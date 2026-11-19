@@ -33,20 +33,29 @@ function row(opts={}){
 }
 async function run(config={}){
  const log={urls:[],requests:[],alerts:[],pages:[],completed:false};
- const pages=[row()];
+ const pages=config.pages||[row()];
  const token=config.token===false?'':'scriptable-private-notion-token';
  const id=ID;
  class MockRequest{
   constructor(url){this.url=url;this.body='';this.headers={};this.method='GET';this.response=null;log.urls.push(url)}
   async loadJSON(){
    log.requests.push({url:this.url,method:this.method,headers:this.headers,body:this.body});
-   this.response={statusCode:200};
+   this.response={statusCode:200,url:this.url};
+   if(config.autoPhotos&&this.url.includes('commons.wikimedia.org/w/api.php')){
+    if(config.commonsPhotos)return {query:{pages:{
+      17:{title:'File:Toilet_paper_rolls.jpg',imageinfo:[{mime:'image/jpeg',
+        thumburl:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Toilet_paper_rolls.jpg',
+        descriptionurl:'https://commons.wikimedia.org/wiki/File:Toilet_paper_rolls.jpg'}]}
+    }}};
+    return {query:{pages:{}}};
+   }
    if(this.url.includes('/data_sources/')&&this.url.endsWith('/query'))
     return {results:pages,has_more:false};
    if(this.url.endsWith('/pages/'+id)){
     if(this.method==='PATCH'){
       const patch=JSON.parse(this.body);
-      for(const [key,value] of Object.entries(patch.properties))pages[0].properties[key]=value;
+      if(patch.properties)for(const [key,value] of Object.entries(patch.properties))pages[0].properties[key]=value;
+      if(patch.cover)pages[0].cover=patch.cover;
       pages[0].last_edited_time='2026-11-19T10:01:00.000Z';
     }
     return pages[0];
@@ -68,7 +77,21 @@ async function run(config={}){
    if(this.url.endsWith('/index.html'))return HTML;
    if(this.url.endsWith('/shopping.css'))return CSS;
    if(this.url.endsWith('/shopping.js'))return JS;
+   if(config.autoPhotos&&this.url.includes('www.muji.com')){
+    return '<html><head><meta property="og:title" content="'+(config.badTitle?'関係ない商品':'無印良品 マイルドジェルクレンジング')+
+      '"><meta property="og:image" content="https://www.muji.com/img/product-photo.jpg"></head><body>商品写真 150g ジェルクレンジング 商品情報</body></html>';
+   }
+   if(config.autoPhotos&&this.url.includes('www.shop.rohto.co.jp')){
+    return '<html><head><meta property="og:title" content="スキンアクア スーパーモイスチャーUVジェル 110g">'+
+      '<meta property="og:image" content="https://www.shop.rohto.co.jp/img/product-190850.jpg"></head><body>商品写真 110g ロート公式商品情報</body></html>';
+   }
    throw Error('Unexpected static asset '+this.url);
+  }
+  async loadImage(){
+   log.requests.push({url:this.url,method:'IMAGE',headers:this.headers});
+   if(config.failImages)throw Error('Network image unavailable');
+   this.response={statusCode:200,mimeType:'image/jpeg',url:this.url};
+   return {size:{width:320,height:400}};
   }
  }
  class MockAlert{
@@ -88,6 +111,34 @@ async function run(config={}){
   Script:{complete(){log.completed=true}},
   console
  };
+ if(config.autoPhotos){
+  const files=config.storage||new Map();
+  const fakeImage=Buffer.from('mock-local-jpeg-image-data').toString('base64');
+  sandbox.FileManager={local:()=>({
+    libraryDirectory:()=>'/local',
+    joinPath:(base,name)=>base+'/'+name,
+    fileExists:path=>files.has(path),
+    createDirectory:path=>files.set(path,{dir:true}),
+    write:(path,value)=>files.set(path,value),
+    read:path=>files.get(path),
+    readString:path=>files.get(path),
+    writeString:(path,value)=>files.set(path,value)
+  })};
+  sandbox.Data={fromJPEG:()=>({toBase64String:()=>fakeImage})};
+  sandbox.DrawContext=class{
+   set size(x){this._size=x}
+   set opaque(x){}
+   set respectScreenScale(x){}
+   setFillColor(){}
+   fillRect(){}
+   drawImageInRect(){}
+   getImage(){return {size:this._size}}
+  };
+  sandbox.Color={white:()=>({})};
+  sandbox.Size=class {constructor(width,height){this.width=width;this.height=height}};
+  sandbox.Rect=class {constructor(x,y,w,h){Object.assign(this,{x,y,w,h})}};
+ }
+
  await vm.runInNewContext('(async()=>{'+CODE+'\n})()',sandbox,{timeout:10000});
  return {log,pages};
 }
@@ -218,4 +269,100 @@ test('purchased candidate count is distinct from confirmed sale and price buy ti
  assert.doesNotMatch(CSS,/html\.scriptable-native\s+\.shopping-app\s*\{[^}]*padding-top\s*:/);
  assert.doesNotMatch(CSS,/@media[^}]*\}\s*html\.scriptable-native\s+\.shopping-app\s*\{[^}]*padding-top\s*:/);
  assert.doesNotThrow(()=>new Function(JS));
+});
+
+
+test('automatic product photo is downloaded, cached and reused with zero image requests on second open',async()=>{
+ const storage=new Map();
+ const first=await run({autoPhotos:true,storage});
+ assert.equal(first.log.pages.length,1);
+ assert.match(first.log.pages[0],/data:image\/jpeg;base64/);
+ assert.equal(first.log.requests.filter(x=>x.method==='IMAGE').length,1);
+ assert.ok([...storage.keys()].some(k=>k.endsWith('/'+ID+'.jpg')));
+ assert.doesNotMatch(first.log.pages[0],/scriptable-private-notion-token/);
+ const again=await run({autoPhotos:true,storage});
+ assert.equal(again.log.pages.length,1);
+ assert.equal(again.log.requests.filter(x=>x.method==='IMAGE').length,0);
+ assert.match(again.log.pages[0],/data:image\/jpeg;base64/);
+});
+
+test('blocked image download does not replace existing Notion cover or mislabel an unknown item',async()=>{
+ const storage=new Map();
+ const first=await run({autoPhotos:true,storage,failImages:true});
+ assert.equal(first.log.pages.length,1);
+ assert.equal(first.log.requests.filter(x=>x.method==='PATCH').length,0);
+ assert.doesNotMatch(first.log.pages[0],/data:image\/jpeg;base64/);
+ const second=await run({autoPhotos:true,storage,failImages:true});
+ assert.equal(second.log.requests.filter(x=>x.method==='IMAGE').length,0,'negative cache avoids repeat network delays');
+});
+
+test('exact official product page can supply cover only after matching product title',async()=>{
+ const muji=row({
+  cover:null,
+  properties:{...row().properties,
+   商品名:{title:[{plain_text:'無印良品 マイルドジェルクレンジング 150g'}]},
+   商品URL:{url:'https://www.muji.com/jp/ja/store/cmdty/detail/4550583941178'}
+  }
+ });
+ const storage=new Map();
+ const {log,pages}=await run({autoPhotos:true,storage,pages:[muji]});
+ const coverRequests=log.requests.filter(x=>x.url.endsWith('/pages/'+ID)&&x.method==='PATCH');
+ assert.equal(coverRequests.length,1);
+ assert.match(JSON.stringify(coverRequests[0].body),/product-photo\.jpg/);
+ assert.equal(pages[0].cover.external.url,'https://www.muji.com/img/product-photo.jpg');
+ assert.match(log.pages[0],/data:image\/jpeg;base64/);
+ assert.ok([...storage.keys()].some(k=>k.endsWith('/'+ID+'.jpg')));
+});
+
+test('incorrect product title does not overwrite Notion or invent an exact product photo',async()=>{
+ const muji=row({
+  cover:null,
+  properties:{...row().properties,
+   商品名:{title:[{plain_text:'無印良品 マイルドジェルクレンジング 150g'}]},
+   商品URL:{url:'https://www.muji.com/jp/ja/store/cmdty/detail/4550583941178'}
+  }
+ });
+ const {log,pages}=await run({autoPhotos:true,pages:[muji],badTitle:true});
+ assert.equal(log.requests.filter(x=>x.method==='PATCH').length,0);
+ assert.equal(pages[0].cover,null);
+ assert.doesNotMatch(log.pages[0],/data:image\/jpeg;base64/);
+});
+
+test('category imagery is marked as representative and must never be written to Notion cover',()=>{
+ assert.match(CODE,/kind:'representative'/);
+ assert.match(CODE,/notionCover:false/);
+ assert.match(CODE,/if\(result\.coverUrl\)pendingWrites\.push/);
+ assert.match(CODE,/PHOTO_MAX_NEW_PER_OPEN=8/);
+ assert.match(JS,/参考写真/);
+ assert.match(JS,/カテゴリの参考画像（実商品とは異なります）/);
+ assert.match(CSS,/reference-photo-label/);
+ assert.doesNotThrow(()=>new vm.Script('(async()=>{'+CODE+'\n})()'));
+});
+
+
+test('generic toilet-paper row uses a clearly labeled Commons representative photo and never changes Notion',async()=>{
+ const basic=row({cover:null,properties:{...row().properties,
+   商品名:{title:[{plain_text:'トイレットペーパー'}]},商品URL:{url:null},分類:{select:{name:'衛生'}}
+ }});
+ const storage=new Map();
+ const {log,pages}=await run({autoPhotos:true,commonsPhotos:true,pages:[basic],storage});
+ assert.equal(log.requests.filter(x=>x.method==='PATCH').length,0);
+ assert.equal(pages[0].cover,null);
+ assert.match(log.pages[0],/data:image\/jpeg;base64/);
+ assert.match(log.pages[0],/参考写真/);
+ assert.match(log.pages[0],/カテゴリの参考画像/);
+ const reloaded=await run({autoPhotos:true,commonsPhotos:true,pages:[basic],storage});
+ assert.equal(reloaded.log.requests.filter(x=>x.method==='IMAGE').length,0);
+ assert.equal(reloaded.log.requests.filter(x=>x.url.includes('commons.wikimedia.org/w/api.php')).length,0);
+});
+
+test('official exact Rohto product within /category/ is eligible for validated image acquisition',async()=>{
+ const rohto=row({cover:null,properties:{...row().properties,
+  商品名:{title:[{plain_text:'スキンアクア スーパーモイスチャーUVジェル 110g'}]},
+  商品URL:{url:'https://www.shop.rohto.co.jp/category/skincare/skin-aqua/super-moisture/190850.html'}
+ }});
+ const {log,pages}=await run({autoPhotos:true,pages:[rohto]});
+ assert.equal(log.requests.filter(x=>x.method==='IMAGE').length,1);
+ assert.match(log.pages[0],/data:image\/jpeg;base64/);
+ assert.equal(pages[0].cover.external.url,'https://www.shop.rohto.co.jp/img/product-190850.jpg');
 });
