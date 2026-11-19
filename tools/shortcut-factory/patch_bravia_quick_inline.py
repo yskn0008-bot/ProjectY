@@ -22,7 +22,7 @@ def patch(shortcut, script_path):
     for banned in ("ntn_","sk-proj-","YOS_NOTION_INTEGRATION_TOKEN","api.notion.com"):
         if banned in source: raise SystemExit("No private credentials may be embedded")
     params=found[0]["WFWorkflowActionParameters"]
-    if params.get("runInApp") is not False or params.get("ShowWhenRun") is not False:
+    if params.get("runInApp") is not True or params.get("ShowWhenRun") is not False:
         raise SystemExit("Unexpected foreground/prompt flags")
     params["script"]={"Value":{"string":source},"WFSerializationType":"WFTextTokenString"}
     shortcut.write_bytes(plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False))
