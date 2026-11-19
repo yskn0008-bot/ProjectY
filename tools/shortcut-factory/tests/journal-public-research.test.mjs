@@ -8,12 +8,18 @@ const study={
   abstractText:'The first study evaluated the association between ratings of facial attractiveness and measured immune response under experimentally controlled conditions. '.repeat(5),
   pubYear:'2022',doi:'10.1038/s41598-022-22866-x',pmid:'36319732'
 };
-async function run({data={resultList:{result:[study]}},failure=false,input=''}={}){
+async function run({data={resultList:{result:[study]}},failure=false,input='',fallback=false}={}){
   let result,completed=0,urls=[],timeouts=[];
   class Request{
     constructor(url){urls.push(url);this.url=url;}
     async loadJSON(){
       if(failure)throw new Error('network disabled');
+      if(fallback){
+        if(this.url.includes('ebi.ac.uk'))throw new Error('Europe PMC timeout');
+        this.response={statusCode:200};
+        return {message:{items:[{title:[study.title],abstract:study.abstractText,
+          published:{'date-parts':[[2022,11,1]]},DOI:study.doi,type:'journal-article'}]}};
+      }
       this.response={statusCode:200};
       return data;
     }
@@ -51,4 +57,14 @@ test('rejects source records lacking real DOI or PMID and implausible dates',asy
   const fake={...study,doi:'javascript:evil',pmid:'bad',pubYear:'2099'};
   const r=await run({data:{resultList:{result:[fake]}}});
   assert.equal(r.result,'YOS_RESEARCH_HOLD_V1:SOURCE_UNAVAILABLE');
+});
+
+test('uses publisher-deposited Crossref abstract only if Europe PMC unavailable',async()=>{
+  const r=await run({fallback:true,input:'家計残高などの非公開情報'});
+  assert.match(r.result,/YOS_RESEARCH_ABSTRACT_V1/);
+  assert.match(r.result,/Crossref公式REST/);
+  assert.match(r.result,/全文未確認/);
+  assert.equal(r.urls.length,2);
+  assert.match(r.urls[1],/^https:\/\/api\.crossref\.org\/works\?/);
+  assert.ok(!r.urls.join(' ').includes('家計残高'));
 });
