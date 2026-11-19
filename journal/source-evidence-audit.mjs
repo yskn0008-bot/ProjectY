@@ -108,7 +108,7 @@ export async function downloadSource(url, {fetcher = fetch, timeoutMs = 12000} =
   for (let redirects = 0; redirects <= 2; redirects++) {
     const response = await fetcher(current, {
       method: 'GET', redirect: 'manual', credentials: 'omit',
-      headers: {accept: 'text/html, text/plain;q=0.9', 'user-agent': 'YOS-JOURNAL-EvidenceAudit/0.1'},
+      headers: {accept: 'application/xml, text/xml;q=0.9, text/html;q=0.8, text/plain;q=0.7', 'user-agent': 'YOS-JOURNAL-EvidenceAudit/0.1'},
       signal: AbortSignal.timeout(timeoutMs)
     });
     if (response.status >= 300 && response.status < 400) {
