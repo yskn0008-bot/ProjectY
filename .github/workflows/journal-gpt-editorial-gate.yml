@@ -4,6 +4,8 @@ on:
   workflow_dispatch: # Read-only owner-run private Inbox acceptance; never auto-publishes
   pull_request:
     paths:
+      - 'journal/build-reviewed-release-bundle.mjs'
+      - 'journal/tests/build-reviewed-release-bundle.test.mjs'
       - 'journal/private-to-public-review-bridge.mjs'
       - 'journal/tests/private-notion-to-reader.e2e.test.mjs'
       - 'journal/tests/private-to-public-review-bridge.test.mjs'
@@ -100,6 +102,25 @@ jobs:
           node journal/notion-private-draft-readback.mjs --dry-run-private-readback
       - name: Check synthetic Notion-to-JOURNAL reader end-to-end without public writes
         run: node --test journal/tests/private-notion-to-reader.e2e.test.mjs
+      - name: Validate isolated issue bundle ready for review, never public writes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check journal/build-reviewed-release-bundle.mjs
+          node --test journal/tests/build-reviewed-release-bundle.test.mjs
+          mkdir -p /tmp/yos-journal-review-release
+          node journal/build-reviewed-release-bundle.mjs \
+            --candidate journal/editorial-candidates/2026-11-20-first-impressions.public.json \
+            --dossier journal/reviewed-evidence/2026-11-20-first-impressions.public.json \
+            --repo . \
+            --output /tmp/yos-journal-review-release
+      - name: Upload review-only issue bundle (not a publication)
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-journal-unapproved-release-bundle
+          path: /tmp/yos-journal-review-release/
+          retention-days: 7
+          if-no-files-found: error
       - name: Test privacy, sources, dates, existing edition preservation
         run: node --test journal/tests/gpt-editorial-gate.test.mjs
       - name: Check added or modified GPT candidate JSON from this PR
