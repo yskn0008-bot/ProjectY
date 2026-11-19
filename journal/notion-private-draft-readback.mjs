@@ -92,7 +92,7 @@ async function cli(){
   // Print no private body, title, URLs, or unfiltered source text.
   console.log(JSON.stringify({status:'readback_only_no_publication',
     verifiedReceipts:drafts.length,
-    latest:drafts.length?{receipt:drafts.at(-1).receipt,length:drafts.at(-1).chars}:null,
+    latest:drafts.length?{length:drafts.at(-1).chars,state:drafts.at(-1).state}:null,
     publicationAllowed:false}));
  }else fail('USE_DRY_RUN_PRIVATE_READBACK_ONLY');
 }
