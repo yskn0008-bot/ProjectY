@@ -83,7 +83,7 @@ test('read-only Notion pagination remains complete',async()=>{
  assert.equal((await a.readTasks('test-token')).tasks.length,2);
  assert.equal(count,2);
 });
-test('web output uses existing purple native cards, not added Notion overlays',()=>{
+test('web output uses native DAYSTREAM cards without introducing Notion overlays',()=>{
  const h=htmlFor([
   row('2026-12-01T05:20:00Z','2026-12-01T05:22:00Z',
   '起床','a'.repeat(32),'yos-daystream-routine-202612-wake')

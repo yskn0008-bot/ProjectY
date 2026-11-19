@@ -6,32 +6,24 @@ const html=fs.readFileSync(new URL('../yos/daystream/index.html',import.meta.url
 const native=fs.readFileSync(new URL('../ios-app/scriptable/YOS Timeline Charcoal 確認 20261111.js',import.meta.url),'utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
 const boot=scripts[0],ui=scripts[1];
-test('Web port inherits the approved original charcoal UI and main navigation',()=>{
- assert.match(html,/--bg:#353a44/);
+test('Web port uses the DAYSTREAM light appearance and existing navigation',()=>{
+ assert.match(html,/--bg:#f4f8fd/);
  assert.match(html,/id="timelinePanel"/);
  assert.match(html,/id="taskPanel"/);
  assert.match(html,/id="yosLearningHints"/);
  assert.match(native,/YOS_LIFE_LEARNING_LIVE_START/);
  assert.match(html,/YOS_LIFE_LEARNING_LIVE_START/);
 });
-test('Undo/redo and three gesture intents preserve normal scroll and task data',()=>{
+test('Move confirmation uses the existing undo/redo and browser plan',()=>{
  assert.match(html,/id="yosUndoBtn"/);
  assert.match(html,/id="yosRedoBtn"/);
  assert.match(html,/function yosHistoryRestore\(direction\)/);
  assert.match(html,/yosHistorySnapshot\(\)/);
- assert.match(html,/task-drag-grip/);
- assert.match(html,/\.card\.task\{touch-action:pan-y\}/);
- assert.match(html,/const HOLD_TO_MOVE=260, HOLD_TO_EDIT=750/);
- assert.match(html,/mode='armed'/);
- assert.match(html,/mode==='armed'\|\|gripStart/);
- assert.match(html,/const lockBackground=\(\)=>/);
- assert.match(html,/const unlockBackground=\(\)=>/);
- assert.match(html,/addEventListener\('touchmove',preventScroll,\{capture:true,passive:false\}\)/);
- assert.match(html,/window\.addEventListener\('scroll',restoreScroll,\{passive:true\}\)/);
- assert.match(html,/active=null;clearTimers\(\);clearPaint\(\);unlockBackground\(\)/);
- assert.match(html,/if\(completedMode==='tap'&&!wasGrip\)toggleTaskDone\(item\)/);
- assert.match(html,/beginLocalEdit\(item\)/);
- assert.match(html,/少し押さえて上下に動かすと移動/);
+ assert.match(html,/<dialog id="moveDialog"/);
+ assert.match(html,/if\(mode==='tap'\)showFocusFor\(item\)/);
+ assert.match(html,/if\(next!==item.s\)openMoveDialog/);
+ assert.match(html,/if\(!saved\)item.s=original/);
+ assert.doesNotMatch(html,/addEventListener\('scroll',restoreScroll/);
 });
 
 test('Layer preserves real long intervals and reuses lanes for disjoint windows',()=>{
@@ -69,7 +61,7 @@ test('Layer uses the strongest state color and reason, with a visible label',()=
  assert.equal(results.get(4).level,'positive');
  assert.equal(results.get(6).level,'negative');
  assert.equal(results.get(8).level,'unknown');
- for(const [state,shade] of [['positive','#23473e'],['negative','#493722'],['danger','#4b303b']]){
+ for(const [state,shade] of [['positive','#dff5ec'],['negative','#fff0da'],['danger','#fce5eb']]){
   assert.ok(html.includes('.timeline .card.compat-'+state+'{--layer-surface:'+shade));
  }
  assert.match(ui,/positive:'＋ 相乗候補',negative:'− 余裕不足',danger:'！ 時間衝突'/);
@@ -122,12 +114,12 @@ test('DAYSTREAM home-screen install resolves to DAYSTREAM instead of MY WAY',()=
  assert.match(sw,/'\.\/yos\/daystream\/manifest\.webmanifest'/);
 });
 
-test('iPhone home-screen layout paints safe-area dark and keeps header crisp',()=>{
+test('iPhone home-screen layout paints the safe area light and keeps header crisp',()=>{
  assert.equal((html.match(/<meta name="viewport"/g)||[]).length,1,'exactly one viewport declaration');
  assert.match(html,/<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">/);
- assert.match(html,/<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">/);
+ assert.match(html,/<meta name="apple-mobile-web-app-status-bar-style" content="default">/);
  assert.match(html,/<body class="yos-daystream-web">/);
- assert.match(html,/html\{background:#262c35!important\}/);
+ assert.match(html,/html\{background:#f4f8fd!important/);
  assert.match(html,/body\.yos-daystream-web \.app\{padding-top:18px\}/);
  assert.match(html,/\.yos-web-port\{[^}]*backdrop-filter:none;[^}]*-webkit-backdrop-filter:none;[^}]*opacity:1;/);
  assert.match(html,/\.yos-web-port a,\.yos-web-port button\{[^}]*backdrop-filter:none;[^}]*-webkit-backdrop-filter:none;/);

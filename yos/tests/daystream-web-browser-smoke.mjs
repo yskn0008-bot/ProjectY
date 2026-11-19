@@ -366,7 +366,7 @@ try{
   }
   assert.ok(byId.get(2105).thickness>byId.get(2110).thickness,
    'long task title wraps instead of being cut in a slim bar');
-  assert.equal(byId.get(2110).color,'rgb(34, 46, 68)','default task uses the Layer slate surface');
+  assert.equal(byId.get(2110).color,'rgb(240, 231, 251)','default task uses the lavender surface');
   for(const id of [2102,2106,2108,2110]){
    const surface=await p.locator('#tl [data-id="'+id+'"]').evaluate(el=>({
     shadow:getComputedStyle(el).boxShadow,
@@ -375,9 +375,9 @@ try{
    assert.equal(surface.before,'none','left stripe must be hidden for task '+id);
    assert.ok(!surface.shadow.includes('inset 4px'),'left accent shadow absent for task '+id);
   }
-  assert.equal(byId.get(2106).color,'rgb(35, 71, 62)','positive status has a green surface');
-  assert.equal(byId.get(2108).color,'rgb(73, 55, 34)','negative status has an amber surface');
-  assert.equal(byId.get(2102).color,'rgb(75, 48, 59)','overlap has a rose surface');
+  assert.equal(byId.get(2106).color,'rgb(223, 245, 236)','positive status has a green surface');
+  assert.equal(byId.get(2108).color,'rgb(255, 240, 218)','negative status has an amber surface');
+  assert.equal(byId.get(2102).color,'rgb(252, 229, 235)','overlap has a rose surface');
   assert.equal(byId.get(2110).radius,'11px','compact task cards keep rounded corners');
 
   const distinct=await p.locator('#tl [data-id="2100"], #tl [data-id="2102"], #tl [data-id="2110"]').evaluateAll(nodes=>nodes.map(el=>({
@@ -386,7 +386,7 @@ try{
    borderColor:getComputedStyle(el).borderColor,shadow:getComputedStyle(el).boxShadow,image:getComputedStyle(el).backgroundImage
   })));
   const appearance=new Map(distinct.map(x=>[x.id,x]));
-  assert.equal(appearance.get(2100).background,'rgb(56, 41, 51)','long overlapping sleep span is muted behind cards');
+  assert.equal(appearance.get(2100).background,'rgb(250, 239, 243)','long overlapping sleep span is muted behind cards');
   assert.equal(appearance.get(2100).borderStyle,'solid','long backdrop has a quiet solid outline');
   assert.equal(appearance.get(2102).borderStyle,'solid','short overlapping card has a crisp solid edge');
   assert.equal(appearance.get(2102).border,'1px','short task remains distinct from backdrop');
@@ -416,6 +416,9 @@ try{
   await p.evaluate(()=>{const el=document.querySelector('#tl [data-id="2102"]');window.__yosDragTrace=[];for(const name of ['pointerdown','pointermove','pointerup','pointercancel','touchstart','touchmove','touchend'])el.addEventListener(name,e=>window.__yosDragTrace.push({event:name,y:e.clientY,pointerType:e.pointerType,button:e.button,target:e.target.className}),true)});
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2);await p.mouse.down();
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2+130,{steps:12});await p.mouse.up();
+  await p.locator('#moveDialog').waitFor();
+  assert.equal(await p.evaluate(()=>items.find(x=>x.id===2102).s),345,'preview never writes before confirmation');
+  await p.locator('#moveSave').click();
   const dragState=await p.evaluate(()=>({s:items.find(x=>x.id===2102).s,note:note.textContent,events:window.__yosDragTrace,scrollY:scrollY}));
   assert.notEqual(dragState.s,345,'the grip actually moves a task: '+JSON.stringify(dragState));
   await p.locator('#yosUndoBtn').click();
@@ -425,126 +428,12 @@ try{
  }
 
 
- // Three-finger-intent regression: short tap => complete, held-moving => move,
- // long stationary hold => editor. Does not require unavailable iPhone force data.
+ // The Scriptable boot browser suite covers native finger drags, WebKit
+ // gestures, preview/cancel, failure, undo/redo, and saved-plan reload.
  const gestureContext=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,timezoneId:'Asia/Tokyo',serviceWorkers:'block'});
  const gp=await gestureContext.newPage();
  const gestureErrors=[];gp.on('pageerror',e=>gestureErrors.push(e.message));
  await gp.goto('http://127.0.0.1:4173/yos/daystream/',{waitUntil:'domcontentloaded'});
- await gp.evaluate(()=>{
-  const day=localISO(new Date()),p={version:1,days:{[day]:[
-   {id:91001,t:'THREE GESTURES',s:360,d:15,kind:'task',done:false}
-  ]},hiddenCalendar:{}};
-  if(!window.YOS_DAYSTREAM_WEB.write(p))throw Error('gesture fixture save failed');
- });
- await gp.reload({waitUntil:'domcontentloaded'});
- await gp.evaluate(()=>{
-  window.__gestureTouch=async (id,steps,fromGrip=false)=>{
-   const card=document.querySelector('#tl [data-id="'+id+'"]');
-   if(!card)throw Error('gesture fixture card missing');
-   const target=fromGrip?card.querySelector('.task-drag-grip'):card.querySelector('.task-copy');
-   for(const [type,x,y,hold] of steps){
-    // WebKit test runners do not expose constructible Touch objects. A synthetic
-    // cancelable Event carrying TouchList-shaped coordinates tests the same handlers.
-    const touch={identifier:1,target,clientX:x,clientY:y};
-    const contacts=type==='touchend'||type==='touchcancel'?[]:[touch];
-    const event=new Event(type,{bubbles:true,cancelable:true});
-    Object.defineProperty(event,'touches',{value:contacts});
-    Object.defineProperty(event,'targetTouches',{value:contacts});
-    Object.defineProperty(event,'changedTouches',{value:[touch]});
-    target.dispatchEvent(event);
-    if(hold)await new Promise(ok=>setTimeout(ok,hold));
-   }
-   return {start:items.find(x=>x.id===id)?.s,done:!!items.find(x=>x.id===id)?.done,
-    editor:document.getElementById('editor').classList.contains('show'),
-    deleteVisible:!document.getElementById('gestureDelete').hidden};
-  };
- });
- const g1=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,45],['touchend',200,360,0]]));
- assert.equal(g1.done,true,'brief tap completes local task');
- const g2=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,40],['touchend',200,360,0]]));
- assert.equal(g2.done,false,'second brief tap toggles local completion');
- const g3=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchend',200,360,0]]));
- assert.equal(g3.done,false,'a held but un-dragged touch does not complete');
- const g4=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,0],['touchmove',200,420,0],['touchend',200,420,0]]));
- assert.equal(g4.start,360,'quick vertical swipe scrolls instead of changing task time');
- assert.equal(g4.done,false,'scrolling does not mark task complete');
-
- // While a card is armed, even an attempted viewport scroll must leave the
- // hour grid pinned. On finger release native scrolling must work again.
- const pinned=await gp.evaluate(async()=>{
-  const nap=ms=>new Promise(ok=>setTimeout(ok,ms));
-  const target=document.querySelector('#tl [data-id="91001"] .task-copy');
-  const send=(type,x=200,y=360)=>{
-   const touch={identifier:100,target,clientX:x,clientY:y};
-   const touches=(type==='touchend'||type==='touchcancel')?[]:[touch];
-   const e=new Event(type,{bubbles:true,cancelable:true});
-   Object.defineProperty(e,'touches',{value:touches});
-   Object.defineProperty(e,'changedTouches',{value:[touch]});
-   target.dispatchEvent(e);return e.defaultPrevented;
-  };
-  window.scrollTo(0,175);await nap(55);
-  const before=window.scrollY;
-  send('touchstart');await nap(320);
-  const touchBlocked=send('touchmove');
-  window.scrollTo(0,before+125);await nap(60);
-  const during=window.scrollY;
-  send('touchend');
-  window.scrollTo(0,before+125);await nap(60);
-  const after=window.scrollY;
-  return {before,during,after,touchBlocked,start:items.find(x=>x.id===91001).s};
- });
- assert.ok(pinned.before>0,'scroll-lock fixture has an actual scrollable timeline');
- assert.equal(pinned.touchBlocked,true,'armed press prevents native document scrolling');
- assert.ok(Math.abs(pinned.during-pinned.before)<=2,'background time ruler must remain still on armed press: '+JSON.stringify(pinned));
- assert.ok(pinned.after>pinned.before+40,'normal background scroll is restored on release: '+JSON.stringify(pinned));
- assert.equal(pinned.start,360,'press does not change source start');
-
- const canceledLock=await gp.evaluate(async()=>{
-  const nap=ms=>new Promise(done=>setTimeout(done,ms));
-  const target=document.querySelector('#tl [data-id="91001"] .task-copy');
-  const send=(type)=>{
-   const touch={identifier:101,target,clientX:200,clientY:360};
-   const touches=type==='touchcancel'?[]:[touch];
-   const event=new Event(type,{bubbles:true,cancelable:true});
-   Object.defineProperty(event,'touches',{value:touches});
-   Object.defineProperty(event,'changedTouches',{value:[touch]});
-   target.dispatchEvent(event);
-  };
-  window.scrollTo(0,170);await nap(60);
-  const before=window.scrollY;
-  send('touchstart');await nap(320);
-  send('touchcancel');
-  window.scrollTo(0,before+100);await nap(60);
-  return {before,after:window.scrollY};
- });
- assert.ok(canceledLock.after>canceledLock.before+40,
-  'canceled gesture must release the global scroll lock: '+JSON.stringify(canceledLock));
-
-
- const g5=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchmove',200,530,30],['touchend',200,530,0]]));
- assert.notEqual(g5.start,360,'hold then move on the task body actually moves time');
- assert.equal(g5.done,false,'drag must not complete a task');
- await gp.locator('#yosUndoBtn').click();
- assert.equal(await gp.evaluate(()=>items.find(x=>x.id===91001).s),360,'undo restores the original time');
- const g6=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,780],['touchend',200,360,0]]));
- assert.equal(g6.editor,true,'motionless long hold opens task editor');
- assert.equal(g6.done,false,'editing never auto-completes task');
- await gp.locator('#cancelEditor').click();
- const g7=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchmove',200,530,0],['touchcancel',200,530,0]]));
- assert.equal(g7.start,360,'cancelled move does not overwrite saved time');
- const g8=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',240,370,35],['touchend',240,370,0]],true));
- assert.equal(g8.done,false,'tapping the drag grip never accidentally completes');
- const g9=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,0],['touchmove',120,360,0],['touchend',120,360,0]]));
- assert.equal(g9.deleteVisible,true,'swipe delete still requires confirmation');
- await gp.locator('#gestureDeleteCancel').click();
- const cancelledArmed=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchcancel',200,360,0]]));
- assert.equal(cancelledArmed.done,false,'interrupted press does not complete a task');
- assert.equal(cancelledArmed.start,360,'interrupted press does not alter task time');
- const tinySlideTap=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,35],['touchmove',204,364,0],['touchend',204,364,0]]));
- assert.equal(tinySlideTap.done,true,'normal finger jitter under 12px still allows deliberate brief tap');
- await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,35],['touchend',200,360,0]]));
- assert.equal(await gp.evaluate(()=>!!items.find(x=>x.id===91001).done),false,'test restores original task state');
  // Verify the existing timeline renders long fixed and editable windows behind live status cards.
  await gp.evaluate(()=>{
   items=[
@@ -571,7 +460,7 @@ try{
  assert.ok(testCard.y>sleep.y&&testCard.y<sleep.y+sleep.height,'short action is inside the sleep window');
  assert.equal(await card(2).evaluate(el=>{
   const rect=el.getBoundingClientRect();
-  return getComputedStyle(el).backgroundColor==='rgb(75, 48, 59)'&&Number(getComputedStyle(el).zIndex)>Number(getComputedStyle(document.querySelector('.yos-backdrop')).zIndex)&&rect.width>0;
+  return getComputedStyle(el).backgroundColor==='rgb(252, 229, 235)'&&Number(getComputedStyle(el).zIndex)>Number(getComputedStyle(document.querySelector('.yos-backdrop')).zIndex)&&rect.width>0;
  }),true,'danger tint and foreground stacking are computed by the browser');
  await gp.evaluate(()=>{items.find(item=>item.id===2).s=540;render();updateReview();});
  assert.equal(await card(2).locator('.layer-status').count(),0,'conflict tint disappears when moved clear');
