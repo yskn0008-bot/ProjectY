@@ -145,7 +145,7 @@ test('ACTUAL rendered Scriptable WebView script parses and starts the remote but
     set innerHTML(s){this._html=s;this.children=[]}
     get innerHTML(){return this._html||''}
     appendChild(node){this.children.push(node);return node}
-    addEventListener(){}
+    addEventListener(type,handler){this.handlers=this.handlers||{};this.handlers[type]=handler}
     setAttribute(){}
   }
   const document={
@@ -155,9 +155,28 @@ test('ACTUAL rendered Scriptable WebView script parses and starts the remote but
   };
   const window={location:{href:''},addEventListener(){}};
   const localStorage={getItem(){return null},setItem(){}};
-  const launch=new Function('window','document','localStorage','setInterval','clearInterval','setTimeout','clearTimeout',runtime);
-  launch(window,document,localStorage,()=>1,()=>{},()=>1,()=>{});
+  const launch=new Function('window','document','localStorage','setInterval','clearInterval','setTimeout','clearTimeout',
+    runtime+'; return {showQuickStatus,quickModeButtons,quickAppButtons};');
+  const ui=launch(window,document,localStorage,()=>1,()=>{},()=>1,()=>{});
   assert.ok(nodes.get('tvGrid').children.length>=2,'navigation buttons must render');
   assert.equal(nodes.get('modeBadge').textContent,'カーソル','mode must not stay 判定中');
   assert.ok(window.location.href.includes('__action?'),'initial status request expected');
+  ui.showQuickStatus({ok:true,quick:{
+    picture:{entries:[{target:'pictureMode',value:'custom',available:true,
+      options:['custom','standard'],min:null,max:null,step:null}],saved:{day:false},message:'読取成功'},
+    sound:{soundMode:{available:true,value:'Standard',options:['Standard','Cinema']},
+      outputTerminal:{available:true,value:'speaker',options:['speaker','audioSystem']}},
+    apps:{youtube:true,netflix:true}
+  }});
+  assert.equal(nodes.get('quickPictureModes').children.length,2,'one-tap picture modes must appear');
+  assert.equal(nodes.get('quickPictureModesPanel').children.length,2);
+  assert.equal(nodes.get('quickSoundModes').children.length,2,'sound mode choices must appear');
+  assert.equal(nodes.get('quickAudioOutputs').children.length,2,'audio output choices must appear');
+  assert.equal(nodes.get('quickApps').children.length,5,'all app names must appear');
+  window.location.href='';
+  nodes.get('quickPictureModes').children[1].handlers.click({
+    preventDefault(){},stopPropagation(){}
+  });
+  assert.ok(window.location.href.includes('device=picture'),'picture click must dispatch native action');
+  assert.ok(window.location.href.includes('pictureMode'),'picture click must preserve target');
 });
