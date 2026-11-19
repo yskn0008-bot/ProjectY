@@ -16,12 +16,12 @@
 const now = currentDate()
 const stamp = formatDate(now, "Custom", "yyyy-MM-dd-HH-mm-ss")
 // Research step: official source abstracts ONLY. Never send private ShortcutInput to public APIs.
-const researchOutput = rawAction("dk.simonbs.Scriptable.RunScriptInlineIntent", {
+action 'dk.simonbs.Scriptable.RunScriptInlineIntent' fetchPublicResearch(text parameter: 'parameter'): text {
     "script": "__YOS_JOURNAL_RESEARCH_INLINE__",
-    "parameter": "",
     "runInApp": false,
     "ShowWhenRun": false
-})
+}
+const researchOutput = fetchPublicResearch("")
 const researchText = getText(researchOutput)
 const evidenceMarker = matchText("YOS_RESEARCH_ABSTRACT_V1", researchText)
 const evidenceCount = count(evidenceMarker, "Items")
