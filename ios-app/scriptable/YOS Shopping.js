@@ -159,7 +159,7 @@ function enteredAmount(raw,whole){
  const value=clean(raw,24);
  if(!value)return undefined;
  if(value==='-'||value==='－')return null;
- if(!/^(0|[1-9]\\d{0,7})(?:\\.\\d{1,2})?$/.test(value)||whole&&value.includes('.'))
+ if(!/^(0|[1-9]\d{0,7})(?:\.\d{1,2})?$/.test(value)||whole&&value.includes('.'))
   throw Error('金額・数量は0以上の数字を入力してください。削除する場合は - を入力');
  const result=Number(value);if(!Number.isFinite(result))throw Error('金額の形式が不正です');
  return result;
