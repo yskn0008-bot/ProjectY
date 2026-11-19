@@ -92,7 +92,7 @@ test('keeps current Japanese scripts and archives legacy root scripts as .bak', 
   assert.ok(filePaths(iCloud).some(path => path.endsWith('/YOS Light Remote copy.js.bak')));
 });
 
-test('archives an Untitled exact duplicate but leaves unique Untitled content untouched', async () => {
+test('never archives Untitled scripts even if code is an exact duplicate', async () => {
   const iCloud = makeManager('/icloud');
   const local = makeManager('/local');
   put(iCloud, 'リモコン.js', 'SAME');
@@ -101,9 +101,27 @@ test('archives an Untitled exact duplicate but leaves unique Untitled content un
 
   await run(iCloud, local);
 
-  assert.equal(iCloud.files.has('/icloud/Untitled Script 11.js'), false);
+  assert.equal(iCloud.files.get('/icloud/Untitled Script 11.js'), 'SAME');
   assert.equal(iCloud.files.get('/icloud/Untitled Script 14.js'), 'personal unique utility');
-  assert.ok(filePaths(iCloud).some(path => path.endsWith('/Untitled Script 11.js.bak')));
+  assert.ok(!filePaths(iCloud).some(path => path.endsWith('/Untitled Script 11.js.bak')));
+});
+
+test('preserves the user active direct remote launcher Untitled Script 9', async () => {
+  const iCloud = makeManager('/icloud');
+  const local = makeManager('/local');
+  const launcher = '// YOS Remote 4台版 v6.6 直接起動\\n' +
+    'const RELEASE = "fb1316a915ed8b0194a14fc40db5e2736f18c009";\\n' +
+    'const cache = "YOS_Remote_v66_cache.json";';
+  put(iCloud, 'リモコン.js', '// YOS Remote Hub v6.6');
+  put(iCloud, 'Untitled Script 9.js', launcher);
+  put(local, 'リモコン.js', '// YOS Remote Hub v6.5');
+
+  await run(iCloud, local);
+
+  assert.equal(iCloud.files.get('/icloud/Untitled Script 9.js'), launcher);
+  assert.ok(!filePaths(iCloud).some(path => path.includes('Untitled Script 9.js.bak')));
+  assert.equal(iCloud.files.get('/icloud/リモコン.js'), '// YOS Remote Hub v6.6');
+  assert.equal(local.files.get('/local/リモコン.js'), '// YOS Remote Hub v6.5');
 });
 
 test('hides .js inside legacy archive folders but preserves successful update backup scripts for rollback', async () => {
