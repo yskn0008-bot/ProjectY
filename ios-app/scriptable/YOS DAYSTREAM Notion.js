@@ -4,7 +4,7 @@
 // Existing DAYSTREAM UI + native Notion reads. A confirmed move can update only '期限'.
 'use strict';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
-const UI_REF='31a08a12a5c3d5069eee4031985cfdc747771e35';
+const UI_REF='177c3671af645e32d7a08af82d8dedef4bc82098';
 const ROOT='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/';
 const SOURCE='965c6086-32c1-463d-93b4-87a9cb69b3ad';
 const STATES=['次にやる','実行中','本人操作','待ち','保留','完了'];
@@ -92,58 +92,11 @@ function dayProjection(items,day){
  }
  return out;
 }
-
-// Convert the existing Notion YOS Tasks "習慣周期" field to read-only
-// candidate rows. Do NOT assume a fixed time, completion, or a recurrence
-// before its first explicitly dated instance.
-function nativeHabitSource(tasks,now=new Date()){
- if(!Array.isArray(tasks)||tasks.length>400)throw Error('Notion習慣の元データ件数が不正');
- const tokyo=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'});
- const tokyoDay=value=>{
-  if(validDate(value))return value;
-  if(!validAt(value))return null;
-  const date=new Date(value);
-  const p=Object.fromEntries(tokyo.formatToParts(date).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
-  const day=p.year+'-'+p.month+'-'+p.day;
-  return validDate(day)?day:null;
- };
- const items=[],seen=new Set();let skipped=0;
- for(const t of tasks){
-  if(!t||!['毎日','毎週','毎月'].includes(t.habitCycle))continue;
-  if(t.sourceKind!=='task'||!/^[a-f0-9]{32}$/.test(t.id||'')||
-     typeof t.title!=='string'||!t.title||!STATES.includes(t.state)||
-     !['次にやる','実行中','本人操作'].includes(t.state))continue;
-  if(seen.has(t.id))continue;
-  const firstDay=t.due?tokyoDay(t.due):null;
-  if(t.due&&!firstDay){skipped++;continue}
-  // The existing proposal UI supports only short same-day slots. An 8-hour
-  // sleep schedule must never be misrepresented as a 15-minute habit.
-  if(t.due&&t.dueEnd&&t.due.includes('T')&&t.dueEnd.includes('T')){
-   const sourceMinutes=(Date.parse(t.dueEnd)-Date.parse(t.due))/60000;
-   if(!Number.isFinite(sourceMinutes)||sourceMinutes>240){skipped++;continue}
-  }
-  const base={kind:'habit',id:t.id,title:clean(t.title,120),trigger:'',
-   ...(firstDay?{startDay:firstDay}:{})};
-  if(t.habitCycle==='毎日')items.push({...base,period:'daily'});
-  else if(t.habitCycle==='毎週'&&firstDay){
-   const dayOfWeek=new Date(firstDay+'T12:00:00Z').getUTCDay();
-   items.push({...base,period:'weekly',weekdays:[dayOfWeek]});
-  }else if(t.habitCycle==='毎月'&&firstDay){
-   items.push({...base,period:'monthly',dayOfMonth:Number(firstDay.slice(8))});
-  }else skipped++;
-  seen.add(t.id);
- }
- if(items.length>80)throw Error('Notionの反復習慣候補が上限を超えました');
- return {status:'ok',source:'notion-tasks-cycle',items,checkedAt:now.toISOString(),skippedCount:skipped};
-}
-
 const BROWSER_BOOT=String.raw`
 (()=>{
  const snapshot=__SNAPSHOT__;
- const habitSnapshot=__HABITS__;
  const calendarStatus=__CALENDAR_STATUS__;
  window.YOS_CHARCOAL_BOOT.taskSource=snapshot;
- window.YOS_CHARCOAL_BOOT.habitSource=habitSnapshot;
  window.YOS_DAYSTREAM_TASK_AUTH={
   setup:()=>{location.href='scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion';return Promise.resolve(true)},
   complete:()=>Promise.resolve({ok:false,reason:'表示専用です。Notionの元ページで完了してください'})
@@ -304,16 +257,15 @@ async function readDeviceCalendar(nativeSource,tasks,now=new Date()){
 }
 
 const safeScript=s=>s.replace(/<\/script/gi,'<\\/script');
-function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCalendar=null,calendarStatus='Apple予定：未確認',habits={status:'unavailable',items:[]}){
+function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCalendar=null,calendarStatus='Apple予定：未確認'){
  if(!html.includes('// WEB_PORT_BOOT')||!html.includes('</script><script>\nconst tl=')||!html.includes('<script src="./task-wizard.js"></script>'))throw Error('DAYSTREAMの形式が一致しません');
  const json=JSON.stringify(snapshot).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
  const directJSON=JSON.stringify(directRows).replace(/</g,'\\u003c');
- const habitJSON=JSON.stringify(habits).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
  const deviceJSON=deviceCalendar?JSON.stringify(deviceCalendar).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029'):null;
  let out=html.replace('<script src="./source-adapters.js"></script>','<script>'+safeScript(adapters)+'</script>')
  .replace('<script src="../../life/calendar/native-bridge.js"></script>','<script>'+safeScript(native)+'</script>')
  .replace('<script src="./yos-tasks-auth.js"></script>','')
- .replace('</script><script>\nconst tl=','</script><script>'+safeScript(BROWSER_BOOT.replace('__SNAPSHOT__',json).replace('__HABITS__',habitJSON).replace('__CALENDAR_STATUS__',JSON.stringify(clean(calendarStatus,100))))+'</script><script>'+safeScript(BROWSER_DIRECT_IMPORT.replace('__DIRECT_ROWS__',directJSON))+'</script><script>\nconst tl=')
+ .replace('</script><script>\nconst tl=','</script><script>'+safeScript(BROWSER_BOOT.replace('__SNAPSHOT__',json).replace('__CALENDAR_STATUS__',JSON.stringify(clean(calendarStatus,100))))+'</script><script>'+safeScript(BROWSER_DIRECT_IMPORT.replace('__DIRECT_ROWS__',directJSON))+'</script><script>\nconst tl=')
  .replace('<script src="./task-wizard.js"></script>','<script>'+safeScript(wizard)+'</script>');
  if(deviceJSON){
   const marker=" const nativeCalendar=(()=>{try{return window.YOS_CALENDAR_NATIVE?.asDaystream(localStorage)||null}catch{return null}})();";
@@ -370,9 +322,8 @@ async function main(){
  if(!snapshot)throw Error('Notionの取得結果を検証できません');
  // This payload contains only task projections; credentials never enter the WebView.
  const directRows=nativeDirectRows(data.tasks);
- const habitSource=nativeHabitSource(data.tasks);
  const deviceCalendar=await readDeviceCalendar(native,data.tasks);
- const output=buildHTML(html,adapters,native,wizard,snapshot,directRows,deviceCalendar,deviceCalendarStatus,habitSource);
+ const output=buildHTML(html,adapters,native,wizard,snapshot,directRows,deviceCalendar,deviceCalendarStatus);
  stage='画面表示';
  await WebView.loadHTML(output,null,null,true);
 }
