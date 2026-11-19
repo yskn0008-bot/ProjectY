@@ -25,9 +25,9 @@ const makeRecord=x=>{
   const url=doi?'https://doi.org/'+doi:'https://pubmed.ncbi.nlm.nih.gov/'+pmid+'/';
   return {title,year,doi:doi||'',url,abstract};
 };
-function format(records,topic,query){
+function format(records,topic,query,provider){
   return ['YOS_RESEARCH_ABSTRACT_V1','状態: 公開抄録の実取得済み／本文原典の意味照合待ち／自動公開禁止',
-    '選択テーマ: '+topic,'検索語: '+query,'情報源: Europe PMC公式REST／原典の研究発表・内容は未独立照合',
+    '選択テーマ: '+topic,'検索語: '+query,'情報源: '+provider+'／原典の研究発表・内容は未独立照合',
     ...records.map((r,i)=>['資料'+(i+1)+'｜'+r.title,'出版年: '+r.year,'DOI: '+r.doi,
        '論文リンク: '+r.url,'原典抄録（抜粋・翻訳ではない）: '+r.abstract,
        '取り扱い: 元の研究条件と解釈は別途照合。誇張・因果断定禁止。'].join('\n')),
@@ -54,13 +54,42 @@ async function fetchStudies(topic){
     if(matched.length===2)break;
   }
   if(!matched.length)throw Error('NO_PUBLIC_ABSTRACTS');
-  return format(matched,topic[0],topic[1]);
+  return format(matched,topic[0],topic[1],'Europe PMC公式REST（抄録）');
+}
+async function fetchCrossref(topic){
+  // Only publisher-deposited public metadata and abstracts; never treated as full text.
+  const url='https://api.crossref.org/works?rows=8&query='+encodeURIComponent(topic[1]);
+  const r=new Request(url);
+  r.method='GET';r.timeoutInterval=8;
+  r.headers={'Accept':'application/json'};
+  r.onRedirect=next=>String(next?.url||'').startsWith('https://api.crossref.org/')?next:null;
+  const payload=await r.loadJSON();
+  if(!r.response||r.response.statusCode!==200)throw Error('CROSSREF_HTTP_NOT_OK');
+  const items=Array.isArray(payload?.message?.items)?payload.message.items:[];
+  const seen=new Set(),matched=[];
+  for(const x of items){
+    if(x?.type!=='journal-article')continue;
+    const parts=x?.published?.['date-parts']?.[0];
+    const v=makeRecord({
+      title:Array.isArray(x.title)?x.title[0]:'',
+      abstractText:x.abstract,
+      pubYear:Array.isArray(parts)?parts[0]:null,
+      doi:x.DOI
+    });
+    if(!v||seen.has(v.url))continue;
+    seen.add(v.url);matched.push(v);
+    if(matched.length===2)break;
+  }
+  if(!matched.length)throw Error('NO_CROSSREF_ABSTRACTS');
+  return format(matched,topic[0],topic[1],'Crossref公式REST（登録抄録・全文未確認）');
 }
 async function main(){
   // Daily theme rotation, never transmit shortcut input or personal data in a query.
   const index=Math.floor(new Date().getTime()/86400000)%TOPICS.length;
   try{
-    const notes=await fetchStudies(TOPICS[index]);
+    let notes;
+    try{notes=await fetchStudies(TOPICS[index]);}
+    catch(e){notes=await fetchCrossref(TOPICS[index]);}
     Script.setShortcutOutput(notes);
   }catch(err){
     // Do not generate a speculative article after unavailable/blocked sources.
