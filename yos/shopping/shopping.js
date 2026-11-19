@@ -70,7 +70,7 @@
     state.items=Array.isArray(items)?items:[];
     state.demo=asDemo;
     status(asDemo?'デザインプレビュー｜商品・価格はサンプルです（実際の値引きではありません）':
-      'iPhoneからNotionを直接取得｜価格の最新性は商品ごとに確認');
+      'iPhoneからNotionを直接取得｜写真は端末に保存して再利用｜価格は要確認');
     render();
   }
   function count(pred){return state.items.filter(x=>!x.purchased&&pred(x)).length}
@@ -101,12 +101,16 @@
     });
     return items;
   }
-  function imageBlock(item){
-    // Local images are injected by the private Scriptable runtime, not read from Notion URLs.
+  function effectivePhoto(item){
     const local=typeof item.localPhotoData==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]{16,750000}$/.test(item.localPhotoData)?item.localPhotoData:'';
-    const image=local||safeLink(item.imageUrl);
-    return image?'<img loading="lazy" decoding="async" alt="'+escapeText(item.name)+'の商品写真" src="'+escapeText(image)+'">':
-      '<div class="no-photo" aria-label="商品写真未登録"><span class="missing-glyph">'+escapeText(imgIcons[item.category]||'◈')+'</span><small>写真を追加</small></div>';
+    return local||safeLink(item.imageUrl);
+  }
+  function imageBlock(item){
+    const image=effectivePhoto(item);
+    const kind=item.photoKind==='representative'?'representative':'product';
+    if(image)return '<img loading="lazy" decoding="async" alt="'+escapeText(kind==='representative'?'カテゴリ参考写真':'商品写真：'+item.name)+'" src="'+escapeText(image)+'">'+
+      (kind==='representative'?'<span class="reference-photo-label">参考写真</span>':'');
+    return '<div class="no-photo" aria-label="商品写真未登録"><span class="missing-glyph">'+escapeText(imgIcons[item.category]||'◈')+'</span><small>写真を自動検索中</small></div>';
   }
   function badge(item){
     if(restock(item))return '<span class="flag restock">▣ 補充候補</span>';
@@ -123,7 +127,7 @@
     const priceText=hasCurrent?yen(item.currentPrice):hasReference?'参考 '+yen(item.referencePrice):'価格未確認';
     const statusText=item.purchased?'購入済':restock(item)?'補充が必要':buy(item)?'目標価格以下':selected(item)?'購入候補':item.state==='保留'?'保留中':'検討中';
     const statusClass=item.purchased?'purchase-status purchased-state':restock(item)?'purchase-status stock':buy(item)?'purchase-status':selected(item)?'purchase-status selected-state':'purchase-status wait';
-    const photoMissing=!item.localPhotoData&&!safeLink(item.imageUrl);
+    const photoMissing=!effectivePhoto(item);
     const actions='<button type="button" data-action="detail" data-id="'+escapeText(item.id)+'" aria-label="商品詳細">詳細</button>'+
       (NATIVE?'<button type="button" data-action="edit" data-id="'+escapeText(item.id)+'" aria-label="価格と在庫を編集">編集</button>':'')+
       (url?'<a href="'+escapeText(url)+'" target="_blank" rel="noopener noreferrer" aria-label="商品ページを開く">↗</a>':'');
@@ -171,7 +175,7 @@
     state.filter=value;render();window.scrollTo({top:0,behavior:'smooth'});
   }
   function detail(item){
-    const url=safeLink(item.url),pct=diffPct(item),photo=(item.localPhotoData&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]{16,750000}$/.test(item.localPhotoData)?item.localPhotoData:'')||safeLink(item.imageUrl);
+    const url=safeLink(item.url),pct=diffPct(item),photo=effectivePhoto(item);
     const message=state.demo?'サンプル表示：実際の価格ではありません':pct?
       '登録参考価格との差。送料・クーポン・販売期間・沖縄への配送を購入前に確認してください。':
       '値引き情報は未確認です。';
@@ -186,6 +190,7 @@
       '<div><dt>価格確認日 / 情報元</dt><dd>'+escapeText(item.priceUpdatedAt||'未確認')+' / '+escapeText(item.priceSource||'未確認')+'</dd></div>'+
       '</dl></div>'+
       '<p style="font-size:11px;color:#68748a;line-height:1.6">'+escapeText(message)+'</p>'+
+      (item.photoSourceUrl&&safeLink(item.photoSourceUrl)?'<p style="font-size:11px;color:#68748a">写真：'+escapeText(item.photoKind==='representative'?'カテゴリの参考画像（実商品とは異なります）':'登録商品・参照元')+' <a href="'+escapeText(safeLink(item.photoSourceUrl))+'" target="_blank" rel="noopener noreferrer">出典を確認</a></p>':'')+
       '<div class="detail-action">'+
       (url?'<a href="'+escapeText(url)+'" target="_blank" rel="noopener noreferrer">販売ページで価格を確認</a>':'')+
       '<button type="button" data-action="research" data-id="'+escapeText(item.id)+'">商品をウェブで価格調査</button>'+
