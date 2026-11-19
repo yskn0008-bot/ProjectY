@@ -401,15 +401,13 @@ function renderPicturePresets(){
 function savePicturePreset(e,key){
  if(e){e.preventDefault();e.stopPropagation()}
  if(!pictureConnected||!PIC_PRESET_IDS.includes(key))return
- const ask=savedPresets[key]?"既存の「"+PIC_PRESET_NAMES[key]+"」設定を上書き保存しますか？":"現在のテレビ画質を「"+PIC_PRESET_NAMES[key]+"」に保存しますか？"
- if(!window.confirm(ask))return
+ if(savedPresets[key]&&!window.confirm("既存の「"+PIC_PRESET_NAMES[key]+"」設定を上書き保存しますか？"))return
  const status=document.getElementById("shortcutsStatus");if(status)status.textContent="現在の画質を保存中…"
  nativeAction("picture","save","保存",key)
 }
 function loadPicturePreset(e,key){
  if(e){e.preventDefault();e.stopPropagation()}
  if(!pictureConnected||!savedPresets[key]||!PIC_PRESET_IDS.includes(key))return
- if(!window.confirm("保存済み「"+PIC_PRESET_NAMES[key]+"」をテレビへ反映しますか？現在の画質が変わります。"))return
  const status=document.getElementById("shortcutsStatus");if(status)status.textContent="テレビへ反映し、値を確認中…"
  nativeAction("picture","load","呼出",key)
 }
