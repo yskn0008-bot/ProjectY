@@ -213,6 +213,9 @@ test('purchased candidate count is distinct from confirmed sale and price buy ti
  assert.match(JS,/購入候補\$\{selectedCount\}件を含む/);
  assert.match(JS,/const buy=item=>/);
  assert.match(JS,/recentPrice\(item\)/);
- assert.match(CSS,/html\.scriptable-native \.shopping-app\{padding-top:8px\}/);
+ // 22:26 iPhone screenshot: 6px/8px overrides put Shopping behind Close and status bar.
+ assert.match(CSS,/\.shopping-app\{[^}]*env\(safe-area-inset-top\)/);
+ assert.doesNotMatch(CSS,/html\.scriptable-native\s+\.shopping-app\s*\{[^}]*padding-top\s*:/);
+ assert.doesNotMatch(CSS,/@media[^}]*\}\s*html\.scriptable-native\s+\.shopping-app\s*\{[^}]*padding-top\s*:/);
  assert.doesNotThrow(()=>new Function(JS));
 });
