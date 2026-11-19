@@ -154,7 +154,7 @@ async function retrieve(){
     :err instanceof TypeError?'気象庁への接続ができませんでした（通信・ブラウザ制限の可能性）。'
     :String(err?.message||'').startsWith('HTTP ')?'気象庁が正常な応答を返しませんでした。'
     :'公開データの内容・時刻が確認条件に合いませんでした。';
-  $('weather-report').textContent=reason+' 最新の状態は公式ページで確認してください。';
+  $('weather-report').textContent='公式データを確認できませんでした。'+reason+' 最新の状態は公式ページで確認してください。';
   $('weather-meta').textContent='発表：未確認｜取得：失敗｜予報期間：未確認';
  }finally{clearTimeout(timeout);btn.disabled=false}
 }
