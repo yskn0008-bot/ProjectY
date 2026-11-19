@@ -116,6 +116,12 @@ function nativeHabitSource(tasks,now=new Date()){
   if(seen.has(t.id))continue;
   const firstDay=t.due?tokyoDay(t.due):null;
   if(t.due&&!firstDay){skipped++;continue}
+  // The existing proposal UI supports only short same-day slots. An 8-hour
+  // sleep schedule must never be misrepresented as a 15-minute habit.
+  if(t.due&&t.dueEnd&&t.due.includes('T')&&t.dueEnd.includes('T')){
+   const sourceMinutes=(Date.parse(t.dueEnd)-Date.parse(t.due))/60000;
+   if(!Number.isFinite(sourceMinutes)||sourceMinutes>240){skipped++;continue}
+  }
   const base={kind:'habit',id:t.id,title:clean(t.title,120),trigger:'',
    ...(firstDay?{startDay:firstDay}:{})};
   if(t.habitCycle==='毎日')items.push({...base,period:'daily'});
