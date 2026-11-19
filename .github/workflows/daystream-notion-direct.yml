@@ -4,6 +4,7 @@ on:
     paths:
       - 'ios-app/scriptable/YOS DAYSTREAM Notion.js'
       - 'ios-app/tests/daystream-notion*'
+      - 'yos/daystream/**'
       - '.github/workflows/daystream-notion-direct.yml'
   workflow_dispatch:
 permissions:
@@ -25,3 +26,10 @@ jobs:
       - run: node ios-app/tests/daystream-notion.browser.mjs
         env:
           LIFE_BROWSER: ${{ matrix.browser }}
+          DAYSTREAM_SCREENSHOTS: ${{ runner.temp }}/daystream-screenshots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: daystream-visual-${{ matrix.browser }}
+          path: ${{ runner.temp }}/daystream-screenshots/*.png
+          retention-days: 3

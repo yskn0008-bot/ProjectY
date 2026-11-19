@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111721"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="DAYSTREAM"><link rel="manifest" href="./manifest.webmanifest"><title>DAYSTREAM｜YOS Web</title><style>
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f4f8fd"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="DAYSTREAM"><link rel="manifest" href="./manifest.webmanifest"><title>DAYSTREAM｜YOS Web</title><style>
 .yos-web-port{position:relative;z-index:300;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:calc(env(safe-area-inset-top) + 8px) 16px 12px;background:#262c35;color:#f5f7fb;border-bottom:1px solid #667080;font:12px -apple-system,BlinkMacSystemFont,sans-serif;filter:none;-webkit-filter:none;backdrop-filter:none;-webkit-backdrop-filter:none;opacity:1;box-shadow:none}
 .yos-web-port a,.yos-web-port button{color:#f3f6ff;border:1px solid #778395;border-radius:9px;background:#414958;padding:8px 11px;text-decoration:none;font-weight:650;opacity:1;filter:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
 .yos-web-port strong{font-size:12px;margin-right:auto;letter-spacing:.05em}
@@ -9,7 +9,7 @@
 .yos-web-port-dialog p{line-height:1.6}
 </style><style>
 /* DAYSTREAM Web: cover iOS standalone status bar and avoid duplicate safe-area spacing. */
-html{background:#262c35!important}
+html{background:#f4f8fd!important}
 body.yos-daystream-web{background:#353a44;min-height:100svh}
 body.yos-daystream-web .app{padding-top:18px}
 body.yos-daystream-web .yos-web-port{background:#262c35}
@@ -128,6 +128,123 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
 .timeline .card.done b{text-decoration:line-through}
 .timeline .card.drag-preview,.timeline .card.moving{z-index:10;box-shadow:0 8px 20px #080d17bb}
 @media(max-width:370px){.timeline{--card-inset:69px}.timeline .layer-status{font-size:9px}}
+/* DAYSTREAM · light appearance shared by Web and Scriptable. */
+html{background:#f4f8fd!important;color-scheme:light}
+:root{--bg:#f4f8fd;--bg2:#fff;--text:#1d2d44;--muted:#52657e;--line:#d5e1ee;--blue:#246aa3;--green:#20755c;--violet:#744ba5}
+html body.yos-daystream-web{
+ background:radial-gradient(ellipse at 92% 0,#dcf5eb 0,transparent 380px),
+ radial-gradient(ellipse at 0 4%,#e9e1fa 0,transparent 370px),linear-gradient(#ebf5ff,#f9fbfe 540px,#f4f8fd);
+}
+.yos-daystream-web .app{padding-top:18px}
+.yos-daystream-web .yos-web-port,.yos-daystream-web .dock{background:#ffffffed;color:var(--text);border-color:var(--line)}
+.yos-daystream-web .yos-web-port a,.yos-daystream-web .yos-web-port button,.yos-web-port-dialog button{
+ background:#edf4fc;border-color:var(--line);color:#254867
+}
+.yos-web-port-note,.subtitle,.notice,.gesture-help,.metric label{color:var(--muted)}
+.yos-web-port-dialog{background:#f5faff;color:var(--text)}
+.top{padding-inline:16px}
+.headrow{align-items:flex-end}
+.daystream-brand{color:#205e6f;font-weight:800;font-size:13px;letter-spacing:.07em}
+.daystream-brand span{font-size:10px;color:#52657e;letter-spacing:.12em;font-weight:680}
+.headrow h1{font-size:clamp(19px,5.5vw,25px);line-height:1.16;margin:5px 0 4px;letter-spacing:-.04em}
+.daystream-date{font-size:13px;color:#405a78;font-weight:650}
+.actions{gap:5px}.iconbtn{border-radius:12px;color:#245477;background:#ffffffab;border:1px solid #fff}
+.iconbtn svg{width:18px;height:18px}
+#addBtn{background:#20755c;color:#fff;border-color:#20755c}
+.day,.tab{color:#405a78}.yos-daystream-web .day.active,.calendar-modes button.active{background:#20755c;color:#fff}
+.calendar-modes{background:#e5edf6;border-color:#e2eafa}.calendar-modes button{color:#405875}
+.yos-daystream-web .summary{background:#ffffffc9;border:1px solid var(--line);border-radius:14px}
+.yos-daystream-web .metric{border-color:var(--line)}
+.yos-daystream-web .ring{background:conic-gradient(#258f71 0 var(--pct),#d8e8ed var(--pct) 100%)}
+.yos-daystream-web .ring:after{background:#fff}
+.zoomBtn{background:#fff;border-color:#d5e1ee;color:#3d5674}
+.timeline-legend{display:flex;flex-wrap:wrap;gap:5px;margin:10px 14px 0}
+.timeline-legend span{display:flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:3px 8px;font-size:11px;color:#405570}
+.timeline-legend span:before{content:'';width:7px;height:7px;border-radius:50%;background:#457fca}
+.timeline-legend .legend-habit:before{background:#2b9270}
+.timeline-legend .legend-local:before{background:#8659bf}
+.gesture-help{line-height:1.5;margin-bottom:14px}
+.timeline-wrap{margin:8px 13px 20px 10px}
+.timeline{--card-inset:59px}
+.timeline .axis{left:46px;width:1px;background:linear-gradient(#8acdb5,#93c8eb 55%,#b6a2de)}
+.timeline .hour{border-color:#dce7f1}
+.timeline .hour span{left:2px;color:#50647c;font-size:11px}
+.timeline .tick{left:43px;background:#348d81;border-color:#f8fbff}
+.timeline .nowline{background:#22856a}
+.timeline .nowline:before{left:36px;background:#22856a;border-color:#effbf7}
+.timeline .nowbadge{right:calc(100% - 43px);background:#1d765e;color:#fff;font-size:10px;padding:3px 4px}
+.timeline .card{
+ --layer-surface:#e5f0ff;--layer-edge:#afcdeb;--zone-surface:#e7f1fc;--zone-edge:#bfd7ec;--signal:#365774;
+ background:var(--layer-surface);border-color:var(--layer-edge);border-radius:12px;color:#20334d;
+ box-shadow:0 2px 5px #26436212;padding-inline:7px 6px;gap:5px;touch-action:pan-y;-webkit-touch-callout:none;
+}
+.timeline .card.task{--layer-surface:#f0e7fb;--layer-edge:#d2bdeb;--zone-surface:#f4edfd;--zone-edge:#d9c9ea}
+.timeline .card.habit{--layer-surface:#dff5ec;--layer-edge:#a7d9c6;--zone-surface:#e6f5ee;--zone-edge:#addac9}
+.timeline .card.sleep{--layer-surface:#e8e9fa;--layer-edge:#c5c9e7;--zone-surface:#eef0fb;--zone-edge:#c5c9e7}
+.timeline .card.compat-positive{--layer-surface:#dff5ec;--layer-edge:#a0d6c1;--zone-surface:#e6f5ee;--zone-edge:#addac9;--signal:#17644b}
+.timeline .card.compat-negative{--layer-surface:#fff0da;--layer-edge:#dcbd8a;--zone-surface:#fff6e8;--zone-edge:#e5c896;--signal:#80500e}
+.timeline .card.compat-danger{--layer-surface:#fce5eb;--layer-edge:#db9eb0;--zone-surface:#faeff3;--zone-edge:#d8a7b7;--signal:#8d324d}
+.timeline .card small,.timeline .card.task .task-copy small{color:#455b76}
+.timeline .card-icon{display:grid;place-items:center;flex:0 0 20px;width:20px;height:20px;border-radius:6px;background:#ffffffb5;color:#25669e}
+.timeline .card-icon svg{stroke:currentColor;width:14px;height:14px}
+.timeline .task .card-icon{color:#7545a4}.timeline .habit .card-icon{color:#20755c}
+.timeline .event-copy{flex:1}
+.timeline .fixed-label{color:#3b5878;background:#ffffffb5;padding:2px 4px;border-radius:5px;font-size:9px;white-space:nowrap}
+.timeline .task-drag-grip{
+ flex-basis:38px;min-width:38px;align-self:stretch;border:0;border-radius:8px;background:#ffffff8f;
+ color:#4c527a;touch-action:none;font-size:21px;margin-right:0;
+}
+.timeline .yos-backdrop .task-drag-grip{height:36px}
+.timeline .yos-backdrop{background:var(--zone-surface);border-color:var(--zone-edge);box-shadow:none}
+.timeline .card.press-armed,.timeline .card.drag-preview{
+ border-color:#25846b;outline:2px solid #72baab;box-shadow:0 9px 20px #316d6455;filter:none
+}
+.timeline .card.selected{outline-color:#2873ad}
+.tab.active{color:#14664f;font-weight:750}
+.compat-status,.compat-status .overlap-details{color:#354e67}
+.compat-status .overlap-button{background:#fff3e2;border-color:#e4c49c;color:#75501e}
+.compat-key .pos{color:#17644b}.compat-key .neg{color:#80500e}.compat-key .danger{color:#8d324d}
+.editor,.tabbox,.review,.focus,.gesture-delete,.month-pop,.week-overview,.all-day{
+ background:#fdfdff;border-color:var(--line);color:var(--text);box-shadow:0 10px 25px #3350701a;
+}
+.editor input,.editor select,.editor .shortcut-picker,.tabbox input[type=time],.searchrow input{
+ background:#f6faff;color:var(--text);border-color:#c8d6e8
+}
+.editor :is(label,small,.edit-end),.tabbox p,.review p,.review .muted,.tabbox .muted,.all-day :is(b,span),
+.yos-source-row small,.month-pop .coverage,.week-overview .coverage,.week-day .empty,.week-day .more{color:var(--muted)}
+.editor small[style]{color:var(--muted)!important}
+.week-day,.month-grid button,.month-grid span{color:var(--text);border-color:var(--line)}
+.month-grid button.outside{color:#61748b}
+.week-day .agenda .task{color:#744ba5}.week-day .agenda .habit{color:#20755c}.week-day .agenda .due{color:#80500e}
+.move-sheet{
+ width:min(440px,calc(100% - 24px));max-height:calc(100dvh - 34px);margin:auto;
+ padding:16px;border:1px solid #c9dceb;border-radius:22px;color:var(--text);
+ background:linear-gradient(150deg,#ecf9f4,#fff 44%,#f1ebfa);box-shadow:0 20px 50px #29466250;
+}
+.move-sheet::backdrop{background:#34496755}
+.move-sheet header{display:grid;gap:5px;margin-bottom:13px}
+.move-sheet h2,.move-sheet h3,.move-sheet p{margin:0}
+.move-sheet h2{font-size:17px}.move-sheet header p{font-size:19px;font-weight:750;overflow-wrap:anywhere}
+.move-time{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:650}
+.move-time input{min-height:44px;padding:5px 10px;border:1px solid #c7d8e7;border-radius:10px;color:var(--text);background:#fff}
+#moveRange{font-variant-numeric:tabular-nums;margin:8px 0;color:#45617f;font-size:13px}
+.move-impact{padding:12px;border:1px solid var(--line);border-radius:13px;background:#ffffffd9}
+.move-impact h3{font-size:14px;color:#1e664f}.move-impact h3[data-level=danger]{color:#8d324d}
+.move-impact ul{padding-left:17px;margin:6px 0 0;font-size:12px;line-height:1.55;color:#405570;overflow-wrap:anywhere}
+.move-impact ul:empty{display:none}
+.move-sheet .move-scope{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}
+.move-sheet footer{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.move-sheet footer button{padding:8px 13px;min-height:44px;border-radius:10px;border:1px solid #bdcfe1;background:#fff;color:#355470;font-weight:650}
+.move-sheet #moveSave{background:#20755c;border-color:#20755c;color:#fff}
+.move-sheet #moveSave:disabled{opacity:.5}
+#moveSuggest{padding:8px 10px;margin-top:8px;min-height:38px;border:1px solid #abd7c6;border-radius:10px;background:#e4f5ed;color:#205d48;font-weight:650}
+#moveSuggest[hidden]{display:none}
+@media(max-width:350px){
+ .timeline .layer-status{font-size:8px}
+ .timeline .card{gap:4px;padding-inline:5px}
+ .timeline .card-icon{flex-basis:16px;width:16px;height:16px}
+ .actions{gap:4px}.actions .iconbtn{width:27px}
+}
 </style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
 <a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
 <button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
@@ -137,7 +254,7 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
 </div><section id="yosWebHistoryPanel" class="yos-web-port-dialog" hidden aria-label="行動学習の候補"><div id="yosWebHistoryRows"></div></section>
 <div class="app">
   <div class="top">
-    <div class="headrow"><div><div class="datehead" id="dateTitle">今日</div><div class="subtitle" id="dayCaption">Today</div></div>
+    <div class="headrow"><div><div class="daystream-brand">YOS <span>/ DAYSTREAM</span></div><h1>1日のタイムライン</h1><div class="daystream-date"><span id="dateTitle">今日</span> <span id="dayCaption"></span></div></div>
       <div class="actions">
         <button class="iconbtn" type="button" id="dateBtn" aria-label="月カレンダーを開く" aria-controls="monthPicker" aria-expanded="false"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></button>
         <button class="iconbtn" id="searchBtn" aria-label="検索"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></button>
@@ -167,7 +284,10 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
   <div class="editor" id="editor" role="dialog" aria-modal="true" aria-labelledby="editorTitle"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><div class="duration-control"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" aria-label="所要時間（分）"><label for="newDuration">分</label></div><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><span class="edit-end" id="editEnd">終了予定：10:30</span><div id="shortcutField"><label for="shortcutPicker">ショートカット（任意）</label><select id="shortcutPicker" class="shortcut-picker" aria-label="登録済みショートカットから選ぶ"><option value="">候補から選ぶ</option></select><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">設定したショートカットはここから実行できます。実行しても自動完了にはなりません。</small><a id="runShortcut" class="editor-shortcut-run" href="#" hidden>ショートカットを実行</a></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
   <section class="week-overview" id="weekOverview" hidden aria-label="週の予定"><div class="week-overview-head"><button id="weekPrev" type="button" aria-label="前週">‹</button><strong id="weekCaption"></strong><button id="weekNext" type="button" aria-label="翌週">›</button></div><div id="weekAgenda"></div><p class="coverage" id="weekCoverage"></p></section>
   <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
-  <p class="gesture-help" id="gestureHelp">タスク：軽くタップで完了 ｜ 少し押さえて上下に動かすと移動 ｜ 長押しで編集 ｜ 左スワイプで削除</p>
+  <div id="gestureHelp">
+  <div class="timeline-legend" aria-label="カードの種類"><span class="legend-fixed">固定予定</span><span class="legend-habit">習慣</span><span class="legend-local">タスク</span></div>
+  <p class="gesture-help">上下にスワイプでスクロール · ⠿ または長押しからドラッグで時刻移動</p>
+  </div>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p><button id="yosWebTaskRefresh" type="button">iPhoneでNotionタスクを開く</button>
@@ -178,6 +298,15 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
   <section class="tabbox" id="recordsPanel"><h3>記録</h3><p>このタイムライン内で完了にした項目のみを表示します。</p><div id="recordsList"></div></section>
   <section class="tabbox" id="aiPanel"><h3>AIプラン</h3><p>AIとの連携は未実装です。実行状況を確認せずに予定の自動変更はしません。</p><p class="muted">追加や時間変更はタイムラインで手動操作できます。</p></section>
   <div class="gesture-delete" id="gestureDelete" hidden aria-live="polite"><span id="gestureDeleteTitle"></span><button id="gestureDeleteConfirm" type="button">削除</button><button id="gestureDeleteCancel" class="cancel" type="button">戻す</button></div>
+  <dialog id="moveDialog" class="move-sheet" aria-labelledby="moveHeading">
+    <header><h2 id="moveHeading">配置アドバイス</h2><p id="moveTitle"></p></header>
+    <label class="move-time">開始時刻 <input id="moveTime" type="time" step="60" required></label>
+    <p id="moveRange"></p>
+    <section class="move-impact" aria-label="影響する予定・タスク"><h3 id="moveAdvice" aria-live="polite"></h3><ul id="moveImpact"></ul></section>
+    <button id="moveSuggest" type="button" hidden></button>
+    <p class="move-scope">表示中の時間枠から計算。移動はこの端末の時間割に保存します。</p>
+    <footer><button id="moveCancel" type="button">キャンセル</button><button id="moveSave" type="button">移動を保存</button></footer>
+  </dialog>
   <div class="focus" id="focus"><b id="focusTitle"></b><p id="focusInfo" aria-live="polite"></p><div class="actions-row"><button id="startActualBtn" class="secondary" hidden>開始を記録</button><button id="doneBtn">完了にする</button><button id="editSelected" class="secondary">編集</button><button id="deleteSelected" class="danger">削除</button><button id="hideFixed" class="secondary" hidden>この画面で隠す</button><button id="closeFocus" class="secondary">閉じる</button></div></div>
 </div>
 <nav class="dock" aria-label="画面切り替え"><div class="dock-inner">
@@ -870,7 +999,7 @@ function yosReadableAxis(rows,baseScale,backdrops){
  const starts=[...groups.keys()].sort((a,b)=>a-b),spans=[];
  for(let i=0;i<starts.length;i++){
   const start=starts[i],entries=groups.get(start),next=starts[i+1];
-  const required=entries.reduce((sum,item)=>sum+(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(28,Math.min(60,base.coordinate(item.s+item.d)-base.coordinate(item.s))))+4,0);
+  const required=entries.reduce((sum,item)=>sum+(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(34,Math.min(60,base.coordinate(item.s+item.d)-base.coordinate(item.s))))+4,0);
   const end=next??Math.min(1440,Math.max(start+1,...entries.map(item=>item.s+item.d)));
   if(end<=start)continue;
   const natural=base.coordinate(end)-base.coordinate(start);
@@ -1099,7 +1228,7 @@ function showDay(iso){
 function renderWeek(){
  const d=parseDay(selectedDay), label=['日','月','火','水','木','金','土'];
  document.getElementById('dateTitle').textContent=(d.getMonth()+1)+'/'+d.getDate()+'（'+label[d.getDay()]+'）';
- document.getElementById('dayCaption').textContent=selectedDay===todayISO?'Today':'';
+ document.getElementById('dayCaption').textContent=selectedDay===todayISO?'今日':'';
  const strip=document.getElementById('weekStrip');strip.textContent='';
  const monday=new Date(d);monday.setDate(d.getDate()-((d.getDay()+6)%7));
  for(let offset=0;offset<7;offset++){
@@ -1211,6 +1340,7 @@ document.getElementById('weekPrev').onclick=()=>{const d=parseDay(selectedDay);d
 document.getElementById('weekNext').onclick=()=>{const d=parseDay(selectedDay);d.setDate(d.getDate()+7);showDay(localISO(d))};
 function setTab(name){
  if(name!=='timeline')hideSwipeDelete();
+ document.getElementById('gestureHelp').hidden=name!=='timeline'||calendarMode!=='day';
  for(const b of document.querySelectorAll('[data-tab]')){b.classList.toggle('active',b.dataset.tab===name);b.setAttribute('aria-current',b.dataset.tab===name?'page':'false');}
  document.getElementById('calendarModes').hidden=name!=='timeline';
  document.getElementById('timelinePanel').style.display=name==='timeline'&&calendarMode==='day'?'block':'none';
@@ -1310,171 +1440,207 @@ function toggleTaskDone(item){
  note.textContent='「'+target.t+'」を'+(target.done?'完了':'未完了に戻した')+(saved?' · 端末内で保存中':' · 保存準備に失敗');
  smoothRender();updateReview();
 }
-// Only local, movable tasks use this gesture system; fixed Apple records and other kinds
-// retain their existing read-only details / vertical time dragging.
+const moveDialog=document.getElementById('moveDialog');
+const moveTime=document.getElementById('moveTime');
+let pendingMove=null;
+
+function renderMoveAdvice(){
+ if(!pendingMove)return;
+ const {item}=pendingMove;
+ const start=/^\d{2}:\d{2}$/.test(moveTime.value)
+  ? Number(moveTime.value.slice(0,2))*60+Number(moveTime.value.slice(3)):NaN;
+ const valid=Number.isInteger(start)&&start>=0&&start+item.d<=1440;
+ const moved=valid&&start!==item.s;
+ const entries=document.getElementById('moveImpact');
+ entries.replaceChildren();
+ document.getElementById('moveSave').disabled=!moved;
+ document.getElementById('moveRange').textContent=valid
+  ? fmt(item.s)+' → '+fmt(start)+'–'+fmt(start+item.d)
+  : '終了時刻が24:00以内になる開始時刻を選んでください';
+ const hint=document.getElementById('moveAdvice');
+ const suggest=document.getElementById('moveSuggest');
+ suggest.hidden=true;
+ if(!valid){hint.textContent='この日に収まる時間を指定';hint.dataset.level='';return}
+ const end=start+item.d;
+ const others=items.filter(other=>other!==item).sort((a,b)=>a.s-b.s);
+ const overlaps=others.filter(other=>start<other.s+other.d&&other.s<end);
+ hint.textContent=overlaps.length?'時間衝突 '+overlaps.length+'件':'表示中の予定との時間衝突なし';
+ hint.dataset.level=overlaps.length?'danger':'clear';
+ if(overlaps.length){
+  for(const other of overlaps){
+   const row=document.createElement('li');
+   const minutes=Math.min(end,other.s+other.d)-Math.max(start,other.s);
+   row.textContent=other.t+' · '+fmt(other.s)+'–'+fmt(other.s+other.d)+'（'+minutes+'分重複）';
+   entries.append(row);
+  }
+  let free=start;
+  for(const other of others){
+   if(free<other.s+other.d&&other.s<free+item.d)free=Math.ceil((other.s+other.d)/5)*5;
+  }
+  if(free!==start&&free+item.d<=1440){
+   suggest.hidden=false;
+   suggest.textContent='次の空き枠 '+fmt(free)+'–'+fmt(free+item.d);
+   suggest.onclick=()=>{moveTime.value=fmt(free);renderMoveAdvice()};
+  }
+ }else{
+  const before=others.filter(other=>other.s+other.d<=start).sort((a,b)=>b.s+b.d-a.s-a.d)[0];
+  const after=others.find(other=>other.s>=end);
+  for(const [other,gap,prefix] of [[before,before?start-before.s-before.d:0,'前'],[after,after?after.s-end:0,'次']]){
+   if(!other)continue;
+   const row=document.createElement('li');
+   row.textContent=prefix+'の予定「'+other.t+'」との間隔 '+gap+'分';
+   entries.append(row);
+  }
+  const signal=yosCompatibility([...others,{...item,s:start}]).get(item.id);
+  if(signal?.level==='positive'||signal?.level==='negative'){
+   const row=document.createElement('li');
+   row.textContent=signal.reasons[0];
+   entries.append(row);
+  }
+ }
+}
+
+function openMoveDialog(item,start,previousRect){
+ if(moveDialog.open||!items.includes(item)||item.f)return;
+ hideSwipeDelete();
+ focus.classList.remove('show');
+ pendingMove={item,day:selectedDay,previousRect,plan:localStorage.getItem(yosPlanKey)};
+ document.getElementById('moveTitle').textContent=item.t;
+ moveTime.value=fmt(start);
+ renderMoveAdvice();
+ moveDialog.showModal();
+}
+moveTime.addEventListener('input',renderMoveAdvice);
+moveDialog.addEventListener('close',()=>{if(!moveDialog.open)pendingMove=null});
+document.getElementById('moveCancel').onclick=()=>moveDialog.close();
+document.getElementById('moveSave').onclick=()=>{
+ if(!pendingMove||document.getElementById('moveSave').disabled)return;
+ const {item,day,previousRect,plan}=pendingMove;
+ if(day!==selectedDay||!items.includes(item)||item.f){moveDialog.close();return}
+ if(localStorage.getItem(yosPlanKey)!==plan){
+  moveDialog.close();note.textContent='別の画面で保存内容が変わりました。開き直してから移動してください';return;
+ }
+ const [hours,minutes]=moveTime.value.split(':').map(Number);
+ const next=hours*60+minutes,original=item.s;
+ if(!Number.isInteger(next)||next<0||next+item.d>1440||next===original)return;
+ item.s=next;
+ const saved=persist();
+ if(!saved)item.s=original;
+ moveDialog.close();
+ note.textContent=saved?'「'+item.t+'」を'+fmt(next)+'に移動しました':'時刻を保存できなかったため、元の位置に戻しました';
+ smoothRender(item.id,saved?previousRect:null);
+ updateReview();
+};
+
+// Card bodies keep native scrolling. A handle press or a stationary hold claims
+// the drag before the first vertical move can be consumed by the WebView.
 function wireTaskGestures(el,item){
- // iPhone Web views do not provide reliable force/pressure. Use press duration,
- // direction, and movement. Short tap completes; hold+drag moves; still long hold edits.
- const HOLD_TO_MOVE=260, HOLD_TO_EDIT=750, MOVE_SLOP=12;
- let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap';
- let armTimer=null,editTimer=null,paintFrame=0,swipeFrame=0,lastPreview=item.s,gripStart=false;
- let backgroundLock=null;
- const timeLabel=el.querySelector('small');
-
- const lockBackground=()=>{
-  if(backgroundLock)return;
-  const x=window.scrollX,y=window.scrollY;
-  let correcting=false;
-  // Block native touch scrolling once a card is armed, without disabling ordinary swipes.
-  const preventScroll=e=>{if(e.cancelable)e.preventDefault()};
-  const restoreScroll=()=>{
-   if(!backgroundLock||correcting)return;
-   if(Math.abs(window.scrollX-x)<1&&Math.abs(window.scrollY-y)<1)return;
-   correcting=true;window.scrollTo(x,y);correcting=false;
-  };
-  backgroundLock={x,y,preventScroll,restoreScroll};
-  document.addEventListener('touchmove',preventScroll,{capture:true,passive:false});
-  window.addEventListener('scroll',restoreScroll,{passive:true});
-  restoreScroll();
+ const holdToMove=260,holdToEdit=750,slop=7;
+ const label=el.querySelector('small');
+ const grip=el.querySelector('.task-drag-grip');
+ let gesture=null;
+ let armTimer=0,editTimer=0,paintFrame=0;
+ const clearTimers=()=>{clearTimeout(armTimer);clearTimeout(editTimer)};
+ const offset=()=>gesture.y-gesture.startY+window.scrollY-gesture.scrollY;
+ const candidateStart=()=>{
+  const snapped=Math.round(minuteAtY(yFor(item.s)+offset())/5)*5;
+  return Math.max(0,Math.min(1440-item.d,snapped));
  };
- const unlockBackground=()=>{
-  if(!backgroundLock)return;
-  const locked=backgroundLock;
-  document.removeEventListener('touchmove',locked.preventScroll,true);
-  window.removeEventListener('scroll',locked.restoreScroll);
-  backgroundLock=null;
- };
-
- const clearTimers=()=>{
-  if(armTimer!==null){clearTimeout(armTimer);armTimer=null}
-  if(editTimer!==null){clearTimeout(editTimer);editTimer=null}
- };
- const clearPaint=()=>{
-  if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0}
-  if(swipeFrame){cancelAnimationFrame(swipeFrame);swipeFrame=0}
- };
- const resetVisual=()=>{
-  el.classList.remove('drag-preview','press-armed');
-  el.style.transform='';
-  if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
- };
- const candidateStart=()=>Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(item.s)+lastY-startY)/5)*5));
- const paintSwipe=()=>{swipeFrame=0;if(mode==='swipe'&&active!==null)el.style.transform='translate3d('+Math.max(-74,lastX-startX)+'px,0,0)'};
- const paintDrag=()=>{
-  paintFrame=0;if(mode!=='drag'||active===null)return;
-  el.style.transform='translate3d(0,'+(lastY-startY)+'px,0)';
+ const paint=()=>{
+  paintFrame=0;
+  if(!gesture||!el.isConnected){finish(true);return}
+  if(gesture.mode==='swipe'){
+   el.style.transform='translate3d('+Math.max(-74,gesture.x-gesture.startX)+'px,0,0)';
+   return;
+  }
+  if(gesture.mode!=='drag')return;
+  const viewport=window.visualViewport?.height||window.innerHeight;
+  const direction=gesture.y<60?-1:gesture.y>viewport-100?1:0;
+  const prior=window.scrollY;
+  if(direction)window.scrollBy(0,direction*8);
+  el.style.transform='translate3d(0,'+offset()+'px,0)';
   const at=candidateStart();
-  if(at!==lastPreview){lastPreview=at;if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d)}
+  label.textContent=fmt(at)+'–'+fmt(at+item.d);
+  if(window.scrollY!==prior)paintFrame=requestAnimationFrame(paint);
  };
- const begin=(x,y,id,grip)=>{
-  if(active!==null)return;
-  clearTimers();clearPaint();
-  active=id;startX=lastX=x;startY=lastY=y;mode='tap';gripStart=!!grip;
-  if(gripStart)lockBackground();
-  lastPreview=item.s;el.style.transition='';
-  // Long, motionless contact edits. An intermediate armed state never marks done.
+ const begin=(x,y,id,fromGrip)=>{
+  if(gesture)return;
+  gesture={id,x,y,startX:x,startY:y,scrollY:window.scrollY,fromGrip,mode:fromGrip?'armed':'tap'};
+  if(fromGrip){el.classList.add('press-armed');return}
   armTimer=setTimeout(()=>{
-   armTimer=null;
-   if(active!==null&&mode==='tap'){
-    mode='armed';el.classList.add('press-armed');lockBackground();vibrate();
-   }
-  },HOLD_TO_MOVE);
+   if(!gesture||gesture.mode!=='tap')return;
+   gesture.mode='armed';el.classList.add('press-armed');
+  },holdToMove);
   editTimer=setTimeout(()=>{
-   editTimer=null;
-   if(active!==null&&(mode==='tap'||mode==='armed')){
-    active=null;clearTimers();clearPaint();unlockBackground();resetVisual();mode='long';
-    beginLocalEdit(item);
-   }
-  },HOLD_TO_EDIT);
+   if(!gesture||gesture.mode!=='armed')return;
+   finish(true);beginLocalEdit(item);
+  },holdToEdit);
  };
  const move=(x,y,event)=>{
-  if(active===null||mode==='scroll'||mode==='ignored')return;
-  lastX=x;lastY=y;
-  const dx=x-startX,dy=y-startY,ax=Math.abs(dx),ay=Math.abs(dy);
-  const vertical=ay>MOVE_SLOP&&ay>ax*1.1;
-  const left=ax>14&&dx<0&&ax>ay*1.3;
-  if(mode==='drag'){
-   if(event?.cancelable)event.preventDefault();
-   if(!paintFrame)paintFrame=requestAnimationFrame(paintDrag);
-   return;
-  }
-  if(mode==='swipe'){
-   if(event?.cancelable)event.preventDefault();
-   if(!swipeFrame)swipeFrame=requestAnimationFrame(paintSwipe);
-   return;
-  }
-  if(left){
-   clearTimers();unlockBackground();mode='swipe';el.classList.remove('press-armed');
-   if(event?.cancelable)event.preventDefault();
-   if(!swipeFrame)swipeFrame=requestAnimationFrame(paintSwipe);
-   return;
-  }
-  if(vertical){
-   // A quick swipe scrolls, but a brief stationary press arms a deliberate drag.
-   // The existing ⋮ grip remains an immediate, accessible drag fallback.
-   if(mode==='armed'||gripStart){
-    lockBackground();clearTimers();mode='drag';el.classList.remove('press-armed');
-    el.classList.add('drag-preview');
-    if(event?.cancelable)event.preventDefault();
-    if(!paintFrame)paintFrame=requestAnimationFrame(paintDrag);
-   }else{
-    clearTimers();unlockBackground();mode='scroll';
+  if(!gesture||gesture.mode==='scroll'||gesture.mode==='ignored')return;
+  const dx=x-gesture.startX,dy=y-gesture.startY;
+  const ax=Math.abs(dx),ay=Math.abs(dy);
+  gesture.x=x;gesture.y=y;
+  if(gesture.mode==='armed'||gesture.mode==='drag'){
+   if(!event.cancelable&&gesture.id==='touch'&&!gesture.fromGrip){finish(true);return}
+   event.preventDefault();
+   if(gesture.mode==='armed'&&Math.max(ax,ay)>slop){
+    clearTimers();el.classList.remove('press-armed');
+    if(ay>=ax){gesture.mode='drag';el.classList.add('drag-preview')}
+    else gesture.mode='ignored';
    }
-   return;
+  }else if(gesture.mode==='tap'&&Math.max(ax,ay)>slop){
+   clearTimers();
+   if(item.kind==='task'&&dx<0&&ax>ay*1.4&&event.cancelable)gesture.mode='swipe';
+   else gesture.mode=ay>=ax?'scroll':'ignored';
   }
-  if((ax>MOVE_SLOP||ay>MOVE_SLOP)&&mode==='tap'){
-   // Non-vertical finger movement is not an affirmative completion tap.
-   if(ax>ay){clearTimers();mode='ignored'}
-  }
+  if(gesture.mode==='swipe')event.preventDefault();
+  if((gesture.mode==='drag'||gesture.mode==='swipe')&&!paintFrame)paintFrame=requestAnimationFrame(paint);
  };
- const finish=cancelled=>{
-  if(active===null)return;
-  const completedMode=mode,wasGrip=gripStart,oldRect=completedMode==='drag'&&!cancelled?el.getBoundingClientRect():null;
-  active=null;clearTimers();clearPaint();unlockBackground();
-  el.classList.remove('press-armed','drag-preview');
-  if(completedMode==='swipe'){
-   el.style.transition='transform .26s cubic-bezier(.22,1,.36,1)';
-   el.style.transform='translate3d(0,0,0)';
-  }else el.style.transform='';
-  if(cancelled){
-   if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
-   return;
+ function finish(cancelled,endY){
+  if(!gesture)return;
+  if(Number.isFinite(endY))gesture.y=endY;
+  const {mode,fromGrip,x,startX}=gesture;
+  const next=mode==='drag'&&!cancelled?candidateStart():item.s;
+  let previousRect=null;
+  if(next!==item.s){
+   el.style.transform='translate3d(0,'+offset()+'px,0)';
+   previousRect=el.getBoundingClientRect();
   }
-  if(completedMode==='swipe'){
-   if(lastX-startX< -45)showSwipeDelete(item);
-   return;
-  }
-  if(completedMode==='drag'){
-   const next=candidateStart();
-   if(next!==item.s){
-    const original=item.s;item.s=next;
-    const saved=persist();
-    if(!saved){item.s=original;note.textContent='時刻の保存に失敗したため移動を取り消しました'}
-    else note.textContent='「'+item.t+'」を'+fmt(next)+'に移動（この端末に保存）';
-    smoothRender(item.id,oldRect);updateReview();
-   }else if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
-   return;
-  }
-  // A release after an armed hold, scroll or grip tap is not a completion.
-  if(completedMode==='tap'&&!wasGrip)toggleTaskDone(item);
- };
+  gesture=null;clearTimers();cancelAnimationFrame(paintFrame);paintFrame=0;
+  el.classList.remove('press-armed','drag-preview');el.style.transform='';
+  label.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
+  if(cancelled)return;
+  if(mode==='swipe'&&x-startX< -45)showSwipeDelete(item);
+  if(mode==='tap')showFocusFor(item);
+  if(mode==='armed'&&fromGrip)openMoveDialog(item,item.s,null);
+  if(next!==item.s)openMoveDialog(item,next,previousRect);
+ }
  el.addEventListener('contextmenu',e=>e.preventDefault());
  el.addEventListener('touchstart',e=>{
-  if(e.touches.length===1)begin(e.touches[0].clientX,e.touches[0].clientY,'touch',e.target.closest('.task-drag-grip'));
+  if(e.touches.length!==1){finish(true);return}
+  const touch=e.touches[0];
+  begin(touch.clientX,touch.clientY,'touch',grip.contains(e.target));
  },{passive:true});
  el.addEventListener('touchmove',e=>{
-  if(active==='touch'&&e.touches.length)move(e.touches[0].clientX,e.touches[0].clientY,e);
+  if(gesture?.id!=='touch')return;
+  if(e.touches.length!==1){finish(true);return}
+  move(e.touches[0].clientX,e.touches[0].clientY,e);
  },{passive:false});
- el.addEventListener('touchend',()=>{if(active==='touch')finish(false)});
- el.addEventListener('touchcancel',()=>{if(active==='touch')finish(true)});
+ el.addEventListener('touchend',e=>{
+  if(gesture?.id==='touch')finish(false,e.changedTouches?.[0]?.clientY);
+ });
+ el.addEventListener('touchcancel',()=>finish(true));
  el.addEventListener('pointerdown',e=>{
   if(e.pointerType==='touch'||e.button!==0)return;
-  begin(e.clientX,e.clientY,e.pointerId,e.target.closest('.task-drag-grip'));
+  begin(e.clientX,e.clientY,e.pointerId,grip.contains(e.target));
   el.setPointerCapture?.(e.pointerId);
  });
- el.addEventListener('pointermove',e=>{if(active===e.pointerId)move(e.clientX,e.clientY,e)});
- el.addEventListener('pointerup',e=>{if(active===e.pointerId)finish(false)});
- el.addEventListener('pointercancel',e=>{if(active===e.pointerId)finish(true)});
+ el.addEventListener('pointermove',e=>{if(gesture?.id===e.pointerId)move(e.clientX,e.clientY,e)});
+ el.addEventListener('pointerup',e=>{if(gesture?.id===e.pointerId)finish(false,e.clientY)});
+ el.addEventListener('pointercancel',e=>{if(gesture?.id===e.pointerId)finish(true)});
+ el.addEventListener('lostpointercapture',e=>{if(gesture?.id===e.pointerId)finish(true)});
+ grip.addEventListener('click',e=>{if(e.detail===0)openMoveDialog(item,item.s,null)});
 }
 function smoothRender(activeId,oldActiveRect){
  const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
@@ -1510,7 +1676,7 @@ function render(){
   let offset=0;
   for(const item of group){
    visualOffsets.set(item,offset);
-   offset+=(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(28,Math.min(60,yFor(item.s+item.d)-yFor(item.s))))+4;
+   offset+=(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(34,Math.min(60,yFor(item.s+item.d)-yFor(item.s))))+4;
   }
  }
  let lastBottom=-2;
@@ -1518,7 +1684,7 @@ function render(){
    const natural=yFor(item.s);
    const backdrop=backdrops.has(item),isTask=item.kind==='task'&&!item.f;
    const span=yFor(item.s+item.d)-natural;
-   const height=backdrop?Math.max(1,span-2):isTask?yosReadableTaskHeight(item):Math.max(28,Math.min(60,span));
+   const height=backdrop?Math.max(1,span-2):isTask?yosReadableTaskHeight(item):Math.max(34,Math.min(60,span));
    const top=natural+(visualOffsets.get(item)||0);
    lastBottom=Math.max(lastBottom,top+height);
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
@@ -1549,19 +1715,23 @@ function render(){
      statusEl=document.createElement('span');statusEl.className='layer-status';statusEl.textContent=label;
     }
    }
-   if(item.kind!=='task'||item.f){
-    const iconEl=document.createElement('span');iconEl.innerHTML=eventIcon(item);el.append(iconEl.firstChild);
-   }
+   const iconEl=document.createElement('span');iconEl.className='card-icon';iconEl.innerHTML=eventIcon(item);el.append(iconEl);
    const titleEl=document.createElement('b');titleEl.textContent=item.t;
    const timeEl=document.createElement('small');timeEl.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
    if(item.kind==='task'&&!item.f){
     const copy=document.createElement('span');copy.className='task-copy';
     const meta=document.createElement('span');meta.className='task-meta';meta.append(timeEl);if(statusEl)meta.append(statusEl);
-    copy.append(titleEl,meta);el.append(copy);const grip=document.createElement('span');grip.className='task-drag-grip';grip.textContent='⋮';grip.setAttribute('aria-label','ドラッグして時刻を移動');el.append(grip);
+    copy.append(titleEl,meta);el.append(copy);
    }else{
     const copy=document.createElement('span');copy.className='event-copy';
     const meta=document.createElement('span');meta.className='task-meta';meta.append(timeEl);if(statusEl)meta.append(statusEl);
     copy.append(titleEl,meta);el.append(copy);
+   }
+   if(item.f){
+    const badge=document.createElement('span');badge.className='fixed-label';badge.textContent='固定';el.append(badge);
+   }else{
+    const grip=document.createElement('button');grip.type='button';grip.className='task-drag-grip';
+    grip.textContent='⠿';grip.setAttribute('aria-label',item.t+'の時刻を移動');el.append(grip);
    }
    if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');
    if(['朝の準備','朝食','昼食','夕食','入浴'].includes(item.t))el.classList.add('neutral');
@@ -1570,27 +1740,8 @@ function render(){
    if(searchText&&!item.t.toLocaleLowerCase().includes(searchText))el.style.display='none';
    el.dataset.id=String(item.id);if(item.done)el.classList.add('done');tl.append(el);
    const tick=document.createElement('div');tick.className='tick';tick.style.top=(natural-3)+'px';tl.append(tick);
-   let downY=0,downS=0,moved=false,holding=false,activePointer=null,frame=0,latestY=0,previewS=item.s,lastHaptic=0,startedAt=0;
-   const timeLabel=el.querySelector('small');
-   const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);const now=performance.now();if(now-lastHaptic>75){lastHaptic=now;vibrate()}}};
-   const startDrag=(y,id)=>{downY=latestY=y;downS=previewS=item.s;startedAt=performance.now();moved=false;holding=false;activePointer=id};
-   const moveDrag=y=>{if(activePointer===null)return;latestY=y;const distance=Math.abs(latestY-downY);if(distance>3&&!item.f){holding=true;moved=true;el.classList.add('moving');if(!frame)frame=requestAnimationFrame(paint)}};
-   const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){showFocusFor(item);smoothRender()}holding=false};
-   if(item.f){
-    // Let iOS handle scrolling. A real tap still opens details; a scroll
-    // gesture does not trigger the old pointer-up focus overlay.
-    el.addEventListener('click',()=>showFocusFor(item));
-   }else if(item.kind==='task'){wireTaskGestures(el,item)}else{
-   // Touch events are used on iOS WebView to avoid pointer capture cancelling a vertical drag.
-   el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;startDrag(e.touches[0].clientY,'touch')},{passive:true});
-   el.addEventListener('touchmove',e=>{if(activePointer!=='touch'||!e.touches.length)return;if(!item.f){e.preventDefault();moveDrag(e.touches[0].clientY)}},{passive:false});
-   el.addEventListener('touchend',()=>{if(activePointer==='touch')endDrag(false)});
-   el.addEventListener('touchcancel',()=>{if(activePointer==='touch')endDrag(true)});
-   el.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==0)return;startDrag(e.clientY,e.pointerId);el.setPointerCapture(e.pointerId)});
-   el.addEventListener('pointermove',e=>{if(activePointer===e.pointerId)moveDrag(e.clientY)});
-   el.addEventListener('pointerup',e=>{if(activePointer===e.pointerId)endDrag(false)});
-   el.addEventListener('pointercancel',e=>{if(activePointer===e.pointerId)endDrag(true)});
-   }
+   if(item.f)el.addEventListener('click',()=>showFocusFor(item));
+   else wireTaskGestures(el,item);
  });
  tl.style.height=(Math.max(bottom,lastBottom)+12)+'px';updateNow();
  // Readable-density layout is visual only; no source time or task mutation.
