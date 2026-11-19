@@ -342,3 +342,77 @@ jobs:
             tools/shortcut-factory/artifacts/YOS-JOURNAL-RESEARCH-unsigned.shortcut
           if-no-files-found: error
           retention-days: 14
+
+  build-journal-notify-candidate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify notification Shortcut source is secret-free
+        run: |
+          python3 tools/shortcut-factory/validate_secret_free.py 'tools/shortcut-factory/shortcuts/YOS JOURNAL 配信確認 TEST.cherri'
+
+      - name: Install existing pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile, patch and validate publication-only notifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/shortcut-factory/shortcuts
+          cherri 'YOS JOURNAL 配信確認 TEST.cherri' --skip-sign --debug
+          test -s 'YOS JOURNAL 配信確認 TEST_unsigned.shortcut'
+          cd ../../..
+          python3 tools/shortcut-factory/patch_journal_publication_notify.py \
+            'tools/shortcut-factory/shortcuts/YOS JOURNAL 配信確認 TEST_unsigned.shortcut' \
+            --script 'tools/shortcut-factory/journal_publication_notify_inline.js'
+          python3 tools/shortcut-factory/validate_journal_publication_notify.py \
+            'tools/shortcut-factory/shortcuts/YOS JOURNAL 配信確認 TEST_unsigned.shortcut'
+          mkdir -p tools/shortcut-factory/artifacts
+          cp 'tools/shortcut-factory/shortcuts/YOS JOURNAL 配信確認 TEST_unsigned.shortcut' \
+            tools/shortcut-factory/artifacts/YOS-JOURNAL-NOTIFY-unsigned.shortcut
+
+      - name: Test publication notification and duplicate-suppression logic
+        run: |
+          node --check tools/shortcut-factory/journal_publication_notify_inline.js
+          node --test tools/shortcut-factory/tests/journal-publication-notify.test.mjs
+
+      - name: Sign isolated notification test with existing HubSign
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/shortcut-factory/artifacts/YOS-JOURNAL-NOTIFY-unsigned.shortcut' \
+            --output 'tools/shortcut-factory/artifacts/YOS-JOURNAL-NOTIFY-signed.shortcut' \
+            --name 'YOS JOURNAL 配信確認 TEST'
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/shortcut-factory/artifacts/YOS-JOURNAL-NOTIFY-signed.shortcut')
+          b=p.read_bytes()
+          assert b.startswith(b'AEA1') and len(b)>500
+          print('YOS JOURNAL notification signed AEA1 PASS',len(b))
+          PY
+
+      - name: Upload PR-only notification test
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-journal-publication-notification-candidate
+          path: |
+            tools/shortcut-factory/artifacts/YOS-JOURNAL-NOTIFY-signed.shortcut
+            tools/shortcut-factory/artifacts/YOS-JOURNAL-NOTIFY-unsigned.shortcut
+          if-no-files-found: error
+          retention-days: 14
