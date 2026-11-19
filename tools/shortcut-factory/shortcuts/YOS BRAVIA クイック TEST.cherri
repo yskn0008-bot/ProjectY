@@ -1,0 +1,12 @@
+#define name YOS BRAVIA クイック TEST
+#define color blue
+
+// Isolated TEST launcher. Scriptable reads existing on-device BRAVIA Keychain.
+// Does not overwrite, rename or delete the active four-device Untitled Script 9.
+action 'dk.simonbs.Scriptable.RunScriptInlineIntent' openBraviaQuick(text parameter: 'parameter'): text {
+    "script": "__YOS_BRAVIA_QUICK_MEDIA_INLINE__",
+    "runInApp": false,
+    "ShowWhenRun": false
+}
+const result = openBraviaQuick("")
+stop()
