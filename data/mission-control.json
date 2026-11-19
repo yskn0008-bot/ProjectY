@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-19T22:41:28+09:00",
+  "updated_at": "2026-11-19T22:42:42+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-848",
-      "title": "PR #848 YOS 日記｜iPhone実機で判明した本文幅・余白折返し・予定過密を修正",
+      "id": "github-pr-769",
+      "title": "PR #769 Clarity v4 pilot｜原文保存＋Notion一括仕分け＋安全なiPhone操作",
       "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/848",
-      "updated_at": "2026-11-19T13:40:42Z"
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/769",
+      "updated_at": "2026-11-16T18:31:56Z"
     },
     {
       "id": "github-pr-771",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-19T13:40:57Z"
+      "updated_at": "2026-11-19T13:41:47Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f35b49b522f2",
+      "title": "Merge PR #848: YOS Journal iPhone handwritten layout fix",
+      "completed_at": "2026-11-19T13:41:53Z",
+      "result": "GitHub mainへ反映（f35b49b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f35b49b522f246f08684e26fee76103f8c16b112"
+    },
+    {
+      "id": "github-commit-8062e28eb402",
+      "title": "sync Journal iPhone fix with current main, preserving all installer entries",
+      "completed_at": "2026-11-19T13:41:16Z",
+      "result": "GitHub mainへ反映（8062e28）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8062e28eb402084c94a1ba63275d8edae63822b6"
+    },
+    {
       "id": "github-commit-a578a1a1feb0",
       "title": "feat(remote): integrate BRAVIA picture controls into preserved 4-device v6.6 (#863)",
       "completed_at": "2026-11-19T13:40:53Z",
@@ -212,32 +226,18 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a578a1a1feb0daf0c57cc6ff813dbae09e1e08fe"
     },
     {
-      "id": "github-commit-af58747da86a",
-      "title": "test(remote): assert active 4-device hub version 6.6",
-      "completed_at": "2026-11-19T13:36:26Z",
-      "result": "GitHub mainへ反映（af58747）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/af58747da86a12bde07ade94b38df4a320675408"
+      "id": "github-commit-98f7d3fb443d",
+      "title": "merge latest main: preserve all 22 installer entries while fixing Journal iPhone layout",
+      "completed_at": "2026-11-19T13:38:08Z",
+      "result": "GitHub mainへ反映（98f7d3f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/98f7d3fb443d91980041a98609d1322d22d0d5d4"
     },
     {
-      "id": "github-commit-0bfa63c9b012",
-      "title": "test(remote): exercise picture presets with preserved four-device v6.6 controls",
-      "completed_at": "2026-11-19T13:35:53Z",
-      "result": "GitHub mainへ反映（0bfa63c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0bfa63c9b0126368b43d8623920cd81a0b6466cc"
-    },
-    {
-      "id": "github-commit-c3d9360838e3",
-      "title": "chore(remote): pin original v6.6 dependency YOS AC Widget.js",
-      "completed_at": "2026-11-19T13:35:14Z",
-      "result": "GitHub mainへ反映（c3d9360）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c3d9360838e39bc8fb0b7156f89c1614b79ee9a8"
-    },
-    {
-      "id": "github-commit-7dd8b697bcd4",
-      "title": "chore(remote): pin original v6.6 dependency YOS Light Widget.js",
-      "completed_at": "2026-11-19T13:35:11Z",
-      "result": "GitHub mainへ反映（7dd8b69）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7dd8b697bcd48b222a866a100a9db7c9c71073a7"
+      "id": "github-commit-862684153f9d",
+      "title": "fix(journal): pin reviewed iPhone layout source and digest in shared installer",
+      "completed_at": "2026-11-19T13:36:59Z",
+      "result": "GitHub mainへ反映（8626841）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/862684153f9dd57e62b1394669be1e1b91ac4d33"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #848をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-19T22:41:28+09:00",
+      "last_update": "2026-11-19T22:42:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 64件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 63件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-19T22:41:28+09:00",
+      "last_update": "2026-11-19T22:42:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #848をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-19T22:41:28+09:00",
+      "last_update": "2026-11-19T22:42:42+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7542608cc6504bb2201ba48e01b78c04c999b895c3d9a52c6757058b3a5d233e"
+  "github_snapshot_hash": "ef4c994f9d33896cb8c2041ec7877e22e0e489ab9b7848187ef2db5291683388"
 }
