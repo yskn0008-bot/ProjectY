@@ -180,3 +180,6 @@ button[disabled]{cursor:not-allowed;opacity:.55}
 }
 
 /* Native WebView safe-area is preserved to keep the header below the iOS toolbar. */
+
+/* Image provenance must remain visible: category photos are not exact products. */
+.product-photo .reference-photo-label{position:absolute;left:4px;bottom:5px;z-index:2;background:#fbfdffee;border:1px solid #d3dce8;border-radius:9px;padding:3px 5px;color:#415975;font-size:9px;font-weight:850;letter-spacing:0;box-shadow:0 1px 3px #00000010}
