@@ -9,7 +9,7 @@ const text=path=>readFileSync(new URL(path,root),'utf8');
 export function api(overrides={}){
  const context=vm.createContext({Intl,Date,console,...overrides});
  vm.runInContext(script.split('// SCRIPTABLE_ENTRY')[0]+
-  '\nglobalThis.api={project,readTasks,buildHTML,main,nativeDirectRows,dayProjection,readDeviceCalendar};',context);
+  '\nglobalThis.api={project,readTasks,buildHTML,main,nativeDirectRows,dayProjection,readDeviceCalendar,getCalendarStatus:()=>deviceCalendarStatus};',context);
  return context.api;
 }
 export const row=(start=null,end=null,name='架空タスク',id='a'.repeat(32),key='')=>({
@@ -164,4 +164,32 @@ test('device calendar read failure or incomplete source cannot erase Notion task
  assert.equal(await tooMany.readDeviceCalendar(text('life/calendar/native-bridge.js'),[],now),null);
  const bad=api({CalendarEvent:{between:async()=>[{identifier:'broken',title:'予約',startDate:now,endDate:now}]}});
  assert.equal(await bad.readDeviceCalendar(text('life/calendar/native-bridge.js'),[],now),null);
+});
+
+
+test('iPhone calendar errors are visible without revealing event content or editing originals',async()=>{
+ const denied=api({CalendarEvent:{between:async()=>{throw Error('private-title-do-not-leak')}}});
+ assert.equal(await denied.readDeviceCalendar(text('life/calendar/native-bridge.js'),[],new Date()),null);
+ assert.match(denied.getCalendarStatus(),/Apple予定：読取エラー/);
+ assert.doesNotMatch(denied.getCalendarStatus(),/private-title/);
+ const emptyTasks={schema:'yos-daystream-source-snapshot-v1',kind:'tasks',status:'ok',
+  items:[],checkedAt:new Date().toISOString(),source:'yos-auth-cache',origin:'notion',complete:true};
+ const h=denied.buildHTML(text('yos/daystream/index.html'),
+  text('yos/daystream/source-adapters.js'),
+  text('life/calendar/native-bridge.js'),
+  text('yos/daystream/task-wizard.js'),emptyTasks,[],null,denied.getCalendarStatus());
+ assert.match(h,/const calendarStatus="Apple予定：読取エラー/);
+ assert.doesNotMatch(h,/__CALENDAR_STATUS__|private-title-do-not-leak/);
+ for(const m of h.matchAll(/<script>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
+ const many=api({CalendarEvent:{between:async()=>Array.from({length:81},(_,i)=>({
+  identifier:'id-'+i,title:'sample',startDate:new Date(),endDate:new Date(Date.now()+60000),isAllDay:false
+ }))}});
+ assert.equal(await many.readDeviceCalendar(text('life/calendar/native-bridge.js'),[],new Date()),null);
+ assert.match(many.getCalendarStatus(),/81件.*80件を超過/);
+ const valid=api({CalendarEvent:{between:async()=>[{
+  identifier:'ok',title:'予定あり',startDate:new Date(Date.now()+86400000),
+  endDate:new Date(Date.now()+88200000),isAllDay:false
+ }]}});
+ assert.equal((await valid.readDeviceCalendar(text('life/calendar/native-bridge.js'),[],new Date())).status,'ok');
+ assert.match(valid.getCalendarStatus(),/1件読取／1件表示対象/);
 });

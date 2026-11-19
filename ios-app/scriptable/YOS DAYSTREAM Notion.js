@@ -95,6 +95,7 @@ function dayProjection(items,day){
 const BROWSER_BOOT=String.raw`
 (()=>{
  const snapshot=__SNAPSHOT__;
+ const calendarStatus=__CALENDAR_STATUS__;
  window.YOS_CHARCOAL_BOOT.taskSource=snapshot;
  window.YOS_DAYSTREAM_TASK_AUTH={
   setup:()=>{location.href='scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion';return Promise.resolve(true)},
@@ -106,7 +107,7 @@ const BROWSER_BOOT=String.raw`
   button.textContent='↻ Notionを更新';button.onclick=refresh;
   const top=document.createElement('button');top.textContent='↻ Notionを更新';top.onclick=refresh;
   document.querySelector('.yos-web-port').insertBefore(top,document.getElementById('yosWebImport'));
-  document.getElementById('yosWebSourceState').textContent='Notion '+snapshot.items.length+'件取得 · '+new Date(snapshot.checkedAt).toLocaleString('ja-JP')+' · 開き直し・更新で再取得 · Appleカレンダーは別接続';
+  document.getElementById('yosWebSourceState').textContent='Notion '+snapshot.items.length+'件取得 · '+new Date(snapshot.checkedAt).toLocaleString('ja-JP')+' · 開き直し・更新で再取得 · '+calendarStatus;
  });
 })();
 `;
@@ -190,26 +191,41 @@ function nativeDirectRows(tasks){
  * creating a second task, altering Shortcuts, or changing the public PWA store.
  * Permission errors or incomplete event lists must not block Notion tasks.
  */
+let deviceCalendarStatus='Apple予定：未確認';
 async function readDeviceCalendar(nativeSource,tasks,now=new Date()){
- if(typeof CalendarEvent==='undefined'||typeof CalendarEvent.between!=='function')return null;
+ deviceCalendarStatus='Apple予定：読取未完了';
+ if(typeof CalendarEvent==='undefined'||typeof CalendarEvent.between!=='function'){
+  deviceCalendarStatus='Apple予定：ScriptableのカレンダーAPI利用不可';return null;
+ }
  const start=new Date(now.getFullYear(),now.getMonth(),now.getDate());
  const end=new Date(start);end.setDate(end.getDate()+15);
  let events;
- try{events=await CalendarEvent.between(start,end)}catch(_){return null}
- if(!Array.isArray(events)||events.length>80)return null;
+ try{events=await CalendarEvent.between(start,end)}catch(_){
+  deviceCalendarStatus='Apple予定：読取エラー（端末カレンダーまたはアプリ接続を確認）';return null;
+ }
+ if(!Array.isArray(events)){
+  deviceCalendarStatus='Apple予定：応答形式の不一致';return null;
+ }
+ if(events.length>80){
+  deviceCalendarStatus='Apple予定：15日間に'+events.length+'件あり、取得上限80件を超過';return null;
+ }
  const matched=(Array.isArray(tasks)?tasks:[]).filter(t=>t&&t.due?.includes('T')&&t.dueEnd?.includes('T')&&
    Number.isFinite(Date.parse(t.due))&&Number.isFinite(Date.parse(t.dueEnd))&&
    (t.sourceKind==='calendar'||(t.sourceKind==='task'&&/^YOS Inbox clarity:/i.test(t.evidence||''))));
  const mirror=[],ids=new Set();
  for(const e of events){
   const title=clean(e?.title,100),a=new Date(e?.startDate),b=new Date(e?.endDate);
-  if(!title||!Number.isFinite(+a)||!Number.isFinite(+b)||b<=a||b-a>15*86400000)return null;
+  if(!title||!Number.isFinite(+a)||!Number.isFinite(+b)||b<=a||b-a>15*86400000){
+   deviceCalendarStatus='Apple予定：日時・件名の形式を確認できません';return null;
+  }
   // A Notion row with identical title and exact time is already on DAYSTREAM.
   // The iCloud event is not written to Tasks or imported as a second task.
   if(matched.some(t=>clean(t.title,100)===title&&Date.parse(t.due)===+a&&Date.parse(t.dueEnd)===+b))continue;
   const identity=clean(e.identifier,130)||('no-id:'+title+'|'+a.toISOString()+'|'+b.toISOString());
   const id=(identity+':'+a.toISOString()).slice(0,180);
-  if(ids.has(id))return null;
+  if(ids.has(id)){
+   deviceCalendarStatus='Apple予定：同一IDの重複を検出';return null;
+  }
   ids.add(id);
   mirror.push({id,title,start:a.toISOString(),end:b.toISOString(),allDay:e.isAllDay===true});
  }
@@ -219,16 +235,25 @@ async function readDeviceCalendar(nativeSource,tasks,now=new Date()){
   windowEnd:day(new Date(end.getTime()-1000)),completeCalendar:true,
   remindersStatus:'unavailable',reminders:[],events:mirror};
  const raw=JSON.stringify(snapshot);
- if(raw.length>16000)return null;
+ if(raw.length>16000){
+  deviceCalendarStatus='Apple予定：安全な取込サイズ上限を超過';return null;
+ }
  try{
   const scope={};new Function('window',nativeSource)(scope);
-  return scope.YOS_CALENDAR_NATIVE?.asDaystream({getItem:key=>
+  const projected=scope.YOS_CALENDAR_NATIVE?.asDaystream({getItem:key=>
    key==='YOS_CALENDAR_NATIVE_SNAPSHOT_V1'?raw:null})||null;
- }catch(_){return null}
+  if(!projected||projected.status!=='ok'){
+   deviceCalendarStatus='Apple予定：読み取り後の画面変換に失敗';return null;
+  }
+  deviceCalendarStatus='Apple予定：'+events.length+'件読取／'+mirror.length+'件表示対象';
+  return projected;
+ }catch(_){
+  deviceCalendarStatus='Apple予定：読み取り後の画面変換に失敗';return null;
+ }
 }
 
 const safeScript=s=>s.replace(/<\/script/gi,'<\\/script');
-function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCalendar=null){
+function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCalendar=null,calendarStatus='Apple予定：未確認'){
  if(!html.includes('// WEB_PORT_BOOT')||!html.includes('</script><script>\nconst tl=')||!html.includes('<script src="./task-wizard.js"></script>'))throw Error('DAYSTREAMの形式が一致しません');
  const json=JSON.stringify(snapshot).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
  const directJSON=JSON.stringify(directRows).replace(/</g,'\\u003c');
@@ -236,7 +261,7 @@ function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCale
  let out=html.replace('<script src="./source-adapters.js"></script>','<script>'+safeScript(adapters)+'</script>')
  .replace('<script src="../../life/calendar/native-bridge.js"></script>','<script>'+safeScript(native)+'</script>')
  .replace('<script src="./yos-tasks-auth.js"></script>','')
- .replace('</script><script>\nconst tl=','</script><script>'+safeScript(BROWSER_BOOT.replace('__SNAPSHOT__',json))+'</script><script>'+safeScript(BROWSER_DIRECT_IMPORT.replace('__DIRECT_ROWS__',directJSON))+'</script><script>\nconst tl=')
+ .replace('</script><script>\nconst tl=','</script><script>'+safeScript(BROWSER_BOOT.replace('__SNAPSHOT__',json).replace('__CALENDAR_STATUS__',JSON.stringify(clean(calendarStatus,100))))+'</script><script>'+safeScript(BROWSER_DIRECT_IMPORT.replace('__DIRECT_ROWS__',directJSON))+'</script><script>\nconst tl=')
  .replace('<script src="./task-wizard.js"></script>','<script>'+safeScript(wizard)+'</script>');
  if(deviceJSON){
   const marker=" const nativeCalendar=(()=>{try{return window.YOS_CALENDAR_NATIVE?.asDaystream(localStorage)||null}catch{return null}})();";
@@ -294,7 +319,7 @@ async function main(){
  // This payload contains only task projections; credentials never enter the WebView.
  const directRows=nativeDirectRows(data.tasks);
  const deviceCalendar=await readDeviceCalendar(native,data.tasks);
- const output=buildHTML(html,adapters,native,wizard,snapshot,directRows,deviceCalendar);
+ const output=buildHTML(html,adapters,native,wizard,snapshot,directRows,deviceCalendar,deviceCalendarStatus);
  stage='画面表示';
  await WebView.loadHTML(output,null,null,true);
 }
