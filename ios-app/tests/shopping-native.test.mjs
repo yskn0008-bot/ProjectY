@@ -325,5 +325,5 @@ test('category imagery is marked as representative and must never be written to 
  assert.match(JS,/参考写真/);
  assert.match(JS,/カテゴリの参考画像（実商品とは異なります）/);
  assert.match(CSS,/reference-photo-label/);
- assert.doesNotThrow(()=>new vm.Script(CODE));
+ assert.doesNotThrow(()=>new vm.Script('(async()=>{'+CODE+'\n})()'));
 });
