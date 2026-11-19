@@ -8,7 +8,7 @@ const backendEnd=source.indexOf('async function discoverSony(){',backendStart);
 assert.ok(backendStart>0&&backendEnd>backendStart,'backend boundaries');
 const backend=source.slice(backendStart,backendEnd);
 
-function mockHub({unsupportedSound=false,appFailure=false,installed=['YouTube','Netflix','Prime Video','U-NEXT','Proton VPN'],hdmiConfirmed=true}={}){
+function mockHub({unsupportedSound=false,aggregateSoundBlocked=false,appFailure=false,installed=['YouTube','Netflix','Prime Video','U-NEXT','Proton VPN'],hdmiConfirmed=true,delayedHDMI=false}={}){
   const requests=[];
   const audio={
     soundMode:{target:'soundMode',currentValue:'Standard',candidate:[{value:'Standard'},{value:'Cinema'}]},
@@ -21,7 +21,11 @@ function mockHub({unsupportedSound=false,appFailure=false,installed=['YouTube','
       const req=JSON.parse(this.body);requests.push({url:this.url,...req});
       if(this.url.endsWith('/sony/audio')){
         if(unsupportedSound) return JSON.stringify({error:[404,'Unknown method']});
-        if(req.method==='getSoundSettings')return JSON.stringify({result:[[...Object.values(audio)]]});
+        if(req.method==='getSoundSettings'){
+          if(aggregateSoundBlocked&&req.params[0].target==='')return JSON.stringify({error:[404,'Unsupported aggregate']});
+          const chosen=req.params[0].target;
+          return JSON.stringify({result:[[...Object.values(audio).filter(x=>!chosen||x.target===chosen)]]});
+        }
         if(req.method==='setSoundSettings'){
           const item=req.params[0].settings[0];
           if(!Object.hasOwn(audio,item.target))return JSON.stringify({error:[404,'Invalid target']});
@@ -35,16 +39,21 @@ function mockHub({unsupportedSound=false,appFailure=false,installed=['YouTube','
       }
       if(this.url.endsWith('/sony/avContent')){
         if(req.method==='setPlayContent')return JSON.stringify({result:[]});
-        if(req.method==='getPlayingContentInfo')return JSON.stringify({result:[{source:'extInput:hdmi',title:'HDMI3',uri:hdmiConfirmed?'extInput:hdmi?port=3':'extInput:hdmi?port=2'}]});
+        if(req.method==='getPlayingContentInfo'){
+          const checks=requests.filter(x=>x.method==='getPlayingContentInfo').length;
+          const success=hdmiConfirmed&&(!delayedHDMI||checks>=2);
+          return JSON.stringify({result:[{source:'extInput:hdmi',uri:success?'extInput:hdmi?port=3':'extInput:hdmi?port=2'}]});
+        }
       }
       throw Error('Unexpected fake API: '+req.method);
     }
   }
   const commandIndex=new Map([['digital','fake-tv-ircc-code']]);
   const sonyAction=async()=>requests.push({method:'irccTv'});
-  const evaluate=new Function('Request','sonyHost','sonyPSK','pictureProbe','discoverSony','commandIndex','sonyAction',
+  const Timer={schedule(ms,repeats,fn){assert.equal(ms,450);assert.equal(repeats,false);fn();}};
+  const evaluate=new Function('Request','sonyHost','sonyPSK','pictureProbe','discoverSony','commandIndex','sonyAction','Timer',
      backend+'; return {quickInstalledApps,quickLaunchApp,quickAudioRead,quickAudioWrite,quickHDMI3,quickTVTuner,quickProbe,quickAction,quickAppPick,quickSoundFlatten};');
-  const funcs=evaluate(Request,()=>'192.168.0.15',()=>'mock-only',async()=>({entries:[],saved:{}}),async()=>{},commandIndex,sonyAction);
+  const funcs=evaluate(Request,()=>'192.168.0.15',()=>'mock-only',async()=>({entries:[],saved:{}}),async()=>{},commandIndex,sonyAction,Timer);
   return {funcs,requests,audio};
 }
 test('isolated v6.6 four-device UI and existing preset keys are preserved',()=>{
@@ -199,4 +208,23 @@ test('existing 12-key adaptive cursor/playback switching remains BYTE-FOR-BYTE i
   assert.match(source,/const CROSS_NAV = \{ up:"up", left:"left", center:"confirm", right:"right", down:"down" \}/);
   assert.ok(!source.includes('カーソル操作</button>'));
   assert.ok(!source.includes('再生操作</button>'));
+});
+
+test('Sony TVs rejecting aggregate getSoundSettings still expose individual supported targets',async()=>{
+ const {funcs,requests}=mockHub({aggregateSoundBlocked:true});
+ const sound=await funcs.quickAudioRead();
+ assert.equal(sound.soundMode.value,'Standard');
+ assert.equal(sound.outputTerminal.value,'speaker');
+ assert.ok(requests.some(x=>x.method==='getSoundSettings'&&x.params[0].target==='soundMode'));
+ assert.ok(requests.some(x=>x.method==='getSoundSettings'&&x.params[0].target==='outputTerminal'));
+});
+test('HDMI3 asynchronous switching is read back before reporting success',async()=>{
+ const {funcs,requests}=mockHub({delayedHDMI:true});
+ const result=await funcs.quickHDMI3();
+ assert.match(result.message,/HDMI3をテレビ側で確認/);
+ assert.equal(requests.filter(x=>x.method==='getPlayingContentInfo').length,2);
+});
+test('quick UI partial update does not wipe audio selection after launching app',()=>{
+ assert.match(source,/hasOwnProperty\.call\(result\.quick,"sound"\)/);
+ assert.match(source,/hasOwnProperty\.call\(result\.quick,"apps"\)/);
 });
