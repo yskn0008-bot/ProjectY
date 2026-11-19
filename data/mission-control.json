@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-19T22:46:19+09:00",
+  "updated_at": "2026-11-19T22:57:50+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,6 +13,16 @@
   },
   "inbox": [
     {
+      "id": "github-pr-866",
+      "title": "PR #866 YOS TAXI: 営業リサーチをiPhoneで一目で分かる画面に改善",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/866",
+      "updated_at": "2026-11-19T13:56:14Z"
+    },
+    {
       "id": "github-pr-771",
       "title": "PR #771 YOS Calendar｜Notionデータを承認済みUIへ安全同期（Google/Face IDなし）",
       "type": "GitHub PR",
@@ -21,16 +31,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/771",
       "updated_at": "2026-11-18T16:35:41Z"
-    },
-    {
-      "id": "github-pr-773",
-      "title": "PR #773 fix: restore Clarity Text to verified v3 without dictation fallback",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/773",
-      "updated_at": "2026-11-16T18:54:38Z"
     },
     {
       "id": "github-pr-789",
@@ -70,7 +70,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
-      "updated_at": "2026-11-19T13:45:08Z"
+      "updated_at": "2026-11-19T13:48:07Z"
     },
     {
       "id": "github-pr-832",
@@ -103,14 +103,14 @@
       "updated_at": "2026-11-19T13:28:47Z"
     },
     {
-      "id": "github-pr-864",
-      "title": "PR #864 DAYSTREAM｜Notionの習慣周期を既存の配置提案へ安全に接続",
+      "id": "github-pr-867",
+      "title": "PR #867 feat(shopping): exact product photo auto-fetch, persistent cache and safe Notion covers",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/864",
-      "updated_at": "2026-11-19T13:44:08Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/867",
+      "updated_at": "2026-11-19T13:57:06Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-19T13:45:00Z"
+      "updated_at": "2026-11-19T13:56:41Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-a6de3568eaa7",
+      "title": "DAYSTREAM: connect Notion habit cycles to safe local proposals",
+      "completed_at": "2026-11-19T13:57:10Z",
+      "result": "GitHub mainへ反映（a6de356）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a6de3568eaa70e4194924f5bb5e3c4e7e1255762"
+    },
+    {
+      "id": "github-commit-054f0c095f9b",
+      "title": "feat(remote): safe BRAVIA picture upgrade for existing Untitled Script 9 (#865)",
+      "completed_at": "2026-11-19T13:51:07Z",
+      "result": "GitHub mainへ反映（054f0c0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/054f0c095f9b36e07b7a5b0a6fed4eecaf5265fb"
+    },
+    {
       "id": "github-commit-f35b49b522f2",
       "title": "Merge PR #848: YOS Journal iPhone handwritten layout fix",
       "completed_at": "2026-11-19T13:41:53Z",
@@ -224,20 +238,6 @@
       "completed_at": "2026-11-19T13:40:53Z",
       "result": "GitHub mainへ反映（a578a1a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a578a1a1feb0daf0c57cc6ff813dbae09e1e08fe"
-    },
-    {
-      "id": "github-commit-98f7d3fb443d",
-      "title": "merge latest main: preserve all 22 installer entries while fixing Journal iPhone layout",
-      "completed_at": "2026-11-19T13:38:08Z",
-      "result": "GitHub mainへ反映（98f7d3f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/98f7d3fb443d91980041a98609d1322d22d0d5d4"
-    },
-    {
-      "id": "github-commit-862684153f9d",
-      "title": "fix(journal): pin reviewed iPhone layout source and digest in shared installer",
-      "completed_at": "2026-11-19T13:36:59Z",
-      "result": "GitHub mainへ反映（8626841）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/862684153f9dd57e62b1394669be1e1b91ac4d33"
     },
     {
       "id": "complete-002",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #866をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-19T22:46:19+09:00",
+      "last_update": "2026-11-19T22:57:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 64件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 65件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-19T22:46:19+09:00",
+      "last_update": "2026-11-19T22:57:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #866をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-19T22:46:19+09:00",
+      "last_update": "2026-11-19T22:57:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f615d623dd09098ab50e6687310fa6f1428262094f58d4b5c5e161b06570d48c"
+  "github_snapshot_hash": "785d783dde1809122721c8726893da8d3afa53e574607405f17ce85bc9693048"
 }
