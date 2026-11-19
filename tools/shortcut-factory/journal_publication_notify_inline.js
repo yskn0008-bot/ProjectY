@@ -32,10 +32,8 @@ function isPublicToday(data,now){
   for(const x of data.articles){
     if(!x||typeof x!=='object'||typeof x.title!=='string'||x.title.length<8||x.title.length>160)return false;
     if(typeof x.link!=='string'||!x.link.startsWith('https://'))return false;
-    try{
-      const u=new URL(x.link);
-      if(u.protocol!=='https:'||u.username||u.password||!u.hostname.includes('.')||u.hostname.endsWith('.invalid'))return false;
-    }catch(_){return false;}
+    const url=x.link.match(/^https:\/\/([a-z0-9.-]+)(?=\/|$)/i);
+    if(!url||!url[1].includes('.')||url[1].endsWith('.invalid')||x.link.includes('@'))return false;
   }
   return true;
 }
