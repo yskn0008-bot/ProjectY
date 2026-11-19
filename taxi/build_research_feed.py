@@ -7,6 +7,8 @@ Each source fails closed and does not become an assertion of taxi demand.
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import datetime as dt
 import email.utils
 import hashlib
@@ -144,7 +146,18 @@ def naha_news(raw: bytes, checked: dt.datetime) -> dict:
             "items": items}
 
 
-def cruise_catalog(raw: bytes, checked: dt.datetime) -> dict:
+def ckan_updated_at(s: str | None) -> dt.datetime | None:
+    """CKAN catalog/resource metadata timestamps are UTC even without a timezone."""
+    if not isinstance(s, str) or not s.strip():
+        return None
+    raw = s.strip()
+    if not re.search(r"(?:Z|[+-]\d\d:\d\d)$", raw):
+        raw += "Z"
+    return parse_time(raw)
+
+
+def cruise_catalog(raw: bytes, checked: dt.datetime, get=fetch) -> dict:
+    """Public CSV reservations only: never infer a real arrival or taxi queue."""
     data = json.loads(raw)
     if data.get("success") is not True or not isinstance(data.get("result"), dict):
         raise ValueError("CKAN response invalid")
@@ -153,14 +166,76 @@ def cruise_catalog(raw: bytes, checked: dt.datetime) -> dict:
                  and "2026" in (r.get("name") or "") and (r.get("format") or "").upper() == "CSV"]
     if not resources:
         raise ValueError("No 2026 cruise CSV in CKAN")
-    resources.sort(key=lambda r: parse_time(r.get("last_modified") or r.get("created") or "") or dt.datetime(1970, 1, 1, tzinfo=UTC), reverse=True)
+    resources.sort(key=lambda r: ckan_updated_at(r.get("metadata_modified") or r.get("last_modified")
+                        or r.get("created")) or dt.datetime(1970, 1, 1, tzinfo=UTC), reverse=True)
     latest = resources[0]
-    modified = parse_time(latest.get("last_modified") or latest.get("created"))
-    return {"id": "cruise_catalog", "name": "沖縄県｜クルーズ予約・実績資料", "url": CRUISE_PAGE,
-            "checkedAt": iso(checked), "publishedAt": iso(modified), "status": "ok" if modified else "unknown",
-            "summary": (latest.get("name") or "2026年の寄港予約CSV")[:160],
-            "detail": "月次の予約・実績資料の所在確認のみ。今夜の実入港や乗客・タクシー需要は未確認。",
-            "items": []}
+    file_url = latest.get("url") or ""
+    if not isinstance(file_url, str) or not safe_url(file_url, domains=("data.bodik.jp",)):
+        raise ValueError("Unexpected cruise CSV URL")
+    modified = ckan_updated_at(latest.get("metadata_modified") or latest.get("last_modified")
+                               or dataset.get("metadata_modified") or latest.get("created"))
+    if modified and (modified - checked).total_seconds() > 600:
+        raise ValueError("Cruise catalog metadata is in the future")
+    payload = get(file_url)
+    if len(payload) > 360_000:
+        raise ValueError("Cruise CSV too large")
+    try:
+        content = payload.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        content = payload.decode("cp932")
+    reader = csv.DictReader(io.StringIO(content))
+    required = {"港湾", "入港月日", "入港時間", "出港月日", "出港時間", "船名", "係留施設名（バース）"}
+    if not reader.fieldnames or not required.issubset(set(reader.fieldnames)):
+        raise ValueError("Unexpected cruise CSV columns")
+    horizon = checked + dt.timedelta(hours=48)
+    items = []
+    naha_rows = 0
+    for row in reader:
+        if (row.get("港湾") or "").strip() != "那覇港":
+            continue
+        naha_rows += 1
+        try:
+            date = dt.date.fromisoformat((row.get("入港月日") or "").strip())
+            time = dt.time.fromisoformat((row.get("入港時間") or "").strip())
+            arrival = dt.datetime.combine(date, time, tzinfo=JST).astimezone(UTC)
+        except (ValueError, TypeError):
+            continue  # Incomplete/invalid time is not a verified arrival time.
+        try:
+            dep_date = dt.date.fromisoformat((row.get("出港月日") or "").strip())
+            dep_time = dt.time.fromisoformat((row.get("出港時間") or "").strip())
+            departure = dt.datetime.combine(dep_date, dep_time, tzinfo=JST).astimezone(UTC)
+        except (ValueError, TypeError):
+            departure = None
+        # Include arriving soon or already scheduled in port; exclude vessels that left.
+        if arrival > horizon or (departure or arrival) < checked:
+            continue
+        vessel = (row.get("船名") or "").strip()
+        if not vessel:
+            continue
+        berth = (row.get("係留施設名（バース）") or "").strip()
+        label = arrival.astimezone(JST).strftime("%m/%d %H:%M")
+        depart_label = departure.astimezone(JST).strftime("%m/%d %H:%M") if departure else "未確認"
+        title = f"{label} 那覇港寄港予約 {vessel[:38]}／出港予定 {depart_label}"
+        identifier = hashlib.sha256(f"{vessel}|{arrival.isoformat()}|{berth}".encode("utf-8")).hexdigest()[:16]
+        items.append({"id": identifier, "title": title[:140], "url": CRUISE_PAGE,
+                      "eventAt": iso(arrival), "departureAt": iso(departure),
+                      "publishedAt": iso(modified),
+                      "kind": "公開CSVの寄港予約（実入港・乗車需要未確認）"})
+    if naha_rows == 0:
+        raise ValueError("Cruise CSV has no Naha port rows")
+    items.sort(key=lambda x: x["eventAt"])
+    # This is a monthly reservation source; a late update should never be 'current'.
+    age_days = (checked - modified).total_seconds() / 86400 if modified else None
+    status = ("unknown" if age_days is None else "stale" if age_days > 45 else "ok")
+    eligible = items[:8] if status == "ok" else []
+    summary = (f"那覇港の今後48時間の寄港予約 {len(items)}件。実入港・下船・タクシー需要は未確認。"
+               if status == "ok" else "資料の更新日・鮮度が未確認です。港湾管理者の最新情報をご確認ください。")
+    return {"id": "cruise_catalog", "name": "沖縄県｜那覇港クルーズ予約", "url": CRUISE_PAGE,
+            "checkedAt": iso(checked), "publishedAt": iso(modified), "status": status,
+            "summary": summary,
+            "detail": "沖縄県が月次公開した寄港予約一覧を確認。予定変更・欠航・実入港・乗客の乗車機会は未確認。"
+                      f" 資料名: {(latest.get('name') or '')[:100]}",
+            "items": eligible}
 
 
 SOURCES = [
@@ -175,7 +250,10 @@ def build(get=fetch, checked: dt.datetime | None = None) -> dict:
     sources = []
     for source_id, name, url, decoder in SOURCES:
         try:
-            sources.append(decoder(get(url), checked))
+            if source_id == "cruise_catalog":
+                sources.append(decoder(get(url), checked, get=get))
+            else:
+                sources.append(decoder(get(url), checked))
         except (ValueError, TypeError, KeyError, ET.ParseError, urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
             # No stale carry-over: failure must not be displayed as current data.
             reason = type(exc).__name__
