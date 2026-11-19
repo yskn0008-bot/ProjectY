@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-20T02:49:47+09:00",
+  "updated_at": "2026-11-20T02:54:17+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,6 +31,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/818",
       "updated_at": "2026-11-18T16:45:53Z"
+    },
+    {
+      "id": "github-pr-823",
+      "title": "PR #823 Clarityの時刻つきタスクを既存DAYSTREAM Webに表示",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/823",
+      "updated_at": "2026-11-18T16:45:50Z"
     },
     {
       "id": "github-pr-830",
@@ -93,16 +103,6 @@
       "updated_at": "2026-11-19T16:59:27Z"
     },
     {
-      "id": "github-pr-882",
-      "title": "PR #882 YOS DAYSTREAM｜時刻移動の修復とライトUI",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/882",
-      "updated_at": "2026-11-19T17:46:48Z"
-    },
-    {
       "id": "github-pr-883",
       "title": "PR #883 YOS TAXI: ソース鮮度の区別を復旧し沖縄クルーズ実データを検証",
       "type": "GitHub PR",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/883",
-      "updated_at": "2026-11-19T17:49:16Z"
+      "updated_at": "2026-11-19T17:53:43Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-19T17:47:17Z"
+      "updated_at": "2026-11-19T17:53:35Z"
     },
     {
       "id": "github-issue-234",
@@ -205,39 +205,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-e38a289310d8",
-      "title": "journal: publish approved 2026-11-20 first-impressions feature",
-      "completed_at": "2026-11-19T17:34:44Z",
-      "result": "GitHub mainへ反映（e38a289）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e38a289310d82e1b079df8d56e226aec88c13aba"
+      "id": "github-commit-c883c5e8273d",
+      "title": "Merge YOS DAYSTREAM touch and light UI release (#882)",
+      "completed_at": "2026-11-19T17:53:27Z",
+      "result": "GitHub mainへ反映（c883c5e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c883c5e8273d1646a473c0905648ead6d61b4df2"
     },
     {
-      "id": "github-commit-c0d74079be20",
-      "title": "fix(taxi): prioritize automated official research status on iPhone",
-      "completed_at": "2026-11-19T17:17:41Z",
-      "result": "GitHub mainへ反映（c0d7407）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c0d74079be2080bd580c2399e49f9544f6b995ed"
+      "id": "github-commit-32081111fdb7",
+      "title": "Pin the reviewed DAYSTREAM build in the existing installer",
+      "completed_at": "2026-11-19T17:46:14Z",
+      "result": "GitHub mainへ反映（3208111）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/32081111fdb7e7d66eb0e679590238e86d755273"
     },
     {
-      "id": "github-commit-cb8625b49b05",
-      "title": "fix(taxi): validate official source health and expire stale research safely",
-      "completed_at": "2026-11-19T17:00:28Z",
-      "result": "GitHub mainへ反映（cb8625b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cb8625b49b0501e5aa71685f21aefc2d7576ca5c"
+      "id": "github-commit-e02f33a6c120",
+      "title": "Pin Scriptable to DAYSTREAM’s final contrast-reviewed UI",
+      "completed_at": "2026-11-19T17:46:11Z",
+      "result": "GitHub mainへ反映（e02f33a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e02f33a6c12034ce38a36c09451c99840fe203ef"
     },
     {
-      "id": "github-commit-158355487fe8",
-      "title": "feat(shopping): source-linked JPY listing observations and honest Web data status (#876)",
-      "completed_at": "2026-11-19T16:55:32Z",
-      "result": "GitHub mainへ反映（1583554）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/158355487fe8bd31e11c7c0f89111fdfa2c87b89"
+      "id": "github-commit-ad40bc6dbd3b",
+      "title": "Make lavender timeline drag handles consistently visible",
+      "completed_at": "2026-11-19T17:46:07Z",
+      "result": "GitHub mainへ反映（ad40bc6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ad40bc6dbd3b3fe8ab4dfec1ef9781f38e1201de"
     },
     {
-      "id": "github-commit-458ca0b8dbd5",
-      "title": "DAYSTREAM: restore iPhone scroll on fixed night-shift cards",
-      "completed_at": "2026-11-19T16:47:41Z",
-      "result": "GitHub mainへ反映（458ca0b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/458ca0b8dbd544ec439d0021225a9294a9778854"
+      "id": "github-commit-5a1c6543af97",
+      "title": "Stage only DAYSTREAM in the existing shared installer catalog",
+      "completed_at": "2026-11-19T17:40:14Z",
+      "result": "GitHub mainへ反映（5a1c654）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5a1c6543af97647876e551f2ff59aa7224c4b6d3"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-20T02:49:47+09:00",
+      "last_update": "2026-11-20T02:54:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 68件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 67件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-20T02:49:47+09:00",
+      "last_update": "2026-11-20T02:54:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-20T02:49:47+09:00",
+      "last_update": "2026-11-20T02:54:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6c80d35cd6f6b7c1fe83e3ebe57c4ce125712b751639f4bc9e104dee46822888"
+  "github_snapshot_hash": "57303c46960ba81832fd0620ca129fd848f805c6a76269f84578567e6fff2e16"
 }
