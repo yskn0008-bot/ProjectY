@@ -141,6 +141,13 @@
       "path": "ios-app/scriptable/remote-widgets/YOS Remote Hub.js",
       "commit": "696eb3bd9d0bc0faf147c55ee4e73aa1c1ae9f44",
       "sha256": "cf7b6f441db5e715feee185971c77b51e3c6945675fac71c13a6e7050072235a"
+    },
+    {
+      "id": "scriptable-inventory",
+      "name": "YOS Scriptable 棚卸し",
+      "path": "ios-app/scriptable/YOS Scriptable 棚卸し.js",
+      "commit": "05ffe3341257d6632ca5f95cc16e2a3df3fd2ecc",
+      "sha256": "3583ad6ca3368a0181ed61949da4873e994378eec4fc16e62b634bfa37bf3b64"
     }
   ]
 }
