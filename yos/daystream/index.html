@@ -598,9 +598,14 @@ const planBox=document.getElementById('yosPlanBox'),taskFeed=document.getElement
 const yosStatusWord=x=>x==='ok'?'取得済み':x==='partial'?'一部のみ取得':x==='unavailable'?'未接続':'取得エラー';
 const yosTaskRank=x=>({P0:0,P1:10,P2:20,P3:30}[x.priority]??40);
 function yosEligibleHabits(day){
- const d=parseDay(day);return sourceHabits.filter(x=>x.kind==='habit'&&(x.period==='daily'||x.period==='weekly'&&x.weekdays.includes(d.getDay())||x.period==='monthly'&&x.dayOfMonth===d.getDate()||x.period==='yearly'&&x.monthDay===day.slice(5)));
+ const d=parseDay(day);return sourceHabits.filter(x=>x.kind==='habit'&&
+  (!x.startDay||x.startDay<=day)&&
+  (x.period==='daily'||x.period==='weekly'&&Array.isArray(x.weekdays)&&x.weekdays.includes(d.getDay())||
+   x.period==='monthly'&&x.dayOfMonth===d.getDate()||
+   x.period==='yearly'&&x.monthDay===day.slice(5)));
 }
-const yosIsPlanned=ref=>items.some(x=>x.sourceRef===ref);
+const yosIsPlanned=ref=>items.some(x=>x.sourceRef===ref||
+ (ref.startsWith('habit:')&&x.sourceRef==='yos-direct:'+ref.slice('habit:'.length)));
 // YOS_UNIFIED_SLOT_START
 function yosFindSlot(occupied,start,duration){
  if(!Number.isInteger(start)||!Number.isInteger(duration)||duration<5||duration>240)return null;
@@ -650,7 +655,8 @@ function yosRenderSources(){
  taskFeed.textContent='';habitFeed.textContent='';
  const status=document.getElementById('yosTaskSourceStatus');
  status.textContent=(taskSource.source==='user-file'?'手動取込のTasks写し：':taskSource.origin==='notion'?'Notion正本の取得済み写し：':taskSource.source==='yos-auth-cache'?'YOS認証済みTasks写し（自動更新なし）：':'Notion Tasks：')+yosStatusWord(taskSource.status)+(taskSource.status==='ok'||taskSource.status==='partial'?'（取得 '+sourceTasks.length+'件・先頭80件を表示）':'')+(taskSource.checkedAt?' · '+new Date(taskSource.checkedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'');
- const live=sourceTasks.filter(x=>!['完了','待ち','保留'].includes(x.status));
+ const recurringIds=new Set(sourceHabits.map(x=>'notion-'+x.id));
+ const live=sourceTasks.filter(x=>!recurringIds.has(x.id)&&!['完了','待ち','保留'].includes(x.status));
  live.sort((a,b)=>yosTaskRank(a)-yosTaskRank(b)||String(a.due||'9999').localeCompare(String(b.due||'9999'))||a.title.localeCompare(b.title,'ja'));
  const pending=live.filter(x=>!x.clarityWindow&&!yosIsPlanned('notion:'+x.id)).slice(0,80);
  if(!pending.length){const p=document.createElement('p');p.className='muted';p.textContent=taskSource.status==='ok'?'未配置の対象タスクはありません':'タスクは未取得・要確認';taskFeed.append(p)}
@@ -660,7 +666,7 @@ function yosRenderSources(){
   if(x.timing==='fixed')yosAddRow(taskFeed,x.title,info+' · 元カレンダーの予定（移動しません）',()=>window.open('https://www.notion.so/'+x.id.slice(7),'_blank','noopener'),'Notionで確認');
   else yosAddRow(taskFeed,x.title,info,()=>yosPropose(x,'task'));
  }
- const habitStatus=document.getElementById('yosHabitSourceStatus');habitStatus.textContent='習慣：'+yosStatusWord(habitSource.status);
+ const habitStatus=document.getElementById('yosHabitSourceStatus');habitStatus.textContent='習慣：'+yosStatusWord(habitSource.status)+(habitSource.source==='notion-tasks-cycle'?'（Notionの周期指定 '+sourceHabits.length+'件・時刻未確定）':'');
  const habits=yosEligibleHabits(selectedDay).filter(x=>!yosIsPlanned('habit:'+x.id)).slice(0,40);
  if(!habits.length){const p=document.createElement('p');p.className='muted';p.textContent=habitSource.status==='ok'?'未配置の反復習慣はありません':'習慣データは未取得';habitFeed.append(p)}
  for(const x of habits)yosAddRow(habitFeed,x.title,(x.trigger||'実施するきっかけ未設定')+' · '+x.period,()=>yosPropose(x,'habit'));
