@@ -29,24 +29,37 @@ def validate(path: Path) -> dict:
     for banned in BANNED_ACTIONS:
         assert banned not in ids, f'unexpected action: {banned}'
     ask = [p for n, p in pairs if str(n).endswith('askllm')]
-    assert len(ask) == 1, f'expected one askllm, got {len(ask)}'
-    params = ask[0]
-    assert params.get('FollowUp') is False, 'FollowUp must be false'
-    assert params.get('WFGenerativeResultType') == 'Text', 'result type must be Text'
-    prompt = params.get('WFLLMPrompt')
-    assert prompt is not None, 'GPT prompt missing'
+    assert len(ask) == 2, f'expected writer+editor askllm, got {len(ask)}'
+    for stage, params in enumerate(ask):
+        assert params.get('FollowUp') is False, f'stage {stage} FollowUp must be false'
+        assert params.get('WFGenerativeResultType') == 'Text', f'stage {stage} must output text'
+        assert params.get('WFLLMModel') == 'ChatGPT', f'stage {stage} model not ChatGPT'
+        assert params.get('WFLLMPrompt') is not None, f'stage {stage} missing prompt'
     workflow_rep = repr(wf)
     # WFLLMPrompt references the preceding Text action via token attachment;
     # the literal editorial prompt is therefore elsewhere in the workflow.
     assert 'YOS JOURNAL' in workflow_rep and '要裏取り' in workflow_rep, 'editorial safety prompt missing'
     saves = [p for n, p in pairs if n == 'is.workflow.actions.documentpicker.save']
-    assert len(saves) == 1, f'expected 1 save action, got {len(saves)}'
-    save = saves[0]
-    assert save.get('WFAskWhereToSave') is False, f'location prompt unexpected: {save}'
-    assert save.get('WFSaveFileOverwrite') is False, f'overwrite unexpectedly enabled: {save}'
-    assert 'YOS-JOURNAL-GPT-DRAFT-' in repr(save), 'draft filename not found'
+    assert len(saves) == 2, f'expected writer and editor backup actions, got {len(saves)}'
+    for save in saves:
+        assert save.get('WFAskWhereToSave') is False, f'location prompt unexpected: {save}'
+        assert save.get('WFSaveFileOverwrite') is False, f'overwrite unexpectedly enabled: {save}'
+    writer_backup,save=saves
+    assert 'YOS-JOURNAL-GPT-WRITER-' in repr(writer_backup), 'writer backup missing'
+    assert 'YOS-JOURNAL-GPT-DRAFT-' in repr(save), 'editor backup missing'
+    writer_attachment=writer_backup.get('WFInput')
+    assert isinstance(writer_attachment,dict) and writer_attachment.get('Value',{}).get('OutputName')=='writerText', 'writer backup not from GPT1'
     attachment=save.get('WFInput')
-    assert isinstance(attachment,dict) and attachment.get('Value',{}).get('OutputName')=='draftText', 'saved input not draft'
+    assert isinstance(attachment,dict) and attachment.get('Value',{}).get('OutputName')=='draftText', 'editor backup not from GPT2'
+    writer_uuid=writer_attachment.get('Value',{}).get('OutputUUID')
+    editor_uuid=attachment.get('Value',{}).get('OutputUUID')
+    assert writer_uuid and editor_uuid and writer_uuid!=editor_uuid, 'GPT stages not separate'
+    writer_ask_index=next(i for i,n in enumerate(ids) if str(n).endswith('askllm'))
+    editor_ask_index=[i for i,n in enumerate(ids) if str(n).endswith('askllm')][1]
+    saves_index=[i for i,n in enumerate(ids) if n=='is.workflow.actions.documentpicker.save']
+    handoff_index=ids.index('dk.simonbs.Scriptable.RunScriptInlineIntent')
+    assert writer_ask_index<saves_index[0]<editor_ask_index<saves_index[1]<handoff_index, 'writer/editor action order invalid'
+    assert '執筆原稿' in workflow_rep and 'writerText' in workflow_rep, 'second GPT must receive first GPT text'
     scriptable_id='dk.simonbs.Scriptable.RunScriptInlineIntent'
     inline=[p for n,p in pairs if n==scriptable_id]
     assert len(inline)==1, f'expected one private Scriptable handoff, got {len(inline)}'
