@@ -4,11 +4,17 @@ import {createProductionWidgetFeed} from '../../dist/widget/production.js';
 import {createProductionBaseHomeRefreshHandler} from '../../dist/base-home/production.js';
 import {createProductionMoneyNotionMirror} from '../../dist/intake/production.js';
 import {createMoneyShadowHandler} from '../../lib/money-shadow.mjs';
+import {createProductionShoppingHandler} from '../../dist/shopping/handler.js';
 
 let handler;
+let shoppingHandler;
 let moneyHandler;
 let moneyNotionMirror;
 let baseHomeRefreshHandler;
+function getShoppingHandler(){
+  shoppingHandler ??= createProductionShoppingHandler({environment:process.env});
+  return shoppingHandler;
+}
 function getHandler(){
   handler ??= createProductionWidgetFeed({environment:process.env});
   return handler;
@@ -42,6 +48,11 @@ function getMoneyHandler(){
 export default {
   async fetch(request){
     const mode=new URL(request.url).searchParams.get('mode');
+    if(mode==='shopping'){
+      try{return await getShoppingHandler()(request)}catch{
+        return Response.json({error:'Shopping is temporarily unavailable'},{status:503,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+      }
+    }
     if(mode==='base-home-refresh'){
       try{return await getBaseHomeRefreshHandler()(request)}catch{
         console.error(JSON.stringify({level:'error',event:'yos_base_home_refresh_unavailable',route:'/api/yos/widget',stage:'app-init'}));
