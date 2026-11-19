@@ -5,8 +5,8 @@ const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
 const code=await readFile(new URL('../journal_publication_notify_inline.js',import.meta.url),'utf8');
 const TODAY='2026-11-20';
 const sample=()=>({
-  issuedOn:TODAY,date:'2026.11.20 / FRI',headline:'第一印象の研究から、新たな魅力の可能性を読み解く特集。',
-  articles:[{title:'研究の結果を原典から見直す特集記事',link:'https://www.nature.com/articles/s41598-017-00526-9'}]
+  issuedOn:TODAY,date:'2026.11.20 / FRI',edition:'PUBLIC-SOURCE PERSONAL EDIT',headline:'第一印象の研究から、新たな魅力の可能性を読み解く特集。',
+  articles:[{title:'研究の結果を原典から見直す特集記事',link:'https://www.nature.com/articles/s41598-017-00526-9',image:'',imageCaption:'',imageKind:''}]
 });
 async function run({issue=sample(),offline=false,saveError=false,notifyError=false,previous=null,time='2026-11-20T00:00:00.000Z'}={}){
   let result,completed=0,requested=[],notes=[];
@@ -80,4 +80,16 @@ test('does not claim delivery when local dedupe state cannot be saved',async()=>
  assert.match(r.result,/HOLD:ERROR/);
  assert.equal(r.notes.length,1);
  assert.equal(r.notes[0].scheduled,true);
+});
+
+test('never announces fallback/legacy daily issue as reviewed magazine or unlicensed imagery',async()=>{
+  for(const issue of [
+    {...sample(),edition:'ULTIMATE PERSONAL EDITION'},
+    {...sample(),edition:'RSS FALLBACK'},
+    {...sample(),articles:[{...sample().articles[0],image:'https://images.example.org/unlicensed.jpg'}]}
+  ]){
+    const r=await run({issue});
+    assert.equal(r.result,'YOS_JOURNAL_NOTIFY_HOLD:NO_CURRENT_PUBLIC_ISSUE');
+    assert.equal(r.notes.length,0);
+  }
 });
