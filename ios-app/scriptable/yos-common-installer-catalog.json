@@ -69,8 +69,8 @@
       "id": "journal-book",
       "name": "YOS Journal Book",
       "path": "ios-app/scriptable/YOS Journal Book.js",
-      "commit": "e0e68ab69c25e0bde9334a9a219ed10ae00afb69",
-      "sha256": "52fd330178b1efcbe9a2ff0bb5f8884a3724a4649b6408379bae04179c31b7d4"
+      "commit": "739eb7cfbbefd9e1c018199dc13bebbf9adf23d5",
+      "sha256": "793b2a90eb6d83394e065104831f58f16d42c5ef5f51fc02bbfb1c192d883a9c"
     },
     {
       "id": "journal-notion-bridge",
