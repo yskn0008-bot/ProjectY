@@ -146,3 +146,12 @@
   .home-overview-v1{padding:9px}
   .home-done-v1 input,.home-done-save-v1{min-height:36px}
 }
+
+
+/* Existing Life keeps its navigation; Shopping is one compact entry, not a new screen. */
+.life-shopping-entry{display:flex;align-items:center;gap:10px;min-height:62px;padding:10px 14px;margin:-3px 0 12px;border:1px solid #f8d6e3;border-radius:19px;background:linear-gradient(110deg,#fff0f5,#ffffff 80%);color:#29364a;text-decoration:none;box-shadow:0 6px 14px rgba(211,92,134,.07)}
+.life-shopping-entry>span:first-child{font-size:25px}
+.life-shopping-entry>span:nth-child(2){display:grid;gap:3px;min-width:0;flex:1}
+.life-shopping-entry b{font-size:15px;font-weight:900}
+.life-shopping-entry small{font-size:10px;color:#7f7184;line-height:1.4}
+.life-shopping-entry strong{font-size:12px;white-space:nowrap;color:#dc4676}

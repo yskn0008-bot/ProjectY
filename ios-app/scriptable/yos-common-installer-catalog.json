@@ -104,8 +104,8 @@
       "id": "daystream-notion",
       "name": "YOS DAYSTREAM Notion",
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
-      "commit": "1d79878057849fb129d0ceb02223916f3aecda97",
-      "sha256": "04e797c698c06034ca96fa5f64e79e9f4463b2dacb4d93fb472d926bf429d99d"
+      "commit": "31ba00387063176270c0082ca08e2b7d30510265",
+      "sha256": "65d518a7e4f8abe6cbdf686e0e91d62adf51af35c461a9e920f29cb4f1492037"
     },
     {
       "id": "ikemen-magazine",
@@ -141,6 +141,20 @@
       "path": "ios-app/scriptable/remote-widgets/YOS Remote Hub.js",
       "commit": "696eb3bd9d0bc0faf147c55ee4e73aa1c1ae9f44",
       "sha256": "cf7b6f441db5e715feee185971c77b51e3c6945675fac71c13a6e7050072235a"
+    },
+    {
+      "id": "shopping",
+      "name": "YOS Shopping",
+      "path": "ios-app/scriptable/YOS Shopping.js",
+      "commit": "d70d73def0356f83406a94f379179d9f9c6ea9a4",
+      "sha256": "32c2f4182e4c130c5e7e65d98317c356971c743aa656b6f846000cc7e7fb231b"
+    },
+    {
+      "id": "scriptable-inventory",
+      "name": "YOS Scriptable 棚卸し",
+      "path": "ios-app/scriptable/YOS Scriptable 棚卸し.js",
+      "commit": "fa6c7d41013dcc89e74f4afdff96eaf3630b07d0",
+      "sha256": "bbc3b709a9c2a1c10908c5a3eb8b5dd65d1dccbe117c727fc6f12566d0feffad"
     }
   ]
 }

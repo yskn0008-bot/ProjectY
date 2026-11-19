@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fffafd">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>YOS Shopping｜賢く買って、暮らしをもっと快適に</title>
+<meta name="description" content="YOS Shopping。写真付きの高密度商品リスト、価格監視、値引き候補、日用品の補充管理。">
+<link rel="apple-touch-icon" href="../../assets/yos-icon-180.png">
+<link rel="stylesheet" href="./shopping.css?v=1">
+<script defer src="./shopping.js?v=1"></script>
+</head>
+<body>
+<main class="shopping-app" id="shoppingApp">
+  <header class="masthead">
+    <a class="identity" href="../../yos/" aria-label="YOSホームへ戻る">
+      <svg class="bag-logo" viewBox="0 0 42 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" aria-hidden="true"><path d="M7 15h28l3 28H4L7 15Z"/><path d="M14 18V12a7 7 0 0 1 14 0v6"/></svg>
+      <div><div class="identity-name"><span>YOS</span> Shopping</div><p>賢く買って、暮らしをもっと快適に</p></div>
+    </a>
+    <div class="mast-actions">
+      <button id="searchToggle" class="round-icon" type="button" aria-label="商品を検索" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"/><path d="m16 16 5 5"/></svg>
+      </button>
+      <button id="addToggle" class="add-button" type="button">＋ 追加</button>
+      <button id="moreToggle" class="round-icon more-button" type="button" aria-label="その他の操作">•••</button>
+    </div>
+  </header>
+  <div id="searchWrap" class="search-wrap" hidden><label for="searchInput" class="sr-only">商品名・カテゴリ・販売店で検索</label><input id="searchInput" type="search" placeholder="商品名・カテゴリ・販売店で検索" autocomplete="off"><button id="clearSearch" type="button">クリア</button></div>
+  <div id="connectionState" class="connection-state" role="status">商品リストを読み込んでいます</div>
+  <div id="authPanel" class="auth-panel" hidden><p id="authMessage">既存YOS Shoppingのデータを見るには本人確認が必要です。</p><div id="authButton"></div></div>
+
+  <section class="overview" aria-label="買い物サマリー">
+    <button class="recommend" type="button" data-filter="recommended">
+      <span class="recommend-icon" aria-hidden="true">✦</span>
+      <span class="recommend-copy"><strong>今日のおすすめ <em id="recCount">—</em></strong><small id="recommendReason">購入候補も含みます。価格確認は別途必要です</small></span>
+      <span class="recommend-chevron">›</span>
+    </button>
+    <div class="metric-row">
+      <button class="metric metric-sale" type="button" data-filter="sale"><span>◆ 値引き中</span><b id="saleCount">—</b><small>件</small></button>
+      <button class="metric metric-buy" type="button" data-filter="buy"><span>🛒 買い時</span><b id="buyCount">—</b><small>件</small></button>
+      <button class="metric metric-stock" type="button" data-filter="stock"><span>▣ 補充候補</span><b id="stockCount">—</b><small>件</small></button>
+    </div>
+  </section>
+  <nav class="chips" aria-label="商品絞り込み">
+    <button type="button" class="chip selected" data-filter="all"><span>▦</span> すべて <b id="allCount">0</b></button>
+    <button type="button" class="chip" data-filter="sale"><span class="chip-pink">◆</span> 値引き中 <b id="chipSaleCount">0</b></button>
+    <button type="button" class="chip" data-filter="buy"><span class="chip-blue">🛒</span> 買い時 <b id="chipBuyCount">0</b></button>
+    <button type="button" class="chip" data-filter="stock"><span class="chip-orange">▣</span> 補充 <b id="chipStockCount">0</b></button>
+    <button type="button" class="chip" data-filter="selected"><span class="chip-blue">★</span> 購入候補 <b id="chipSelectedCount">0</b></button>
+    <button type="button" class="chip" data-filter="daily">♙ 日用品</button>
+    <button type="button" class="chip" data-filter="beauty">✧ 美容・ケア</button>
+    <button type="button" class="chip" data-filter="food">♜ 食品</button>
+    <button type="button" class="chip" data-filter="purchased">✓ 購入済</button>
+  </nav>
+  <div class="toolbar">
+    <label class="sort-label" for="sortBy">並び替え：
+      <select id="sortBy" aria-label="並び替え">
+        <option value="recommended">おすすめ順</option>
+        <option value="discount">値引き率順</option>
+        <option value="price">安い順</option>
+        <option value="name">商品名順</option>
+        <option value="latest">更新順</option>
+      </select>
+    </label>
+    <div class="view-switch" aria-label="表示形式">
+      <button id="listMode" type="button" aria-label="1列リスト表示" aria-pressed="false">☰</button>
+      <button id="gridMode" type="button" aria-label="2列カード表示" aria-pressed="true" class="active">▦</button>
+    </div>
+  </div>
+  <section id="productGrid" class="product-grid" aria-label="商品リスト" aria-live="polite"></section>
+  <p id="footerNote" class="footer-note">値引き率は登録された参考価格との比較です。実際の販売価格・送料・在庫は購入前に確認してください。</p>
+</main>
+
+<nav class="bottom-nav" aria-label="Shoppingメニュー">
+  <a href="../../yos/"><span aria-hidden="true">⌂</span><b>ホーム</b></a>
+  <button class="current" type="button" data-bottom="all"><span aria-hidden="true">♧</span><b>Shopping</b></button>
+  <button type="button" data-bottom="favorites"><span aria-hidden="true">♡</span><b>お気に入り</b></button>
+  <button type="button" data-bottom="history"><span aria-hidden="true">▥</span><b>価格履歴</b></button>
+  <button type="button" data-bottom="stock"><span aria-hidden="true">◇</span><b>在庫・補充</b></button>
+  <a href="https://tokubai.co.jp/prefectures/47/cities/%E5%AE%9C%E9%87%8E%E6%B9%BE%E5%B8%82/leaflet" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">♧</span><b>近隣の特売</b></a>
+</nav>
+
+<dialog id="itemDialog" class="item-dialog">
+ <form id="itemForm" method="dialog">
+   <header><div><small>ADD ITEM</small><h2>商品を追加</h2></div><button class="close-dialog" type="button" data-close aria-label="閉じる">×</button></header>
+   <label>商品名 <input name="name" required maxlength="120" placeholder="例：洗顔料 120g" autocomplete="off"></label>
+   <label>分類 <select name="category"><option>その他</option><option>食品</option><option>美容</option><option>衛生</option><option>洗濯</option><option>掃除</option><option>家電</option><option>家具</option></select></label>
+   <label>商品ページURL（任意）<input name="url" type="url" placeholder="https://..." inputmode="url"></label>
+   <details><summary>商品写真も登録する</summary><label>写真URL（HTTPS）<input name="imageUrl" type="url" placeholder="https://..." inputmode="url"></label><p>Notionの商品ページのカバー写真として保存します。</p></details>
+   <p id="addError" class="form-error" role="alert" hidden></p>
+   <button id="addSubmit" class="submit-button" type="submit">Notionの買い物リストへ追加</button>
+ </form>
+</dialog>
+<dialog id="detailDialog" class="item-dialog detail-dialog">
+  <div id="detailContent"></div><button class="close-details" type="button" data-close>閉じる</button>
+</dialog>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

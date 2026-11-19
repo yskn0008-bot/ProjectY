@@ -92,6 +92,33 @@ async function get(url){
   if(request.response?.statusCode!==200||!value||value.length>1200000)throw Error('GitHub取得に失敗しました');
   return value;
 }
+// Fetch the exact pinned GitHub bytes. The raw endpoint may be normalized or
+// cached by iOS networking; a second GitHub API route is independently verified.
+// Neither route is ever trusted without matching the manifest SHA-256.
+async function verifiedSource(entry,url){
+  const expected=entry.sha256;
+  let raw=null,first='未取得',second='未取得';
+  try{
+    raw=await get(url);
+    const actual=digest(raw);
+    if(actual===expected)return raw;
+    first='RAW:'+actual.slice(0,12)+' ('+raw.length+'文字)';
+  }catch(error){first='RAW取得:'+String(error.message||error).slice(0,60)}
+  try{
+    const apiUrl='https://api.github.com/repos/'+OWNER+'/contents/'+entry.path.split('/').map(encodeURIComponent).join('/')+'?ref='+entry.commit;
+    const req=new Request(apiUrl);req.timeoutInterval=30;
+    req.headers={'Accept':'application/vnd.github+json','User-Agent':'YOS-Common-Installer'};
+    const payload=await req.loadJSON();
+    if(req.response?.statusCode!==200||payload.encoding!=='base64'||typeof payload.content!=='string'||payload.size>1200000)throw Error('GitHub API応答が不正');
+    const bytes=Data.fromBase64String(payload.content.replace(/\\s/g,''));
+    if(!bytes)throw Error('Base64データの復元に失敗');
+    const candidate=bytes.toRawString();
+    const actual=digest(candidate);
+    if(actual===expected)return candidate;
+    second='API:'+actual.slice(0,12)+' ('+candidate.length+'文字)';
+  }catch(error){second='API取得:'+String(error.message||error).slice(0,60)}
+  throw Error('配布元の検証が2経路とも不一致。変更していません。対象:'+entry.id+' / 期待:'+expected.slice(0,12)+' / '+first+' / '+second);
+}
 function stores(){
   const out=[];
   try{const cloud=FileManager.iCloud();if(cloud&&cloud.documentsDirectory())out.push({fm:cloud,kind:'iCloud'})}catch(_){}
@@ -194,8 +221,8 @@ async function diagnoseDuplicate(entry,existing,desiredHash=entry.sha256){
 async function install(entry){
   const path=entry.path.split('/').map(encodeURIComponent).join('/');
   const url=ROOT+entry.commit+'/'+path;
-  const raw=await get(url);
-  if(digest(raw)!==entry.sha256||!(raw.startsWith('// Variables used by Scriptable.')||(isRemoteEntry(entry)&&/^\/\/ YOS Remote Hub v6\.5\b/.test(raw))))throw Error('コードの改変または形式不一致。何も更新していません');
+  const raw=await verifiedSource(entry,url);
+  if(!(raw.startsWith('// Variables used by Scriptable.')||(isRemoteEntry(entry)&&/^\/\/ YOS Remote Hub v6\.5\b/.test(raw))))throw Error('GitHub元コードの形式が不一致です。変更していません');
   const name=scriptName(entry,raw),code=localizedCode(entry,raw),desiredHash=digest(code),locations=stores();
   const existing=[];
   for(const s of locations){

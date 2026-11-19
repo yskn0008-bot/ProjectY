@@ -23,6 +23,7 @@ if selected == "出庫前｜確認・開始" {
     @prep += "出庫前点検｜確認する"
     @prep += "出庫｜営業開始を確認"
     @prep += "営業画面｜開く"
+    @prep += "営業前リサーチ｜公式情報を確認"
     const choicePrep = chooseFromList(@prep, "出庫前")
     const prepText = getText(choicePrep)
     if prepText == "出庫前点検｜確認する" {
@@ -37,12 +38,17 @@ if selected == "出庫前｜確認・開始" {
         openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html")
         stop()
     }
+    if prepText == "営業前リサーチ｜公式情報を確認" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/research.html?phase=before")
+        stop()
+    }
     stop()
 }
 
 if selected == "営業中｜判断・休憩・記録" {
     @ops: array
     @ops += "営業画面｜開く"
+    @ops += "営業中リサーチ｜変化を確認"
     @ops += "M100｜停車中に確認"
     @ops += "空車｜15分タイマー"
     @ops += "休憩｜20分タイマー"
@@ -53,6 +59,10 @@ if selected == "営業中｜判断・休憩・記録" {
     const opsText = getText(choiceOps)
     if opsText == "営業画面｜開く" {
         openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html")
+        stop()
+    }
+    if opsText == "営業中リサーチ｜変化を確認" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/research.html?phase=during")
         stop()
     }
     if opsText == "M100｜停車中に確認" {
