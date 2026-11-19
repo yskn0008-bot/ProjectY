@@ -5,7 +5,7 @@
 // Does not overwrite, rename or delete the active four-device Untitled Script 9.
 action 'dk.simonbs.Scriptable.RunScriptInlineIntent' openBraviaQuick(text parameter: 'parameter'): text {
     "script": "__YOS_BRAVIA_QUICK_MEDIA_INLINE__",
-    "runInApp": false,
+    "runInApp": true,
     "ShowWhenRun": false
 }
 const result = openBraviaQuick("")
