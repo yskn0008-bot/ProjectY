@@ -463,14 +463,16 @@ function currentAutoPhoto(fm,item,manifest){
  return {data,kind:entry.kind,sourceUrl:entry.sourceUrl};
 }
 async function tryEnrichPhoto(item){
- if(item.imageUrl){
-  const jpg=await downloadPhoto({image:item.imageUrl,kind:'product',sourceUrl:item.url||item.imageUrl});
-  if(jpg)return {jpg,kind:'product',sourceUrl:item.url||item.imageUrl,coverUrl:null};
- }
+ // Verify the exact SKU from the manufacturer's/seller's product page first.
+ // Previously imported cover URLs may be broken or may point to another item.
  const exact=await findExactProductImage(item);
  if(exact){
   const jpg=await downloadPhoto(exact);
   if(jpg)return {jpg,kind:'product',sourceUrl:exact.sourceUrl,coverUrl:!item.imageUrl?exact.image:null};
+ }
+ if(item.imageUrl){
+  const jpg=await downloadPhoto({image:item.imageUrl,kind:'product',sourceUrl:item.url||item.imageUrl});
+  if(jpg)return {jpg,kind:'product',sourceUrl:item.url||item.imageUrl,coverUrl:null};
  }
  const generic=await findRepresentativeImage(item);
  if(generic){
