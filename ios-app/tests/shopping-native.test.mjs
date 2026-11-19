@@ -229,7 +229,7 @@ test('shopping HTML uses the requested compact 2-column photo cards',()=>{
 
 
 test('reference price stays reference, and candidate status is separate from confirmed buying time',()=>{
- assert.match(JS,/参考 '\+yen\(item.referencePrice\)/);
+ assert.match(JS,/label:'参考',amount:item.referencePrice/);
  assert.match(JS,/selected=item=>/);
  assert.match(JS,/\bitem\.state==='購入候補'/);
  assert.match(JS,/product-heading-row/);
@@ -281,7 +281,7 @@ test('purchased candidate count is distinct from confirmed sale and price buy ti
  assert.match(HTML,/id="chipSelectedCount"/);
  assert.match(JS,/case 'selected':return selected\(item\)/);
  assert.match(JS,/const selectedCount=count\(selected\)/);
- assert.match(JS,/購入候補\$\{selectedCount\}件を含む/);
+ assert.match(JS,/Notionで選択済み\$\{selectedCount\}件を含む/);
  assert.match(JS,/const buy=item=>/);
  assert.match(JS,/recentPrice\(item\)/);
  // 22:26 iPhone screenshot: 6px/8px overrides put Shopping behind Close and status bar.
