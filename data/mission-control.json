@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-20T02:27:19+09:00",
+  "updated_at": "2026-11-20T02:29:55+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-771",
-      "title": "PR #771 YOS Calendar｜Notionデータを承認済みUIへ安全同期（Google/Face IDなし）",
+      "id": "github-pr-881",
+      "title": "PR #881 YOS JOURNAL | Publish user-approved first-impressions feature (2026-11-20)",
       "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/771",
-      "updated_at": "2026-11-18T16:35:41Z"
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/881",
+      "updated_at": "2026-11-19T17:29:04Z"
     },
     {
       "id": "github-pr-818",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/880",
-      "updated_at": "2026-11-19T17:26:40Z"
+      "updated_at": "2026-11-19T17:27:03Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-19T17:26:49Z"
+      "updated_at": "2026-11-19T17:27:05Z"
     },
     {
       "id": "github-issue-234",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #881をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-20T02:27:19+09:00",
+      "last_update": "2026-11-20T02:29:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 66件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 67件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-20T02:27:19+09:00",
+      "last_update": "2026-11-20T02:29:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #881をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-20T02:27:19+09:00",
+      "last_update": "2026-11-20T02:29:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d81040df90653c041e215fcc217ee5a75ad1d685ba2edc9f9dc9707c9a4999c3"
+  "github_snapshot_hash": "4ee0b472c11ae418a39a70c37257cf1fd99c9ddbedb351c6b06569adde8e3c35"
 }
