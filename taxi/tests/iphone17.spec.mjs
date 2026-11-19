@@ -601,11 +601,17 @@ test('Taxi research: official forecast displays separate publication, retrieval 
   await expect(page.locator('#phase-before')).toHaveAttribute('aria-pressed','true');
   await page.locator('#weather-fetch').click();
   await expect(page.locator('#weather-status')).toHaveText('公式予報を取得');
-  await expect(page.locator('#weather-report')).toContainText('雨　夜遅く晴れ');
+  // 21:00 belongs to the forecast period which started at 17:00, not the next 00:00 slot.
+  await expect(page.locator('#weather-report')).toContainText('くもり');
+  await expect(page.locator('#weather-report')).not.toContainText('雨　夜遅く晴れ');
   await expect(page.locator('#weather-meta')).toContainText('発表');
   await expect(page.locator('#weather-meta')).toContainText('取得');
-  await expect(page.locator('#weather-meta')).toContainText('対象');
+  await expect(page.locator('#weather-meta')).toContainText('予報期間開始');
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+  // Once midnight has passed, the 00:00 slot becomes the active forecast period.
+  await page.clock.setFixedTime(new Date('2026-11-20T01:00:00+09:00'));
+  await page.locator('#weather-fetch').click();
+  await expect(page.locator('#weather-report')).toContainText('雨　夜遅く晴れ');
   await page.locator('#phase-during').click();
   await expect(page.locator('#phase-during')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#weather-status')).toHaveText('公式予報を取得');
