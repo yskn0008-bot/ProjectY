@@ -9,7 +9,7 @@ const NAME='YOS Shopping';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
 const SOURCE='d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc';
 const VERSION='2026-03-11';
-const UI_REF='9b2676090eebf85f8d8bfe2a1f067ab3a8a0cba1';
+const UI_REF='4b6d290623345c56d271f2dfc6062bfd46b666e5';
 const ASSETS='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/yos/shopping/';
 const CATEGORIES=new Set(['食品','洗濯','掃除','衛生','美容','家電','家具','その他']);
 const clean=(v,max=180)=>typeof v==='string'?v.replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max):'';
@@ -146,6 +146,129 @@ async function purchase(token,query){
  if(!project(check)?.purchased)throw Error('更新後のNotion読戻し未確認。再試行前に原本を確認してください');
  return 'purchased';
 }
+
+function safeEditedRow(row,q){
+ if(!row||!validId(q.id)||id32(row.id)!==id32(q.id)||id32(row.parent?.data_source_id)!==SOURCE.replace(/-/g,''))
+  throw Error('既存Shoppingの対象商品を確認できません');
+ const item=project(row);
+ if(!item)throw Error('商品の詳細を確認できません');
+ if(item.updatedAt!==clean(q.expectedEditedAt,80))throw Error('商品が更新されています。画面を開き直してください');
+ return item;
+}
+function enteredAmount(raw,whole){
+ const value=clean(raw,24);
+ if(!value)return undefined;
+ if(value==='-'||value==='－')return null;
+ if(!/^(0|[1-9]\d{0,7})(?:\.\d{1,2})?$/.test(value)||whole&&value.includes('.'))
+  throw Error('金額・数量は0以上の数字を入力してください。削除する場合は - を入力');
+ const result=Number(value);if(!Number.isFinite(result))throw Error('金額の形式が不正です');
+ return result;
+}
+async function editItem(token,q){
+ const path='pages/'+id32(q.id);
+ const before=await notion(token,path);
+ const item=safeEditedRow(before,q);
+ const a=new Alert();a.title='価格と在庫を編集';
+ a.message=item.name+'\\n販売ページで確認できた金額だけ記録してください。空欄は変更なし、- は未登録に戻します。';
+ const keys=[
+  ['現在価格（税・送料確認）','現在価格',false],
+  ['参考価格','参考価格',false],
+  ['目標価格','目標価格',false],
+  ['在庫数','在庫数',true],
+  ['補充基準','補充基準',true]
+ ];
+ for(const [label] of keys)a.addTextField(label,'');
+ a.addAction('内容を確認');a.addCancelAction('キャンセル');
+ if(await a.presentAlert()!==0)return 'cancel';
+ const properties={},changes=[];
+ let priceChanged=false;
+ for(let i=0;i<keys.length;i++){
+  const [label,key,whole]=keys[i],parsed=enteredAmount(a.textFieldValue(i),whole);
+  if(parsed===undefined)continue;
+  const attr={現在価格:'currentPrice',参考価格:'referencePrice',目標価格:'targetPrice',在庫数:'stock',補充基準:'reorderAt'}[key];
+  if(item[attr]===parsed)continue;
+  properties[key]={number:parsed};changes.push(label+' → '+(parsed===null?'未登録':String(parsed)));
+  if(key==='現在価格')priceChanged=true;
+ }
+ if(!changes.length){await info('変更なし','入力がないためNotionは変更していません');return 'cancel'}
+ if(priceChanged){
+  properties['価格更新日']={date:{start:tokyoDay()}};
+  properties['価格情報元']={select:{name:'手動'}};
+ }
+ const confirm=new Alert();confirm.title='変更内容を確認';
+ confirm.message=item.name+'\\n\\n'+changes.join('\\n')+'\\n\\n現在価格は確認した時点の情報であり、購入時点の価格を保証しません。';
+ confirm.addAction('Notionに保存');confirm.addCancelAction('中止');
+ if(await confirm.presentAlert()!==0)return 'cancel';
+ const current=await notion(token,path);
+ safeEditedRow(current,q);
+ await notion(token,path,'PATCH',{properties});
+ const verified=await notion(token,path);
+ const after=project(verified);
+ if(!after)throw Error('更新後の商品を確認できません');
+ for(const key of Object.keys(properties)){
+  if(key==='価格更新日'){
+   if(after.priceUpdatedAt!==tokyoDay())throw Error('更新日を読戻しできません');continue;
+  }
+  if(key==='価格情報元'){
+   if(after.priceSource!=='手動')throw Error('情報元を読戻しできません');continue;
+  }
+  const attr={現在価格:'currentPrice',参考価格:'referencePrice',目標価格:'targetPrice',在庫数:'stock',補充基準:'reorderAt'}[key];
+  if(after[attr]!==properties[key].number)throw Error('Notionへの保存結果を確認できません。重ねて保存せず元ページを確認してください');
+ }
+ return 'updated';
+}
+function photoPath(fm,id){
+ const dir=fm.joinPath(fm.libraryDirectory(),'YOS Shopping Photos');
+ return {dir,path:fm.joinPath(dir,id+'.jpg')};
+}
+async function setLocalPhoto(token,q){
+ const row=await notion(token,'pages/'+id32(q.id));
+ const item=safeEditedRow(row,q);
+ if(typeof Photos==='undefined'||typeof FileManager==='undefined'||typeof Data==='undefined')
+  throw Error('写真を追加できるScriptable実行環境ではありません');
+ const pick=new Alert();pick.title='商品写真';
+ pick.message=item.name+'\\niPhoneの写真から選び、この端末内だけに保存します。Notionや外部サーバーに画像は送信しません。';
+ pick.addAction('iPhoneの写真を選ぶ');pick.addCancelAction('キャンセル');
+ if(await pick.presentAlert()!==0)return 'cancel';
+ const image=await Photos.fromLibrary();
+ if(!image||!Number.isFinite(image.size?.width)||!Number.isFinite(image.size?.height))
+  throw Error('写真を読み取れません');
+ const ratio=Math.min(520/image.size.width,520/image.size.height,1);
+ const w=Math.max(1,Math.round(image.size.width*ratio)),h=Math.max(1,Math.round(image.size.height*ratio));
+ const canvas=new DrawContext();canvas.size=new Size(w,h);canvas.opaque=true;canvas.respectScreenScale=false;
+ canvas.setFillColor(Color.white());canvas.fillRect(new Rect(0,0,w,h));
+ canvas.drawImageInRect(image,new Rect(0,0,w,h));
+ const jpeg=Data.fromJPEG(canvas.getImage());
+ if(!jpeg||jpeg.toBase64String().length>750000)throw Error('選択した写真の容量が大きすぎます。別の画像を選んでください');
+ const fm=FileManager.local(),paths=photoPath(fm,item.id);
+ if(!fm.fileExists(paths.dir))fm.createDirectory(paths.dir,true);
+ // An existing photo is never silently replaced without a second confirmation.
+ if(fm.fileExists(paths.path)){
+  const confirm=new Alert();confirm.title='既存写真を変更しますか？';
+  confirm.message='現在のこの端末内の写真を、新しい選択写真に置き換えます。';
+  confirm.addAction('置き換える');confirm.addCancelAction('中止');
+  if(await confirm.presentAlert()!==0)return 'cancel';
+ }
+ fm.write(paths.path,jpeg);
+ if(!fm.fileExists(paths.path)||!fm.read(paths.path))throw Error('写真の保存確認に失敗しました');
+ return 'photo';
+}
+function attachLocalPhotos(rows){
+ if(typeof FileManager==='undefined'||typeof Data==='undefined')return rows;
+ try{
+  const fm=FileManager.local();
+  return rows.map(item=>{
+   const file=photoPath(fm,item.id).path;
+   if(!fm.fileExists(file))return item;
+   try{
+    const raw=fm.read(file),base64=raw?.toBase64String();
+    if(!base64||base64.length>750000)return item;
+    return {...item,localPhotoData:'data:image/jpeg;base64,'+base64};
+   }catch{return item}
+  });
+ }catch{return rows}
+}
+
 async function asset(file,min,max,contains){
  const req=new Request(ASSETS+file);req.timeoutInterval=20;
  const value=await req.loadString();
@@ -178,6 +301,14 @@ async function main(){
   if(outcome==='purchased')await info('更新確認','Notionを読み戻して購入済みを確認しました');
   if(outcome==='already')await info('確認','すでに購入済みです');
  }
+ if(mode==='edit'){
+  const outcome=await editItem(token,q);
+  if(outcome==='updated')await info('編集完了','保存した価格・在庫をNotionから読み戻しました');
+ }
+ if(mode==='photo'){
+  const outcome=await setLocalPhoto(token,q);
+  if(outcome==='photo')await info('写真を設定しました','iPhone内に保存した商品写真を表示します。Notionの元データは変更していません');
+ }
  let rows=await list(token);
  if(mode==='add'){
   const outcome=await add(token,rows);
@@ -191,7 +322,7 @@ async function main(){
   asset('shopping.css',7000,30000,'.product-grid'),
   asset('shopping.js',9000,30000,'yos-shopping-local-v1')
  ]);
- const page=inlineHTML(html,css,js,rows);
+ const page=inlineHTML(html,css,js,attachLocalPhotos(rows));
  if(!page.includes('YOS_SHOPPING_NATIVE')||page.includes('project-y-yos-ai.vercel.app'))
   throw Error('Shopping表示の安全確認に失敗しました');
  await WebView.loadHTML(page,null,null,true);

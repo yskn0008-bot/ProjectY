@@ -46,8 +46,7 @@ async function run(config={}){
    if(this.url.endsWith('/pages/'+id)){
     if(this.method==='PATCH'){
       const patch=JSON.parse(this.body);
-      pages[0].properties.購入済=patch.properties.購入済;
-      pages[0].properties.買い物状態=patch.properties.買い物状態;
+      for(const [key,value] of Object.entries(patch.properties))pages[0].properties[key]=value;
       pages[0].last_edited_time='2026-11-19T10:01:00.000Z';
     }
     return pages[0];
@@ -150,8 +149,56 @@ test('unavailable interface assets do not cause Notion writes or fabricated data
 test('shopping HTML uses the requested compact 2-column photo cards',()=>{
  assert.match(CSS,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
  assert.match(HTML,/id="productGrid"/);
- assert.match(JS,/値引き中/);
- assert.match(JS,/scriptable:\/\/\/run/);
+ assert.match(JS,/値引き候補/);
+ assert.match(JS,/open\.scriptable\.app\/run/);
  assert.doesNotMatch(JS,/\.vercel\.app|Authorization:|google\.accounts/);
  assert.doesNotThrow(()=>new Function(JS));
+});
+
+
+test('reference price stays reference, and candidate status is separate from confirmed buying time',()=>{
+ assert.match(JS,/参考 '\+yen\(item.referencePrice\)/);
+ assert.match(JS,/selected=item=>/);
+ assert.match(JS,/\bitem\.state==='購入候補'/);
+ assert.match(JS,/product-heading-row/);
+ assert.match(CSS,/\.product-heading-row/);
+ assert.match(CSS,/-webkit-line-clamp:3/);
+ assert.match(JS,/値引き候補/);
+});
+
+test('native item editor updates current price only after confirmation, and verifies Notion readback',async()=>{
+ const {log,pages}=await run({
+  query:{action:'edit',id:ID,expectedEditedAt:NOW},
+  fields:['1680','','1350','2','1']
+ });
+ const patches=log.requests.filter(x=>x.method==='PATCH');
+ assert.equal(patches.length,1);
+ const body=JSON.parse(patches[0].body);
+ assert.equal(body.properties.現在価格.number,1680);
+ assert.equal(body.properties.目標価格.number,1350);
+ assert.equal(body.properties.在庫数.number,2);
+ assert.equal(body.properties.補充基準.number,1);
+ assert.equal(body.properties.価格情報元.select.name,'手動');
+ assert.equal(pages[0].properties.現在価格.number,1680);
+ assert.equal(log.pages.length,1);
+ assert.match(log.pages[0],/"currentPrice":1680/);
+});
+
+test('native price edit cannot update stale item and does not write',async()=>{
+ const {log}=await run({query:{action:'edit',id:ID,expectedEditedAt:'2026-01-01T00:00:00.000Z'},fields:['100']});
+ assert.equal(log.requests.some(x=>x.method==='PATCH'),false);
+ assert.match(log.alerts.at(-1).message,/更新/);
+});
+
+test('native price edit rejects malformed money and preserves record',async()=>{
+ const {log,pages}=await run({query:{action:'edit',id:ID,expectedEditedAt:NOW},fields:['abc']});
+ assert.equal(log.requests.some(x=>x.method==='PATCH'),false);
+ assert.equal(pages[0].properties.現在価格.number,null);
+ assert.match(log.alerts.at(-1).message,/数字/);
+});
+
+test('native photo picker requires Scriptable Photos permission; no Notion image upload',async()=>{
+ const {log}=await run({query:{action:'photo',id:ID,expectedEditedAt:NOW}});
+ assert.equal(log.requests.some(x=>x.method==='PATCH'),false);
+ assert.match(log.alerts.at(-1).message,/写真を追加できる/);
 });
