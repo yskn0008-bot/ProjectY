@@ -160,3 +160,17 @@ test('unknown shortcut and invalid preset metadata are rejected before writes',a
  await assert.rejects(api.pictureLoad('day'),/不明な保存データ/);
  assert.equal(h.writes.length,0);
 });
+
+test('X90L picture mode labels match Japanese TV, while Sony API values stay raw',()=>{
+ const html=new Function(source.slice(0,source.indexOf('\\nfunction secure(key)'))+'\\nreturn html;')();
+ const js=html.split('<script>')[1].split('</script>')[0];
+ const start=js.indexOf('function pictureModeLabel('),end=js.indexOf('function renderPictureMenu(){',start);
+ assert.ok(start>0&&end>start);
+ const label=new Function(js.slice(start,end)+'return pictureModeLabel;')();
+ const modes={vivid:'ダイナミック',standard:'スタンダード',cinema:'シネマ',imax:'IMAX',custom:'カスタム'};
+ for(const [raw,jp] of Object.entries(modes))assert.equal(label('pictureMode',raw),jp);
+ assert.equal(label('pictureMode','newSonyMode'),'newSonyMode');
+ assert.equal(label('color','vivid'),'vivid');
+ assert.ok(js.includes("pictureEscape(option)"));
+ assert.ok(js.includes("pictureEscape(pictureModeLabel(target,option))"));
+});
