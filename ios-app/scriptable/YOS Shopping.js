@@ -253,6 +253,18 @@ async function setLocalPhoto(token,q){
  if(!fm.fileExists(paths.path)||!fm.read(paths.path))throw Error('写真の保存確認に失敗しました');
  return 'photo';
 }
+
+function photoMissingReason(item,manifest){
+ if(/(?:商品名確認待ち|テスト商品|銘柄選定待ち|未確認)/.test(item.name))
+  return '商品特定待ち';
+ const entry=manifest.entries[item.id];
+ if(entry?.signature===pictureSignature(item)&&entry.resolverVersion===PHOTO_RESOLVER_VERSION&&entry.failedAt)
+  return '写真未取得・次回再検索';
+ if(representativeSearch(item))return '参考写真未取得';
+ if(item.imageUrl||trustedProductPage(item.url||''))return '商品写真未取得';
+ return '写真情報が不足';
+}
+
 function attachLocalPhotos(rows){
  if(typeof FileManager==='undefined'||typeof Data==='undefined')return rows;
  try{
@@ -262,7 +274,7 @@ function attachLocalPhotos(rows){
    if(personal)return {...item,localPhotoData:personal,photoKind:'product',photoSourceUrl:null};
    const cached=currentAutoPhoto(fm,item,manifest);
    if(cached)return {...item,localPhotoData:cached.data,photoKind:cached.kind,photoSourceUrl:cached.sourceUrl};
-   return item;
+   return {...item,photoStatus:photoMissingReason(item,manifest)};
   });
  }catch{return rows}
 }
@@ -270,7 +282,8 @@ function attachLocalPhotos(rows){
 
 const AUTO_PHOTO_DIR='YOS Shopping Auto Photos';
 const PHOTO_MAX_NEW_PER_OPEN=8;
-const PHOTO_RETRY_MS=2*24*60*60*1000;
+const PHOTO_RETRY_MS=12*60*60*1000;
+const PHOTO_RESOLVER_VERSION=2;
 const ALLOWED_PRODUCT_HOSTS=[
  'muji.com','kao-kirei.com','shop.rohto.co.jp','matsukiyococokara-online.com',
  'shiseido.co.jp','nitori-net.jp','amazon.co.jp','rakuten.co.jp','yodobashi.com',
@@ -380,6 +393,38 @@ function titleMatchesProduct(item,title,html,sourceUrl){
  if(amount&&!sourceHasJan&&!normalizePictureText(title+' '+html.slice(0,16000)).includes(normalizePictureText(amount[0])))return false;
  return true;
 }
+
+function extractProductJsonLD(html,item,sourceUrl){
+ // Product JSON-LD supplies images when generic og:image is merely a brand logo.
+ const scripts=html.match(/<script\b[^>]*type\s*=\s*["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi)||[];
+ const walk=(entry,depth,out)=>{
+  if(depth>5||out.length>24||!entry)return;
+  if(Array.isArray(entry)){for(const child of entry.slice(0,24))walk(child,depth+1,out);return}
+  if(typeof entry!=='object')return;
+  if(entry['@graph'])walk(entry['@graph'],depth+1,out);
+  const kind=entry['@type'];
+  if((typeof kind==='string'&&/(?:^|\/)Product$/i.test(kind))||(Array.isArray(kind)&&kind.includes('Product')))out.push(entry);
+  if(entry.mainEntity)walk(entry.mainEntity,depth+1,out);
+ };
+ for(const script of scripts.slice(0,10)){
+  const raw=(script.match(/>([\s\S]*?)<\/script>/i)||[])[1]||'';
+  if(!raw||raw.length>250000)continue;
+  let parsed;try{parsed=JSON.parse(raw.trim())}catch{continue}
+  const products=[];walk(parsed,0,products);
+  for(const itemData of products){
+   if(!titleMatchesProduct(item,String(itemData.name||''),html,sourceUrl))continue;
+   const data=itemData.image;
+   const images=typeof data==='string'?[data]:Array.isArray(data)?data:typeof data==='object'?[data]:[];
+   for(const img of images.slice(0,10)){
+    const raw=typeof img==='string'?img:typeof img?.url==='string'?img.url:typeof img?.contentUrl==='string'?img.contentUrl:'';
+    const candidate=resolvedImageLink(sourceUrl,raw);
+    if(candidate)return candidate;
+   }
+  }
+ }
+ return null;
+}
+
 async function findExactProductImage(item){
  if(!item.url||!trustedProductPage(item.url))return null;
  try{
@@ -392,7 +437,7 @@ async function findExactProductImage(item){
   const title=ogValue(html,['og:title','twitter:title'])||decodedHTML((html.match(/<title[^>]*>([^<]+)<\/title>/i)||[])[1]||'');
   if(!titleMatchesProduct(item,title,html,finalUrl))return null;
   const raw=ogValue(html,['og:image:secure_url','og:image','twitter:image']);
-  const image=resolvedImageLink(finalUrl,raw);
+  const image=extractProductJsonLD(html,item,finalUrl)||resolvedImageLink(finalUrl,raw);
   if(!image)return null;
   return {image,kind:'product',sourceUrl:finalUrl,notionCover:true};
  }catch{return null}
@@ -491,7 +536,7 @@ async function enrichShoppingPhotos(items,token){
  const candidates=items.filter(item=>{
   if(isExistingManualPhoto(fm,item)||currentAutoPhoto(fm,item,manifest))return false;
   const entry=manifest.entries[item.id];
-  if(entry?.signature===pictureSignature(item)&&entry.failedAt&&now-entry.failedAt<PHOTO_RETRY_MS)return false;
+  if(entry?.signature===pictureSignature(item)&&entry.resolverVersion===PHOTO_RESOLVER_VERSION&&entry.failedAt&&now-entry.failedAt<PHOTO_RETRY_MS)return false;
   return Boolean(item.imageUrl||trustedProductPage(item.url||'')||representativeSearch(item));
  }).sort((a,b)=>Number(Boolean(b.imageUrl))-Number(Boolean(a.imageUrl))||
   Number(Boolean(trustedProductPage(b.url||'')))-Number(Boolean(trustedProductPage(a.url||''))));
@@ -509,11 +554,11 @@ async function enrichShoppingPhotos(items,token){
     if(!encodeLocalPicture(fm,path))throw Error('cache verify failed');
     manifest.entries[item.id]={
      signature:pictureSignature(item),kind:result.kind,
-     sourceUrl:result.sourceUrl,checkedAt:now
+     sourceUrl:result.sourceUrl,checkedAt:now,resolverVersion:PHOTO_RESOLVER_VERSION
     };
     if(result.coverUrl)pendingWrites.push({item,url:result.coverUrl});
-   }catch{manifest.entries[item.id]={signature:pictureSignature(item),failedAt:now}}
-  }else manifest.entries[item.id]={signature:pictureSignature(item),failedAt:now};
+   }catch{manifest.entries[item.id]={signature:pictureSignature(item),failedAt:now,resolverVersion:PHOTO_RESOLVER_VERSION}}
+  }else manifest.entries[item.id]={signature:pictureSignature(item),failedAt:now,resolverVersion:PHOTO_RESOLVER_VERSION};
  }
  try{savePictureManifest(fm,manifest)}catch{}
  // Only exact, publicly retrievable image URLs from matching product pages may
