@@ -155,6 +155,13 @@
       "path": "ios-app/scriptable/YOS Scriptable 棚卸し.js",
       "commit": "fa6c7d41013dcc89e74f4afdff96eaf3630b07d0",
       "sha256": "bbc3b709a9c2a1c10908c5a3eb8b5dd65d1dccbe117c727fc6f12566d0feffad"
+    },
+    {
+      "id": "bravia-picture-integration",
+      "name": "YOS BRAVIA 画質統合",
+      "path": "ios-app/scriptable/YOS BRAVIA 画質統合.js",
+      "commit": "2b61b650314c3cd05b62287134971d3bfa12edfd",
+      "sha256": "78056b332397e98d2351f093f7268593c471a9c0b01c14fbf838a2ba446f7ed2"
     }
   ]
 }
