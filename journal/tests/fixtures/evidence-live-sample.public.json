@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "publicOnly": true,
+  "topic": "男性の外見評価と免疫反応が同じとは限らないという研究",
+  "sources": [
+    {
+      "id": "S1",
+      "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9626598/fullTextXML",
+      "sourceType": "primary"
+    }
+  ],
+  "claims": [
+    {
+      "id": "C1",
+      "text": "この研究では、ワクチン接種に対する抗体反応と顔の魅力度・健康そうに見える評価に統計的に有意な関連が見つからなかった。",
+      "sourceId": "S1",
+      "evidenceQuote": "We found no significant associations between antibody levels induced by vaccination and perceived facial attractiveness, facial healthiness, or skin healthiness."
+    }
+  ]
+}
