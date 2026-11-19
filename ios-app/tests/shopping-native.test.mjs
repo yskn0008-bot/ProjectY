@@ -5,9 +5,9 @@ import vm from 'node:vm';
 
 const ROOT=new URL('../',import.meta.url);
 const CODE=fs.readFileSync(new URL('scriptable/YOS Shopping.js',ROOT),'utf8');
-const HTML=fs.readFileSync(new URL('../../yos/shopping/index.html',ROOT),'utf8');
-const CSS=fs.readFileSync(new URL('../../yos/shopping/shopping.css',ROOT),'utf8');
-const JS=fs.readFileSync(new URL('../../yos/shopping/shopping.js',ROOT),'utf8');
+const HTML=fs.readFileSync(new URL('../yos/shopping/index.html',ROOT),'utf8');
+const CSS=fs.readFileSync(new URL('../yos/shopping/shopping.css',ROOT),'utf8');
+const JS=fs.readFileSync(new URL('../yos/shopping/shopping.js',ROOT),'utf8');
 const ID='42a5ca88289581a4b66ae9a3ad05c363';
 const NOW='2026-11-19T10:00:00.000Z';
 
