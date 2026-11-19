@@ -1,6 +1,7 @@
 name: YOS JOURNAL GPT editorial candidate safety
 
 on:
+  workflow_dispatch: # Read-only owner-run private Inbox acceptance; never auto-publishes
   pull_request:
     paths:
       - 'journal/private-to-public-review-bridge.mjs'
@@ -85,6 +86,17 @@ jobs:
         run: |
           node --check journal/private-to-public-review-bridge.mjs
           node --test journal/tests/private-to-public-review-bridge.test.mjs
+      - name: Read existing private Notion Inbox receipts (manual only, no content output)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          YOS_NOTION_API_TOKEN: ${{ secrets.YOS_NOTION_API_TOKEN }}
+        shell: bash
+        run: |
+          if [ -z "${YOS_NOTION_API_TOKEN:-}" ]; then
+            echo 'Existing Notion token not configured for this workflow; no private data accessed.'
+            exit 1
+          fi
+          node journal/notion-private-draft-readback.mjs --dry-run-private-readback
       - name: Test privacy, sources, dates, existing edition preservation
         run: node --test journal/tests/gpt-editorial-gate.test.mjs
       - name: Check added or modified GPT candidate JSON from this PR
