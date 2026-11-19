@@ -18,7 +18,9 @@ def patch(path, source):
     if len(hits)!=1:
         found=[(i,str(a.get('WFWorkflowActionParameters',{}).get('script'))[:240])
                for i,a in enumerate(actions) if a.get('WFWorkflowActionIdentifier')==INTENT]
-        raise SystemExit(f'research placeholder must exist exactly once; Scriptable scripts: {found}')
+        diagnostic=[(i,a.get('WFWorkflowActionIdentifier',''),repr(a.get('WFWorkflowActionParameters',{}))[:300])
+                    for i,a in enumerate(actions) if MARKER in repr(a)]
+        raise SystemExit(f'research placeholder missing; inline: {found}; marker matches: {diagnostic}; first actions: {[x.get("WFWorkflowActionIdentifier") for x in actions[:14]]}')
     i,action=hits[0]
     if any(str(a.get('WFWorkflowActionIdentifier','')).endswith('askllm') for a in actions[:i]):
         raise SystemExit('research must occur before first GPT')
