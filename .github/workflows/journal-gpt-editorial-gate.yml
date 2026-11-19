@@ -6,6 +6,8 @@ on:
       - 'journal/gpt-editorial-gate.mjs'
       - 'journal/tests/gpt-editorial-gate.test.mjs'
       - 'journal/GPT_EDITORIAL.md'
+      - 'journal/preview-reviewed-candidate.mjs'
+      - 'journal/tests/preview-reviewed-candidate.test.mjs'
       - 'journal/reviewed-evidence-gate.mjs'
       - 'journal/tests/reviewed-evidence-gate.test.mjs'
       - 'journal/reviewed-evidence/*.public.json'
@@ -47,6 +49,10 @@ jobs:
           node --check journal/reviewed-evidence-gate.mjs
           node --test journal/tests/reviewed-evidence-gate.test.mjs
           node journal/reviewed-evidence-gate.mjs --dossier journal/reviewed-evidence/2026-11-20-first-impressions.public.json
+      - name: Preview reviewed public feature safely (no issue writes)
+        run: |
+          node --check journal/preview-reviewed-candidate.mjs
+          node --test journal/tests/preview-reviewed-candidate.test.mjs
       - name: Test privacy, sources, dates, existing edition preservation
         run: node --test journal/tests/gpt-editorial-gate.test.mjs
       - name: Check added or modified GPT candidate JSON from this PR
