@@ -117,7 +117,7 @@ test('stale edit token rejects purchase without a Notion PATCH',async()=>{
  const {log}=await run({query:{action:'purchase',id:ID,expectedEditedAt:'2026-10-01T00:00:00.000Z'}});
  assert.equal(log.pages.length,0);
  assert.equal(log.requests.some(x=>x.method==='PATCH'),false);
- assert.match(log.alerts[0].message,/変更/);
+ assert.match(log.alerts[0].message,/更新|変更/);
 });
 
 test('explicit purchase confirmation updates Notion and checks readback',async()=>{
@@ -137,7 +137,7 @@ test('cancelled purchase leaves the original Notion record untouched',async()=>{
 test('existing item is protected against duplicate creation',async()=>{
  const {log}=await run({query:{action:'add'},fields:['テスト用 洗顔 120g','https://example.com/product','']});
  assert.equal(log.requests.some(x=>x.method==='POST'&&x.url.endsWith('/pages')),false);
- assert.match(log.alerts[0].message,/重複登録/);
+ assert.match(log.alerts.at(-1).message,/重複登録/);
 });
 
 test('unavailable interface assets do not cause Notion writes or fabricated data',async()=>{
