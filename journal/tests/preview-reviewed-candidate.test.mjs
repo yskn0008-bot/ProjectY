@@ -38,6 +38,17 @@ test('unreviewed source and unverifiable review date fail closed',async()=>fixtu
  const c2=clone(candidate);c2.verification[0].checkedOn='2026-11-19';
  await assert.rejects(()=>previewReviewedCandidate(c2,clone(dossier),root,{now:NOW}),/date mismatch/);
 }));
+test('unsupported or unreviewed claim references are rejected regardless of URL match',async()=>fixture(async root=>{
+ const a=clone(candidate);
+ a.verification[0].reviewClaimIds=['C1','C4'];
+ await assert.rejects(()=>previewReviewedCandidate(a,clone(dossier),root,{now:NOW}),/unsupported, unreviewed/);
+ const b=clone(candidate);
+ b.verification[0].reviewClaimIds=['C99'];
+ await assert.rejects(()=>previewReviewedCandidate(b,clone(dossier),root,{now:NOW}),/unsupported, unreviewed/);
+ const c=clone(candidate);
+ delete c.verification[0].reviewClaimIds;
+ await assert.rejects(()=>previewReviewedCandidate(c,clone(dossier),root,{now:NOW}),/missing independent reviewed claim IDs/);
+}));
 test('does not implicitly publish even when reviewer status changes to requires approval',async()=>fixture(async root=>{
  const d=clone(dossier);d.articleAssessment.publishDecision='requires_editor_approval';
  const r=await previewReviewedCandidate(clone(candidate),d,root,{now:NOW});
