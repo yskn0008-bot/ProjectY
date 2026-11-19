@@ -72,6 +72,42 @@ try{
   await context.close();
  }
 
+ // Notion habit cycles use the existing candidate UI and never create a
+ // recurring fixed time without user confirmation. Existing direct-imported
+ // one-time routines are not suggested twice on their original day.
+ {
+  const daily=row(null,null,'朝夜ストレッチ','1'.repeat(32));
+  daily.properties['習慣周期']={select:{name:'毎日'}};
+  const future=row('2026-12-01T05:20:00Z','2026-12-01T05:22:00Z',
+   '起床','2'.repeat(32),'yos-daystream-routine-202612-wake');
+  future.properties['習慣周期']={select:{name:'毎日'}};
+  const html=htmlFor([daily,future]);
+  const context=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Asia/Tokyo'});
+  const page=await context.newPage(),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.route('**/*',route=>{
+   if(route.request().url()==='http://yos.local/')
+    return route.fulfill({status:200,contentType:'text/html',body:html});
+   return route.abort();
+  });
+  await page.goto('http://yos.local/');
+  await page.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
+  assert.match(await page.locator('#yosHabitSourceStatus').textContent(),/Notionの周期指定 2件/);
+  await page.evaluate(()=>showDay('2026-11-20'));
+  assert.match(await page.locator('#yosHabitTasks').textContent(),/朝夜ストレッチ/);
+  assert.doesNotMatch(await page.locator('#yosHabitTasks').textContent(),/起床/);
+  assert.doesNotMatch(await page.locator('#yosSourceTasks').textContent(),/朝夜ストレッチ/);
+  await page.evaluate(()=>showDay('2026-12-01'));
+  assert.doesNotMatch(await page.locator('#yosHabitTasks').textContent(),/起床/);
+  assert.equal(await page.locator('#tl .card.task').count(),1,
+   'the already-imported 2026-12-01 routine remains in the timeline once');
+  await page.evaluate(()=>showDay('2026-12-02'));
+  assert.match(await page.locator('#yosHabitTasks').textContent(),/起床/);
+  assert.equal(await page.locator('#tl .card.task').count(),0);
+  assert.deepEqual(errors,[]);
+  await context.close();
+ }
+
  // Calendar rows created by existing Clarity iCloud routing appear as fixed
  // schedules in the same native DAYSTREAM layout without a new local task.
  const deviceMirror={status:'ok',source:'scriptable-on-device',
