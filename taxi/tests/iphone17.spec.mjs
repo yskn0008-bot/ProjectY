@@ -671,12 +671,14 @@ test('Taxi research redesign: compact first viewport, expandable sources and aut
     return {pageWidth:document.documentElement.scrollWidth,screenWidth:innerWidth,
     header:rect('header').bottom,
     decision:rect('.decision').bottom,
+    auto:rect('#auto-research').top,
     weather:rect('#weather-section').bottom,
     sources:rect('#official-sources').top};
   });
   expect(positions.pageWidth).toBeLessThanOrEqual(positions.screenWidth);
   expect(positions.decision).toBeLessThan(380);
-  expect(positions.weather).toBeLessThan(770);
+  expect(positions.auto).toBeLessThan(770);
+  expect(positions.auto).toBeLessThan(positions.weather);
   expect(positions.sources).toBeGreaterThan(positions.weather); // Scheduled source card is now between weather and manual links.
   const road=page.locator('#official-sources details').first();
   await expect(road).not.toHaveAttribute('open','');
@@ -791,10 +793,29 @@ test('Taxi scheduled evidence: source status, age, official links and change tra
  });
  await page.goto('./research.html?phase=during',{waitUntil:'domcontentloaded'});
  await expect(page.locator('#feed-status')).toHaveText('一部未取得');
+ await expect(page.locator('#feed-meta')).toContainText('気象庁：取得成功');
+ await expect(page.locator('#feed-meta')).toContainText('那覇市：取得成功');
+ await expect(page.locator('#feed-meta')).toContainText('沖縄県：未取得');
+ const layout=await page.evaluate(()=>({
+  first:document.querySelector('#auto-research').getBoundingClientRect().top,
+  shift:document.querySelector('#shift-brief').getBoundingClientRect().top,
+  weather:document.querySelector('#weather-section').getBoundingClientRect().top,
+  badge:document.querySelector('#feed-status').getBoundingClientRect().top,
+  viewport:innerHeight,
+  bodyWidth:document.documentElement.scrollWidth,
+  viewportWidth:innerWidth
+ }));
+ expect(layout.first).toBeLessThan(layout.shift);
+ expect(layout.first).toBeLessThan(layout.weather);
+ expect(layout.badge).toBeLessThan(layout.viewport);
+ expect(layout.bodyWidth).toBeLessThanOrEqual(layout.viewportWidth);
  await expect(page.locator('#feed-sources')).toContainText('くもり');
  await expect(page.locator('#feed-sources')).toContainText('直近の関連見出し1件');
  await expect(page.locator('#feed-sources')).toContainText('未取得');
  await expect(page.locator('#feed-sources')).toContainText('前回の配信との差分');
+ await expect(page.locator('#feed-details')).not.toHaveAttribute('open','');
+ await page.locator('#feed-details summary').click();
+ await expect(page.locator('#feed-details')).toHaveAttribute('open','');
  await expect(page.locator('#feed-sources a[href="https://www.city.naha.okinawa.jp/news/test.html"]')).toBeVisible();
  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
 });
