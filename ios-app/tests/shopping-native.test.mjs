@@ -81,6 +81,10 @@ async function run(config={}){
     return '<html><head><meta property="og:title" content="'+(config.badTitle?'関係ない商品':'無印良品 マイルドジェルクレンジング')+
       '"><meta property="og:image" content="https://www.muji.com/img/product-photo.jpg"></head><body>商品写真 150g ジェルクレンジング 商品情報</body></html>';
    }
+   if(config.autoPhotos&&this.url.includes('www.shop.rohto.co.jp')){
+    return '<html><head><meta property="og:title" content="スキンアクア スーパーモイスチャーUVジェル 110g">'+
+      '<meta property="og:image" content="https://www.shop.rohto.co.jp/img/product-190850.jpg"></head><body>商品写真 110g ロート公式商品情報</body></html>';
+   }
    throw Error('Unexpected static asset '+this.url);
   }
   async loadImage(){
@@ -350,4 +354,15 @@ test('generic toilet-paper row uses a clearly labeled Commons representative pho
  const reloaded=await run({autoPhotos:true,commonsPhotos:true,pages:[basic],storage});
  assert.equal(reloaded.log.requests.filter(x=>x.method==='IMAGE').length,0);
  assert.equal(reloaded.log.requests.filter(x=>x.url.includes('commons.wikimedia.org/w/api.php')).length,0);
+});
+
+test('official exact Rohto product within /category/ is eligible for validated image acquisition',async()=>{
+ const rohto=row({cover:null,properties:{...row().properties,
+  商品名:{title:[{plain_text:'スキンアクア スーパーモイスチャーUVジェル 110g'}]},
+  商品URL:{url:'https://www.shop.rohto.co.jp/category/skincare/skin-aqua/super-moisture/190850.html'}
+ }});
+ const {log,pages}=await run({autoPhotos:true,pages:[rohto]});
+ assert.equal(log.requests.filter(x=>x.method==='IMAGE').length,1);
+ assert.match(log.pages[0],/data:image\/jpeg;base64/);
+ assert.equal(pages[0].cover.external.url,'https://www.shop.rohto.co.jp/img/product-190850.jpg');
 });
