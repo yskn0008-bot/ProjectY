@@ -354,6 +354,21 @@ function pictureModeLabel(target,value){
  const raw=String(value),key=raw.trim().toLowerCase()
  return Object.prototype.hasOwnProperty.call(labels,key)?labels[key]:raw
 }
+function pictureOptionLabel(target,value){
+ const raw=String(value),key=raw.trim().toLowerCase()
+ if(target==="pictureMode")return pictureModeLabel(target,value)
+ const maps={
+  lightSensor:{on:"入",off:"切"},
+  autoPictureMode:{auto:"自動",auto24p:"自動（24p）",off:"切"},
+  autoLocalDimming:{high:"強",medium:"中",low:"弱",off:"切"},
+  xtendedDynamicRange:{high:"強",medium:"中",low:"弱",off:"切"},
+  hdrMode:{auto:"自動",hdr10:"HDR10",hlg:"HLG",off:"切"},
+  colorSpace:{auto:"自動",dci:"DCI",adobergb:"Adobe RGB",bt2020:"BT.2020","srgb/bt709":"sRGB／BT.709"},
+  colorTemperature:{cool:"クール",neutral:"ニュートラル",warm:"ウォーム",expert1:"エキスパート1",expert2:"エキスパート2"}
+ }
+ const names=maps[target]
+ return names&&Object.prototype.hasOwnProperty.call(names,key)?names[key]:raw
+}
 function renderPictureMenu(){
  const root=document.getElementById("pictureGroups");if(!root)return
  let html=""
@@ -366,7 +381,7 @@ function renderPictureMenu(){
        html+='<div class="pic-slider-wrap"><input type="range" min="'+info.min+'" max="'+info.max+'" step="'+info.step+'" value="'+info.value+'" oninput="previewPicValue(event)" onchange="commitPictureSlider(event,&quot;'+target+'&quot;)"><output>'+pictureEscape(info.value)+'</output></div>'
      }else if(info&&info.available&&info.options&&info.options.length){
        html+='<select class="pic-enum" aria-label="'+pictureEscape(name)+'" onchange="commitPictureSelect(event,&quot;'+target+'&quot;)">'
-       for(const option of info.options)html+='<option value="'+pictureEscape(option)+'"'+(String(option)===String(info.value)?' selected':'')+'>'+pictureEscape(pictureModeLabel(target,option))+'</option>'
+       for(const option of info.options)html+='<option value="'+pictureEscape(option)+'"'+(String(option)===String(info.value)?' selected':'')+'>'+pictureEscape(pictureOptionLabel(target,option))+'</option>'
        html+='</select>'
      }else html+='<span class="pic-manual">テレビで設定</span>'
      html+='</div>'
@@ -510,11 +525,32 @@ async function sonyVideoJSON(method,params){
 }
 function flattenPicture(v,out=[]){if(Array.isArray(v)){for(const x of v)flattenPicture(x,out)}else if(v&&typeof v==="object"&&typeof v.target==="string"){out.push(v)}return out}
 async function pictureAll(){
- const data=await sonyVideoJSON("getPictureQualitySettings",[{target:""}])
- const list=flattenPicture(data.result)
- const available=new Map()
- for(const x of list)if(PICTURE_TARGETS.includes(x.target)&&x.isAvailable!==false&&!available.has(x.target))available.set(x.target,x)
- return available
+ const all=new Map(),seen=new Set()
+ let aggregateError=null
+ try{
+  const data=await sonyVideoJSON("getPictureQualitySettings",[{target:""}])
+  for(const entry of flattenPicture(data.result)){
+   if(!PICTURE_TARGETS.includes(entry.target))continue
+   seen.add(entry.target)
+   if(entry.isAvailable!==false&&!all.has(entry.target))all.set(entry.target,entry)
+  }
+ }catch(error){aggregateError=error}
+ // Consumer BRAVIA firmware can provide a specific target even if the aggregate query fails.
+ // The mode was verified on this user's real television; brightness must remain read-only until valid.
+ for(const target of ["pictureMode","brightness"]){
+  if(seen.has(target))continue
+  try{
+   const data=await sonyVideoJSON("getPictureQualitySettings",[{target}])
+   for(const entry of flattenPicture(data.result)){
+    if(entry.target!==target)continue
+    seen.add(target)
+    if(entry.isAvailable!==false)all.set(target,entry)
+    break
+   }
+  }catch(_){}
+ }
+ if(!all.size&&aggregateError)throw aggregateError
+ return all
 }
 function pictureOptions(entry){return entry&&Array.isArray(entry.candidate)?entry.candidate.filter(x=>x&&typeof x.value==="string"&&x.value!=="").map(x=>x.value):[]}
 function pictureRange(entry){
