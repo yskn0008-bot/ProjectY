@@ -183,6 +183,23 @@ class ClarityNextOutcomeContractTests(unittest.TestCase):
         self.assertIn("記帳は未確認", self.source)
         self.assertNotIn("Notion保存済み", self.source)
 
+    def test_only_non_sensitive_status_labels_enter_notifications(self):
+        start = self.source.index('const outcome = text(')
+        end = self.source.index('const resultRecord = text(', start)
+        outcome = self.source[start:end]
+        self.assertIn('{receiptLines}', outcome)
+        self.assertNotIn('{userInput}', outcome)
+        self.assertNotIn('{eventTitle}', outcome)
+        self.assertNotIn('{moneyRaw}', outcome)
+        self.assertNotIn('{routerPrompt}', outcome)
+        for action in ("openAppApplied", "deviceApplied", "timerApplied",
+                       "calendarApplied", "reminderApplied", "navigateApplied",
+                       "notionApplied"):
+            index = self.source.index(
+                'appendToFile("Clarity Next Ledger.txt", '+action+')'
+            )
+            self.assertIn('@receiptLines =', self.source[index:index+200])
+
     def test_success_is_nonblocking_and_blockers_explain_causes(self):
         self.assertIn('showNotification(outcome, "Clarity｜処理結果", false)', self.source)
         self.assertIn('alert("{cleanReply}\\n\\n{outcome}", "Clarity｜処理結果")', self.source)
