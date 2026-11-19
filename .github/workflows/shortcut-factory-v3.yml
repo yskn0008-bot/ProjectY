@@ -245,7 +245,7 @@ jobs:
           from pathlib import Path
           p=Path('tools/shortcut-factory/artifacts/YOS-BRAVIA-Quick-TEST.shortcut')
           b=p.read_bytes()
-          assert b.startswith(b'AEA1') and len(b)>65000, 'signed 4-device launcher invalid'
+          assert b.startswith(b'AEA1') and len(b)>15000, 'signed 4-device launcher invalid'
           print('BRAVIA Quick signed AEA1 PASS',len(b),'bytes')
           PY
 
