@@ -251,14 +251,16 @@ test('only explicit active Notion habits become read-only recurrence candidates'
  const calendar=row('2026-12-01T17:00:00+09:00','2026-12-02T05:00:00+09:00','夜勤','7'.repeat(32),'yos-shift-2026-12-01');
  calendar.properties['状態']={select:null};
  calendar.properties['習慣周期']={select:{name:'毎日'}};
- const original=[daily,future,weekly,uncertain,finished,longTerm,calendar];
+ const overnight=row('2026-11-30T21:10:00Z','2026-12-01T05:20:00Z','睡眠','a'.repeat(32),'yos-daystream-routine-202612-sleep');
+ overnight.properties['習慣周期']={select:{name:'毎日'}};
+ const original=[daily,future,weekly,uncertain,finished,longTerm,calendar,overnight];
  const projected=original.map(x=>a.project(x));
  const copy=JSON.stringify(projected);
  const result=a.nativeHabitSource(projected,new Date('2026-11-19T12:00:00Z'));
  assert.equal(result.status,'ok');
  assert.equal(result.source,'notion-tasks-cycle');
  assert.equal(result.items.length,3);
- assert.equal(result.skippedCount,1);
+ assert.equal(result.skippedCount,2,'ambiguous weekly date and overnight sleep are not 15-min proposals');
  assert.deepEqual([...result.items].map(x=>[x.title,x.period,x.startDay||null]),[
   ['朝と夜のストレッチ','daily',null],
   ['起床','daily','2026-12-01'],
