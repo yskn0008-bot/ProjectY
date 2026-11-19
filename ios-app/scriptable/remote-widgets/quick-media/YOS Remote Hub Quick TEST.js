@@ -805,12 +805,20 @@ const QUICK_APP_MATCHERS=Object.freeze({
  netflix:[/^netflix$/i],
  prime:[/^prime\s*video$/i,/^amazon\s*prime\s*video$/i],
  unext:[/^u[-\s]?next$/i],
- proton:[/^proton\s*vpn$/i]
+ proton:[/^proton\s*vpn(?:\b|\s*[:：])/i]
 })
 function quickFlatten(value,output=[]){
  if(Array.isArray(value)){for(const x of value)quickFlatten(x,output)}
  else if(value&&typeof value==="object"){if(typeof value.uri==="string"&&typeof(value.title||value.name)==="string")output.push(value);else for(const x of Object.values(value))if(x&&typeof x==="object")quickFlatten(x,output)}
  return output
+}
+function quickSoundFlatten(value,out=[]){
+ if(Array.isArray(value)){for(const item of value)quickSoundFlatten(item,out)}
+ else if(value&&typeof value==="object"){
+   if(typeof value.target==="string"&&["soundMode","outputTerminal"].includes(value.target))out.push(value)
+   else for(const item of Object.values(value))if(item&&typeof item==="object")quickSoundFlatten(item,out)
+ }
+ return out
 }
 async function sonyQuickJSON(service,method,params=[],version="1.0"){
  const r=new Request("http://"+sonyHost()+"/sony/"+service);r.method="POST";r.timeoutInterval=8
@@ -841,7 +849,7 @@ async function quickLaunchApp(id){
 async function quickAudioRead(){
  const sound={}
  try{
-   const rows=quickFlatten((await sonyQuickJSON("audio","getSoundSettings",[{target:""}],"1.1")).result)
+   const rows=quickSoundFlatten((await sonyQuickJSON("audio","getSoundSettings",[{target:""}],"1.1")).result)
    for(const r of rows){
      if(!["soundMode","outputTerminal"].includes(r.target))continue
      const options=Array.isArray(r.candidate)?r.candidate.filter(c=>c&&typeof c.value==="string").map(c=>c.value):[]
@@ -1007,4 +1015,4 @@ async function controlFloor(action,value){
 const queue=[];let running=false,web=null
 async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
 web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);if(query.device==="tvHoldStart"){startTVHold(query.action);return false}if(query.device==="tvHoldHeartbeat"){renewTVHold(query.action);return false}if(query.device==="tvHoldStop"){stopTVHold();return false}if(query.device==="lightHoldStart"){startLightHold(query.action);return false}if(query.device==="lightHoldHeartbeat"){renewLightHold(query.action);return false}if(query.device==="lightHoldStop"){stopLightHold();return false}queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
-await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);Script.complete()
+await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setTimeout(()=>probePictureScene(),250)") }catch(_){}try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);Script.complete()
