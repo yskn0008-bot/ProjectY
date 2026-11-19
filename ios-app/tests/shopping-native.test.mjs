@@ -77,6 +77,17 @@ async function run(config={}){
    if(this.url.endsWith('/index.html'))return HTML;
    if(this.url.endsWith('/shopping.css'))return CSS;
    if(this.url.endsWith('/shopping.js'))return JS;
+   if(config.autoPhotos&&config.priceOffer&&this.url.includes('www.muji.com')){
+    return '<html><head><script type="application/ld+json">'+JSON.stringify({
+      '@context':'https://schema.org','@type':'Product',
+      name:config.priceWrongItem?'無印良品 化粧水 150g':'無印良品 マイルドジェルクレンジング 150g',
+      offers:config.priceAggregate?{'@type':'AggregateOffer',priceCurrency:'JPY',lowPrice:'330',highPrice:'690'}:{
+        '@type':'Offer',price:config.priceValue||'690',
+        priceCurrency:config.priceCurrency||'JPY',
+        ...(config.priceExpired?{priceValidUntil:'2020-01-01'}:{})
+      }
+    })+'</script></head><body>マイルドジェルクレンジング 150g 価格情報</body></html>';
+   }
    if(config.autoPhotos&&config.jsonLdOnly&&this.url.includes('www.muji.com')){
     return '<html><head><meta property="og:title" content="無印良品 公式ネットストア">'+
       '<meta property="og:image" content="https://www.muji.com/img/brand-logo.jpg">'+
@@ -218,7 +229,7 @@ test('shopping HTML uses the requested compact 2-column photo cards',()=>{
 
 
 test('reference price stays reference, and candidate status is separate from confirmed buying time',()=>{
- assert.match(JS,/参考 '\+yen\(item.referencePrice\)/);
+ assert.match(JS,/label:'参考',amount:item.referencePrice/);
  assert.match(JS,/selected=item=>/);
  assert.match(JS,/\bitem\.state==='購入候補'/);
  assert.match(JS,/product-heading-row/);
@@ -270,7 +281,7 @@ test('purchased candidate count is distinct from confirmed sale and price buy ti
  assert.match(HTML,/id="chipSelectedCount"/);
  assert.match(JS,/case 'selected':return selected\(item\)/);
  assert.match(JS,/const selectedCount=count\(selected\)/);
- assert.match(JS,/購入候補\$\{selectedCount\}件を含む/);
+ assert.match(JS,/Notionで選択済み\$\{selectedCount\}件を含む/);
  assert.match(JS,/const buy=item=>/);
  assert.match(JS,/recentPrice\(item\)/);
  // 22:26 iPhone screenshot: 6px/8px overrides put Shopping behind Close and status bar.
@@ -415,4 +426,51 @@ test('no longer misleadingly claims images are actively being searched after pag
  assert.doesNotMatch(JS,/写真を自動検索中/);
  assert.match(JS,/item\.photoStatus\|\|'写真未取得'/);
  assert.match(CODE,/PHOTO_RESOLVER_VERSION=2/);
+});
+
+
+test('source-linked JPY listing is visible but never promoted to a Notion current price or discount',async()=>{
+ const muji=row({cover:null,properties:{...row().properties,
+   商品名:{title:[{plain_text:'無印良品 マイルドジェルクレンジング 150g'}]},
+   商品URL:{url:'https://www.muji.com/jp/ja/store/cmdty/detail/4550583941178'},
+   現在価格:{number:null},参考価格:{number:690},目標価格:{number:600}
+ }});
+ const storage=new Map();
+ const first=await run({autoPhotos:true,storage,pages:[muji],priceOffer:true});
+ assert.match(first.log.pages[0],/"webPrice":690/);
+ assert.match(first.log.pages[0],/"webPriceStatus":"public-listing"/);
+ assert.match(first.log.pages[0],/"webPriceFresh":true/);
+ assert.match(first.log.pages[0],/Web掲載/);
+ assert.match(first.log.pages[0],/掲載元を確認/);
+ assert.equal(first.log.requests.filter(x=>x.method==='PATCH').length,0);
+ assert.equal(muji.properties.現在価格.number,null);
+ const second=await run({autoPhotos:true,storage,pages:[muji],priceOffer:true});
+ const network=second.log.urls.filter(x=>x.startsWith('https://www.muji.com'));
+ assert.equal(network.length,0,'cached price and failed photo must not trigger repeated manufacturer requests');
+ assert.match(second.log.pages[0],/"webPrice":690/);
+});
+test('rejects mismatched, wrong currency, AggregateOffer and expired listing without Notion writes',async()=>{
+ const muji=row({cover:null,properties:{...row().properties,
+  商品名:{title:[{plain_text:'無印良品 マイルドジェルクレンジング 150g'}]},
+  商品URL:{url:'https://www.muji.com/jp/ja/store/cmdty/detail/4550583941178'}
+ }});
+ for(const invalid of [{priceWrongItem:true},{priceCurrency:'USD'},{priceAggregate:true},{priceExpired:true}]){
+  const {log}=await run({autoPhotos:true,pages:[muji],priceOffer:true,...invalid});
+  assert.doesNotMatch(log.pages[0],/"webPrice":/);
+  assert.equal(log.requests.filter(x=>x.method==='PATCH').length,0);
+ }
+});
+test('browser-only preview remains clearly labeled and real-data evidence is displayed separately',()=>{
+ assert.match(HTML,/id="dataHealth"/);
+ assert.match(HTML,/確認する商品/);
+ assert.match(JS,/商品URL .*?24時間内のWeb掲載/s);
+ assert.match(JS,/state\.demo\?/);
+ assert.match(JS,/Web掲載/);
+ assert.match(JS,/過去の登録/);
+ assert.match(JS,/登録価格差/);
+ assert.match(CODE,/PRICE_OBSERVATION_LIMIT=4/);
+ assert.match(CODE,/PRICE_OBSERVATION_TTL=24\*60\*60\*1000/);
+ assert.match(CODE,/async function enrichShoppingPrices/);
+ assert.doesNotThrow(()=>new Function(JS));
+ assert.doesNotThrow(()=>new vm.Script('(async()=>{'+CODE+'\n})()'));
 });
