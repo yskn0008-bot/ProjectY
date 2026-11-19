@@ -132,5 +132,6 @@ test('generated WebView JavaScript is syntactically valid, including quick-mode 
  let htmlScript=source.slice(begin+8,end);
  // The surrounding Scriptable template interpolates these JSON objects at runtime.
  htmlScript=htmlScript.replace(/\$\{JSON\.stringify\([^)]*\)\}/g,'[]');
+ htmlScript=htmlScript.replace(/\$\{SWIPE_THRESHOLD\}/g,'24');
  assert.doesNotThrow(()=>new Function(htmlScript));
 });
