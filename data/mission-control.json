@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-20T03:02:38+09:00",
+  "updated_at": "2026-11-20T03:04:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/771",
       "updated_at": "2026-11-18T16:35:41Z"
+    },
+    {
+      "id": "github-pr-789",
+      "title": "PR #789 feat(remote): YOS Remote Web — iPhone Scriptable WebView with native LAN appliance bridge",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/789",
+      "updated_at": "2026-11-17T07:29:19Z"
     },
     {
       "id": "github-pr-818",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-19T16:59:27Z"
     },
     {
-      "id": "github-pr-884",
-      "title": "PR #884 feat(shortcuts): Notion YOS Shopping list + native Pricey product research launcher",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/884",
-      "updated_at": "2026-11-19T18:01:51Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-19T18:00:34Z"
+      "updated_at": "2026-11-19T18:03:18Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-25c90267848e",
+      "title": "feat(shortcuts): Notion YOS Shopping and Pricey native research launcher (#884)",
+      "completed_at": "2026-11-19T18:03:50Z",
+      "result": "GitHub mainへ反映（25c9026）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/25c90267848e8014ddd59a995d53bc5a36263a0c"
+    },
+    {
       "id": "github-commit-dabd7243a8c0",
       "title": "feat(taxi): parse official Naha cruise reservations and distinguish source staleness",
       "completed_at": "2026-11-19T18:00:30Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-19T17:46:11Z",
       "result": "GitHub mainへ反映（e02f33a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e02f33a6c12034ce38a36c09451c99840fe203ef"
-    },
-    {
-      "id": "github-commit-ad40bc6dbd3b",
-      "title": "Make lavender timeline drag handles consistently visible",
-      "completed_at": "2026-11-19T17:46:07Z",
-      "result": "GitHub mainへ反映（ad40bc6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ad40bc6dbd3b3fe8ab4dfec1ef9781f38e1201de"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-20T03:02:38+09:00",
+      "last_update": "2026-11-20T03:04:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 66件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 65件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-20T03:02:38+09:00",
+      "last_update": "2026-11-20T03:04:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-20T03:02:38+09:00",
+      "last_update": "2026-11-20T03:04:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4b75a029a4d2ac08b061a033cd4e2c2bf4f35e923d38628d6bd7a1647840d5b3"
+  "github_snapshot_hash": "8770f1c7460a9f934096a576a0b9a7211d1565d4fb87e85175e100d654a5af9e"
 }
