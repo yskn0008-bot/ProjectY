@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 
 const source=fs.readFileSync(new URL('../scriptable/remote-widgets/YOS BRAVIA Picture Off.js',import.meta.url),'utf8');
 
@@ -54,4 +55,13 @@ test('HTTP error is not reported as successful',async()=>{
 test('Picture Off script does not depend on new credentials or power writes',()=>{
  assert.match(source,/YOS_SCRIPT_NAME: YOS BRAVIA Picture Off/);
  assert.doesNotMatch(source,/setPowerStatus|setPictureQualitySettings|Keychain\.set|FileManager\./);
+});
+
+test('existing shared installer contains a pinned, hash-checked Picture Off entry',()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
+ const item=catalog.targets.find(x=>x.id==='bravia-picture-off');
+ assert.ok(item);
+ assert.equal(item.name,'YOS BRAVIA Picture Off');
+ assert.equal(item.commit,'cfae0db7be4e5d560242520ee9c99b04a8a08fd5');
+ assert.equal(item.sha256,crypto.createHash('sha256').update(source).digest('hex'));
 });
