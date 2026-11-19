@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'taxi/ui-v2.html'
+      - 'taxi/research.html'
       - 'taxi/tests/iphone17.spec.mjs'
       - 'tools/taxi-shortcuts/**'
       - '.github/workflows/taxi-shortcuts-build.yml'
