@@ -134,7 +134,7 @@ test('ACTUAL rendered Scriptable WebView script parses and starts the remote but
   const template=source.slice(start+'const html = '.length,end+'</html>'.length+1);
   const render=new Function('REMOTES','TV_ACTIONS','TV_DEFAULT','CROSS_NAV','SWIPE_THRESHOLD','makeButtons','LIGHT_BUTTONS','AC_BUTTONS','return '+template);
   const actions=[{action:'play',icon:'▶',label:'再生'},{action:'up',icon:'↑',label:'上'}];
-  const html=render({tv:'scriptable://run'},actions,['play','up'],{up:'up',down:'down',left:'left',right:'right',center:'play'},24,()=>'',[],[]);
+  const html=render({tv:'scriptable://run'},actions,['play','up'],{up:'up',down:'up',left:'up',right:'up',center:'play'},24,()=>'',[],[]);
   const begin=html.indexOf('<script>'),finish=html.indexOf('</script>',begin);
   assert.ok(begin>0&&finish>begin,'rendered script boundaries');
   const runtime=html.slice(begin+8,finish);
