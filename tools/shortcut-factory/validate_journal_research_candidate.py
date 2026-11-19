@@ -38,6 +38,8 @@ def validate(path):
         p=actions[i]['WFWorkflowActionParameters']
         if p.get('FollowUp') is not False or p.get('WFGenerativeResultType')!='Text':
             raise AssertionError("GPT must use isolated Text with FollowUp off")
+    if 'https://doi[.]org/' not in repr(root) or 'sourceLinkCount' not in repr(root):
+        raise AssertionError('source link guard required before Notion transfer')
     if 'YOS_RESEARCH_ABSTRACT_V1' not in repr(root) or '公開不可・要審査' not in repr(root):
         raise AssertionError("missing editorial safety prompts")
     research,p1,p2=[actions[i]['WFWorkflowActionParameters'] for i in saves]
