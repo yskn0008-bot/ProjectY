@@ -9,7 +9,7 @@ const text=path=>readFileSync(new URL(path,root),'utf8');
 export function api(overrides={}){
  const context=vm.createContext({Intl,Date,console,...overrides});
  vm.runInContext(script.split('// SCRIPTABLE_ENTRY')[0]+
-  '\nglobalThis.api={project,readTasks,buildHTML,main,nativeDirectRows,nativeHabitSource,dayProjection,readDeviceCalendar,getCalendarStatus:()=>deviceCalendarStatus};',context);
+  '\nglobalThis.api={project,readTasks,buildHTML,main,nativeDirectRows,dayProjection,readDeviceCalendar,getCalendarStatus:()=>deviceCalendarStatus};',context);
  return context.api;
 }
 export const row=(start=null,end=null,name='架空タスク',id='a'.repeat(32),key='')=>({
@@ -31,7 +31,7 @@ export function htmlFor(tasks,deviceCalendar=null){
  return a.buildHTML(text('yos/daystream/index.html'),
   text('yos/daystream/source-adapters.js'),
   text('life/calendar/native-bridge.js'),
-  text('yos/daystream/task-wizard.js'),snapshot,a.nativeDirectRows(rows),deviceCalendar,a.getCalendarStatus(),a.nativeHabitSource(rows));
+  text('yos/daystream/task-wizard.js'),snapshot,a.nativeDirectRows(rows),deviceCalendar);
 }
 test('Notion direct seeds preserve independent morning and night task titles',()=>{
  const a=api();
@@ -230,62 +230,4 @@ test('other Notion calendar mirrors remain visible through the iCloud source',as
  assert.equal(projected?.status,'ok');
  assert.equal(projected.calendarDays['2026-11-20'].length,1);
  assert.equal(projected.calendarDays['2026-11-20'][0].title,'固定予定');
-});
-
-
-test('only explicit active Notion habits become read-only recurrence candidates',()=>{
- const a=api();
- const daily=row(null,null,'朝と夜のストレッチ','1'.repeat(32));
- daily.properties['習慣周期']={select:{name:'毎日'}};
- const future=row('2026-12-01T05:20:00Z','2026-12-01T05:22:00Z','起床','2'.repeat(32),'yos-daystream-routine-202612-wake');
- future.properties['習慣周期']={select:{name:'毎日'}};
- const weekly=row('2026-12-04T06:10:00Z','2026-12-04T06:15:00Z','爪のお手入れ','3'.repeat(32));
- weekly.properties['習慣周期']={select:{name:'毎週'}};
- const uncertain=row(null,null,'曜日が不明な毎週','4'.repeat(32));
- uncertain.properties['習慣周期']={select:{name:'毎週'}};
- const finished=row(null,null,'完了した習慣','5'.repeat(32));
- finished.properties['習慣周期']={select:{name:'毎日'}};
- finished.properties['状態'].select.name='完了';
- const longTerm=row(null,null,'長期目標','6'.repeat(32));
- longTerm.properties['習慣周期']={select:{name:'年・長期'}};
- const calendar=row('2026-12-01T17:00:00+09:00','2026-12-02T05:00:00+09:00','夜勤','7'.repeat(32),'yos-shift-2026-12-01');
- calendar.properties['状態']={select:null};
- calendar.properties['習慣周期']={select:{name:'毎日'}};
- const overnight=row('2026-11-30T21:10:00Z','2026-12-01T05:20:00Z','睡眠','a'.repeat(32),'yos-daystream-routine-202612-sleep');
- overnight.properties['習慣周期']={select:{name:'毎日'}};
- const original=[daily,future,weekly,uncertain,finished,longTerm,calendar,overnight];
- const projected=original.map(x=>a.project(x));
- const copy=JSON.stringify(projected);
- const result=a.nativeHabitSource(projected,new Date('2026-11-19T12:00:00Z'));
- assert.equal(result.status,'ok');
- assert.equal(result.source,'notion-tasks-cycle');
- assert.equal(result.items.length,3);
- assert.equal(result.skippedCount,2,'ambiguous weekly date and overnight sleep are not 15-min proposals');
- assert.deepEqual([...result.items].map(x=>[x.title,x.period,x.startDay||null]),[
-  ['朝と夜のストレッチ','daily',null],
-  ['起床','daily','2026-12-01'],
-  ['爪のお手入れ','weekly','2026-12-04']]);
- assert.deepEqual([...result.items[2].weekdays],[5]);
- assert.equal(JSON.stringify(projected),copy,'original Notion task objects remain unchanged');
-});
-test('repeating monthly habit requires an explicit anchor date; titles cannot inject HTML',()=>{
- const monthly=row('2026-12-06',null,'月間メンテナンス','8'.repeat(32));
- monthly.properties['習慣周期']={select:{name:'毎月'}};
- const malicious=row(null,null,'</script><script>privateTitle()</script>','9'.repeat(32));
- malicious.properties['習慣周期']={select:{name:'毎日'}};
- const a=api(),rows=[monthly,malicious].map(x=>a.project(x));
- const source=a.nativeHabitSource(rows);
- assert.equal(source.items[0].dayOfMonth,6);
- const scope={};vm.runInNewContext(text('yos/daystream/source-adapters.js'),{window:scope,Intl,Date});
- const snapshot=scope.YOS_DAYSTREAM_SOURCES.fromYosTaskDashboardCache({
-  savedAt:Date.now(),data:{source:'notion',complete:true,tasks:rows}
- });
- assert.ok(snapshot);
- const h=a.buildHTML(text('yos/daystream/index.html'),
-  text('yos/daystream/source-adapters.js'),
-  text('life/calendar/native-bridge.js'),
-  text('yos/daystream/task-wizard.js'),snapshot,[],null,'Apple予定：テスト',source);
- assert.match(h,/"source":"notion-tasks-cycle"/);
- assert.doesNotMatch(h,/<script>privateTitle\(\)<\/script>/);
- for(const m of h.matchAll(/<script>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
 });
