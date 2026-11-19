@@ -259,10 +259,10 @@ function photoMissingReason(item,manifest){
   return '商品特定待ち';
  const entry=manifest.entries[item.id];
  if(entry?.signature===pictureSignature(item)&&entry.resolverVersion===PHOTO_RESOLVER_VERSION&&entry.failedAt)
-  return '写真未取得・次回再検索';
+  return '再検索予定';
  if(representativeSearch(item))return '参考写真未取得';
  if(item.imageUrl||trustedProductPage(item.url||''))return '商品写真未取得';
- return '写真情報が不足';
+ return '写真情報不足';
 }
 
 function attachLocalPhotos(rows){
@@ -435,9 +435,11 @@ async function findExactProductImage(item){
   const finalUrl=safeHttps(req.response?.url)||item.url;
   if(!trustedProductPage(finalUrl))return null;
   const title=ogValue(html,['og:title','twitter:title'])||decodedHTML((html.match(/<title[^>]*>([^<]+)<\/title>/i)||[])[1]||'');
-  if(!titleMatchesProduct(item,title,html,finalUrl))return null;
-  const raw=ogValue(html,['og:image:secure_url','og:image','twitter:image']);
-  const image=extractProductJsonLD(html,item,finalUrl)||resolvedImageLink(finalUrl,raw);
+  const structuredImage=extractProductJsonLD(html,item,finalUrl);
+  const pageTitleMatches=titleMatchesProduct(item,title,html,finalUrl);
+  if(!pageTitleMatches&&!structuredImage)return null;
+  const raw=pageTitleMatches?ogValue(html,['og:image:secure_url','og:image','twitter:image']):'';
+  const image=structuredImage||resolvedImageLink(finalUrl,raw);
   if(!image)return null;
   return {image,kind:'product',sourceUrl:finalUrl,notionCover:true};
  }catch{return null}
