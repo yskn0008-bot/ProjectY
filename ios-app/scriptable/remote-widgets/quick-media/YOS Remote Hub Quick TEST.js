@@ -893,9 +893,10 @@ async function quickAudioRead(){
  }
  try{ingest(await sonyQuickJSON("audio","getSoundSettings",[{target:""}],"1.1"))}catch(_){}
  // Some BRAVIA firmware rejects aggregate target="", but supports individual targets.
- for(const target of ["soundMode","outputTerminal"]){
-   if(found.has(target))continue
-   try{ingest(await sonyQuickJSON("audio","getSoundSettings",[{target}],"1.1"))}catch(_){}
+ const targets=["soundMode","outputTerminal"].filter(target=>!found.has(target))
+ if(targets.length){
+   const replies=await Promise.allSettled(targets.map(target=>sonyQuickJSON("audio","getSoundSettings",[{target}],"1.1")))
+   for(const response of replies)if(response.status==="fulfilled")ingest(response.value)
  }
  return sound
 }
