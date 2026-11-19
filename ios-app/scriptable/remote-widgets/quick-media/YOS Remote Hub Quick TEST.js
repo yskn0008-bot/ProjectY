@@ -513,8 +513,8 @@ function showQuickStatus(result){
  if(result&&result.picture){quickModeButtons("quickPictureModes");quickModeButtons("quickPictureModesPanel")}
  if(result&&result.quick){
    if(result.quick.picture)showPictureStatus({picture:result.quick.picture})
-   quickSound=result.quick.sound||{}
-   quickAppsAvailable=result.quick.apps||{}
+   if(Object.prototype.hasOwnProperty.call(result.quick,"sound"))quickSound=result.quick.sound||{}
+   if(Object.prototype.hasOwnProperty.call(result.quick,"apps"))quickAppsAvailable=result.quick.apps||{}
    quickSoundButtons("quickSoundModes","soundMode")
    quickSoundButtons("quickAudioOutputs","outputTerminal")
    quickAppButtons()
@@ -837,6 +837,14 @@ function quickFlatten(value,output=[]){
  else if(value&&typeof value==="object"){if(typeof value.uri==="string"&&typeof(value.title||value.name)==="string")output.push(value);else for(const x of Object.values(value))if(x&&typeof x==="object")quickFlatten(x,output)}
  return output
 }
+function quickFlattenUri(value,out=[]){
+ if(Array.isArray(value)){for(const x of value)quickFlattenUri(x,out)}
+ else if(value&&typeof value==="object"){
+   if(typeof value.uri==="string")out.push(value.uri)
+   for(const x of Object.values(value))if(x&&typeof x==="object")quickFlattenUri(x,out)
+ }
+ return out
+}
 function quickSoundFlatten(value,out=[]){
  if(Array.isArray(value)){for(const item of value)quickSoundFlatten(item,out)}
  else if(value&&typeof value==="object"){
@@ -872,16 +880,23 @@ async function quickLaunchApp(id){
  return {message:"テレビへアプリ起動要求を送りました（表示は実機で確認）。",apps:Object.fromEntries(Object.keys(QUICK_APP_MATCHERS).map(k=>[k,Boolean(quickAppPick(list,k))]))}
 }
 async function quickAudioRead(){
- const sound={}
- try{
-   const rows=quickSoundFlatten((await sonyQuickJSON("audio","getSoundSettings",[{target:""}],"1.1")).result)
-   for(const r of rows){
+ const sound={},found=new Set()
+ const ingest=data=>{
+   for(const r of quickSoundFlatten(data.result)){
      if(!["soundMode","outputTerminal"].includes(r.target))continue
      const options=Array.isArray(r.candidate)?r.candidate.filter(c=>c&&typeof c.value==="string").map(c=>c.value):[]
      const current=String(r.currentValue??r.value??"")
-     sound[r.target]={target:r.target,value:current,options,available:options.includes(current)}
+     if(!options.includes(current))continue
+     sound[r.target]={target:r.target,value:current,options,available:true}
+     found.add(r.target)
    }
- }catch(_){}
+ }
+ try{ingest(await sonyQuickJSON("audio","getSoundSettings",[{target:""}],"1.1"))}catch(_){}
+ // Some BRAVIA firmware rejects aggregate target="", but supports individual targets.
+ for(const target of ["soundMode","outputTerminal"]){
+   if(found.has(target))continue
+   try{ingest(await sonyQuickJSON("audio","getSoundSettings",[{target}],"1.1"))}catch(_){}
+ }
  return sound
 }
 async function quickAudioWrite(payload){
@@ -899,8 +914,14 @@ async function quickHDMI3(){
  const uri="extInput:hdmi?port=3"
  // Only the user's explicitly designated input is sent; do not guess Fire TV internal apps.
  await sonyQuickJSON("avContent","setPlayContent",[{uri}],"1.0")
- const active=(await sonyQuickJSON("avContent","getPlayingContentInfo",[],"1.0")).result
- const observed=quickFlatten(active).some(x=>x.uri===uri)
+ let observed=false
+ // Switching HDMI sources is asynchronous. Read back up to three times.
+ for(let attempt=0;attempt<3;attempt++){
+   if(attempt)await new Promise(resolve=>Timer.schedule(450,false,resolve))
+   const active=(await sonyQuickJSON("avContent","getPlayingContentInfo",[],"1.0")).result
+   observed=quickFlattenUri(active).some(x=>x===uri)
+   if(observed)break
+ }
  if(!observed)throw Error("HDMI3への切替要求後にテレビ側の入力を確認できません")
  return {message:"HDMI3をテレビ側で確認しました。Fire TVのDMM.comはFire TV画面から起動してください。"}
 }
