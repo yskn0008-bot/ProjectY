@@ -46,7 +46,7 @@ function makeHarness({unsupported=false,writeFails=false,mode='standard',brightn
 }
 
 test('existing remote, adaptive keys, and persisted layout remain',()=>{
- assert.match(source,/YOS Remote Hub v6\.5/);
+ assert.match(source,/YOS Remote Hub v6\.6/);
  assert.match(source,/function installCenterGesture/);
  assert.match(source,/const LAYOUT_KEY="yos\.remote\.tv\.buttons\.v52"/);
  assert.match(source,/const LIGHT_HOLD_BURST=2/);
