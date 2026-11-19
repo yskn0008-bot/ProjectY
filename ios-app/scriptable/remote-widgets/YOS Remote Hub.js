@@ -177,7 +177,7 @@ body{padding:0 8px}
 </div></div>
 <div id="shortcutsLayer" class="config-layer" role="dialog" aria-modal="true" aria-label="BRAVIA画質ショートカット"><div class="config-card">
   <div class="config-head"><div class="config-title">画質ショートカット</div><button class="tool" onclick="closeShortcuts(event)">閉じる</button></div>
-  <p class="config-help">先にテレビで好きな画質へ調整して「保存」。次回は「呼出」で再現します。YOSが勝手に画質の数値を決めることはありません。</p>
+  <p class="config-help">テレビで好きな画質に調整して「保存」。保存対象は今の映像入力でAPIから取得できた項目だけです。明るさが未取得なら保存・復元できません。YOSが数値を勝手に決めることはありません。</p>
   <div id="picturePresets"></div>
   <p id="shortcutsStatus" class="pic-status" aria-live="polite">設定を確認中</p>
   <button class="tool" onclick="probePictureScene(event)">登録状況を再取得</button>
