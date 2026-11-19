@@ -84,7 +84,7 @@ export function validateCandidate(candidate, { now = new Date(), recent = [] } =
     for (const item of a.keyPoints) text(item, 'key point', 3, 170);
 
     const review = candidate.verification[i];
-    allowKeys(review, ['link', 'checkedOn', 'sourceType', 'sourceDateStatus', 'evidence', 'limitations', 'audienceMatch'], 'verification');
+    allowKeys(review, ['link', 'checkedOn', 'sourceType', 'sourceDateStatus', 'evidence', 'limitations', 'audienceMatch', 'reviewClaimIds'], 'verification');
     if (httpsLink(review.link, 'verification source') !== link) refuse('source verification link mismatch');
     if (!day(review.checkedOn) || ageInDays(today, review.checkedOn) < 0 || ageInDays(today, review.checkedOn) > 2) refuse('source check outdated or in future');
     if (!['official', 'primary', 'editorial'].includes(review.sourceType)) refuse('unsupported source type');
@@ -92,6 +92,16 @@ export function validateCandidate(candidate, { now = new Date(), recent = [] } =
     text(review.evidence, 'evidence description', 25, 450);
     text(review.limitations, 'scope/uncertainty', 10, 320);
     text(review.audienceMatch, 'why it matters', 20, 280);
+    if (review.reviewClaimIds !== undefined) {
+      if (!Array.isArray(review.reviewClaimIds) || review.reviewClaimIds.length < 1 || review.reviewClaimIds.length > 12)
+        refuse('invalid independent review claim references');
+      const refs = new Set();
+      for (const id of review.reviewClaimIds) {
+        if (typeof id !== 'string' || !/^C[1-9][0-9]*$/.test(id) || refs.has(id))
+          refuse('invalid or duplicate independent review claim reference');
+        refs.add(id);
+      }
+    }
     // The source is checked *by the GPT editor* via its browsing tools. A text
     // declaration is NOT independently verified by this local schema check.
   }
