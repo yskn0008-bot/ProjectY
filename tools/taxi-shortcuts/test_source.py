@@ -40,4 +40,18 @@ for label,source in sources.items():
     for url in ('https://yskn0008-bot.github.io/', 'https://app.notion.com/p/'):
         if url not in source: continue
         assert url == 'https://yskn0008-bot.github.io/' or label == 'YOS TAXI 運行'
+research=(repo/'taxi/research.html').read_text()
+assert 'YOS TAXI｜営業リサーチ' in research
+assert 'yos-taxi-ui-v2-live-20261117' not in research
+assert 'localStorage.' not in research
+assert 'https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json' in research
+assert 'timeSeries' in research and 'reportDatetime' in research
+assert 'decodeForecast(' in research and '12*60*60*1000' in research
+assert '取得に失敗' in research or '確認できませんでした' in research
+assert '自動取得未接続' in research and '未判定' in research
+assert '営業前リサーチ｜公式情報を確認' in shift
+assert '営業中リサーチ｜変化を確認' in shift
+assert 'research.html?phase=before' in shift
+assert 'research.html?phase=during' in shift
+print("YOS Taxi research source contracts: PASS")
 print("YOS Taxi 7 native Shortcut source contracts: PASS")

@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#04152a">
+<title>YOS TAXI｜営業リサーチ（検証版）</title>
+<style>
+:root{color-scheme:dark;--bg:#031020;--panel:#0b2743;--edge:#426482;--text:#f4f8ff;--muted:#b4cde2;--good:#61e6aa;--warn:#ffe08b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;font-size:16px}
+header,main,footer{max-width:540px;margin:auto}header{position:sticky;top:0;background:#04182d;padding:calc(12px + env(safe-area-inset-top)) 14px 12px;border-bottom:1px solid var(--edge);z-index:1}
+header h1{margin:8px 0 0;font-size:24px;line-height:1.2}header small{color:var(--muted)}
+main{padding:14px 13px 90px;display:grid;gap:12px}
+section{background:var(--panel);border:1px solid var(--edge);border-radius:16px;padding:14px}
+h2{font-size:19px;margin:0 0 9px}p{margin:6px 0;line-height:1.5}.muted,small{color:var(--muted)}.small{font-size:13px}
+a,button{border-radius:10px;padding:10px 12px;min-height:44px;font:inherit}a{color:#bdeeff;display:inline-flex;align-items:center;text-decoration:underline;text-underline-offset:3px}button{border:1px solid #6991ae;background:#103a5d;color:white;font-weight:700}
+button:focus-visible,a:focus-visible{outline:3px solid #ffe08b;outline-offset:2px}
+button.selected{border-color:#6ee7ff;background:#205777}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.row>*{flex:1}.stack{display:grid;gap:9px}
+.badge{display:inline-block;border:1px solid #7895a7;color:#e1e9f0;border-radius:30px;padding:3px 9px;font-size:12px;font-weight:700}
+.badge.good{border-color:var(--good);color:var(--good)}.badge.warn{border-color:var(--warn);color:var(--warn)}
+.hint{border-left:3px solid var(--warn);padding:9px 12px;background:#302815;border-radius:5px}
+.source{border-top:1px solid #37536d;padding-top:11px;margin-top:11px}.source:first-child{border:0;padding:0;margin:0}.source-title{display:flex;justify-content:space-between;align-items:center;gap:8px}.source-title b{font-size:16px}
+.source .links{display:flex;gap:6px;flex-wrap:wrap}.source .links a{padding-left:0}.label{color:var(--muted);font-size:12px;margin:0}
+#weather-report{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;font-size:15px}
+#weather-status{margin-left:4px}
+footer{padding:10px 14px 20px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <a href="./ui-v2.html" aria-label="YOS TAXIの営業画面へ戻る">‹ 営業画面に戻る</a>
+  <h1>営業リサーチ</h1><small>一次情報を確認するための検証版｜安全な停車中だけ操作</small>
+</header>
+<main>
+<section class="stack">
+ <div class="row"><button id="phase-before" type="button">営業前｜広域確認</button><button id="phase-during" type="button">営業中｜変化確認</button></div>
+ <p id="phase-explanation" class="muted small"></p>
+ <p class="hint small">需要があることと、乗客を獲得できることは別。公式情報だけでは空車回送先や収益の優位性を判定できません。</p>
+</section>
+<section class="stack" id="weather-section" aria-label="気象庁の公開予報データ取得">
+ <div class="source-title"><h2>気象庁｜沖縄本島中南部</h2><span id="weather-status" class="badge">未取得</span></div>
+ <p class="small muted">公開された予報データを直接取得します。雨雲実況・警報ではありません。運用保証のある公式APIではないため、取得に失敗する場合があります。</p>
+ <button type="button" id="weather-fetch">気象庁の発表データを確認</button>
+ <div id="weather-report" role="status" aria-live="polite">未取得。天候の最新状況は気象庁公式ページで直接確認してください。</div>
+ <p class="small muted" id="weather-meta">発表時刻：未確認｜取得時刻：未確認｜対象時刻：未確認</p>
+ <a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" rel="noopener noreferrer">公式の天気予報を開く</a>
+ <a href="https://www.jma.go.jp/bosai/rain/" target="_blank" rel="noopener noreferrer">雨雲実況・予測を開く</a>
+</section>
+<section>
+ <h2>公式情報源の確認</h2>
+ <p class="small muted">以下は公式情報への入口です。リンクを開いたことを「データ取得成功」「最新を確認済み」とは記録しません。</p>
+ <div id="official-sources" class="stack">
+  <div class="source"><div class="source-title"><b>JARTIC｜事故・渋滞・規制</b><span class="badge">自動取得未接続</span></div><p class="small muted">5分更新と公表されるが、発生から掲載まで遅延あり。規制がないと断定しない。</p><div class="links"><a href="https://www.jartic.or.jp/" target="_blank" rel="noopener noreferrer">公式の道路情報</a></div></div>
+  <div class="source"><div class="source-title"><b>那覇空港｜当日到着便</b><span class="badge">自動取得未接続</span></div><p class="small muted">到着・遅延とタクシー需要は別。最新状況は航空会社でも再確認。</p><div class="links"><a href="https://www.naha-airport.co.jp/flight/today/" target="_blank" rel="noopener noreferrer">公式の当日便</a></div></div>
+  <div class="source"><div class="source-title"><b>ゆいレール｜遅延・臨時便</b><span class="badge">自動取得未接続</span></div><p class="small muted">終電・臨時ダイヤの有無を当日確認。</p><div class="links"><a href="https://www.yui-rail.co.jp/" target="_blank" rel="noopener noreferrer">公式の運行情報</a></div></div>
+  <div class="source"><div class="source-title"><b>那覇港｜クルーズ寄港予定</b><span class="badge">自動取得未接続</span></div><p class="small muted">予約・予定は実入港やタクシー需要を保証しません。</p><div class="links"><a href="https://nahaport.jp/users/kyakusen/" target="_blank" rel="noopener noreferrer">公式の寄港予定</a><a href="https://x.com/OkinawaCruise" target="_blank" rel="noopener noreferrer">寄港情報X</a></div></div>
+  <div class="source"><div class="source-title"><b>イベント｜公式主催者・会場</b><span class="badge">自動取得未接続</span></div><p class="small muted">終演時刻、入退場、交通規制、タクシー乗り場をそれぞれ確認。</p><div class="links"><a href="https://www.city.naha.okinawa.jp/event_calendar.html" target="_blank" rel="noopener noreferrer">那覇市イベント</a><a href="https://www.oki-conven.jp/allevent/" target="_blank" rel="noopener noreferrer">コンベンションセンター</a></div></div>
+ </div>
+</section>
+<section>
+ <h2>営業判断の安全基準</h2>
+ <p>待機・流し・移動のどれが高収益かは、本人の乗車時刻・空車・迎車・回送・競合データが揃うまで<b>未判定</b>です。</p>
+ <p class="muted small">古い情報、取得失敗、出典不明、予定と実施の混同、需要だけの断定で遠方への移動を勧めません。「未判定」は「必ず待機」の意味でもありません。</p>
+</section>
+</main>
+<footer>この画面は読取専用です。乗務・降車・日報・Notionの保存データを変更しません。情報収集結果の永続保存・X自動監視・推奨行動の算出は未実装です。</footer>
+<script>
+'use strict';
+(()=>{
+const ENDPOINT='https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json';
+const $=id=>document.getElementById(id);
+let phase=new URL(location.href).searchParams.get('phase')==='during'?'during':'before';
+const format=date=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(date);
+function setPhase(next){
+ phase=next;
+ $('phase-before').classList.toggle('selected',phase==='before');
+ $('phase-during').classList.toggle('selected',phase==='during');
+ $('phase-before').setAttribute('aria-pressed',String(phase==='before'));
+ $('phase-during').setAttribute('aria-pressed',String(phase==='during'));
+ $('phase-explanation').textContent=phase==='before'?'出庫前に今夜のイベント・天候・交通・航空・クルーズを調べる入口。自動取得済みと表示するのは検証に成功した項目のみ。':'停車中に変更・中止・規制・遅延を再確認する入口。差分の自動検知は未実装。';
+}
+const setStatus=(label,kind='')=>{const el=$('weather-status');el.textContent=label;el.className='badge '+kind};
+function decodeForecast(data,receivedAt){
+ if(!Array.isArray(data)||!data.length)throw Error('形式不正');
+ const issue=data[0],published=new Date(issue?.reportDatetime);
+ if(issue?.publishingOffice!=='沖縄気象台'||!Number.isFinite(published.getTime()))throw Error('発表元・時刻不明');
+ const series=issue.timeSeries?.[0],times=series?.timeDefines,area=series?.areas?.find(a=>a?.area?.code==='471010');
+ if(!Array.isArray(times)||!Array.isArray(area?.weathers)||times.length!==area.weathers.length)throw Error('中南部の予報が未確認');
+ const candidates=times.map((t,i)=>({at:new Date(t),forecast:area.weathers[i]}))
+  .filter(x=>Number.isFinite(x.at.getTime())&&typeof x.forecast==='string'&&x.forecast.trim());
+ if(!candidates.length)throw Error('対象時刻なし');
+ const age=receivedAt.getTime()-published.getTime();
+ if(age < -10*60*1000)throw Error('発表時刻が端末時刻より未来');
+ const ordered=candidates.slice().sort((a,b)=>a.at-b.at);
+ const next=ordered.filter(x=>x.at.getTime()<=receivedAt.getTime()).at(-1)||ordered.find(x=>x.at.getTime()>receivedAt.getTime());
+ if(!next||Math.abs(receivedAt.getTime()-next.at.getTime())>24*60*60*1000)throw Error('対象期間を特定できない');
+ return {published,receivedAt,next,ageMs:age};
+}
+async function retrieve(){
+ const btn=$('weather-fetch');btn.disabled=true;setStatus('確認中');
+ $('weather-report').textContent='公式の予報データへ接続中。';$('weather-meta').textContent='発表時刻：未確認｜取得時刻：未確認｜対象時刻：未確認';
+ const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),8000);
+ try{
+  const res=await fetch(ENDPOINT,{cache:'no-store',signal:controller.signal,redirect:'error'});
+  if(!res.ok)throw Error('HTTP '+res.status);
+  const contentType=res.headers.get('content-type')||'';
+  if(!contentType.includes('json'))throw Error('形式不明');
+  const size=Number(res.headers.get('content-length'));if(Number.isFinite(size)&&size>250000)throw Error('サイズ上限');
+  const body=await res.text();if(body.length>250000)throw Error('サイズ上限');
+  const weather=decodeForecast(JSON.parse(body),new Date());
+  const expired=weather.ageMs>12*60*60*1000;
+  setStatus(expired?'期限切れ':'公式予報を取得',expired?'warn':'good');
+  $('weather-report').textContent=expired?'発表から12時間を超えています。最新とは扱わず、公式サイトで再確認してください。':weather.next.forecast+'（公式の予報文。雨雲の実況ではありません）';
+  $('weather-meta').textContent='発表 '+format(weather.published)+'｜取得 '+format(weather.receivedAt)+'｜予報期間開始 '+format(weather.next.at)+'｜更新経過 約'+Math.max(0,Math.floor(weather.ageMs/60000))+'分';
+ }catch(err){
+  setStatus('未取得','warn');
+  $('weather-report').textContent='公式データを確認できませんでした。情報を補完・推測していません。下の公式ページを直接確認してください。';
+  $('weather-meta').textContent='発表時刻：未確認｜取得時刻：失敗｜対象時刻：未確認';
+ }finally{clearTimeout(timeout);btn.disabled=false}
+}
+$('phase-before').addEventListener('click',()=>setPhase('before'));
+$('phase-during').addEventListener('click',()=>setPhase('during'));
+$('weather-fetch').addEventListener('click',retrieve);
+setPhase(phase);
+window.YOSTaxiResearchTest={decodeForecast,setPhase}; // Read-only deterministic test hook.
+})();
+</script>
+</body>
+</html>
