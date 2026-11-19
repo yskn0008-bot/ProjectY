@@ -190,7 +190,7 @@
   async function load(){
     if(!state.token)return;
     status('Notionの買い物リストを取得しています…');
-    const resp=await fetch(API+'/api/yos/shopping',{headers:{Authorization:'Bearer '+state.token,Accept:'application/json'},cache:'no-store',credentials:'omit'});
+    const resp=await fetch(API+'/api/yos/widget?mode=shopping',{headers:{Authorization:'Bearer '+state.token,Accept:'application/json'},cache:'no-store',credentials:'omit'});
     if(!resp.ok)throw new Error('Shopping '+resp.status);
     const data=await resp.json();
     if(data.schema!=='yos-shopping-v1'||!Array.isArray(data.items))throw new Error('Invalid shopping data');
@@ -233,7 +233,7 @@
     if(!name)return;
     state.busy=true;el('addSubmit').disabled=true;el('addError').hidden=true;
     try{
-      const res=await fetch(API+'/api/yos/shopping',{method:'POST',
+      const res=await fetch(API+'/api/yos/widget?mode=shopping',{method:'POST',
         headers:{Authorization:'Bearer '+state.token,'Content-Type':'application/json'},
         body:JSON.stringify({action:'add',name,category:data.get('category'),url:data.get('url'),imageUrl:data.get('imageUrl')}),
         cache:'no-store',credentials:'omit'});
@@ -251,7 +251,7 @@
     if(!window.confirm('「'+item.name+'」を購入済みにしますか？（購入自体は行いません）'))return;
     if(state.busy)return;
     state.busy=true;try{
-      const res=await fetch(API+'/api/yos/shopping',{method:'PATCH',
+      const res=await fetch(API+'/api/yos/widget?mode=shopping',{method:'PATCH',
         headers:{Authorization:'Bearer '+state.token,'Content-Type':'application/json'},
         body:JSON.stringify({action:'purchase',id:item.id,expectedEditedAt:item.updatedAt}),
         cache:'no-store',credentials:'omit'});
