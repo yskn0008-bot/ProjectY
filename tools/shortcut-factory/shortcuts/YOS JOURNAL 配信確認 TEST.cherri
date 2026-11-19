@@ -1,0 +1,13 @@
+#define name YOS JOURNAL 配信確認 TEST
+#define color blue
+#define inputs text
+
+// Publication-only notification sensor. This never writes journal, Notion, or GitHub.
+// Add a daily Time of Day automation in iOS 27 to check the published issue.
+action 'dk.simonbs.Scriptable.RunScriptInlineIntent' checkPublishedJournal(text parameter: 'parameter'): text {
+  "script": "__YOS_JOURNAL_NOTIFICATION_INLINE__",
+  "runInApp": false,
+  "ShowWhenRun": false
+}
+const deliveryState = checkPublishedJournal("")
+stop()
