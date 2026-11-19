@@ -1,12 +1,11 @@
 'use strict';
 (()=>{
-  const API='https://project-y-yos-ai.vercel.app';
-  const YOS_ORIGIN='https://yskn0008-bot.github.io';
+  // The Scriptable host injects a Notion snapshot. There is no remote application API.
+  const NATIVE=globalThis.YOS_SHOPPING_NATIVE||null;
   const FAVORITES_KEY='yos-shopping-favorites-v1';
   const VIEW_KEY='yos-shopping-view-v1';
-  const GOOGLE_SCRIPT='https://accounts.google.com/gsi/client';
   const el=id=>document.getElementById(id);
-  const state={items:[],token:'',demo:true,filter:'all',sort:'recommended',search:'',favorites:new Set(),view:'grid',busy:false};
+  const state={items:[],demo:true,filter:'all',sort:'recommended',search:'',favorites:new Set(),view:'grid',busy:false};
   const imgIcons={'食品':'🥛','美容':'✧','衛生':'◈','洗濯':'◇','掃除':'▣','家具':'▤','家電':'▣','その他':'◈'};
   const demoList=[
     ['d1','キュレル 保湿ジェル 120g','美容',1408,1760,'楽天','https://www.rakuten.co.jp/'],
@@ -54,11 +53,10 @@
   );
   const restock=item=>!item.purchased&&item.type==='日用品'&&
     Number.isFinite(item.stock)&&Number.isFinite(item.reorderAt)&&item.stock<=item.reorderAt;
-  const buy=item=>!item.purchased&&(item.state==='購入候補'||(
-    Number.isFinite(item.targetPrice)&&Number.isFinite(item.currentPrice)&&item.currentPrice<=item.targetPrice&&recentPrice(item)
-  ));
+  const buy=item=>!item.purchased&&item.state!=='保留'&&
+    Number.isFinite(item.targetPrice)&&Number.isFinite(item.currentPrice)&&
+    item.currentPrice<=item.targetPrice&&recentPrice(item);
   const recommend=item=>!item.purchased&&(sale(item)||buy(item)||restock(item));
-  const verified=(item)=>!state.demo&&sale(item);
   const sortRank=item=> (restock(item)?100:0)+(sale(item)?60:0)+(buy(item)?30:0)+(item.priority==='高'?10:0);
   const number=(id,count)=>{const node=el(id);if(node)node.textContent=String(count)};
   function status(message){el('connectionState').textContent=message}
@@ -71,7 +69,7 @@
     state.items=Array.isArray(items)?items:[];
     state.demo=asDemo;
     status(asDemo?'デザインプレビュー｜商品・価格はサンプルです（実際の値引きではありません）':
-      'Notion YOS Shoppingと接続済み｜価格の最新性は商品ごとに確認');
+      'iPhoneからNotionを直接取得｜価格の最新性は商品ごとに確認');
     render();
   }
   function count(pred){return state.items.filter(x=>!x.purchased&&pred(x)).length}
@@ -187,81 +185,30 @@
     window.open(link,'_blank','noopener,noreferrer');
     toast('検索結果を開きました。商品・容量・沖縄送料を確認してください。');
   }
-  async function load(){
-    if(!state.token)return;
-    status('Notionの買い物リストを取得しています…');
-    const resp=await fetch(API+'/api/yos/widget?mode=shopping',{headers:{Authorization:'Bearer '+state.token,Accept:'application/json'},cache:'no-store',credentials:'omit'});
-    if(!resp.ok)throw new Error('Shopping '+resp.status);
-    const data=await resp.json();
-    if(data.schema!=='yos-shopping-v1'||!Array.isArray(data.items))throw new Error('Invalid shopping data');
-    setData(data.items,false);el('authPanel').hidden=true;
+  function runNative(action,fields={}){
+    if(!NATIVE){toast('実データの編集はiPhoneのScriptable版で利用できます');return}
+    const search=new URLSearchParams({scriptName:'YOS Shopping',action,...fields});
+    location.href='scriptable:///run?'+search.toString();
   }
-  function loadScript(){
-    return new Promise((resolve,reject)=>{
-      if(globalThis.google?.accounts?.id)return resolve(globalThis.google.accounts.id);
-      const script=document.createElement('script');script.src=GOOGLE_SCRIPT;script.async=true;script.defer=true;
-      script.onload=()=>globalThis.google?.accounts?.id?resolve(globalThis.google.accounts.id):reject(new Error('Google ID unavailable'));
-      script.onerror=()=>reject(new Error('Google script unavailable'));document.head.append(script);
-    });
-  }
-  async function setupAuth(){
-    if(location.origin!==YOS_ORIGIN){
-      el('authPanel').hidden=false;el('authMessage').textContent='デザインプレビューです。実データ接続はYOSの公開ドメイン上で本人確認後に利用できます。';
-      return;
-    }
-    el('authPanel').hidden=false;
-    try{
-      const [response,gsi]=await Promise.all([fetch(API+'/api/yos/public-config',{cache:'no-store',credentials:'omit'}),loadScript()]);
-      if(!response.ok)throw new Error('Config unavailable');
-      const config=await response.json();if(!String(config.googleClientId||'').endsWith('.apps.googleusercontent.com'))throw new Error('Client unavailable');
-      gsi.initialize({client_id:config.googleClientId,callback:async payload=>{
-        const token=String(payload?.credential||'');
-        if(!token){toast('本人確認が完了しませんでした');return}
-        state.token=token;try{await load()}catch{toast('Notion商品を取得できません。元データは変更していません。');status('接続未確認｜プレビュー表示中')}
-      },auto_select:false,cancel_on_tap_outside:true,itp_support:true,use_fedcm_for_prompt:true});
-      gsi.renderButton(el('authButton'),{type:'standard',theme:'outline',size:'large',text:'continue_with',shape:'rectangular',width:270});
-    }catch{
-      el('authMessage').textContent='本人確認を読み込めませんでした。プレビューは操作できますがNotionへの保存はできません。';
-    }
-  }
-  async function addItem(event){
+  function addItem(event){
     event.preventDefault();
-    if(state.busy)return;
-    if(!state.token){toast('プレビューでは保存できません。本人確認後に追加してください。');return}
-    const form=event.currentTarget,data=new FormData(form);
-    const name=String(data.get('name')||'').trim();
-    if(!name)return;
-    state.busy=true;el('addSubmit').disabled=true;el('addError').hidden=true;
-    try{
-      const res=await fetch(API+'/api/yos/widget?mode=shopping',{method:'POST',
-        headers:{Authorization:'Bearer '+state.token,'Content-Type':'application/json'},
-        body:JSON.stringify({action:'add',name,category:data.get('category'),url:data.get('url'),imageUrl:data.get('imageUrl')}),
-        cache:'no-store',credentials:'omit'});
-      if(!res.ok)throw new Error('save not confirmed');
-      // Successful create alone is not a full success; re-read the authoritative list.
-      await load();
-      form.reset();el('itemDialog').close();toast('Notionの買い物リストに追加しました');
-    }catch{
-      el('addError').hidden=false;el('addError').textContent='保存結果を確認できません。Notionを確認してから再試行してください（重複防止）。';
-    }finally{state.busy=false;el('addSubmit').disabled=false}
+    if(!NATIVE){toast('プレビューからはNotionへ保存できません');return}
+    // Personal input is collected by Scriptable's native secure dialog, never a public web form.
+    el('itemDialog').close();
+    runNative('add');
   }
-  async function purchase(item){
-    if(state.demo||!state.token){toast('プレビューでは購入状態を変更できません');return}
-    if(!item.updatedAt){toast('更新日時を確認できません。再取得してください');return}
-    if(!window.confirm('「'+item.name+'」を購入済みにしますか？（購入自体は行いません）'))return;
-    if(state.busy)return;
-    state.busy=true;try{
-      const res=await fetch(API+'/api/yos/widget?mode=shopping',{method:'PATCH',
-        headers:{Authorization:'Bearer '+state.token,'Content-Type':'application/json'},
-        body:JSON.stringify({action:'purchase',id:item.id,expectedEditedAt:item.updatedAt}),
-        cache:'no-store',credentials:'omit'});
-      if(!res.ok)throw new Error('Purchase update uncertain');
-      await load();el('detailDialog').close();toast('購入済みをNotionに反映しました');
-    }catch{toast('更新を確認できませんでした。Notionの状態を確認してください')}
-    finally{state.busy=false}
+  function purchase(item){
+    if(!NATIVE||!item.updatedAt||state.demo){toast('Notionの更新にはScriptableが必要です');return}
+    runNative('purchase',{id:item.id,expectedEditedAt:item.updatedAt});
   }
   function install(){
-    setData(demoItems(),true);
+    if(NATIVE&&NATIVE.schema==='yos-shopping-local-v1'&&Array.isArray(NATIVE.items)){
+      setData(NATIVE.items,false);
+    }else{
+      setData(demoItems(),true);
+      el('authPanel').hidden=false;
+      el('authMessage').textContent='この画面はデザインプレビューです。実際のNotion商品はiPhoneの「YOS Shopping」Scriptableから開いてください。';
+    }
     el('sortBy').value=state.sort;
     el('sortBy').addEventListener('change',event=>{state.sort=event.target.value;render()});
     el('searchToggle').addEventListener('click',()=>{
@@ -270,9 +217,9 @@
     });
     el('searchInput').addEventListener('input',event=>{state.search=event.target.value;render()});
     el('clearSearch').addEventListener('click',()=>{el('searchInput').value='';state.search='';render()});
-    el('addToggle').addEventListener('click',()=>el('itemDialog').showModal());
+    el('addToggle').addEventListener('click',()=>NATIVE?runNative('add'):el('itemDialog').showModal());
     el('itemForm').addEventListener('submit',addItem);
-    el('moreToggle').addEventListener('click',()=>{const n='既存Notion「YOS Shopping」を正本として表示。値引き率は参考価格との差であり、購入前に店舗と送料の確認が必要です。';window.alert(n)});
+    el('moreToggle').addEventListener('click',()=>NATIVE?runNative('refresh'):toast('実際の更新はScriptable版で利用できます'));
     el('listMode').addEventListener('click',()=>{state.view='list';store(VIEW_KEY,state.view);render()});
     el('gridMode').addEventListener('click',()=>{state.view='grid';store(VIEW_KEY,state.view);render()});
     document.addEventListener('click',event=>{
@@ -299,7 +246,6 @@
       if(action==='research')research(item);
       if(action==='purchase')purchase(item);
     });
-    setupAuth();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
