@@ -49,6 +49,8 @@ test('read-only scan detects duplicate differing scripts and never exports sourc
  const r=await run({'リモコン.js':'// PRIVATE SECRET iCloud','他の機能.js':'runExisting("リモコン")'},{'リモコン.js':'// PRIVATE SECRET local'});
  assert.match(r.copied,/同名グループ：1/);
  assert.match(r.copied,/【調査先】/);
+ assert.match(r.copied,/【リモコン更新の安全診断】/);
+ assert.match(r.copied,/このiPhone内 21文字/);
  assert.match(r.copied,/リモコン：iCloud \/ このiPhone内｜内容 相違/);
  assert.match(r.copied,/他コードから名前参照/);
  assert.doesNotMatch(r.copied,/PRIVATE SECRET/);
@@ -66,5 +68,13 @@ test('empty scan warns rather than claiming inventory is complete',async()=>{
  const r=await run({},{});
  assert.match(r.copied,/【警告】0件は正常な棚卸し結果として扱いません/);
  assert.match(r.copied,/iCloud：\/cloud｜直下 0件/);
+ assert.equal(r.cloud.writes+r.local.writes+r.cloud.removes+r.local.removes,0);
+});
+
+test('large iCloud root never starves local remote detection',async()=>{
+ const many=Object.fromEntries(Array.from({length:340},(_,i)=>['other-'+i+'.js','// test']));
+ const r=await run({...many,'リモコン.js':'// CLOUD'}, {'リモコン.js':'// LOCAL'});
+ assert.match(r.copied,/リモコン：iCloud \/ このiPhone内｜内容 相違/);
+ assert.match(r.copied,/※iCloud・このiPhone内をそれぞれ独立に調査/);
  assert.equal(r.cloud.writes+r.local.writes+r.cloud.removes+r.local.removes,0);
 });
