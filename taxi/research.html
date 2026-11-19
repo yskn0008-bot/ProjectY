@@ -60,6 +60,14 @@ details a{display:inline-flex;align-items:center;min-height:42px;border:1px soli
 .shift-item .what{flex:1;font-size:13px;line-height:1.35}
 .shift-item .external{font-size:13px;color:#b4daec}
 [hidden]{display:none!important}
+.feed-item{border-top:1px solid #304b64;padding:9px 0;display:grid;gap:4px}
+.feed-item .item-row{display:flex;align-items:center;gap:8px}
+.feed-item .item-row strong{flex:1;font-size:14px}
+.feed-item .item-desc{font-size:12px;color:var(--muted);line-height:1.35}
+.feed-link{color:#c6efff;font-size:13px;display:inline-block;min-height:32px;padding:5px 0;text-decoration:underline;text-underline-offset:2px}
+.feed-error{color:#ffdf87;font-size:13px}
+#feed-meta{font-size:12px;color:var(--muted);line-height:1.35;margin:5px 0 6px}
+#feed-reload{background:#173f60;width:100%;min-height:42px;margin-top:8px}
 .note{padding:11px 13px;background:#0b2339}
 .note summary{font-size:13px;font-weight:650;color:#bedaf0;min-height:36px}
 .note .body{font-size:12px}
@@ -92,6 +100,13 @@ footer{font-size:11px;color:#94aec4;padding:0 13px calc(18px + env(safe-area-ins
  <p id="weather-meta">発表時刻：未確認｜取得時刻：未確認｜対象時刻：未確認</p>
  <details class="details"><summary>雨雲・予報を公式ページで確認</summary><div class="body"><div class="links"><a href="https://www.jma.go.jp/bosai/rain/" target="_blank" rel="noopener noreferrer">雨雲レーダー ↗</a><a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" rel="noopener noreferrer">公式天気予報 ↗</a></div></div></details>
 </section>
+<section id="auto-research" aria-label="定期的に取得した公式情報">
+ <div class="row"><h2>公式情報｜自動チェック</h2><span id="feed-status" class="badge">確認中</span></div>
+ <p id="feed-meta">公式情報の定期確認結果を読み込みます。</p>
+ <div id="feed-sources" aria-live="polite"></div>
+ <button id="feed-reload" type="button">公開済みの情報を再確認</button>
+ <p class="tiny">既存のGitHub定期実行（原則毎時）による情報です。速報保証なし。公式更新情報とタクシー需要の有無は別です。</p>
+</section>
 <section aria-label="他の公式情報">
  <div class="row"><h2>その他の重要情報</h2><span class="badge">自動取得未接続</span></div>
  <p class="section-intro">タップして公式情報を確認。開いただけでは確認済みになりません。</p>
@@ -103,7 +118,7 @@ footer{font-size:11px;color:#94aec4;padding:0 13px calc(18px + env(safe-area-ins
   <details class="source"><summary><b>ゆいレール・運行</b><span class="badge">要確認</span></summary><div class="body">運休、遅延、臨時便、終電を確認。<div class="links"><a href="https://www.yui-rail.co.jp/" target="_blank" rel="noopener noreferrer">ゆいレール公式 ↗</a></div></div></details>
  </div>
 </section>
-<section class="note"><details><summary>情報の信頼性と安全について</summary><div class="body">気象庁の予報だけを画面表示時に自動取得します。道路・イベント・航空便・クルーズ・鉄道の監視とX自動取得は未実装。情報が古い・取得できない場合は、根拠のない移動先を提案しません。安全な停車中のみ操作してください。</div></details></section>
+<section class="note"><details><summary>情報の信頼性と安全について</summary><div class="body">気象庁予報は画面表示時に直接取得。那覇市のRSS見出し・沖縄県のクルーズ月次台帳はGitHub Pagesの既存定時処理で自動確認し、結果と原典・日時を表示します。道路規制・航空便・クルーズ実入港・公式Xはリアルタイム自動監視未実装です。情報が古い・取得できないときは営業先を提案しません。安全な停車中のみ操作してください。</div></details></section>
 </main>
 <footer>読取専用・既存の乗務記録は変更しません。自動需要予測と売上判断は未実装です。</footer>
 <script>
@@ -134,6 +149,77 @@ function setPhase(next){
  $('phase-explanation').textContent=phase==='before'?'出庫前：イベントや交通の予定を公式情報で確認':'営業中：遅延・中止・通行規制の変化を停車中に確認';
 }
 const setStatus=(label,kind='')=>{const el=$('weather-status');el.textContent=label;el.className='badge '+kind};
+
+const OFFICIAL_HOSTS=new Set(['www.jma.go.jp','www.city.naha.okinawa.jp','data.bodik.jp','www.pref.okinawa.jp']);
+function allowedOfficialUrl(raw){
+ try{const u=new URL(raw);return u.protocol==='https:'&&OFFICIAL_HOSTS.has(u.hostname)?u.href:null}catch(_){return null}
+}
+const sourceLabel=(s)=>s==='ok'?'取得成功':s==='stale'?'原本が古い':s==='unknown'?'更新日不明':'未取得';
+const sourceSummary=(s)=>typeof s==='string'?s.slice(0,180):'';
+function createOfficialLink(raw,caption){
+ const href=allowedOfficialUrl(raw);if(!href)return null;
+ const a=document.createElement('a');a.className='feed-link';a.textContent=caption;a.href=href;a.target='_blank';a.rel='noopener noreferrer';return a;
+}
+function renderOfficialFeed(feed,at=new Date()){
+ const generated=new Date(feed?.generatedAt||'');
+ if(feed?.schema!==1||!Number.isFinite(generated.getTime())||!Array.isArray(feed.sources))throw Error('bad snapshot');
+ if(generated.getTime()>at.getTime()+10*60000)throw Error('future snapshot');
+ const ageMin=(at.getTime()-generated.getTime())/60000,expired=ageMin>150;
+ const status=$('feed-status');status.textContent=expired?'配信が古い':'配信確認';status.className='badge '+(expired?'warn':'good');
+ $('feed-meta').textContent='最終配信 '+format(generated)+'｜'+(expired?'配信が古いため営業判断には使用不可':'各情報源の状態を個別確認');
+ const holder=$('feed-sources');holder.replaceChildren();
+ for(const s of feed.sources.slice(0,5)){
+   if(!s||typeof s.name!=='string'||!['ok','stale','unknown','error'].includes(s.status))continue;
+   const item=document.createElement('div');item.className='feed-item';
+   const top=document.createElement('div');top.className='item-row';
+   const name=document.createElement('strong');name.textContent=s.name.slice(0,60);
+   const badge=document.createElement('span');badge.className='badge '+(s.status!=='ok'||expired?'warn':'good');
+   badge.textContent=expired?'配信が古い':sourceLabel(s.status);
+   top.append(name,badge);item.append(top);
+   const description=document.createElement('p');description.className='item-desc';
+   description.textContent=expired?'公開済み結果は更新されていません。原本を確認してください。':sourceSummary(s.summary);
+   item.append(description);
+   const issued=new Date(s.publishedAt||'');
+   const checked=new Date(s.checkedAt||'');
+   const meta=document.createElement('p');meta.className='tiny';
+   meta.textContent='原本更新 '+(Number.isFinite(issued.getTime())?format(issued):'未確認')
+     +'｜確認 '+(Number.isFinite(checked.getTime())?format(checked):'未確認');
+   item.append(meta);
+   const link=createOfficialLink(s.url,'公式原本を開く');if(link)item.append(link);
+   if(!expired&&s.status==='ok'&&Array.isArray(s.items)){
+     for(const x of s.items.slice(0,4)){
+       const detailLink=createOfficialLink(x?.url,x?.title?.slice(0,92)||'公式更新');
+       if(detailLink){const row=document.createElement('div');row.className='item-desc';row.append(detailLink);item.append(row)}
+     }
+   }
+   holder.append(item);
+ }
+ const diff=feed.difference;
+ if(!expired&&diff?.status==='compared'&&Array.isArray(diff.added)){
+   const p=document.createElement('p');p.className='tiny';
+   p.textContent='前回の配信との差分：那覇市の見出し '+diff.added.length+'件（需要予測ではありません）';holder.prepend(p);
+ }else{
+   const p=document.createElement('p');p.className='tiny';p.textContent='前回との差分：未確認';holder.prepend(p);
+ }
+}
+let feedCheckedAt=0;
+async function loadOfficialFeed(){
+ const btn=$('feed-reload');btn.disabled=true;
+ $('feed-status').textContent='確認中';
+ try{
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
+  let res;
+  try{res=await fetch('./research-feed.json?ts='+Date.now(),{cache:'no-store',signal:controller.signal})}finally{clearTimeout(timer)}
+  if(!res.ok)throw Error('HTTP '+res.status);
+  const body=await res.text();if(body.length>150000)throw Error('too large');
+  renderOfficialFeed(JSON.parse(body));feedCheckedAt=Date.now();
+ }catch(_){
+  $('feed-status').textContent='未取得';$('feed-status').className='badge warn';
+  $('feed-meta').textContent='自動収集結果を確認できません。公式原本を直接確認してください。';
+  $('feed-sources').replaceChildren();
+ }finally{btn.disabled=false}
+}
+
 function decodeForecast(data,receivedAt){
  if(!Array.isArray(data)||!data.length)throw Error('形式不正');
  const issue=data[0],published=new Date(issue?.reportDatetime);
@@ -195,7 +281,10 @@ window.YOSTaxiResearchTest={decodeForecast,setPhase,revalidate}; // Read-only de
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)revalidate()});
 window.addEventListener('pageshow',revalidate);
 setInterval(revalidate,60000); // UI-only validity check; does not poll the remote endpoint.
-retrieve(); // Only JMA forecast is automatically attempted. Other sources stay unconnected.
+$('feed-reload').addEventListener('click',loadOfficialFeed);
+window.YOSTaxiResearchTest.renderOfficialFeed=renderOfficialFeed;
+retrieve(); // Direct official forecast request from iPhone.
+loadOfficialFeed(); // Reads published hourly research snapshot; no private data.
 })();
 </script>
 </body>
