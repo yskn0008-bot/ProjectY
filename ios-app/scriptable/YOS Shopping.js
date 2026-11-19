@@ -9,7 +9,7 @@ const NAME='YOS Shopping';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
 const SOURCE='d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc';
 const VERSION='2026-03-11';
-const UI_REF='4b6d290623345c56d271f2dfc6062bfd46b666e5';
+const UI_REF='9227ebb1d3c59656f84f6e2f43ef4502702e7bf2';
 const ASSETS='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/yos/shopping/';
 const CATEGORIES=new Set(['食品','洗濯','掃除','衛生','美容','家電','家具','その他']);
 const clean=(v,max=180)=>typeof v==='string'?v.replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max):'';
@@ -286,6 +286,7 @@ function inlineHTML(html,css,js,items){
  const safeCss=css.replace(/<\/style/gi,'<\\/style');
  const safeJs=js.replace(/<\/script/gi,'<\\/script');
  return html
+  .replace('<html lang="ja">','<html lang="ja" class="scriptable-native">')
   .replace(stylesheet,'<style>'+safeCss+'</style>')
   .replace(script,'<script>globalThis.YOS_SHOPPING_NATIVE='+data+';</script><script>'+safeJs+'</script>')
   .replace(/href="\.\.\/\.\.\/yos\/"/g,'href="https://yskn0008-bot.github.io/ProjectY/yos/"');
