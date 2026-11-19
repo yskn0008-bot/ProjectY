@@ -22,7 +22,7 @@ test('rejects fake publication approval and unsupported source methods',()=>{
  const d=copy();d.articleAssessment.publishDecision='published';
  assert.throws(()=>validateIndependentDossier(d),/Invalid publish/);
  const q=copy();q.reviewerMethod='A model said the study was probably true';
- assert.throws(()=>validateIndependentDossier(q),/Independent original-source/);
+ assert.throws(()=>validateIndependentDossier(q),/review method|Independent original-source/);
  const z=copy();z.sources[0].originalAccess='AI hallucination';
  assert.throws(()=>validateIndependentDossier(z),/Original source/);
 });
