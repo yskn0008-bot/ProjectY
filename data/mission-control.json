@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-19T23:22:51+09:00",
+  "updated_at": "2026-11-19T23:26:36+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -103,14 +103,14 @@
       "updated_at": "2026-11-19T13:28:47Z"
     },
     {
-      "id": "github-pr-868",
-      "title": "PR #868 YOS TAXI: 気象庁の実通信・CORSをブラウザで検証",
+      "id": "github-pr-870",
+      "title": "PR #870 BRAVIA｜4台リモコン保護・画質ワンタップ／音声／アプリ／HDMI3クイック操作 TEST",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/868",
-      "updated_at": "2026-11-19T14:22:02Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/870",
+      "updated_at": "2026-11-19T14:25:54Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-19T14:21:25Z"
+      "updated_at": "2026-11-19T14:24:50Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-de4995f7e3d2",
+      "title": "fix(shopping): retry failed photo lookups and verify Product JSON-LD imagery (#869)",
+      "completed_at": "2026-11-19T14:25:21Z",
+      "result": "GitHub mainへ反映（de4995f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/de4995f7e3d2fe12ef39122dc07a0ceaba4878cd"
+    },
+    {
+      "id": "github-commit-61251632b12d",
+      "title": "test(taxi): verify live JMA browser data and explain safe fetch failures",
+      "completed_at": "2026-11-19T14:24:58Z",
+      "result": "GitHub mainへ反映（6125163）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/61251632b12df234c3ccaa0c2e806ab8cc796113"
+    },
+    {
       "id": "github-commit-b192cba6c7a4",
       "title": "feat(shopping): automatically fetch and locally cache verified product photos (#867)",
       "completed_at": "2026-11-19T13:59:48Z",
@@ -224,20 +238,6 @@
       "completed_at": "2026-11-19T13:57:10Z",
       "result": "GitHub mainへ反映（a6de356）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a6de3568eaa70e4194924f5bb5e3c4e7e1255762"
-    },
-    {
-      "id": "github-commit-054f0c095f9b",
-      "title": "feat(remote): safe BRAVIA picture upgrade for existing Untitled Script 9 (#865)",
-      "completed_at": "2026-11-19T13:51:07Z",
-      "result": "GitHub mainへ反映（054f0c0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/054f0c095f9b36e07b7a5b0a6fed4eecaf5265fb"
-    },
-    {
-      "id": "github-commit-f35b49b522f2",
-      "title": "Merge PR #848: YOS Journal iPhone handwritten layout fix",
-      "completed_at": "2026-11-19T13:41:53Z",
-      "result": "GitHub mainへ反映（f35b49b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f35b49b522f246f08684e26fee76103f8c16b112"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-19T23:22:51+09:00",
+      "last_update": "2026-11-19T23:26:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -355,7 +355,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-19T23:22:51+09:00",
+      "last_update": "2026-11-19T23:26:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-19T23:22:51+09:00",
+      "last_update": "2026-11-19T23:26:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ebbcdb2ac61d726d0dfc3f74aa84fabdd89c1475d55480c99c445cf3c0d0b7c5"
+  "github_snapshot_hash": "2702662a962edcedef0fb285d0ffd7cb298dc2913b50a608b08f02234bdee8a5"
 }
