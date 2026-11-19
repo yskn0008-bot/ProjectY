@@ -30,8 +30,8 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .editor{display:none;position:fixed;z-index:25;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100vw - 28px);max-width:600px;max-height:min(78dvh,670px);overflow-y:auto;overscroll-behavior:contain;margin:0;padding:17px;background:#484e59;border:1px solid #778293;border-radius:17px;box-shadow:0 22px 64px #121621a8}
 .editor.show{display:block}.editor b{font-size:15px}.editor .fields{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.editor input,.editor select{padding:9px;background:#303742;color:white;border:1px solid #7b8594;border-radius:8px;min-width:0}.editor input[type=time]{max-width:130px}.editor button,.focus button,.review button,.mutedbutton{padding:10px 13px;background:#277dbb;color:#fff;border:0;border-radius:9px;font-weight:670}.editor .danger{background:#754751;margin-left:6px}.editor .light{background:#647184}.editor .editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:18px}.editor .editor-actions button{min-height:46px;min-width:126px}.editor .editor-shortcut-run{display:inline-block;margin-top:8px;padding:10px 13px;border:1px solid #80a4cb;background:#335371;border-radius:9px;color:#f2f7fd;text-decoration:none;font-weight:680}.editor .editor-shortcut-run[hidden]{display:none}.editor .duration-control{display:flex;align-items:center;gap:5px;flex:0 1 133px}.editor .duration-control label{font-size:12px;color:#f0f4fa;white-space:nowrap}.editor .duration-control input{width:76px}.editor .edit-end{display:block;margin:-5px 0 10px;font-size:12px;color:#dce8f4;font-variant-numeric:tabular-nums}.editor .shortcut-picker{width:100%;padding:10px;border-radius:9px;margin:6px 0;background:#303742;border:1px solid #8b97a9;color:#fff}.editor .shortcut-picker[hidden]{display:none}@media(prefers-reduced-motion:reduce){.editor-backdrop{backdrop-filter:none;-webkit-backdrop-filter:none}}
 .timeline-wrap{position:relative;margin:8px 13px 20px 11px;overflow:visible}.timeline{position:relative;touch-action:pan-y}.hour{position:absolute;left:0;right:0;border-top:1px solid #ffffff0f;height:1px;pointer-events:none}.hour span{position:absolute;top:-9px;left:6px;color:#dce2eb;font-size:12px;font-weight:480;font-variant-numeric:tabular-nums}.axis{position:absolute;left:58px;top:0;bottom:0;width:1.5px;background:#c2cad2b8;pointer-events:none}.tick{position:absolute;left:54.5px;width:9px;height:9px;border-radius:50%;background:#dce2ec;z-index:2;border:2px solid #56616e;box-shadow:0 0 0 2px #d7dee755;pointer-events:none}
-.card{position:absolute;left:73px;right:0;min-height:16px;border:0;border-radius:9px;padding:1px 9px;display:flex;align-items:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
-.card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;touch-action:none;transform:translate3d(0,0,0);backface-visibility:hidden}.card.task:before{display:none}.card.schedule{background:#2e77b3}
+.card{position:absolute;left:73px;right:0;min-height:16px;border:0;border-radius:9px;padding:1px 9px;display:flex;align-items:center;gap:8px;touch-action:pan-y;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
+.card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;transform:translate3d(0,0,0);backface-visibility:hidden}.card.task:before{display:none}.card.schedule{background:#2e77b3}
 .card.neutral{background:#636b76}.card.neutral:before{background:#97a6b9}.card.sleep{background:#325477}.card.sleep:before{background:#48bdf5}
 .card.task{cursor:pointer;border-radius:13px;padding:6px 11px;box-shadow:0 4px 12px #17102348}.card.task .task-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;min-width:0;width:100%;height:100%}.card.task .task-copy b{font-size:13.5px;line-height:1.12;font-weight:730;flex:none;max-width:100%;letter-spacing:.06px}.card.task .task-copy small{font-size:11.5px;line-height:1.1;font-weight:610;letter-spacing:.1px;margin:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;color:#fffce9;opacity:.94}.card.task.compact{border-radius:11px}.card.task.compact .task-copy b{font-size:13px}.card.task.compact .task-copy small{font-size:11px}.card.task.swiping{filter:brightness(1.14)}.card.task.drag-preview{z-index:9;box-shadow:0 11px 27px #10131a8a;filter:brightness(1.1);transition:box-shadow .18s ease,filter .18s ease}
 .compat-status{font-size:11px;color:#d8e0ea;margin:6px 14px 3px;line-height:1.55}
@@ -132,16 +132,25 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
 html{background:#f4f8fd!important;color-scheme:light}
 :root{--bg:#f4f8fd;--bg2:#fff;--text:#1d2d44;--muted:#52657e;--line:#d5e1ee;--blue:#246aa3;--green:#20755c;--violet:#744ba5}
 html body.yos-daystream-web{
- background:radial-gradient(ellipse at 92% 0,#dcf5eb 0,transparent 380px),
- radial-gradient(ellipse at 0 4%,#e9e1fa 0,transparent 370px),linear-gradient(#ebf5ff,#f9fbfe 540px,#f4f8fd);
+ background:radial-gradient(350px 440px at 92% 0,#dcf5eb 0,transparent 100%),
+ radial-gradient(335px 390px at 0 4%,#e9e1fa 0,transparent 100%),linear-gradient(#ebf5ff,#f9fbfe 540px,#f4f8fd);
 }
 .yos-daystream-web .app{padding-top:18px}
-.yos-daystream-web .yos-web-port,.yos-daystream-web .dock{background:#ffffffed;color:var(--text);border-color:var(--line)}
+body.yos-daystream-web .yos-web-port,.yos-daystream-web .dock{background:#ffffffed;color:var(--text);border-color:var(--line)}
 .yos-daystream-web .yos-web-port a,.yos-daystream-web .yos-web-port button,.yos-web-port-dialog button{
  background:#edf4fc;border-color:var(--line);color:#254867
 }
 .yos-web-port-note,.subtitle,.notice,.gesture-help,.metric label{color:var(--muted)}
 .yos-web-port-dialog{background:#f5faff;color:var(--text)}
+.native-tools{max-width:640px;margin:0 auto;padding:5px 16px 0}
+.native-tools summary{width:max-content;cursor:pointer;list-style:none;padding:6px 9px;border-radius:9px;color:#425e78;font-size:11px;background:#ffffffb0}
+.native-tools summary::-webkit-details-marker{display:none}
+.native-tools summary:before{content:'›';display:inline-block;margin-right:6px;font-weight:800}
+.native-tools[open] summary:before{transform:rotate(90deg)}
+.native-tools .yos-web-port{border:1px solid var(--line);border-radius:13px;padding:8px;margin-top:4px}
+.yos-history-actions{left:max(8px,calc((100vw - 624px)/2));right:auto;background:#ffffffed;border-color:#d5e1ee;box-shadow:0 4px 13px #2e476426}
+.yos-history-actions:not(:has(button:not(:disabled))){display:none}
+.yos-history-button{background:#edf5fc;border-color:#d5e1ee;color:#385d7d}
 .top{padding-inline:16px}
 .headrow{align-items:flex-end}
 .daystream-brand{color:#205e6f;font-weight:800;font-size:13px;letter-spacing:.07em}
@@ -191,7 +200,7 @@ html body.yos-daystream-web{
 .timeline .event-copy{flex:1}
 .timeline .fixed-label{color:#3b5878;background:#ffffffb5;padding:2px 4px;border-radius:5px;font-size:9px;white-space:nowrap}
 .timeline .task-drag-grip{
- flex-basis:38px;min-width:38px;align-self:stretch;border:0;border-radius:8px;background:#ffffff8f;
+ display:grid;place-items:center;flex-basis:38px;min-width:38px;align-self:stretch;border:0;border-radius:8px;background:#ffffff8f;
  color:#4c527a;touch-action:none;font-size:21px;margin-right:0;
 }
 .timeline .yos-backdrop .task-drag-grip{height:36px}
@@ -1194,7 +1203,7 @@ function yosRenderCompatibility(){
  for(const [textName,css] of [['＋ 相乗候補','pos'],['− 余裕不足','neg'],['！ 時間衝突','danger'],['？ 判断材料不足','']]){
   const el=document.createElement('span');el.className=css;el.textContent=textName;key.append(el);
  }
- status.append(key);
+ if(counts.positive||counts.negative||counts.danger)status.append(key);
  const details=[];
  for(const record of rows)for(const reason of record.reasons)if(!details.includes(reason))details.push(reason);
  const review=document.getElementById('compatReview');

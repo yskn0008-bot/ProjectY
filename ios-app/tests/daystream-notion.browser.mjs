@@ -176,12 +176,20 @@ try{
  const otherDay=[{id:9123,t:'別日の計画',s:700,d:25,kind:'task',done:false}];
  await touchPage.evaluate(({startDay,nextDay,otherDay,store})=>{
   const plan=JSON.parse(localStorage.getItem(store));
-  plan.days[startDay].push({id:9124,t:'筋トレ',s:660,d:30,kind:'habit',done:false});
+  plan.days[startDay].push(
+   {id:9124,t:'筋トレ',s:660,d:30,kind:'habit',done:false},
+   {id:9125,t:'朝の準備',s:365,d:25,kind:'habit',done:false}
+  );
   plan.days[nextDay]=otherDay;
   if(!window.YOS_DAYSTREAM_WEB.write(plan))throw Error('fixture write failed');
  },{startDay,nextDay,otherDay,store});
  await touchPage.reload();
  await touchPage.evaluate(day=>{showDay(day);scrollTo(0,0)},startDay);
+ const toolsPanel=touchPage.locator('.native-tools');
+ assert.equal(await toolsPanel.locator('.yos-web-port').isVisible(),false);
+ await toolsPanel.locator('summary').click();
+ assert.match(await toolsPanel.locator('#yosWebSourceState').innerText(),/Notion 1件取得/);
+ await toolsPanel.locator('summary').click();
  const task=touchPage.locator('#tl .card.task').filter({hasText:'ウォーキング'});
  const grip=task.locator('.task-drag-grip'),body=task.locator('.task-copy');
  const dialog=touchPage.locator('#moveDialog'),time=touchPage.locator('#moveTime');

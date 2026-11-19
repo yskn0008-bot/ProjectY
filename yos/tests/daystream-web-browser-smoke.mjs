@@ -378,7 +378,7 @@ try{
   assert.equal(byId.get(2106).color,'rgb(223, 245, 236)','positive status has a green surface');
   assert.equal(byId.get(2108).color,'rgb(255, 240, 218)','negative status has an amber surface');
   assert.equal(byId.get(2102).color,'rgb(252, 229, 235)','overlap has a rose surface');
-  assert.equal(byId.get(2110).radius,'12px','compact task cards keep rounded corners');
+  assert.equal(byId.get(2110).radius,'11px','compact task cards keep rounded corners');
 
   const distinct=await p.locator('#tl [data-id="2100"], #tl [data-id="2102"], #tl [data-id="2110"]').evaluateAll(nodes=>nodes.map(el=>({
    id:Number(el.dataset.id),background:getComputedStyle(el).backgroundColor,
