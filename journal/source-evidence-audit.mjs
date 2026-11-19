@@ -19,7 +19,7 @@ const PRIVATE = /(?:sk-proj-|ntn_[A-Za-z0-9_-]+|gh[pousr]_[A-Za-z0-9_]{16,}|Bear
 const FIXED_HOSTS = new Set([
   'pmc.ncbi.nlm.nih.gov', 'pubmed.ncbi.nlm.nih.gov',
   'www.ncbi.nlm.nih.gov', 'api.crossref.org', 'www.crossref.org', 'www.ebi.ac.uk',
-  'www.jstage.jst.go.jp', 'www.nature.com',
+  'www.jstage.jst.go.jp', 'www.nature.com', 'journals.sagepub.com',
   'www.pref.okinawa.lg.jp', 'www.city.naha.okinawa.jp'
 ]);
 
