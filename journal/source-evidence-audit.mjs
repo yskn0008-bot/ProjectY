@@ -15,7 +15,7 @@ import {pathToFileURL} from 'node:url';
 const MAX_SOURCES = 6;
 const MAX_CLAIMS = 30;
 const MAX_BYTES = 750000;
-const PRIVATE = /(?:sk-proj-|ntn_[A-Za-z0-9_-]+|gh[pousr]_[A-Za-z0-9_]{16,}|Bearer\\s+\\S+|口座番号|マイナンバー|暗証番号|ようすけ|陽介|個人の予定|個人の残高|YOS_NOTION_INTEGRATION_TOKEN)/i;
+const PRIVATE = /(?:sk-proj-|ntn_[A-Za-z0-9_-]+|gh[pousr]_[A-Za-z0-9_]{16,}|Bearer\s+\S+|口座番号|マイナンバー|暗証番号|ようすけ|陽介|個人の予定|個人の残高|YOS_NOTION_INTEGRATION_TOKEN)/i;
 const FIXED_HOSTS = new Set([
   'pmc.ncbi.nlm.nih.gov', 'pubmed.ncbi.nlm.nih.gov',
   'www.ncbi.nlm.nih.gov', 'api.crossref.org',
@@ -25,7 +25,7 @@ const FIXED_HOSTS = new Set([
 
 function requireText(value, name, minimum = 1, maximum = 500) {
   if (typeof value !== 'string' || value.trim().length < minimum || value.length > maximum ||
-      /[\\u0000-\\u001f\\u007f]/.test(value)) throw new Error('Invalid ' + name);
+      /[\u0000-\u001f\u007f]/.test(value)) throw new Error('Invalid ' + name);
   return value.trim();
 }
 function onlyKeys(value, allowed, name) {
@@ -88,20 +88,20 @@ function decodeEntities(text) {
   });
 }
 export function extractReadableText(body, mime) {
-  if (!/^text\\/(?:html|plain)\\b/i.test(mime)) throw new Error('Unsupported source format');
+  if (!/^text\/(?:html|plain)\b/i.test(mime)) throw new Error('Unsupported source format');
   if (/(?:checking your browser|enable javascript and cookies to continue|verify you are human|captcha|access denied)/i.test(body.slice(0,9000)))
     throw new Error('Source blocked by access challenge');
-  const text = /^text\\/html/i.test(mime)
-    ? body.replace(/<(?:script|style|noscript|svg|nav|footer)\\b[^>]*>[\\s\\S]*?<\\/(?:script|style|noscript|svg|nav|footer)>/gi, ' ')
-      .replace(/<!--[\\s\\S]*?-->/g, ' ').replace(/<[^>]*>/g, ' ')
+  const text = /^text\/html/i.test(mime)
+    ? body.replace(/<(?:script|style|noscript|svg|nav|footer)\b[^>]*>[\s\S]*?<\/(?:script|style|noscript|svg|nav|footer)>/gi, ' ')
+      .replace(/<!--[\s\S]*?-->/g, ' ').replace(/<[^>]*>/g, ' ')
     : body;
-  return decodeEntities(text).replace(/\\s+/g, ' ').trim();
+  return decodeEntities(text).replace(/\s+/g, ' ').trim();
 }
 function normalize(text) {
-  return text.normalize('NFKC').toLowerCase().replace(/\\s+/g, ' ').trim();
+  return text.normalize('NFKC').toLowerCase().replace(/\s+/g, ' ').trim();
 }
 function numbers(text) {
-  return [...normalize(text).matchAll(/(?<![a-z0-9])\\d+(?:[.,]\\d+)?%?/g)].map(m => m[0]);
+  return [...normalize(text).matchAll(/(?<![a-z0-9])\d+(?:[.,]\d+)?%?/g)].map(m => m[0]);
 }
 export async function downloadSource(url, {fetcher = fetch, timeoutMs = 12000} = {}) {
   let current = safeSourceUrl(url);
@@ -119,7 +119,7 @@ export async function downloadSource(url, {fetcher = fetch, timeoutMs = 12000} =
     }
     if (!response.ok) throw new Error('Source returned HTTP ' + response.status);
     const mime = response.headers.get('content-type') || '';
-    if (!/^text\\/(?:html|plain)\\b/i.test(mime)) throw new Error('Unsupported source format');
+    if (!/^text\/(?:html|plain)\b/i.test(mime)) throw new Error('Unsupported source format');
     const len = Number(response.headers.get('content-length'));
     if (Number.isFinite(len) && len > MAX_BYTES) throw new Error('Source too large');
     if (!response.body) throw new Error('Empty source response');
@@ -181,10 +181,10 @@ export async function auditResearchPacket(packet, {fetcher = fetch, clock = () =
     '出典の文章に一致した引用が見つかっても、研究内容や主張を検証したことにはならない。',
     '次の引用は執筆GPTの入力素材に限定する。原典の結果・研究対象・限界を独立して照合する。',
     ...claims.filter(c=>c.status==='evidence_located_review_required')
-      .map(c=>c.id + ': 仮主張：' + c.text + '\\n原文抜粋：' + c.locatedExcerpt + '\\n出典：' + c.sourceUrl),
+      .map(c=>c.id + ': 仮主張：' + c.text + '\n原文抜粋：' + c.locatedExcerpt + '\n出典：' + c.sourceUrl),
     ...claims.filter(c=>c.status!=='evidence_located_review_required')
       .map(c=>c.id + ': 未確認につき使用禁止（' + c.status + '）')
-  ].join('\\n\\n');
+  ].join('\n\n');
   return {
     schemaVersion:1, kind:'research-evidence-audit', publicationAllowed:false,
     semanticFactCheck:'NOT_PERFORMED', checkedAt:clock().toISOString(),
@@ -204,8 +204,8 @@ async function main(argv) {
   if (!args.has('--input') || !args.has('--output')) throw new Error('Missing required input/output');
   const packet = JSON.parse(await readFile(args.get('--input'),'utf8'));
   const audit = await auditResearchPacket(packet);
-  await writeFile(args.get('--output'),JSON.stringify(audit,null,2)+'\\n',{flag:'wx',mode:0o600});
-  if (args.has('--notes')) await writeFile(args.get('--notes'),audit.handoffText+'\\n',{flag:'wx',mode:0o600});
+  await writeFile(args.get('--output'),JSON.stringify(audit,null,2)+'\n',{flag:'wx',mode:0o600});
+  if (args.has('--notes')) await writeFile(args.get('--notes'),audit.handoffText+'\n',{flag:'wx',mode:0o600});
   console.log(JSON.stringify({publicationAllowed:false,sourcesRetrieved:audit.checks.sourcesRetrieved,
     evidenceLocated:audit.checks.evidenceLocated,verifiedClaims:0}));
 }
