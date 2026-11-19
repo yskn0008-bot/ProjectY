@@ -161,5 +161,35 @@ class ClarityNextSourceContractTests(unittest.TestCase):
         self.assertIn('money-capture.html?text={moneyEncoded}', self.source)
         self.assertIn('openURL(moneyURL)', self.source)
 
+
+class ClarityNextOutcomeContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.source = SOURCE.read_text(encoding="utf-8")
+
+    def test_ledger_has_explicit_unverified_result(self):
+        self.assertIn('RESULT\\tunverified', self.source)
+        self.assertIn('REQUEST_DONE', self.source)
+        self.assertIn('@receiptLines = ""', self.source)
+        self.assertIn('保存・状態の確認待ち', self.source)
+        self.assertNotIn('alert(reply, "Clarity Next")', self.source)
+
+    def test_per_action_result_does_not_claim_verified_saves(self):
+        for label in ("アプリ起動", "端末設定", "タイマー", "カレンダー",
+                      "リマインダー", "マップ", "Notion"):
+            self.assertIn("・"+label+"：", self.source)
+        self.assertIn("予定の再取得なし", self.source)
+        self.assertIn("原文保存は未確認", self.source)
+        self.assertIn("記帳は未確認", self.source)
+        self.assertNotIn("Notion保存済み", self.source)
+
+    def test_success_is_nonblocking_and_blockers_explain_causes(self):
+        self.assertIn('showNotification(outcome, "Clarity｜処理結果", false)', self.source)
+        self.assertIn('alert("{cleanReply}\\n\\n{outcome}", "Clarity｜処理結果")', self.source)
+        self.assertIn("原因：AIの回答に実行項目がありません", self.source)
+        self.assertIn("本人の確認が必要です", self.source)
+        self.assertIn("この操作はClarity Nextで未対応です", self.source)
+
+
 if __name__ == "__main__":
     unittest.main()
