@@ -193,3 +193,41 @@ test('iPhone calendar errors are visible without revealing event content or edit
  assert.equal((await valid.readDeviceCalendar(text('life/calendar/native-bridge.js'),[],new Date())).status,'ok');
  assert.match(valid.getCalendarStatus(),/1件読取／1件表示対象/);
 });
+
+test('Notion work-shift calendar mirror must not hide the actual iCloud night shift',async()=>{
+ // The Notion record is a read-only source candidate, NOT a timeline card.
+ // iCloud is the authoritative fixed schedule; preserve split across midnight.
+ const now=new Date('2026-11-19T12:00:00+09:00');
+ const start=new Date('2026-11-20T17:00:00+09:00');
+ const end=new Date('2026-11-21T05:00:00+09:00');
+ const a=api({CalendarEvent:{between:async()=>[{
+  identifier:'icloud-work-shift-20261120',title:'夜勤',
+  startDate:start,endDate:end,isAllDay:false
+ }]}});
+ const notionMirror={
+  id:'a'.repeat(32),title:'夜勤',due:start.toISOString(),dueEnd:end.toISOString(),
+  sourceKind:'calendar',syncKey:'yos-shift-2026-11-20'
+ };
+ const mirror=await a.readDeviceCalendar(text('life/calendar/native-bridge.js'),[notionMirror],now);
+ assert.equal(mirror?.status,'ok');
+ assert.deepEqual([...mirror.calendarDays['2026-11-20']].map(x=>[x.title,x.start,x.duration]),[['夜勤',1020,420]]);
+ assert.deepEqual([...mirror.calendarDays['2026-11-21']].map(x=>[x.title,x.start,x.duration]),[['夜勤',0,300]]);
+ assert.match(a.getCalendarStatus(),/1件読取／1件表示対象/);
+ // A Notion source candidate must not be modified as a side effect.
+ assert.equal(notionMirror.sourceKind,'calendar');
+});
+
+test('other Notion calendar mirrors remain visible through the iCloud source',async()=>{
+ const now=new Date('2026-11-19T10:00:00+09:00');
+ const start=new Date('2026-11-20T08:00:00+09:00');
+ const end=new Date('2026-11-20T09:00:00+09:00');
+ const a=api({CalendarEvent:{between:async()=>[{
+   identifier:'calendar-mirror',title:'固定予定',startDate:start,endDate:end,isAllDay:false
+ }]}});
+ const notionMirror={title:'固定予定',due:start.toISOString(),dueEnd:end.toISOString(),
+   sourceKind:'calendar',syncKey:'apple-calendar:example'};
+ const projected=await a.readDeviceCalendar(text('life/calendar/native-bridge.js'),[notionMirror],now);
+ assert.equal(projected?.status,'ok');
+ assert.equal(projected.calendarDays['2026-11-20'].length,1);
+ assert.equal(projected.calendarDays['2026-11-20'][0].title,'固定予定');
+});
