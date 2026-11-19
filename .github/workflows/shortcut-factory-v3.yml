@@ -289,17 +289,17 @@ jobs:
           set -euo pipefail
           cd tools/shortcut-factory/shortcuts
           cherri 'YOS JOURNAL 調査編集 TEST.cherri' --skip-sign --debug
-          test -s 'YOS JOURNAL 調査編集 TEST_unsigned.shortcut'
-          test -s 'YOS JOURNAL 調査編集 TEST.plist'
+          test -s 'YOS JOURNAL 調査安定版 TEST_unsigned.shortcut'
+          test -s 'YOS JOURNAL 調査安定版 TEST.plist'
           cd ../../..
           python3 tools/shortcut-factory/patch_journal_research_inline.py \
-            'tools/shortcut-factory/shortcuts/YOS JOURNAL 調査編集 TEST_unsigned.shortcut' \
+            'tools/shortcut-factory/shortcuts/YOS JOURNAL 調査安定版 TEST_unsigned.shortcut' \
             --script 'tools/shortcut-factory/journal_public_research_inline.js'
           python3 tools/shortcut-factory/patch_journal_draft_inbox.py \
-            'tools/shortcut-factory/shortcuts/YOS JOURNAL 調査編集 TEST_unsigned.shortcut' \
+            'tools/shortcut-factory/shortcuts/YOS JOURNAL 調査安定版 TEST_unsigned.shortcut' \
             --script 'tools/shortcut-factory/journal_draft_inbox_inline.js'
           mkdir -p tools/shortcut-factory/artifacts
-          cp 'tools/shortcut-factory/shortcuts/YOS JOURNAL 調査編集 TEST_unsigned.shortcut' 'tools/shortcut-factory/artifacts/YOS-JOURNAL-RESEARCH-unsigned.shortcut'
+          cp 'tools/shortcut-factory/shortcuts/YOS JOURNAL 調査安定版 TEST_unsigned.shortcut' 'tools/shortcut-factory/artifacts/YOS-JOURNAL-RESEARCH-unsigned.shortcut'
 
       - name: Validate private Notion writer and failure tests
         shell: bash
@@ -320,7 +320,7 @@ jobs:
           python3 tools/clarity-factory/sign_with_hubsign.py \
             --input 'tools/shortcut-factory/artifacts/YOS-JOURNAL-RESEARCH-unsigned.shortcut' \
             --output 'tools/shortcut-factory/artifacts/YOS-JOURNAL-RESEARCH-signed.shortcut' \
-            --name 'YOS JOURNAL 調査編集 TEST'
+            --name 'YOS JOURNAL 調査安定版 TEST'
 
       - name: Check signed AEA1 artifact
         shell: bash
