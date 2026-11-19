@@ -21,8 +21,11 @@ const select=p=>clean(p?.select?.name,64);
 const num=p=>Number.isFinite(p?.number)&&p.number>=0?p.number:null;
 const date=p=>clean(p?.date?.start,70)||null;
 function safeHttps(v){
- const s=clean(v,1600);if(!s||s.length>1500)return null;
- try{const u=new URL(s);return u.protocol==='https:'?u.href:null}catch{return null}
+ const s=clean(v,1600);if(!s||s.length>1500||!/^https:\/\//i.test(s))return null;
+ // Scriptable's native JavaScript environment need not implement browser URL.
+ const authority=s.slice(8).split(/[/?#]/,1)[0];
+ if(!/^[a-z0-9.-]+(?::443)?$/i.test(authority)||authority.includes('..')||!authority.includes('.'))return null;
+ return s;
 }
 function project(row){
  if(!row||row.archived||row.in_trash||!validId(row.id)||!row.properties)return null;
