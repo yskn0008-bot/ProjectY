@@ -7,7 +7,7 @@ const begin=source.indexOf('const PICTURE_TARGETS=');
 const end=source.indexOf('async function discoverSony(){',begin);
 assert.ok(begin>0&&end>begin);
 
-function makeHarness({unsupported=false,writeFails=false,mode='standard',brightness=70}={}){
+function makeHarness({unsupported=false,writeFails=false,mode='standard',brightness=70,aggregateUnavailable=false,brightnessUnavailable=false}={}){
  const settings={
   pictureMode:{currentValue:mode,candidate:[{value:'standard'},{value:'Cinema home'},{value:'Custom'}]},
   brightness:{currentValue:String(brightness),candidate:[{min:0,max:50,step:1}]},
@@ -26,6 +26,7 @@ function makeHarness({unsupported=false,writeFails=false,mode='standard',brightn
    if(request.method==='getPictureQualitySettings'){
     const target=request.params[0].target;
     reads.push(target);
+    if((target===''&&aggregateUnavailable)||(target==='brightness'&&brightnessUnavailable))return JSON.stringify({error:[404,'Target not supported']});
     const entries=Object.entries(settings).filter(([name])=>target===''||target===name).map(([name,item])=>({target:name,isAvailable:true,...item}));
     return JSON.stringify({result:[entries]});
    }
@@ -173,4 +174,37 @@ test('X90L picture mode labels match Japanese TV, while Sony API values stay raw
  assert.equal(label('color','vivid'),'vivid');
  assert.ok(js.includes("pictureEscape(option)"));
  assert.ok(js.includes("pictureEscape(pictureModeLabel(target,option))"));
+});
+
+test('aggregate failure falls back to supported pictureMode without assuming brightness',async()=>{
+ const h=makeHarness({aggregateUnavailable:true,brightnessUnavailable:true,mode:'imax'});
+ const api=await h.api;
+ const probe=await api.pictureProbe();
+ assert.deepEqual(probe.entries.map(x=>x.target),['pictureMode']);
+ assert.equal(probe.entries[0].value,'imax');
+ assert.deepEqual(h.reads,['','pictureMode','brightness']);
+ assert.equal(h.writes.length,0,'read-only fallback cannot modify TV');
+ await api.pictureSave('movie');
+ assert.equal(h.keys.size,1);
+ const snapshot=JSON.parse([...h.keys.values()][0]);
+ assert.deepEqual(snapshot.settings,[{target:'pictureMode',value:'imax'}]);
+});
+
+test('supported option labels display Japanese names while saving Sony raw values',()=>{
+ const html=new Function(source.slice(0,source.indexOf('\nfunction secure(key)'))+'\nreturn html;')();
+ const js=html.split('<script>')[1].split('</script>')[0];
+ const a=js.indexOf('function pictureModeLabel('),b=js.indexOf('function renderPictureMenu(){',a);
+ const display=new Function(js.slice(a,b)+'return pictureOptionLabel;')();
+ const examples=[
+ ['pictureMode','vivid','ダイナミック'],['pictureMode','imax','IMAX'],
+ ['lightSensor','on','入'],['lightSensor','off','切'],
+ ['autoPictureMode','auto','自動'],['autoLocalDimming','high','強'],
+ ['xtendedDynamicRange','medium','中'],['hdrMode','off','切'],
+ ['colorTemperature','expert1','エキスパート1'],['colorSpace','auto','自動']
+ ];
+ for(const [target,raw,jp] of examples)assert.equal(display(target,raw),jp);
+ assert.equal(display('color','50'),'50');
+ assert.equal(display('pictureMode','undocumented'),'undocumented');
+ assert.ok(js.includes('pictureEscape(option)'), 'submit raw option');
+ assert.ok(js.includes('pictureEscape(pictureOptionLabel(target,option))'), 'display translated');
 });
