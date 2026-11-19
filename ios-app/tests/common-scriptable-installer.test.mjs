@@ -20,13 +20,20 @@ function fm(root){
 async function run(options={}){
  const cloud=options.cloud||fm('/icloud'),local=options.local||fm('/local'),catalog=options.catalog||shipped;
  const sources=options.sources||fixtures,choices=[...(options.choices||[0,-1])],alerts=[],opened=[],requests=[];
- class Request{constructor(url){this.url=url;this.response=null;requests.push(url)}
+ class Request{constructor(url){this.url=url;this.response=null;this.headers={};requests.push(url)}
  async loadString(){if(options.offline)throw Error('network offline');this.response={statusCode:options.status||200};if(this.url.includes('yos-common-installer-catalog.json'))return JSON.stringify(catalog);
- for(const t of catalog.targets)if(this.url.includes('/'+t.commit+'/')&&this.url.endsWith(t.path.split('/').map(encodeURIComponent).join('/')))return sources[t.id];
- throw Error('unexpected '+this.url)}}
+ for(const t of catalog.targets)if(this.url.includes('/'+t.commit+'/')&&this.url.endsWith(t.path.split('/').map(encodeURIComponent).join('/')))return options.corruptRaw?'// WRONG RAW CONTENT':sources[t.id];
+ throw Error('unexpected '+this.url)}
+ async loadJSON(){if(options.offline)throw Error('network offline');this.response={statusCode:200};
+ for(const t of catalog.targets)if(this.url.includes('/contents/'+t.path.split('/').map(encodeURIComponent).join('/')+'?ref='+t.commit)){
+  const source=options.corruptApi?'// WRONG API CONTENT':sources[t.id];
+  return {encoding:'base64',content:Buffer.from(source,'utf8').toString('base64'),size:Buffer.byteLength(source)};
+ }
+ throw Error('unexpected API '+this.url)}}
  class Alert{constructor(){this.title='';this.message='';this.actions=[]}addAction(x){this.actions.push(x)}addCancelAction(x){this.actions.push(x)}
  async presentAlert(){alerts.push({title:this.title,message:this.message});return choices.length?choices.shift():-1}}
- const globals={Request,Alert,FileManager:{iCloud:()=>cloud,local:()=>local},Safari:{open:x=>opened.push(x)},Script:{complete(){}},args:{shortcutParameter:options.id||'',queryParameters:{}},console};
+ const Data={fromBase64String(s){return {toRawString(){return Buffer.from(s,'base64').toString('utf8')}}}};
+ const globals={Data,Request,Alert,FileManager:{iCloud:()=>cloud,local:()=>local},Safari:{open:x=>opened.push(x)},Script:{complete(){}},args:{shortcutParameter:options.id||'',queryParameters:{}},console};
  await vm.runInNewContext('(async()=>{'+script+'})()',globals,{timeout:10000});
  return {cloud,local,alerts,opened,requests};
 }
@@ -544,4 +551,22 @@ test('interrupted unmanaged remote upgrade restores its exact code and removes n
  assert.equal(cloud.files.has(remoteReceipt),false);
  assert.equal(cloud.files.has(marker),false);
  assert.match(r.alerts.at(-1).message,/復旧しました/);
+});
+
+test('raw source hash mismatch retries immutable GitHub Contents API before writing',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const r=await run({cloud,local,id:'remote-hub',corruptRaw:true});
+ assert.equal(r.cloud.files.size,0);
+ assert.equal(r.local.files.size,0);
+ assert.ok(r.requests.some(x=>x.includes('/contents/ios-app/scriptable/remote-widgets/YOS%20Remote%20Hub.js?ref=')));
+ assert.match(r.alerts.at(-1).message,/既存の「リモコン」がありません/);
+});
+test('both source routes mismatching stop without touching scripts and explain fingerprints',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ cloud.files.set(remotePath,'PERSONAL REMOTE');
+ const r=await run({cloud,local,id:'remote-hub',corruptRaw:true,corruptApi:true});
+ assert.equal(cloud.files.get(remotePath),'PERSONAL REMOTE');
+ assert.match(r.alerts.at(-1).message,/検証が2経路とも不一致/);
+ assert.match(r.alerts.at(-1).message,/RAW:/);
+ assert.match(r.alerts.at(-1).message,/API:/);
 });
