@@ -168,12 +168,13 @@ function renderOfficialFeed(feed,at=new Date()){
  if(generated.getTime()>at.getTime()+10*60000)throw Error('future snapshot');
  const ageMin=(at.getTime()-generated.getTime())/60000,expired=ageMin>150;
  const validSources=feed.sources.filter(s=>s&&typeof s.name==='string'&&['ok','stale','unknown','error'].includes(s.status));
- const unresolved=validSources.filter(s=>s.status!=='ok').length;
- const noneConfirmed=validSources.length===0||unresolved===validSources.length;
- const summaryStatus=expired?'配信が古い':noneConfirmed?'情報源未取得':unresolved?'一部未取得':'配信確認';
+ const successCount=validSources.filter(s=>s.status==='ok').length;
+ const failedCount=validSources.filter(s=>s.status==='error').length;
+ const needsReview=validSources.filter(s=>s.status==='stale'||s.status==='unknown').length;
+ const summaryStatus=expired?'配信が古い':successCount===0?(failedCount?'情報源未取得':'確認済み情報なし'):failedCount?'一部未取得':needsReview?'一部要確認':'配信確認';
  const status=$('feed-status');status.textContent=summaryStatus;status.className='badge '+(summaryStatus==='配信確認'?'good':'warn');
  const sourceLabels=validSources.map(s=>s.name.split('｜')[0]+'：'+sourceLabel(s.status)).join('｜');
- $('feed-meta').textContent='最終配信 '+format(generated)+'｜'+(expired?'配信が古いため営業判断には使用不可':(noneConfirmed?'確認できた公式情報がありません':unresolved?'一部の公式情報は要確認':'全ての対象情報源に応答あり')+(sourceLabels?'｜'+sourceLabels:''));
+ $('feed-meta').textContent='最終配信 '+format(generated)+'｜'+(expired?'配信が古いため営業判断には使用不可':successCount===0?'確認できた公式情報がありません':failedCount?'一部の公式情報を取得できませんでした':needsReview?'一部の公式情報は更新日・鮮度を要確認':'全ての対象情報源に応答あり')+(sourceLabels?'｜'+sourceLabels:'');
  const holder=$('feed-sources');holder.replaceChildren();
  for(const s of feed.sources.slice(0,5)){
    if(!s||typeof s.name!=='string'||!['ok','stale','unknown','error'].includes(s.status))continue;
