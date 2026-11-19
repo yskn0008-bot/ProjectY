@@ -146,8 +146,8 @@
       "id": "shopping",
       "name": "YOS Shopping",
       "path": "ios-app/scriptable/YOS Shopping.js",
-      "commit": "6893b2d121d803488ea396368476710683a12e8d",
-      "sha256": "df1eeb70d9b05af0a80c993cf5efab6aaa2a6c5132312efc49006f79caf5d1f2"
+      "commit": "47b6db740cf602968b2ab1111a0817b15e103349",
+      "sha256": "605baa87d9431620594e0b7a622eefcc1fadc0c36c7521989996a0d9a9bf272b"
     }
   ]
 }
