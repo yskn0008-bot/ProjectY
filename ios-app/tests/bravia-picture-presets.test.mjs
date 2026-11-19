@@ -9,7 +9,7 @@ assert.ok(begin>0&&end>begin);
 
 function makeHarness({unsupported=false,writeFails=false,mode='standard',brightness=70,aggregateUnavailable=false,brightnessUnavailable=false}={}){
  const settings={
-  pictureMode:{currentValue:mode,candidate:[{value:'standard'},{value:'Cinema home'},{value:'Custom'}]},
+  pictureMode:{currentValue:mode,candidate:[{value:'standard'},{value:'Cinema home'},{value:'Custom'},{value:'imax'}]},
   brightness:{currentValue:String(brightness),candidate:[{min:0,max:50,step:1}]},
   contrast:{currentValue:'90',candidate:[{min:0,max:100,step:1}]},
   color:{currentValue:'50',candidate:[{min:0,max:100,step:1}]}
@@ -173,7 +173,7 @@ test('X90L picture mode labels match Japanese TV, while Sony API values stay raw
  assert.equal(label('pictureMode','newSonyMode'),'newSonyMode');
  assert.equal(label('color','vivid'),'vivid');
  assert.ok(js.includes("pictureEscape(option)"));
- assert.ok(js.includes("pictureEscape(pictureModeLabel(target,option))"));
+ assert.ok(js.includes("pictureEscape(pictureOptionLabel(target,option))"));
 });
 
 test('aggregate failure falls back to supported pictureMode without assuming brightness',async()=>{
