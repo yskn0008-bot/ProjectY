@@ -84,6 +84,13 @@ footer{font-size:11px;color:#94aec4;padding:0 13px calc(18px + env(safe-area-ins
  <p id="phase-explanation"></p>
  <div class="decision"><small>現時点の営業判断</small><strong>移動先の優位性：未判定</strong><p>公式情報だけでは「待つ・流す・移動」の収益差は分かりません。</p></div>
 </section>
+<section id="auto-research" aria-label="定期的に取得した公式情報">
+ <div class="row"><h2>公式情報｜自動チェック</h2><span id="feed-status" class="badge">確認中</span></div>
+ <p id="feed-meta">公式情報の定期確認結果を読み込みます。</p>
+ <details id="feed-details" class="details"><summary>内訳・公式出典を見る</summary><div id="feed-sources" aria-live="polite"></div></details>
+ <button id="feed-reload" type="button">公開済みの情報を再確認</button>
+ <p class="tiny">既存のGitHub定期実行（原則毎時）による情報です。速報保証なし。公式更新情報とタクシー需要の有無は別です。</p>
+</section>
 <section id="shift-brief" class="shift-brief" hidden aria-label="11月21日出庫前の確認事項">
  <div class="row shift-header"><h2>11/21（土）10:00出庫</h2><span class="badge">事前確認</span></div>
  <p>11/20確認の公式開催予定。終了時刻・当日の変更・乗車需要は未確認。</p>
@@ -100,13 +107,7 @@ footer{font-size:11px;color:#94aec4;padding:0 13px calc(18px + env(safe-area-ins
  <p id="weather-meta">発表時刻：未確認｜取得時刻：未確認｜対象時刻：未確認</p>
  <details class="details"><summary>雨雲・予報を公式ページで確認</summary><div class="body"><div class="links"><a href="https://www.jma.go.jp/bosai/rain/" target="_blank" rel="noopener noreferrer">雨雲レーダー ↗</a><a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" rel="noopener noreferrer">公式天気予報 ↗</a></div></div></details>
 </section>
-<section id="auto-research" aria-label="定期的に取得した公式情報">
- <div class="row"><h2>公式情報｜自動チェック</h2><span id="feed-status" class="badge">確認中</span></div>
- <p id="feed-meta">公式情報の定期確認結果を読み込みます。</p>
- <div id="feed-sources" aria-live="polite"></div>
- <button id="feed-reload" type="button">公開済みの情報を再確認</button>
- <p class="tiny">既存のGitHub定期実行（原則毎時）による情報です。速報保証なし。公式更新情報とタクシー需要の有無は別です。</p>
-</section>
+
 <section aria-label="他の公式情報">
  <div class="row"><h2>その他の重要情報</h2><span class="badge">自動取得未接続</span></div>
  <p class="section-intro">タップして公式情報を確認。開いただけでは確認済みになりません。</p>
@@ -171,7 +172,8 @@ function renderOfficialFeed(feed,at=new Date()){
  const noneConfirmed=validSources.length===0||unresolved===validSources.length;
  const summaryStatus=expired?'配信が古い':noneConfirmed?'情報源未取得':unresolved?'一部未取得':'配信確認';
  const status=$('feed-status');status.textContent=summaryStatus;status.className='badge '+(summaryStatus==='配信確認'?'good':'warn');
- $('feed-meta').textContent='最終配信 '+format(generated)+'｜'+(expired?'配信が古いため営業判断には使用不可':noneConfirmed?'確認できた公式情報がありません':unresolved?'一部の公式情報は取得・鮮度に問題があります':'各情報源の状態を個別確認');
+ const sourceLabels=validSources.map(s=>s.name.split('｜')[0]+'：'+sourceLabel(s.status)).join('｜');
+ $('feed-meta').textContent='最終配信 '+format(generated)+'｜'+(expired?'配信が古いため営業判断には使用不可':(noneConfirmed?'確認できた公式情報がありません':unresolved?'一部の公式情報は要確認':'全ての対象情報源に応答あり')+(sourceLabels?'｜'+sourceLabels:''));
  const holder=$('feed-sources');holder.replaceChildren();
  for(const s of feed.sources.slice(0,5)){
    if(!s||typeof s.name!=='string'||!['ok','stale','unknown','error'].includes(s.status))continue;
