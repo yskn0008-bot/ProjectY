@@ -8,11 +8,12 @@ const study={
   abstractText:'The first study evaluated the association between ratings of facial attractiveness and measured immune response under experimentally controlled conditions. '.repeat(5),
   pubYear:'2022',doi:'10.1038/s41598-022-22866-x',pmid:'36319732'
 };
-async function run({data={resultList:{result:[study]}},failure=false,input='',fallback=false}={}){
+async function run({data={resultList:{result:[study]}},failure=false,input='',fallback=false,cache=null}={}){
   let result,completed=0,urls=[],timeouts=[];
   class Request{
     constructor(url){urls.push(url);this.url=url;}
     async loadJSON(){
+      timeouts.push(this.timeoutInterval);
       if(failure)throw new Error('network disabled');
       if(fallback){
         if(this.url.includes('ebi.ac.uk'))throw new Error('Europe PMC timeout');
@@ -25,7 +26,17 @@ async function run({data={resultList:{result:[study]}},failure=false,input='',fa
     }
   }
   const Script={setShortcutOutput(x){result=x;},complete(){completed++;}};
-  await new AsyncFunction('Request','Script','args',source)(Request,Script,{shortcutParameter:input});
+  const FileManager={local(){
+    if(!cache)throw new Error('No local filesystem mock');
+    return {
+      documentsDirectory(){return '/local';},
+      joinPath(a,b){return a+'/'+b;},
+      fileExists(p){return cache.has(p);},
+      readString(p){return cache.get(p);},
+      writeString(p,v){cache.set(p,v);}
+    };
+  }};
+  await new AsyncFunction('Request','Script','args','FileManager',source)(Request,Script,{shortcutParameter:input},FileManager);
   return {result,completed,urls,timeouts};
 }
 test('returns only real received abstract metadata with DOI URL',async()=>{
@@ -67,4 +78,31 @@ test('uses publisher-deposited Crossref abstract only if Europe PMC unavailable'
   assert.equal(r.urls.length,2);
   assert.match(r.urls[1],/^https:\/\/api\.crossref\.org\/works\?/);
   assert.ok(!r.urls.join(' ').includes('家計残高'));
+});
+
+test('repeated run on same UTC day reuses public-only cache without another network request',async()=>{
+  const cache=new Map();
+  const first=await run({cache});
+  assert.match(first.result,/YOS_RESEARCH_ABSTRACT_V1/);
+  assert.equal(first.urls.length,1);
+  assert.equal(first.completed,1);
+  assert.equal(cache.size,1);
+  const second=await run({failure:true,cache,input:'非公開メモ'});
+  assert.equal(second.result,first.result);
+  assert.equal(second.urls.length,0);
+  assert.equal(second.completed,1);
+  assert.ok(!second.result.includes('非公開メモ'));
+});
+test('research request total timeout budget is limited to 7s and fails closed',async()=>{
+  const r=await run({failure:true});
+  assert.equal(r.result,'YOS_RESEARCH_HOLD_V1:SOURCE_UNAVAILABLE');
+  assert.equal(r.completed,1);
+  assert.equal(r.timeouts.length,2);
+  assert.ok(r.timeouts[0]<=4 && r.timeouts[1]<=3);
+});
+test('tampered or malformed local source cache is ignored',async()=>{
+  const cache=new Map([['/local/YOS JOURNAL Public Abstract Cache V1.json','{"day":"broken","notes":"YOS_RESEARCH_ABSTRACT_V1"}']]);
+  const r=await run({failure:true,cache});
+  assert.equal(r.result,'YOS_RESEARCH_HOLD_V1:SOURCE_UNAVAILABLE');
+  assert.equal(r.completed,1);
 });
