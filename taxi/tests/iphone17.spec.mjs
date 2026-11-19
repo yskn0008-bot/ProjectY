@@ -677,7 +677,7 @@ test('Taxi research redesign: compact first viewport, expandable sources and aut
   expect(positions.pageWidth).toBeLessThanOrEqual(positions.screenWidth);
   expect(positions.decision).toBeLessThan(380);
   expect(positions.weather).toBeLessThan(770);
-  expect(positions.sources).toBeLessThan(850);
+  expect(positions.sources).toBeGreaterThan(positions.weather); // Scheduled source card is now between weather and manual links.
   const road=page.locator('#official-sources details').first();
   await expect(road).not.toHaveAttribute('open','');
   await road.locator('summary').click();
@@ -768,4 +768,56 @@ test('Taxi shift briefing: 2026-11-21 10:00 start shows verified official schedu
   await page.evaluate(()=>window.dispatchEvent(new Event('pageshow')));
   await expect(page.locator('#shift-brief')).toBeHidden();
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+
+test('Taxi scheduled evidence: source status, age, official links and change tracking are rendered safely',async ({page})=>{
+ const now=new Date('2026-11-20T12:00:00+09:00');
+ await page.clock.setFixedTime(now);
+ await page.route('**/taxi/research-feed.json?ts=*',async route=>{
+   await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+     schema:1,generatedAt:'2026-11-20T02:50:00Z',timezone:'Asia/Tokyo',sources:[
+       {id:'jma',name:'気象庁｜予報',status:'ok',checkedAt:'2026-11-20T02:50:00Z',
+        publishedAt:'2026-11-20T02:00:00Z',url:'https://www.jma.go.jp/bosai/forecast/',
+        summary:'くもり',items:[]},
+       {id:'naha_rss',name:'那覇市｜公式更新',status:'ok',checkedAt:'2026-11-20T02:50:00Z',
+        publishedAt:null,url:'https://www.city.naha.okinawa.jp/about/rss.html',
+        summary:'直近の関連見出し1件',items:[{id:'a',title:'交通規制のお知らせ',url:'https://www.city.naha.okinawa.jp/news/test.html'}]},
+       {id:'cruise_catalog',name:'沖縄県｜クルーズ台帳',status:'error',checkedAt:'2026-11-20T02:50:00Z',
+        publishedAt:null,url:'https://data.bodik.jp/dataset/470007_okinawa-cruise',
+        summary:'公式情報を取得できませんでした',items:[]}
+     ],difference:{status:'compared',added:[{id:'a'}],previousAt:'2026-11-20T01:50:00Z'}
+   })});
+ });
+ await page.goto('./research.html?phase=during',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#feed-status')).toHaveText('配信確認');
+ await expect(page.locator('#feed-sources')).toContainText('くもり');
+ await expect(page.locator('#feed-sources')).toContainText('直近の関連見出し1件');
+ await expect(page.locator('#feed-sources')).toContainText('未取得');
+ await expect(page.locator('#feed-sources')).toContainText('前回の配信との差分');
+ await expect(page.locator('#feed-sources a[href="https://www.city.naha.okinawa.jp/news/test.html"]')).toBeVisible();
+ expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+test('Taxi scheduled evidence: stale snapshot cannot masquerade as current',async ({page})=>{
+ await page.clock.setFixedTime(new Date('2026-11-20T12:00:00+09:00'));
+ await page.route('**/taxi/research-feed.json?ts=*',async route=>{
+   await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      schema:1,generatedAt:'2026-11-19T05:00:00Z',
+      sources:[{id:'jma',name:'気象庁｜予報',status:'ok',checkedAt:'2026-11-19T05:00:00Z',
+        publishedAt:'2026-11-19T04:00:00Z',url:'https://www.jma.go.jp/bosai/forecast/',summary:'昔の天気',items:[]}],
+      difference:{status:'compared',added:[],previousAt:null}
+   })});
+ });
+ await page.goto('./research.html?phase=before',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#feed-status')).toHaveText('配信が古い');
+ await expect(page.locator('#feed-sources')).not.toContainText('昔の天気');
+ await expect(page.locator('#feed-sources')).toContainText('更新されていません');
+});
+
+test('Taxi scheduled evidence: missing feed fails closed',async ({page})=>{
+ await page.route('**/taxi/research-feed.json?ts=*',route=>route.fulfill({status:503,body:'unavailable'}));
+ await page.goto('./research.html',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#feed-status')).toHaveText('未取得');
+ await expect(page.locator('#feed-meta')).toContainText('公式原本を直接確認');
 });
