@@ -134,6 +134,13 @@
       "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Picture Off.js",
       "commit": "cfae0db7be4e5d560242520ee9c99b04a8a08fd5",
       "sha256": "402901e68dc2e21b6206dc0702d6d7cfdff0865b33fd0a49e589377140a6d2ce"
+    },
+    {
+      "id": "remote-hub",
+      "name": "リモコン",
+      "path": "ios-app/scriptable/remote-widgets/YOS Remote Hub.js",
+      "commit": "696eb3bd9d0bc0faf147c55ee4e73aa1c1ae9f44",
+      "sha256": "cf7b6f441db5e715feee185971c77b51e3c6945675fac71c13a6e7050072235a"
     }
   ]
 }

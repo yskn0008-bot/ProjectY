@@ -33,7 +33,7 @@ async function run(options={}){
 const target='/icloud/YOS Timeline Auto.js',receipt='/icloud/YOS Common Installer Data/YOS%20Timeline%20Auto.receipt.json',marker='/icloud/YOS Common Installer Data/YOS%20Timeline%20Auto.pending.json';
 test('catalog pins original bytes, canonical script names and SHA256',()=>{
  assert.equal(shipped.schema,1);
- for(const t of shipped.targets){assert.equal(hash(fixtures[t.id]),t.sha256);assert.equal(t.name,t.path.split('/').pop().slice(0,-3));assert.match(t.commit,/^[0-9a-f]{40}$/)}});
+ for(const t of shipped.targets){assert.equal(hash(fixtures[t.id]),t.sha256);assert.equal(t.name,t.id==='remote-hub'?'リモコン':t.path.split('/').pop().slice(0,-3));assert.match(t.commit,/^[0-9a-f]{40}$/)}});
 test('calendar importer is available through the existing shared installer without manual naming',async()=>{
  const entry=shipped.targets.find(t=>t.id==='life-calendar-sync');
  assert.ok(entry,'YOS Life Calendar Sync must be catalogued');
@@ -464,4 +464,84 @@ test('two orphan receipts in iCloud and local prevent any restore',async()=>{
  assert.deepEqual([...cloud.files],c);assert.deepEqual([...local.files],l);
  assert.equal(r.opened.length,0);
  assert.match(r.alerts.at(-1).message,/管理記録が両方/);
+});
+
+const REMOTE_REPLACEMENTS=[
+ ['YOS Remote Hub','リモコン'],['YOS BRAVIA Remote','テレビリモコン'],['YOS BRAVIA Widget','テレビウィジェット'],
+ ['YOS AC Remote','エアコンリモコン'],['YOS AC Widget','エアコンウィジェット'],
+ ['YOS Light Remote','照明リモコン'],['YOS Light Widget','照明ウィジェット'],
+ ['YOS Tapo H110 Core','リモコン/内部/Tapo共通']
+];
+const localizeRemote=s=>REMOTE_REPLACEMENTS.reduce((v,[a,b])=>v.split(a).join(b),s);
+const remoteEntry=shipped.targets.find(x=>x.id==='remote-hub');
+const remotePath='/icloud/リモコン.js';
+const remoteReceipt='/icloud/YOS Common Installer Data/'+encodeURIComponent('リモコン')+'.receipt.json';
+test('bundle and JavaScript installer are identical',()=>{
+ const bundle=JSON.parse(fs.readFileSync(new URL('../scriptable/YOS Common Installer.scriptable',import.meta.url),'utf8'));
+ assert.equal(bundle.name,'YOS Common Installer');
+ assert.equal(bundle.script,script);
+});
+test('Japanese remote uses one verified source and never creates a second remote',async()=>{
+ assert.ok(remoteEntry);
+ assert.equal(remoteEntry.name,'リモコン');
+ assert.equal(remoteEntry.path,'ios-app/scriptable/remote-widgets/YOS Remote Hub.js');
+ assert.equal(hash(fixtures['remote-hub']),remoteEntry.sha256);
+ assert.match(fixtures['remote-hub'],/ショートカット/);
+ assert.match(fixtures['remote-hub'],/pictureSave/);
+ const r=await run({id:'remote-hub'});
+ assert.equal(r.cloud.files.size,0);
+ assert.equal(r.local.files.size,0);
+ assert.match(r.alerts.at(-1).message,/既存の「リモコン」がありません/);
+});
+test('known unmanaged Japanese remote upgrades in place, protecting other scripts',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const old=localizeRemote(fixtures['remote-hub']);
+ assert.equal(hash(old),'49ca95b6ce3e0ad07397cfc561d4027d0b04764cf5362e959070956c5186a071');
+ cloud.files.set(remotePath,old);
+ cloud.files.set('/icloud/テレビリモコン.js','PRIVATE TV REMOTE');
+ cloud.files.set('/icloud/エアコンリモコン.js','PRIVATE AIRCON');
+ const future=fixtures['remote-hub']+'\n// TEST: verified future picture UI release\n';
+ const next=localizeRemote(future);
+ const catalog=clone(shipped),entry=catalog.targets.find(x=>x.id==='remote-hub');
+ entry.commit='f'.repeat(40);entry.sha256=hash(future);
+ const r=await run({cloud,local,id:'remote-hub',catalog,sources:{...fixtures,'remote-hub':future},choices:[0,-1]});
+ assert.equal(cloud.files.get(remotePath),next);
+ assert.equal(JSON.parse(cloud.files.get(remoteReceipt)).sha256,hash(next));
+ assert.equal(cloud.files.get('/icloud/テレビリモコン.js'),'PRIVATE TV REMOTE');
+ assert.equal(cloud.files.get('/icloud/エアコンリモコン.js'),'PRIVATE AIRCON');
+ const backup='/icloud/YOS Common Installer Data/backups/'+encodeURIComponent('リモコン')+'-'+hash(old)+'.txt';
+ assert.equal(cloud.files.get(backup),old);
+ assert.equal(r.opened.length,0);
+});
+test('unknown edits and iCloud/local duplicates are protected',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ cloud.files.set(remotePath,'PERSONAL SCRIPT');
+ let r=await run({id:'remote-hub',cloud,local});
+ assert.equal(cloud.files.get(remotePath),'PERSONAL SCRIPT');
+ assert.match(r.alerts.at(-1).message,/管理記録がありません/);
+ const other=fm('/local');
+ cloud.files.set(remotePath,localizeRemote(fixtures['remote-hub']));
+ other.files.set('/local/リモコン.js','CUSTOM LOCAL');
+ r=await run({id:'remote-hub',cloud,local:other});
+ assert.equal(other.files.get('/local/リモコン.js'),'CUSTOM LOCAL');
+ assert.match(r.alerts.at(-1).title,/同名スクリプト/);
+});
+test('interrupted unmanaged remote upgrade restores its exact code and removes new receipt',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const old=localizeRemote(fixtures['remote-hub']);
+ const future=old+'\n// synthetic newer version\n';
+ const oldHash=hash(old),newHash=hash(future);
+ const folder='/icloud/YOS Common Installer Data';
+ cloud.createDirectory(folder+'/backups');
+ const backup=folder+'/backups/'+encodeURIComponent('リモコン')+'-'+oldHash+'.txt';
+ const marker=folder+'/'+encodeURIComponent('リモコン')+'.pending.json';
+ cloud.files.set(backup,old);
+ cloud.files.set(remotePath,future);
+ cloud.files.set(remoteReceipt,JSON.stringify({schema:1,name:'リモコン',id:'remote-hub',path:remoteEntry.path,storage:'iCloud',sha256:newHash,commit:'f'.repeat(40)}));
+ cloud.files.set(marker,JSON.stringify({schema:1,name:'リモコン',oldHash,newHash,backup,receiptFile:remoteReceipt,oldReceipt:null}));
+ const r=await run({cloud,local,id:'remote-hub'});
+ assert.equal(cloud.files.get(remotePath),old);
+ assert.equal(cloud.files.has(remoteReceipt),false);
+ assert.equal(cloud.files.has(marker),false);
+ assert.match(r.alerts.at(-1).message,/復旧しました/);
 });
