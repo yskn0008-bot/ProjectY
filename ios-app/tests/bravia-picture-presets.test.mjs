@@ -162,7 +162,7 @@ test('unknown shortcut and invalid preset metadata are rejected before writes',a
 });
 
 test('X90L picture mode labels match Japanese TV, while Sony API values stay raw',()=>{
- const html=new Function(source.slice(0,source.indexOf('\\nfunction secure(key)'))+'\\nreturn html;')();
+ const html=new Function(source.slice(0,source.indexOf('\nfunction secure(key)'))+'\nreturn html;')();
  const js=html.split('<script>')[1].split('</script>')[0];
  const start=js.indexOf('function pictureModeLabel('),end=js.indexOf('function renderPictureMenu(){',start);
  assert.ok(start>0&&end>start);
