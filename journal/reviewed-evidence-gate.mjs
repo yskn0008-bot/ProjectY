@@ -29,7 +29,10 @@ export function validateIndependentDossier(d){
  const reviewed=str(d.reviewedOn,10,10,'review date');
  if(!/^\d{4}-\d{2}-\d{2}$/.test(reviewed)||Number.isNaN(Date.parse(reviewed)))throw Error('Invalid review date');
  str(d.topic,25,300,'topic');str(d.reviewerMethod,50,600,'review method');
- if(!/original publisher|original source|directly opened/i.test(d.reviewerMethod))
+ // Reject clearly model-only methods even if they mention "original publisher"
+ // in a negative sentence (e.g. "did not open the original publisher source").
+ if(/(?:\bAI model\b|\bguessed\b|\bdid not\b|\bnot directly\b|\bwithout (?:reading|opening|checking)\b)/i.test(d.reviewerMethod) ||
+    !/^(?:Directly opened and read original publisher|Directly opened (?:and read )?the original source)/i.test(d.reviewerMethod))
    throw Error('Independent original-source method not described');
  if(!Array.isArray(d.sources)||d.sources.length<1||d.sources.length>8)throw Error('Invalid sources');
  if(!Array.isArray(d.claims)||d.claims.length<1||d.claims.length>50)throw Error('Invalid claims');
