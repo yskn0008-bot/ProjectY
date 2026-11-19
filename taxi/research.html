@@ -51,6 +51,15 @@ details a{display:inline-flex;align-items:center;min-height:42px;border:1px soli
 .source-list details:last-child{border-bottom:none}
 .source-list summary b{flex:1;font-size:15px;letter-spacing:-.015em}
 .source-list summary .badge{font-size:10px}
+.shift-header{margin-bottom:7px}
+.shift-brief{border-color:#527c99}
+.shift-brief .badge{color:var(--warn);border-color:#977b4c}
+.shift-brief p{color:var(--muted);font-size:12px;line-height:1.45}
+.shift-item{display:flex;align-items:baseline;gap:8px;border-top:1px solid #304b64;padding:9px 0;color:var(--text);text-decoration:none;min-height:42px}
+.shift-item .time{flex:0 0 85px;color:#b7e6fc;font-size:12px;font-weight:700}
+.shift-item .what{flex:1;font-size:13px;line-height:1.35}
+.shift-item .external{font-size:13px;color:#b4daec}
+[hidden]{display:none!important}
 .note{padding:11px 13px;background:#0b2339}
 .note summary{font-size:13px;font-weight:650;color:#bedaf0;min-height:36px}
 .note .body{font-size:12px}
@@ -60,12 +69,20 @@ footer{font-size:11px;color:#94aec4;padding:0 13px calc(18px + env(safe-area-ins
 </style>
 </head>
 <body>
-<header><a href="./ui-v2.html">‹ 営業画面へ戻る</a><h1>今夜の営業リサーチ</h1></header>
+<header><a href="./ui-v2.html">‹ 営業画面へ戻る</a><h1>営業リサーチ</h1></header>
 <main>
 <section aria-label="営業前・営業中の切替">
  <div class="choice"><button type="button" id="phase-before">営業前</button><button type="button" id="phase-during">営業中</button></div>
  <p id="phase-explanation"></p>
  <div class="decision"><small>現時点の営業判断</small><strong>移動先の優位性：未判定</strong><p>公式情報だけでは「待つ・流す・移動」の収益差は分かりません。</p></div>
+</section>
+<section id="shift-brief" class="shift-brief" hidden aria-label="11月21日出庫前の確認事項">
+ <div class="row shift-header"><h2>11/21（土）10:00出庫</h2><span class="badge">事前確認</span></div>
+ <p>11/20確認の公式開催予定。終了時刻・当日の変更・乗車需要は未確認。</p>
+ <a class="shift-item" href="https://www.city.ginowan.lg.jp/soshiki/keizai/3/1_1/20848.html" target="_blank" rel="noopener noreferrer"><span class="time">09:00〜17:00</span><span class="what">宜野湾市産業まつり｜宜野湾海浜公園</span><span class="external">↗</span></a>
+ <a class="shift-item" href="https://www.city.naha.okinawa.jp/kankou-bunka/kankou/1003485/1012115.html" target="_blank" rel="noopener noreferrer"><span class="time">14:00開場<br>16:00開始</span><span class="what">日米対抗ソフトボール｜沖縄セルラースタジアム那覇</span><span class="external">↗</span></a>
+ <a class="shift-item" href="https://fruitszipper.asobisystem.com/live_information/detail/40048" target="_blank" rel="noopener noreferrer"><span class="time">16:30開場<br>17:30開演</span><span class="what">FRUITS ZIPPER｜沖縄コンベンションセンター劇場棟</span><span class="external">↗</span></a>
+ <p>ここから空車移動を勧めるものではありません。最新の交通規制・開催状況は出庫前に再確認。</p>
 </section>
 <section id="weather-section" aria-label="気象庁の公開予報データ取得">
  <div class="row"><h2>天気予報｜本島中南部</h2><span id="weather-status" class="badge">未取得</span></div>
@@ -94,6 +111,18 @@ footer{font-size:11px;color:#94aec4;padding:0 13px calc(18px + env(safe-area-ins
 (()=>{
 const ENDPOINT='https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json';
 const $=id=>document.getElementById(id);
+function tokyoYmd(now){
+ const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
+ const value=key=>parts.find(p=>p.type===key)?.value||'';
+ return value('year')+'-'+value('month')+'-'+value('day');
+}
+function refreshShiftBrief(){
+ const day=tokyoYmd(new Date());
+ $('shift-brief').hidden=day!=='2026-11-20'&&day!=='2026-11-21';
+}
+refreshShiftBrief();
+window.addEventListener('pageshow',refreshShiftBrief);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshShiftBrief()});
 let phase=new URL(location.href).searchParams.get('phase')==='during'?'during':'before';
 const format=date=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(date);
 function setPhase(next){

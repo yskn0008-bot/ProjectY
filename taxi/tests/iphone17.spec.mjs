@@ -739,3 +739,33 @@ test('Taxi research LIVE verification of JMA data from a browser without mocked 
   await testInfo.attach('yos-jma-live-probe.json',{body:Buffer.from(JSON.stringify(result,null,2)),contentType:'application/json'});
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
 });
+
+
+test('Taxi shift briefing: 2026-11-21 10:00 start shows verified official schedules and expires afterward',async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-20T09:00:00+09:00'));
+  await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{
+      publishingOffice:'沖縄気象台',reportDatetime:'2026-11-20T08:00:00+09:00',
+      timeSeries:[{timeDefines:['2026-11-20T06:00:00+09:00'],
+        areas:[{area:{code:'471010'},weathers:['くもり']}]}]
+    }])});
+  });
+  await page.goto('./research.html?phase=before',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#shift-brief')).toBeVisible();
+  await expect(page.locator('header h1')).toHaveText('営業リサーチ');
+  await expect(page.locator('#shift-brief')).toContainText('11/21（土）10:00出庫');
+  await expect(page.locator('#shift-brief')).toContainText('宜野湾市産業まつり');
+  await expect(page.locator('#shift-brief')).toContainText('日米対抗ソフトボール');
+  await expect(page.locator('#shift-brief')).toContainText('FRUITS ZIPPER');
+  await expect(page.locator('#shift-brief')).toContainText('乗車需要は未確認');
+  await expect(page.locator('#shift-brief .shift-item')).toHaveCount(3);
+  await expect(page.locator('#shift-brief .shift-item').nth(2)).toHaveAttribute('href','https://fruitszipper.asobisystem.com/live_information/detail/40048');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+  await page.clock.setFixedTime(new Date('2026-11-21T10:05:00+09:00'));
+  await page.reload();
+  await expect(page.locator('#shift-brief')).toBeVisible();
+  await page.clock.setFixedTime(new Date('2026-11-22T00:01:00+09:00'));
+  await page.evaluate(()=>window.dispatchEvent(new Event('pageshow')));
+  await expect(page.locator('#shift-brief')).toBeHidden();
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
