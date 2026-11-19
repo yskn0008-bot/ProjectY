@@ -187,7 +187,7 @@ class ClarityNextOutcomeContractTests(unittest.TestCase):
         start = self.source.index('const outcome = text(')
         end = self.source.index('const resultRecord = text(', start)
         outcome = self.source[start:end]
-        self.assertIn('{receiptLines}', outcome)
+        self.assertIn('{@receiptLines}', outcome)
         self.assertNotIn('{userInput}', outcome)
         self.assertNotIn('{eventTitle}', outcome)
         self.assertNotIn('{moneyRaw}', outcome)
