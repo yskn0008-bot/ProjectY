@@ -141,6 +141,13 @@
       "path": "ios-app/scriptable/remote-widgets/YOS Remote Hub.js",
       "commit": "696eb3bd9d0bc0faf147c55ee4e73aa1c1ae9f44",
       "sha256": "cf7b6f441db5e715feee185971c77b51e3c6945675fac71c13a6e7050072235a"
+    },
+    {
+      "id": "shopping",
+      "name": "YOS Shopping",
+      "path": "ios-app/scriptable/YOS Shopping.js",
+      "commit": "6893b2d121d803488ea396368476710683a12e8d",
+      "sha256": "df1eeb70d9b05af0a80c993cf5efab6aaa2a6c5132312efc49006f79caf5d1f2"
     }
   ]
 }
