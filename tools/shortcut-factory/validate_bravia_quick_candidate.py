@@ -18,7 +18,7 @@ for expected in ('YOS Remote Hub v6.6','id="quickPictureModes"','id="quickSoundM
     assert expected in source, expected
 assert 'Untitled Script 9' not in repr(root), "No active installed Script should be modified or even referenced"
 assert '__YOS_BRAVIA_QUICK_MEDIA_INLINE__' not in repr(root)
-assert p.get("runInApp") is False
+assert p.get("runInApp") is True, "WebView.present requires Scriptable foreground mode"
 assert p.get("ShowWhenRun") is False
 assert "ntn_" not in source and "sk-proj-" not in source
 assert not any(a.get("WFWorkflowActionIdentifier") in (
