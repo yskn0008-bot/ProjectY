@@ -110,7 +110,7 @@
     const kind=item.photoKind==='representative'?'representative':'product';
     if(image)return '<img loading="lazy" decoding="async" alt="'+escapeText(kind==='representative'?'カテゴリ参考写真':'商品写真：'+item.name)+'" src="'+escapeText(image)+'">'+
       (kind==='representative'?'<span class="reference-photo-label">参考写真</span>':'');
-    return '<div class="no-photo" aria-label="商品写真未登録"><span class="missing-glyph">'+escapeText(imgIcons[item.category]||'◈')+'</span><small>写真を自動検索中</small></div>';
+    return '<div class="no-photo" aria-label="商品写真未取得"><span class="missing-glyph">'+escapeText(imgIcons[item.category]||'◈')+'</span><small>'+escapeText(item.photoStatus||'写真未取得')+'</small></div>';
   }
   function badge(item){
     if(restock(item))return '<span class="flag restock">▣ 補充候補</span>';
