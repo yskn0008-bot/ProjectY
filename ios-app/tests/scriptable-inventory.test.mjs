@@ -50,7 +50,7 @@ test('read-only scan detects duplicate differing scripts and never exports sourc
  assert.match(r.copied,/同名グループ：1/);
  assert.match(r.copied,/【調査先】/);
  assert.match(r.copied,/【リモコン更新の安全診断】/);
- assert.match(r.copied,/このiPhone内 21文字/);
+ assert.match(r.copied,/このiPhone内 23文字/);
  assert.match(r.copied,/リモコン：iCloud \/ このiPhone内｜内容 相違/);
  assert.match(r.copied,/他コードから名前参照/);
  assert.doesNotMatch(r.copied,/PRIVATE SECRET/);
