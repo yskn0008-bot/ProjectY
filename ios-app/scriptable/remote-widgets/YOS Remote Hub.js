@@ -348,6 +348,12 @@ function openShortcuts(e){if(e){e.preventDefault();e.stopPropagation()}document.
 function closeShortcuts(e){if(e){e.preventDefault();e.stopPropagation()}document.getElementById("shortcutsLayer").classList.remove("open")}
 function probePictureScene(e){if(e){e.preventDefault();e.stopPropagation()}for(const id of ["pictureStatus","shortcutsStatus"]){const el=document.getElementById(id);if(el)el.textContent="テレビから設定を読み取り中…"}nativeAction("picture","probe","画質対応確認")}
 function pictureEntry(target){return pictureMap[target]||null}
+function pictureModeLabel(target,value){
+ if(target!=="pictureMode")return String(value)
+ const labels={vivid:"ダイナミック",standard:"スタンダード",cinema:"シネマ",imax:"IMAX",custom:"カスタム"}
+ const raw=String(value),key=raw.trim().toLowerCase()
+ return Object.prototype.hasOwnProperty.call(labels,key)?labels[key]:raw
+}
 function renderPictureMenu(){
  const root=document.getElementById("pictureGroups");if(!root)return
  let html=""
@@ -360,7 +366,7 @@ function renderPictureMenu(){
        html+='<div class="pic-slider-wrap"><input type="range" min="'+info.min+'" max="'+info.max+'" step="'+info.step+'" value="'+info.value+'" oninput="previewPicValue(event)" onchange="commitPictureSlider(event,&quot;'+target+'&quot;)"><output>'+pictureEscape(info.value)+'</output></div>'
      }else if(info&&info.available&&info.options&&info.options.length){
        html+='<select class="pic-enum" aria-label="'+pictureEscape(name)+'" onchange="commitPictureSelect(event,&quot;'+target+'&quot;)">'
-       for(const option of info.options)html+='<option value="'+pictureEscape(option)+'"'+(String(option)===String(info.value)?' selected':'')+'>'+pictureEscape(option)+'</option>'
+       for(const option of info.options)html+='<option value="'+pictureEscape(option)+'"'+(String(option)===String(info.value)?' selected':'')+'>'+pictureEscape(pictureModeLabel(target,option))+'</option>'
        html+='</select>'
      }else html+='<span class="pic-manual">テレビで設定</span>'
      html+='</div>'
