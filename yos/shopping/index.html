@@ -34,7 +34,7 @@
   <section class="overview" aria-label="買い物サマリー">
     <button class="recommend" type="button" data-filter="recommended">
       <span class="recommend-icon" aria-hidden="true">✦</span>
-      <span class="recommend-copy"><strong>今日のおすすめ <em id="recCount">—</em></strong><small>値下げ・買い時・補充の候補です</small></span>
+      <span class="recommend-copy"><strong>今日のおすすめ <em id="recCount">—</em></strong><small id="recommendReason">購入候補も含みます。価格確認は別途必要です</small></span>
       <span class="recommend-chevron">›</span>
     </button>
     <div class="metric-row">
@@ -48,6 +48,7 @@
     <button type="button" class="chip" data-filter="sale"><span class="chip-pink">◆</span> 値引き中 <b id="chipSaleCount">0</b></button>
     <button type="button" class="chip" data-filter="buy"><span class="chip-blue">🛒</span> 買い時 <b id="chipBuyCount">0</b></button>
     <button type="button" class="chip" data-filter="stock"><span class="chip-orange">▣</span> 補充 <b id="chipStockCount">0</b></button>
+    <button type="button" class="chip" data-filter="selected"><span class="chip-blue">★</span> 購入候補 <b id="chipSelectedCount">0</b></button>
     <button type="button" class="chip" data-filter="daily">♙ 日用品</button>
     <button type="button" class="chip" data-filter="beauty">✧ 美容・ケア</button>
     <button type="button" class="chip" data-filter="food">♜ 食品</button>
