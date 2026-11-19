@@ -3,6 +3,8 @@ name: YOS JOURNAL GPT editorial candidate safety
 on:
   pull_request:
     paths:
+      - 'journal/notion-private-draft-readback.mjs'
+      - 'journal/tests/notion-private-draft-readback.test.mjs'
       - 'journal/gpt-editorial-gate.mjs'
       - 'journal/tests/gpt-editorial-gate.test.mjs'
       - 'journal/GPT_EDITORIAL.md'
@@ -73,6 +75,10 @@ jobs:
           path: /tmp/yos-journal-reader-preview/YOS-JOURNAL-PREVIEW.html
           if-no-files-found: error
           retention-days: 7
+      - name: Test private Notion draft receipt readback (mocked API, zero content logs)
+        run: |
+          node --check journal/notion-private-draft-readback.mjs
+          node --test journal/tests/notion-private-draft-readback.test.mjs
       - name: Test privacy, sources, dates, existing edition preservation
         run: node --test journal/tests/gpt-editorial-gate.test.mjs
       - name: Check added or modified GPT candidate JSON from this PR
