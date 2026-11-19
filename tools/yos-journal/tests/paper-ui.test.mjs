@@ -7,7 +7,7 @@ const source=fs.readFileSync(new URL('../YOS Journal Book.js',import.meta.url),'
 const encode=x=>Buffer.from(x).toString('base64');
 function fixture(overrides={}){return {date:'2026-11-13',story:'【出来事】打ち合わせ\n【気持ち】安心した',diary:'【今日の記憶】\n【出来事】打ち合わせ\n【気持ち】安心した',question:'今日の問い',answer:'原文',...overrides};}
 async function open(options={}){
-  const input=fixture(options.input),query=options.mode==='compose'?{mode:'compose',date:input.date}:{date:input.date,story:encode(input.story),diary:encode(input.diary),question:encode(input.question),answer:encode(input.answer)};
+  const input=fixture(options.input),query=options.mode==='direct'?{}:options.mode==='compose'?{mode:'compose',date:input.date}:{date:input.date,story:encode(input.story),diary:encode(input.diary),question:encode(input.question),answer:encode(input.answer)};
   const state={html:'',opened:[],requests:[],presented:0,backups:[]};
   class WebView{constructor(){this.screen=state.presented;}async loadHTML(html){state.html=html;}async present(){state.presented++;}async evaluateJavaScript(s){if(options.readbackFails)throw new Error('readback');if(s.includes('yosPickPhoto'))return options.pickPhoto===true && this.screen===0;if(s.includes('yosFinish'))return options.finished!==false;if(s.includes('yosMood'))return options.mood||'';return options.review===undefined?input.story:options.review;}}
   class Alert{addAction(){}addCancelAction(){}async presentAlert(){return options.choice??-1;}}
@@ -35,7 +35,7 @@ const task=(title,date='2026-11-13T14:00:00+09:00',status='完了')=>({
 
 test('single-page adult paper journal has minimal editable note and non-fake photo placeholder',async()=>{
  const r=await open();assert.equal(r.error,undefined);assert.equal(r.presented,1);
- for(const marker of ['YOS 日記','今日の流れ','心に残ったこと','今日の記録','今日の気分','storyReview','書き終えた','今日の写真','写真を選ぶ'])assert.ok(r.html.includes(marker),marker);
+ for(const marker of ['YOS Night Journal','今日の予定','今日の記録','今日の気分','storyReview','書き終えた','今日の写真','写真を選ぶ'])assert.ok(r.html.includes(marker),marker);
  assert.match(r.html,/overflow:hidden/);
  assert.doesNotMatch(r.html,/https?:\/\/[^" ]+\.jpg|Nov\. 18/);
 });
@@ -98,4 +98,36 @@ test('a chosen iPhone photo reopens the same paper page without losing typed wor
  assert.match(r.html,/今夜は嬉しかった/);
  assert.equal(r.opened.length,1);
  assert.match(r.photos[0].path,/YOS-Journal-Photo-2026-11-13\.png/);
+});
+
+test('the selected journal visual keeps main prose central, with handwritten margin notes',async()=>{
+ const r=await open({mode:'compose',review:'今日は少し嬉しい'});
+ assert.equal(r.error,undefined);
+ for(const marker of ['class="story-grid"','class="story-main"','class="margin-left"','class="margin-right"','id="events"','id="ink"','data:image/webp;base64','font-family:"Klee"','overflow-y:auto','id="finish"']){
+   assert.ok(r.html.includes(marker),marker);
+ }
+ assert.ok(r.html.indexOf('id="storyReview"')<r.html.indexOf('id="photo"'),'central editable diary must precede optional photo');
+ assert.doesNotMatch(r.html,/銀行へ|部屋の片づけ|晴れ\s*26|https?:\/\/[^"' ]+\.jpg/,'demo content must never be embedded as real activity');
+});
+test('direct Scriptable launch is an editable compose page without required URL parameters',async()=>{
+ const r=await open({mode:'direct',review:'いまの気持ち'});
+ assert.equal(r.error,undefined);assert.equal(r.presented,1);
+ assert.ok(r.html.includes('"mode":"compose"'));assert.ok(r.opened[0]?.startsWith('shortcuts://run-shortcut?'));
+ assert.ok(!r.html.includes('invalid input'));
+});
+test('the schedule renders planned and completed states distinctly, without fabricating completion',async()=>{
+ const r=await open({mode:'compose',calendar:[{title:'図書館',startDate:new Date('2026-11-13T10:00:00+09:00'),isAllDay:false}],tasks:[task('片づけ')]});
+ assert.equal(r.error,undefined);
+ assert.match(r.html,/e\.done\?'☑':'□'/);
+ assert.match(r.html,/e\.done\?'完了':'予定'/);
+ assert.match(r.html,/図書館/);
+ assert.match(r.html,/片づけ/);
+});
+test('long handwritten prose is not truncated in print view',async()=>{
+ const r=await open({mode:'compose',review:'今日'.repeat(180)});
+ assert.equal(r.error,undefined);
+ assert.match(r.html,/white-space:pre-wrap/);
+ assert.match(r.html,/overflow-wrap:anywhere/);
+ assert.match(r.html,/Math\.max\(320,field\.scrollHeight\)/);
+ assert.equal(r.opened.length,1);
 });
