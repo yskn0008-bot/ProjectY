@@ -1,10 +1,10 @@
 // Variables used by Scriptable.
 // icon-color: blue; icon-glyph: tasks;
 // YOS_SCRIPT_NAME: YOS DAYSTREAM Notion
-// Existing DAYSTREAM UI + native Notion reads. A confirmed move can update only '期限'.
+// Existing DAYSTREAM UI with read-only Notion/iCloud inputs and a local plan.
 'use strict';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
-const UI_REF='2ed6c103a962be2dc9cfe2e33e751c40a7970ca6';
+const UI_REF='4f680ddbf04a75819b8df69022b17761c94bd574';
 const ROOT='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/';
 const SOURCE='965c6086-32c1-463d-93b4-87a9cb69b3ad';
 const STATES=['次にやる','実行中','本人操作','待ち','保留','完了'];
@@ -106,7 +106,11 @@ const BROWSER_BOOT=String.raw`
   const refresh=()=>{location.href='scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion'};
   button.textContent='↻ Notionを更新';button.onclick=refresh;
   const top=document.createElement('button');top.textContent='↻ Notionを更新';top.onclick=refresh;
-  document.querySelector('.yos-web-port').insertBefore(top,document.getElementById('yosWebImport'));
+  const port=document.querySelector('.yos-web-port');
+  port.insertBefore(top,document.getElementById('yosWebImport'));
+  const tools=document.createElement('details');tools.className='native-tools';
+  const summary=document.createElement('summary');summary.textContent='接続・データ';
+  port.before(tools);tools.append(summary,port);
   document.getElementById('yosWebSourceState').textContent='Notion '+snapshot.items.length+'件取得 · '+new Date(snapshot.checkedAt).toLocaleString('ja-JP')+' · 開き直し・更新で再取得 · '+calendarStatus;
  });
 })();
@@ -273,7 +277,7 @@ function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCale
   out=out.replace(marker," const nativeCalendar="+deviceJSON+";");
  }
  out=out.replace('<head>','<head><base href="https://yskn0008-bot.github.io/ProjectY/yos/daystream/">')
- .replace('<body class="yos-daystream-web">','<body class="yos-daystream-web"><div id="yosNativeBoot" role="status" style="position:fixed;inset:0;z-index:99999;background:#343943;color:white;padding:80px 20px;font-family:-apple-system,sans-serif">DAYSTREAMを読み込んでいます…</div>');
+ .replace('<body class="yos-daystream-web">','<body class="yos-daystream-web"><div id="yosNativeBoot" role="status" style="position:fixed;inset:0;z-index:99999;background:#f4f8fd;color:#1d2d44;padding:80px 20px;font-family:-apple-system,sans-serif">DAYSTREAMを読み込んでいます…</div>');
  // Never start a service worker from the native HTML presentation.
  out=out.replace("if('serviceWorker' in navigator)","if(false)");
  if(/<script[^>]+src=/.test(out))throw Error('未解決の画面部品があります');
