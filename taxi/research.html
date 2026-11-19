@@ -150,8 +150,12 @@ async function retrieve(){
   $('weather-meta').textContent='発表 '+format(weather.published)+'｜取得 '+format(weather.receivedAt)+'｜予報期間開始 '+format(weather.next.at)+'｜更新経過 約'+Math.max(0,Math.floor(weather.ageMs/60000))+'分';
  }catch(err){
   checkedAt=0;weatherStatus='未取得';setStatus('未取得','warn');
-  $('weather-report').textContent='公式データを確認できませんでした。情報を補完・推測していません。下の公式ページを直接確認してください。';
-  $('weather-meta').textContent='発表時刻：未確認｜取得時刻：失敗｜対象時刻：未確認';
+  const reason=err?.name==='AbortError'?'通信が8秒以内に完了しませんでした。'
+    :err instanceof TypeError?'気象庁への接続ができませんでした（通信・ブラウザ制限の可能性）。'
+    :String(err?.message||'').startsWith('HTTP ')?'気象庁が正常な応答を返しませんでした。'
+    :'公開データの内容・時刻が確認条件に合いませんでした。';
+  $('weather-report').textContent='公式データを確認できませんでした。'+reason+' 最新の状態は公式ページで確認してください。';
+  $('weather-meta').textContent='発表：未確認｜取得：失敗｜予報期間：未確認';
  }finally{clearTimeout(timeout);btn.disabled=false}
 }
 $('phase-before').addEventListener('click',()=>setPhase('before'));

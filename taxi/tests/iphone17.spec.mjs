@@ -644,7 +644,7 @@ test('Taxi research: HTTP error / malformed data never becomes current condition
   await page.goto('./research.html',{waitUntil:'domcontentloaded'});
   await page.locator('#weather-fetch').click();
   await expect(page.locator('#weather-status')).toHaveText('未取得');
-  await expect(page.locator('#weather-report')).toContainText('公式データを確認できませんでした');
+  await expect(page.locator('#weather-report')).toContainText('公開データの内容・時刻が確認条件に合いませんでした');
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
 });
 
@@ -703,4 +703,39 @@ test('Taxi research redesign: forecast automatically becomes stale after 15 minu
   await expect(page.locator('#weather-status')).toHaveText('要再確認');
   await expect(page.locator('#weather-report')).not.toContainText('くもり');
   await expect(page.locator('#weather-report')).toContainText('15分以上');
+});
+
+
+test('Taxi research LIVE verification of JMA data from a browser without mocked network',async ({page},testInfo)=>{
+  const endpoint='https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json';
+  const responses=[];const failedRequests=[];
+  page.on('response',r=>{
+    if(r.url().startsWith(endpoint)){
+      responses.push({http:r.status(),type:r.headers()['content-type']||'',cors:r.headers()['access-control-allow-origin']||''});
+    }
+  });
+  page.on('requestfailed',r=>{
+    if(r.url().startsWith(endpoint))failedRequests.push(r.failure()?.errorText||'request failed');
+  });
+  await page.goto('./research.html?phase=during',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#weather-fetch')).toBeEnabled({timeout:15000});
+  const state=(await page.locator('#weather-status').innerText()).trim();
+  const message=(await page.locator('#weather-report').innerText()).trim();
+  const metadata=(await page.locator('#weather-meta').innerText()).trim();
+  // This is an evidence-gathering probe, NOT a gate that mistakes network restrictions
+  // on a GitHub runner for an application regression or claims production iPhone success.
+  expect(['公式予報を取得','期限切れ','未取得']).toContain(state);
+  if(state==='公式予報を取得'){
+    expect(metadata).toContain('発表');
+    expect(metadata).toContain('取得');
+    expect(metadata).toContain('予報期間開始');
+  }else{
+    expect(message).toMatch(/公式ページ|最新とは扱わず/);
+  }
+  const result={browser:testInfo.project.name,status:state,when:new Date().toISOString(),responses,
+    failedRequests,reason:state==='未取得'?message.slice(0,120):'',
+    metadata:state==='公式予報を取得'?metadata:''};
+  console.log('YOS_JMA_LIVE_PROBE '+JSON.stringify(result));
+  await testInfo.attach('yos-jma-live-probe.json',{body:Buffer.from(JSON.stringify(result,null,2)),contentType:'application/json'});
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
 });
