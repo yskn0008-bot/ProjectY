@@ -454,10 +454,18 @@ function pictureEscape(t){return String(t==null?"":t).replace(/&/g,"&amp;").repl
 const QUICK_APPS=[["youtube","YouTube"],["netflix","Netflix"],["prime","Amazonプライム"],["unext","U-NEXT"],["proton","Proton VPNを開く"]]
 let quickAppsAvailable={},quickSound={}
 function quickModeButtons(targetId){
- const box=document.getElementById(targetId),info=pictureEntry("pictureMode")
- if(!box)return
+ const box=document.getElementById(targetId);if(!box)return
+ const info=pictureEntry("pictureMode")
  const opts=info&&info.available&&Array.isArray(info.options)?info.options:[]
- box.innerHTML=opts.length?opts.map(v=>'<button class="'+(String(v)===String(info.value)?'selected':'')+'" onclick="selectQuickPicture(event,decodeURIComponent(\''+encodeURIComponent(v)+'\'))">'+pictureEscape(pictureOptionLabel('pictureMode',v))+'</button>').join(""):'<span class="pic-manual">画質モードの直接切替は未対応</span>'
+ box.innerHTML=""
+ if(!opts.length){box.textContent="画質モードの直接切替は未対応";return}
+ for(const value of opts){
+  const button=document.createElement("button")
+  button.className=String(value)===String(info.value)?"selected":""
+  button.textContent=pictureOptionLabel("pictureMode",value)
+  button.addEventListener("click",e=>selectQuickPicture(e,value))
+  box.appendChild(button)
+ }
 }
 function selectQuickPicture(e,value){
  if(e){e.preventDefault();e.stopPropagation()}
@@ -465,10 +473,18 @@ function selectQuickPicture(e,value){
  if(!info||!info.available||!Array.isArray(info.options)||!info.options.includes(value))return
  nativeAction("picture","set","画質モード",JSON.stringify({target:"pictureMode",value}))
 }
-function quickSoundButtons(id,target,choices){
+function quickSoundButtons(id,target){
  const box=document.getElementById(id);if(!box)return
  const data=quickSound[target],opts=data&&data.available&&Array.isArray(data.options)?data.options:[]
- box.innerHTML=opts.length?opts.map(v=>'<button class="quick-action '+(String(v)===String(data.value)?'selected':'')+'" onclick="selectQuickSound(event,decodeURIComponent(\''+encodeURIComponent(target)+'\'),decodeURIComponent(\''+encodeURIComponent(v)+'\'))">'+pictureEscape(target==="outputTerminal"?quickAudioLabel(v):v)+'</button>').join(""):'<span class="pic-manual">このテレビからは操作できません。テレビの音声設定で変更してください。</span>'
+ box.innerHTML=""
+ if(!opts.length){box.textContent="テレビから操作可能な音声項目を取得できません";return}
+ for(const value of opts){
+  const button=document.createElement("button")
+  button.className="quick-action"+(String(value)===String(data.value)?" selected":"")
+  button.textContent=target==="outputTerminal"?quickAudioLabel(value):value
+  button.addEventListener("click",e=>selectQuickSound(e,target,value))
+  box.appendChild(button)
+ }
 }
 function quickAudioLabel(v){const x={speaker:"テレビスピーカー",speaker_hdmi:"スピーカー＋HDMI",hdmi:"HDMI",audioSystem:"オーディオシステム"};return x[v]||v}
 function selectQuickSound(e,target,value){
@@ -478,8 +494,16 @@ function selectQuickSound(e,target,value){
  nativeAction("quick","soundSet","音声設定",JSON.stringify({target,value}))
 }
 function quickAppButtons(){
- const root=document.getElementById("quickApps");if(!root)return
- root.innerHTML=QUICK_APPS.map(([id,label])=>'<button class="quick-action" '+(!quickAppsAvailable[id]?'disabled':'')+' onclick="nativeAction(\'quick\',\'app\',\''+pictureEscape(label)+'\',\''+id+'\')">'+pictureEscape(label)+'</button>').join("")
+ const box=document.getElementById("quickApps");if(!box)return
+ box.innerHTML=""
+ for(const [id,label] of QUICK_APPS){
+  const button=document.createElement("button")
+  button.className="quick-action"
+  button.disabled=!quickAppsAvailable[id]
+  button.textContent=label
+  button.addEventListener("click",()=>nativeAction("quick","app",label,id))
+  box.appendChild(button)
+ }
 }
 function openQuickEditor(e){if(e){e.preventDefault();e.stopPropagation()}document.getElementById("quickLayer").classList.add("open");quickModeButtons("quickPictureModesPanel");probeQuickEditor()}
 function closeQuickEditor(e){if(e){e.preventDefault();e.stopPropagation()}document.getElementById("quickLayer").classList.remove("open")}
