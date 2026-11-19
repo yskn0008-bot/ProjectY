@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-19T22:10:14+09:00",
+  "updated_at": "2026-11-19T22:10:55+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-856",
-      "title": "PR #856 feat(shopping): iPhone実写確認をもとにUIと写真・価格編集を仕上げる",
+      "id": "github-pr-769",
+      "title": "PR #769 Clarity v4 pilot｜原文保存＋Notion一括仕分け＋安全なiPhone操作",
       "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/856",
-      "updated_at": "2026-11-19T13:09:34Z"
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/769",
+      "updated_at": "2026-11-16T18:31:56Z"
     },
     {
       "id": "github-pr-771",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-19T13:09:17Z"
+      "updated_at": "2026-11-19T13:09:58Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-dace90b01cd8",
+      "title": "feat(shopping): polish iPhone list, reference prices, native edit and photos (#856)",
+      "completed_at": "2026-11-19T13:10:19Z",
+      "result": "GitHub mainへ反映（dace90b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dace90b01cd85905b301a71cffb8d56b8e7fd2dc"
+    },
+    {
       "id": "github-commit-1c9378e4e60e",
       "title": "fix(scriptable): separate live root scripts from backups and inspect both remote stores (#855)",
       "completed_at": "2026-11-19T13:05:19Z",
@@ -233,13 +240,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/33376a370cde2538d2308bec5cf9d8663d9190fa"
     },
     {
-      "id": "github-commit-948f34542b0d",
-      "title": "feat(scriptable): register read-only inventory in shared installer (#851)",
-      "completed_at": "2026-11-19T12:15:04Z",
-      "result": "GitHub mainへ反映（948f345）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/948f34542b0d46f387140766c82ffaaa1a0d120c"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #856をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-19T22:10:14+09:00",
+      "last_update": "2026-11-19T22:10:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 64件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 63件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-19T22:10:14+09:00",
+      "last_update": "2026-11-19T22:10:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #856をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-19T22:10:14+09:00",
+      "last_update": "2026-11-19T22:10:55+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "30dcbe905c750f0019b9ab09674727cb563e5c49bd7ab2b5a9984e6327135877"
+  "github_snapshot_hash": "cfc496dbbebb6434b42346572c8ee449b507b1ad3a54ceae33f65960f1aae1ae"
 }
