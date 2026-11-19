@@ -111,8 +111,8 @@ try{
  assert.equal(importState.calendarCount,1);
  assert.equal(importState.taskCount,1);
  await page.reload({waitUntil:'domcontentloaded'});
- assert.match(await page.locator('#yosWebSourceState').innerText(),/タスク手動取込/);
- assert.match(await page.locator('#yosWebSourceState').innerText(),/Apple予定手動取込/);
+ assert.match(await page.locator('#yosWebSourceState').textContent(),/タスク手動取込/);
+ assert.match(await page.locator('#yosWebSourceState').textContent(),/Apple予定手動取込/);
  await page.locator('[data-tab="task"]').click();
  assert.match(await page.locator('#yosTaskSourceStatus').innerText(),/手動取込のTasks写し/);
  assert.match(await page.locator('#yosSourceTasks').innerText(),/Web imported task/);
@@ -171,7 +171,7 @@ try{
  const inherited=await page.evaluate(()=>window.YOS_CHARCOAL_BOOT);
  assert.equal(inherited.calendarSource,'yos-life-local');
  assert.equal(inherited.calendarDays['2026-11-13'][0].title,'LIFE BROWSER SMOKE');
- assert.match(await page.locator('#yosWebSourceState').innerText(),/保存済みMY WAY生活予定/);
+ assert.match(await page.locator('#yosWebSourceState').textContent(),/保存済みMY WAY生活予定/);
  page.on('dialog',async dialog=>dialog.accept());
  const adopted=await page.evaluate(()=>{
   const title='WEB PORT STORAGE SMOKE',web=window.YOS_DAYSTREAM_WEB;
