@@ -7,6 +7,11 @@
       "id": "S1",
       "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9626598/fullTextXML",
       "sourceType": "primary"
+    },
+    {
+      "id": "S2",
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+      "sourceType": "official"
     }
   ],
   "claims": [
@@ -15,6 +20,12 @@
       "text": "この研究では、ワクチン接種に対する抗体反応と顔の魅力度・健康そうに見える評価に統計的に有意な関連が見つからなかった。",
       "sourceId": "S1",
       "evidenceQuote": "We found no significant associations between antibody levels induced by vaccination and perceived facial attractiveness, facial healthiness, or skin healthiness."
+    },
+    {
+      "id": "C2",
+      "text": "Crossrefの公開REST APIは、登録された学術文献のメタデータを提供する。原典本文の意味を検証する仕組みとは区別する。",
+      "sourceId": "S2",
+      "evidenceQuote": "Our publicly available REST API exposes the scholarly metadata that members and trusted sources deposit with Crossref."
     }
   ]
 }
