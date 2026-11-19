@@ -92,8 +92,9 @@ function decodeForecast(data,receivedAt){
  if(!candidates.length)throw Error('対象時刻なし');
  const age=receivedAt.getTime()-published.getTime();
  if(age < -10*60*1000)throw Error('発表時刻が端末時刻より未来');
- const next=candidates.find(x=>x.at.getTime()>=receivedAt.getTime()-2*60*60*1000);
- if(!next)throw Error('対象時刻が過去');
+ const ordered=candidates.slice().sort((a,b)=>a.at-b.at);
+ const next=ordered.filter(x=>x.at.getTime()<=receivedAt.getTime()).at(-1)||ordered.find(x=>x.at.getTime()>receivedAt.getTime());
+ if(!next||Math.abs(receivedAt.getTime()-next.at.getTime())>24*60*60*1000)throw Error('対象期間を特定できない');
  return {published,receivedAt,next,ageMs:age};
 }
 async function retrieve(){
