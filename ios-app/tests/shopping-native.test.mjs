@@ -41,7 +41,14 @@ async function run(config={}){
   async loadJSON(){
    log.requests.push({url:this.url,method:this.method,headers:this.headers,body:this.body});
    this.response={statusCode:200,url:this.url};
-   if(config.autoPhotos&&this.url.includes('commons.wikimedia.org/w/api.php'))return {query:{pages:{}}};
+   if(config.autoPhotos&&this.url.includes('commons.wikimedia.org/w/api.php')){
+    if(config.commonsPhotos)return {query:{pages:{
+      17:{title:'File:Toilet_paper_rolls.jpg',imageinfo:[{mime:'image/jpeg',
+        thumburl:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Toilet_paper_rolls.jpg',
+        descriptionurl:'https://commons.wikimedia.org/wiki/File:Toilet_paper_rolls.jpg'}]}
+    }}};
+    return {query:{pages:{}}};
+   }
    if(this.url.includes('/data_sources/')&&this.url.endsWith('/query'))
     return {results:pages,has_more:false};
    if(this.url.endsWith('/pages/'+id)){
@@ -326,4 +333,21 @@ test('category imagery is marked as representative and must never be written to 
  assert.match(JS,/カテゴリの参考画像（実商品とは異なります）/);
  assert.match(CSS,/reference-photo-label/);
  assert.doesNotThrow(()=>new vm.Script('(async()=>{'+CODE+'\n})()'));
+});
+
+
+test('generic toilet-paper row uses a clearly labeled Commons representative photo and never changes Notion',async()=>{
+ const basic=row({cover:null,properties:{...row().properties,
+   商品名:{title:[{plain_text:'トイレットペーパー'}]},商品URL:{url:null},分類:{select:{name:'衛生'}}
+ }});
+ const storage=new Map();
+ const {log,pages}=await run({autoPhotos:true,commonsPhotos:true,pages:[basic],storage});
+ assert.equal(log.requests.filter(x=>x.method==='PATCH').length,0);
+ assert.equal(pages[0].cover,null);
+ assert.match(log.pages[0],/data:image\/jpeg;base64/);
+ assert.match(log.pages[0],/参考写真/);
+ assert.match(log.pages[0],/カテゴリの参考画像/);
+ const reloaded=await run({autoPhotos:true,commonsPhotos:true,pages:[basic],storage});
+ assert.equal(reloaded.log.requests.filter(x=>x.method==='IMAGE').length,0);
+ assert.equal(reloaded.log.requests.filter(x=>x.url.includes('commons.wikimedia.org/w/api.php')).length,0);
 });
