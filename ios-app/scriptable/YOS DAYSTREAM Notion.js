@@ -209,17 +209,21 @@ async function readDeviceCalendar(nativeSource,tasks,now=new Date()){
  if(events.length>80){
   deviceCalendarStatus='Apple予定：15日間に'+events.length+'件あり、取得上限80件を超過';return null;
  }
+ // Only deduplicate Notion Clarity windows that the DAYSTREAM timeline
+ // actually renders. Notion calendar mirrors (yos-shift-, apple-calendar:,
+ // calendar:) are shown only as source candidates, not native timeline cards.
+ // Skipping their iCloud event would silently hide the actual fixed schedule.
  const matched=(Array.isArray(tasks)?tasks:[]).filter(t=>t&&t.due?.includes('T')&&t.dueEnd?.includes('T')&&
    Number.isFinite(Date.parse(t.due))&&Number.isFinite(Date.parse(t.dueEnd))&&
-   (t.sourceKind==='calendar'||(t.sourceKind==='task'&&/^YOS Inbox clarity:/i.test(t.evidence||''))));
+   t.sourceKind==='task'&&/^YOS Inbox clarity:/i.test(t.evidence||''));
  const mirror=[],ids=new Set();
  for(const e of events){
   const title=clean(e?.title,100),a=new Date(e?.startDate),b=new Date(e?.endDate);
   if(!title||!Number.isFinite(+a)||!Number.isFinite(+b)||b<=a||b-a>15*86400000){
    deviceCalendarStatus='Apple予定：日時・件名の形式を確認できません';return null;
   }
-  // A Notion row with identical title and exact time is already on DAYSTREAM.
-  // The iCloud event is not written to Tasks or imported as a second task.
+  // A rendered Clarity window with identical title and exact time already
+  // occupies the timeline; keep it once, but never suppress a calendar mirror.
   if(matched.some(t=>clean(t.title,100)===title&&Date.parse(t.due)===+a&&Date.parse(t.dueEnd)===+b))continue;
   const identity=clean(e.identifier,130)||('no-id:'+title+'|'+a.toISOString()+'|'+b.toISOString());
   const id=(identity+':'+a.toISOString()).slice(0,180);
