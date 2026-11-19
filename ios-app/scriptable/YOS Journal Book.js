@@ -8,7 +8,9 @@ const q=args.queryParameters||{};
 const decode=k=>{try{const d=Data.fromBase64String(String(q[k]||''));return d?d.toRawString():'';}catch(e){return '';}};
 // Running the Book itself opens a safe, editable page for today.
 // Only explicitly requested "review" mode may hand an existing diary to Notion.
-const mode=q.mode==='review'?'review':'compose';
+// Legacy shortcut reviews omit "mode" but include all four encoded fields.
+const reviewPayload=Boolean(q.story&&q.diary&&q.question&&q.answer);
+const mode=q.mode==='review'||(q.mode!=='compose'&&reviewPayload)?'review':'compose';
 const localToday=new Date(),today=[localToday.getFullYear(),String(localToday.getMonth()+1).padStart(2,'0'),String(localToday.getDate()).padStart(2,'0')].join('-');
 const input={date:String(q.date||(mode==='compose'?today:'')),story:decode('story'),diary:decode('diary'),question:decode('question'),answer:decode('answer')};
 if(!/^\d{4}-\d{2}-\d{2}$/.test(input.date)||(mode==='review'&&(!input.story||!input.diary||!input.question||!input.answer))){
