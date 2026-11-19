@@ -14,13 +14,16 @@ def patch(path, source):
     actions=root.get('WFWorkflowActions',[])
     hits=[(i,a) for i,a in enumerate(actions)
           if a.get('WFWorkflowActionIdentifier')==INTENT and
-             a.get('WFWorkflowActionParameters',{}).get('script')==MARKER]
-    if len(hits)!=1: raise SystemExit('research placeholder must exist exactly once')
+             MARKER in repr(a.get('WFWorkflowActionParameters',{}).get('script'))]
+    if len(hits)!=1:
+        found=[(i,str(a.get('WFWorkflowActionParameters',{}).get('script'))[:240])
+               for i,a in enumerate(actions) if a.get('WFWorkflowActionIdentifier')==INTENT]
+        raise SystemExit(f'research placeholder must exist exactly once; Scriptable scripts: {found}')
     i,action=hits[0]
     if any(str(a.get('WFWorkflowActionIdentifier','')).endswith('askllm') for a in actions[:i]):
         raise SystemExit('research must occur before first GPT')
     p=action.get('WFWorkflowActionParameters',{})
-    if p.get('runInApp') is not False or p.get('ShowWhenRun') is not False or p.get('parameter')!='':
+    if p.get('runInApp') is not False or p.get('ShowWhenRun') is not False or p.get('parameter') not in ('',None):
         raise SystemExit('unexpected public research action arguments')
     script=source.read_text('utf-8')
     required=('YOS_RESEARCH_ABSTRACT_V1','YOS_RESEARCH_HOLD_V1','Script.setShortcutOutput','Script.complete()')
