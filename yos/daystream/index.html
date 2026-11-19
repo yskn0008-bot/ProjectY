@@ -65,7 +65,10 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .yos-history-actions{display:flex;gap:5px;align-items:center;flex-shrink:0;position:fixed;right:max(14px,calc((100vw - 610px)/2));bottom:calc(97px + env(safe-area-inset-bottom));z-index:19;padding:5px;border:1px solid #ffffff35;border-radius:11px;background:#303741eb;box-shadow:0 5px 18px #0006}
 .yos-history-button{display:grid;place-items:center;min-width:32px;height:30px;border:1px solid #ffffff50;background:#ffffff12;border-radius:8px;color:#f2f7ff;font-size:21px;line-height:1;padding:0}
 .yos-history-button:disabled{opacity:.35;cursor:default}
+/* Fixed Apple calendar blocks may fill most of the iPhone viewport.
+   Let native touch scrolling pass through them; only local tasks use drag grips. */
 .card.task{touch-action:pan-y}
+.card.fixed-scroll{touch-action:pan-y;overscroll-behavior-y:auto}
 .card.task .task-drag-grip{display:grid;place-items:center;flex:0 0 20px;align-self:stretch;min-height:25px;touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;font-size:24px;color:#f0def8;cursor:grab;line-height:1}
 .card.task .task-drag-grip:active{cursor:grabbing}
 .card.task.press-armed{outline:2px solid #dce6ff;outline-offset:-2px;filter:brightness(1.1)}
@@ -1519,6 +1522,7 @@ function render(){
    const top=natural+(visualOffsets.get(item)||0);
    lastBottom=Math.max(lastBottom,top+height);
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
+   if(item.f)el.classList.add('fixed-scroll');
    if(isTask){el.dataset.durationBand=item.d<=5?'xs':item.d<=15?'sm':item.d<=30?'md':item.d<=60?'lg':item.d<=120?'xl':'xxl';}
    if(backdrop){
     el.classList.add('yos-backdrop');
@@ -1572,7 +1576,11 @@ function render(){
    const startDrag=(y,id)=>{downY=latestY=y;downS=previewS=item.s;startedAt=performance.now();moved=false;holding=false;activePointer=id};
    const moveDrag=y=>{if(activePointer===null)return;latestY=y;const distance=Math.abs(latestY-downY);if(distance>3&&!item.f){holding=true;moved=true;el.classList.add('moving');if(!frame)frame=requestAnimationFrame(paint)}};
    const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){showFocusFor(item);smoothRender()}holding=false};
-   if(item.kind==='task'&&!item.f){wireTaskGestures(el,item)}else{
+   if(item.f){
+    // Let iOS handle scrolling. A real tap still opens details; a scroll
+    // gesture does not trigger the old pointer-up focus overlay.
+    el.addEventListener('click',()=>showFocusFor(item));
+   }else if(item.kind==='task'){wireTaskGestures(el,item)}else{
    // Touch events are used on iOS WebView to avoid pointer capture cancelling a vertical drag.
    el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;startDrag(e.touches[0].clientY,'touch')},{passive:true});
    el.addEventListener('touchmove',e=>{if(activePointer!=='touch'||!e.touches.length)return;if(!item.f){e.preventDefault();moveDrag(e.touches[0].clientY)}},{passive:false});
