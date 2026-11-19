@@ -585,3 +585,59 @@ test('YOS TAXI workflow links: read-only history and analysis do not alter shift
   expect(afterAnalysis).toBe(original);
   expect(errors).toEqual([]);
 });
+
+
+test('Taxi research: official forecast displays separate publication, retrieval and target times without touching shift data', async ({page}) => {
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.clock.setFixedTime(new Date('2026-11-19T21:00:00+09:00'));
+  await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{
+      publishingOffice:'沖縄気象台',reportDatetime:'2026-11-19T17:00:00+09:00',
+      timeSeries:[{timeDefines:['2026-11-19T17:00:00+09:00','2026-11-20T00:00:00+09:00'],
+      areas:[{area:{name:'本島中南部',code:'471010'},weathers:['くもり','雨　夜遅く晴れ']}]}]
+    }])});
+  });
+  await page.goto('./research.html?phase=before',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#phase-before')).toHaveAttribute('aria-pressed','true');
+  await page.locator('#weather-fetch').click();
+  await expect(page.locator('#weather-status')).toHaveText('公式予報を取得');
+  await expect(page.locator('#weather-report')).toContainText('雨　夜遅く晴れ');
+  await expect(page.locator('#weather-meta')).toContainText('発表');
+  await expect(page.locator('#weather-meta')).toContainText('取得');
+  await expect(page.locator('#weather-meta')).toContainText('対象');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+  await page.locator('#phase-during').click();
+  await expect(page.locator('#phase-during')).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('#weather-status')).toHaveText('公式予報を取得');
+  expect(errors).toEqual([]);
+});
+
+test('Taxi research: outdated official publication is explicitly expired even after a successful HTTP fetch',async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-19T21:00:00+09:00'));
+  await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{
+      publishingOffice:'沖縄気象台',reportDatetime:'2026-11-18T05:00:00+09:00',
+      timeSeries:[{timeDefines:['2026-11-19T21:00:00+09:00'],areas:[{area:{code:'471010'},weathers:['晴れ']}]}]
+    }])});
+  });
+  await page.goto('./research.html?phase=during',{waitUntil:'domcontentloaded'});
+  await page.locator('#weather-fetch').click();
+  await expect(page.locator('#weather-status')).toHaveText('期限切れ');
+  await expect(page.locator('#weather-report')).not.toContainText('晴れ');
+  await expect(page.locator('#weather-report')).toContainText('最新とは扱わず');
+});
+
+test('Taxi research: HTTP error / malformed data never becomes current conditions or shift writes',async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-19T21:00:00+09:00'));
+  await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{
+      publishingOffice:'沖縄気象台',reportDatetime:'2026-11-19T17:00:00+09:00',
+      timeSeries:[{timeDefines:['2026-11-20T00:00:00+09:00'],areas:[{area:{code:'999999'},weathers:['晴れ']}]}]
+    }])});
+  });
+  await page.goto('./research.html',{waitUntil:'domcontentloaded'});
+  await page.locator('#weather-fetch').click();
+  await expect(page.locator('#weather-status')).toHaveText('未取得');
+  await expect(page.locator('#weather-report')).toContainText('公式データを確認できませんでした');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
