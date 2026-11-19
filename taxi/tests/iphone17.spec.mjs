@@ -671,12 +671,14 @@ test('Taxi research redesign: compact first viewport, expandable sources and aut
     return {pageWidth:document.documentElement.scrollWidth,screenWidth:innerWidth,
     header:rect('header').bottom,
     decision:rect('.decision').bottom,
+    auto:rect('#auto-research').top,
     weather:rect('#weather-section').bottom,
     sources:rect('#official-sources').top};
   });
   expect(positions.pageWidth).toBeLessThanOrEqual(positions.screenWidth);
   expect(positions.decision).toBeLessThan(380);
-  expect(positions.weather).toBeLessThan(770);
+  expect(positions.auto).toBeLessThan(770);
+  expect(positions.auto).toBeLessThan(positions.weather);
   expect(positions.sources).toBeGreaterThan(positions.weather); // Scheduled source card is now between weather and manual links.
   const road=page.locator('#official-sources details').first();
   await expect(road).not.toHaveAttribute('open','');
