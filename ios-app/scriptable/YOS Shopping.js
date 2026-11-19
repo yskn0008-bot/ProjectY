@@ -531,7 +531,17 @@ async function enrichShoppingPhotos(items,token){
  // A Notion cover write changes last_edited_time, so refresh version-sensitive
  // actions rather than passing stale record timestamps to purchase/edit handlers.
  if(written){
-  try{items=await list(token)}catch{}
+  try{
+   items=await list(token);
+   // The Notion cover write changes the product signature. Keep the verified
+   // local photo associated with the new source version without re-downloading.
+   for(const item of items){
+    const entry=manifest.entries[item.id];
+    if(entry&&entry.checkedAt===now&&encodeLocalPicture(fm,autoPicturePath(fm,item.id)))
+      entry.signature=pictureSignature(item);
+   }
+   savePictureManifest(fm,manifest);
+  }catch{}
  }
  return items;
 }
