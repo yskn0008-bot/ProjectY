@@ -17,7 +17,7 @@ function store(files,cloud=false){
   joinPath(a,b){return a+'/'+b},
   listContents(dir){assert.equal(dir,cloud?'/cloud':'/local');return names},
   isDirectory(){return false},
-  isFile(p){return Object.hasOwn(files,p.split('/').at(-1))},
+  fileExists(p){return Object.hasOwn(files,p.split('/').at(-1))},
   modificationDate(){return new Date('2026-11-19T00:00:00Z')},
   isFileStoredIniCloud(){return cloud},
   async downloadFileFromiCloud(){calls.downloads++;await Promise.resolve()},
@@ -48,6 +48,7 @@ test('existing installer pins inventory under its established Japanese name',()=
 test('read-only scan detects duplicate differing scripts and never exports source',async()=>{
  const r=await run({'リモコン.js':'// PRIVATE SECRET iCloud','他の機能.js':'runExisting("リモコン")'},{'リモコン.js':'// PRIVATE SECRET local'});
  assert.match(r.copied,/同名グループ：1/);
+ assert.match(r.copied,/【調査先】/);
  assert.match(r.copied,/リモコン：iCloud \/ このiPhone内｜内容 相違/);
  assert.match(r.copied,/他コードから名前参照/);
  assert.doesNotMatch(r.copied,/PRIVATE SECRET/);
@@ -59,4 +60,11 @@ test('same-code duplicates are detected without marking safe to delete',async()=
  const r=await run({'リモコン.js':'// SAME'},{'リモコン.js':'// SAME'});
  assert.match(r.copied,/内容 完全一致/);
  assert.match(r.copied,/削除しないでください/);
+});
+
+test('empty scan warns rather than claiming inventory is complete',async()=>{
+ const r=await run({},{});
+ assert.match(r.copied,/【警告】0件は正常な棚卸し結果として扱いません/);
+ assert.match(r.copied,/iCloud：\/cloud｜直下 0件/);
+ assert.equal(r.cloud.writes+r.local.writes+r.cloud.removes+r.local.removes,0);
 });
