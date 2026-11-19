@@ -36,7 +36,7 @@ function coverUrl(v:unknown):string|null{
   const c=prop(v);
   return validUrl(prop(c.file).url)||validUrl(prop(c.external).url);
 }
-function parseItem(row:unknown):ShoppingItem|null{
+export function parseShoppingItem(row:unknown):ShoppingItem|null{
   if(!record(row)||row.archived===true||row.in_trash===true)return null;
   const p=prop(row.properties);
   const name=text(p['商品名'],'title');
@@ -75,7 +75,7 @@ async function list(token:string,fetchImpl:Fetcher):Promise<ShoppingItem[]>{
     },fetchImpl);
     if(!Array.isArray(data.results)||typeof data.has_more!=='boolean')throw new Error('Incomplete Notion result');
     for(const entry of data.results){
-      const item=parseItem(entry);
+      const item=parseShoppingItem(entry);
       if(!item)continue;
       if(ids.has(item.id))throw new Error('Duplicate Notion shopping item');
       ids.add(item.id);output.push(item);if(output.length>MAX_ITEMS)throw new Error('Shopping list exceeds capacity');
@@ -109,7 +109,7 @@ async function createItem(token:string,input:JsonRecord,fetchImpl:Fetcher):Promi
       ...(imageUrl?{cover:{type:'external',external:{url:imageUrl}}}:{})
     })
   },fetchImpl);
-  const item=parseItem(data);
+  const item=parseShoppingItem(data);
   if(!item)throw new Error('Created item readback invalid');
   return item;
 }
@@ -122,7 +122,7 @@ async function purchase(token:string,input:JsonRecord,fetchImpl:Fetcher):Promise
     const data=await notion(token,url,{method:'GET'},fetchImpl);
     const parent=prop(data.parent);
     if(asString(parent.data_source_id).replaceAll('-','').toLowerCase()!==NOTION_SOURCE.replaceAll('-',''))throw new Error('Shopping source mismatch');
-    return {data,item:parseItem(data)};
+    return {data,item:parseShoppingItem(data)};
   };
   const previous=await read();
   if(!previous.item)throw new Error('Item missing');
