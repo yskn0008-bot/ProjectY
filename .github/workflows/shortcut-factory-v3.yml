@@ -208,14 +208,14 @@ jobs:
           set -euo pipefail
           cd tools/shortcut-factory/shortcuts
           cherri 'YOS JOURNAL GPT制作.cherri' --skip-sign --debug
-          test -s 'YOS JOURNAL GPT制作 TEST_unsigned.shortcut'
-          test -s 'YOS JOURNAL GPT制作 TEST.plist'
+          test -s 'YOS JOURNAL 2段階編集 TEST_unsigned.shortcut'
+          test -s 'YOS JOURNAL 2段階編集 TEST.plist'
           cd ../../..
           python3 tools/shortcut-factory/patch_journal_draft_inbox.py \
-            'tools/shortcut-factory/shortcuts/YOS JOURNAL GPT制作 TEST_unsigned.shortcut' \
+            'tools/shortcut-factory/shortcuts/YOS JOURNAL 2段階編集 TEST_unsigned.shortcut' \
             --script 'tools/shortcut-factory/journal_draft_inbox_inline.js'
           mkdir -p tools/shortcut-factory/artifacts
-          cp 'tools/shortcut-factory/shortcuts/YOS JOURNAL GPT制作 TEST_unsigned.shortcut' 'tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-unsigned.shortcut'
+          cp 'tools/shortcut-factory/shortcuts/YOS JOURNAL 2段階編集 TEST_unsigned.shortcut' 'tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-unsigned.shortcut'
 
       - name: Validate private Notion writer and failure tests
         shell: bash
@@ -234,7 +234,7 @@ jobs:
           python3 tools/clarity-factory/sign_with_hubsign.py \
             --input 'tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-unsigned.shortcut' \
             --output 'tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-signed.shortcut' \
-            --name 'YOS JOURNAL GPT制作 TEST'
+            --name 'YOS JOURNAL 2段階編集 TEST'
 
       - name: Check signed AEA1 artifact
         shell: bash
