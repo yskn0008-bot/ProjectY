@@ -127,6 +127,13 @@
       "path": "ios-app/scriptable/YOS Health Automation.js",
       "commit": "022655be1d3f19fd5046428b9ea404d3288e337e",
       "sha256": "63366cabebee9f5f8d0b1e0f5b78fa3a7de2fb2e67a2341e920663eca3e94f5b"
+    },
+    {
+      "id": "bravia-picture-off",
+      "name": "YOS BRAVIA Picture Off",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Picture Off.js",
+      "commit": "cfae0db7be4e5d560242520ee9c99b04a8a08fd5",
+      "sha256": "402901e68dc2e21b6206dc0702d6d7cfdff0865b33fd0a49e589377140a6d2ce"
     }
   ]
 }
