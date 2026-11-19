@@ -15,7 +15,7 @@ permissions:
 jobs:
   build-shortcuts:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - name: Check fixed URLs, no duplicate ledger and native source code
@@ -45,23 +45,29 @@ jobs:
         run: |
           set -euo pipefail
           cd tools/taxi-shortcuts
-          cherri 'YOS TAXI 運行.cherri' --skip-sign --debug
-          cherri 'YOS TAXI 降車.cherri' --skip-sign --debug
-          test -f 'YOS TAXI 運行_unsigned.shortcut'
-          test -f 'YOS TAXI 降車_unsigned.shortcut'
-          python3 validate_compiled.py 'YOS TAXI 運行_unsigned.shortcut' 'YOS TAXI 降車_unsigned.shortcut'
+          for source in ./*.cherri; do
+            cherri "$source" --skip-sign --debug
+          done
+          python3 validate_compiled.py *_unsigned.shortcut
       - name: Sign credential-free Shortcuts via existing HubSign procedure
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p tools/taxi-shortcuts/artifacts
-          python3 tools/clarity-factory/sign_with_hubsign.py --input 'tools/taxi-shortcuts/YOS TAXI 運行_unsigned.shortcut' --output 'tools/taxi-shortcuts/artifacts/YOS TAXI 運行.shortcut' --name 'YOS TAXI 運行'
-          python3 tools/clarity-factory/sign_with_hubsign.py --input 'tools/taxi-shortcuts/YOS TAXI 降車_unsigned.shortcut' --output 'tools/taxi-shortcuts/artifacts/YOS TAXI 降車.shortcut' --name 'YOS TAXI 降車'
+          for source in tools/taxi-shortcuts/*_unsigned.shortcut; do
+            name="${source##*/}"
+            name="${name%_unsigned.shortcut}"
+            python3 tools/clarity-factory/sign_with_hubsign.py --input "$source" --output "tools/taxi-shortcuts/artifacts/${name}.shortcut" --name "$name"
+          done
           python3 - <<'PY'
           from pathlib import Path
-          for name in ('YOS TAXI 運行.shortcut','YOS TAXI 降車.shortcut'):
-              data = (Path('tools/taxi-shortcuts/artifacts')/name).read_bytes()
-              assert data.startswith(b'AEA1') and len(data)>500, f'not a valid signed file: {name}'
+          sources=list(Path('tools/taxi-shortcuts').glob('*_unsigned.shortcut'))
+          signed=list(Path('tools/taxi-shortcuts/artifacts').glob('*.shortcut'))
+          assert len(sources)==len(signed)==7, (len(sources),len(signed))
+          for source in sources:
+              name=source.name.replace('_unsigned.shortcut','.shortcut')
+              data=(Path('tools/taxi-shortcuts/artifacts')/name).read_bytes()
+              assert data.startswith(b'AEA1') and len(data)>500, f'invalid signed Shortcut: {name}'
               print(name, 'signed AEA1',len(data))
           PY
       - name: Upload iPhone installable pack

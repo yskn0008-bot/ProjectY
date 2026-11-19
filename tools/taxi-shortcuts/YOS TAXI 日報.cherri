@@ -1,0 +1,8 @@
+#define name YOS TAXI 日報
+#define color orange
+
+#include 'actions/web'
+
+// Open the existing manual photo selection flow. No automatic upload or Notion write.
+openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=report")
+stop()

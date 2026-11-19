@@ -97,8 +97,8 @@
       "id": "clarity-inbox-bridge",
       "name": "YOS Clarity Inbox Bridge",
       "path": "ios-app/scriptable/YOS Clarity Inbox Bridge.js",
-      "commit": "bcecaceb7d933ee0d97e45dbedd159b6004d5860",
-      "sha256": "25917c13e195f585fae450a1bd34147bf240e69801c55cd8a4012b0a35dc45d8"
+      "commit": "82e287cc48cd486b60867caa14d8c8fb00615914",
+      "sha256": "dab381d8dfa18b9bc0b89e855c69673abe021d7a349c18d0bf84340e58af227f"
     },
     {
       "id": "daystream-notion",
@@ -127,6 +127,13 @@
       "path": "ios-app/scriptable/YOS Health Automation.js",
       "commit": "022655be1d3f19fd5046428b9ea404d3288e337e",
       "sha256": "63366cabebee9f5f8d0b1e0f5b78fa3a7de2fb2e67a2341e920663eca3e94f5b"
+    },
+    {
+      "id": "bravia-picture-off",
+      "name": "YOS BRAVIA Picture Off",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Picture Off.js",
+      "commit": "cfae0db7be4e5d560242520ee9c99b04a8a08fd5",
+      "sha256": "402901e68dc2e21b6206dc0702d6d7cfdff0865b33fd0a49e589377140a6d2ce"
     }
   ]
 }

@@ -500,3 +500,88 @@ test('Taxi Shortcuts: locked/home widgets use same local shift and retry-safe dr
   await separate.close();
   expect(errors).toEqual([]);
 });
+
+
+test('Dropoff result is persistent and clearly confirms success, retry and failure', async ({page}) => {
+  const errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.setViewportSize({width:320,height:568});
+  await page.clock.setFixedTime(new Date('2026-11-19T17:15:00+09:00'));
+  const eventCount=()=>page.evaluate(()=>window.YOSTaxiPreview.debugState().events.filter(e=>e.type==='dropoff').length);
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await page.locator('#drop-btn').click();
+  await expect(page.locator('#modal.dropoff-result-error')).toBeVisible();
+  await expect(page.locator('#modal-title')).toHaveText('降車は記録していません');
+  await expect(page.locator('#dropoff-outcome-badge')).toHaveText('保存なし');
+  await expect(page.locator('#dropoff-outcome-time')).toHaveText('未記録');
+  await expect(page.locator('#dropoff-outcome-count')).toHaveText('本日の降車記録 0件');
+  expect(await eventCount()).toBe(0);
+  await page.goto('./ui-v2.html?yos_action=start',{waitUntil:'domcontentloaded'});
+  await page.locator('#modal-actions .primary').click();
+  await page.locator('#drop-btn').click();
+  await expect(page.locator('#modal.dropoff-result-success')).toBeVisible();
+  await expect(page.locator('#modal-title')).toHaveText('降車を記録しました');
+  await expect(page.locator('#dropoff-outcome-badge')).toHaveText('保存完了');
+  await expect(page.locator('#dropoff-outcome-time')).toHaveText('降車 17:15:00');
+  await expect(page.locator('#dropoff-outcome-count')).toHaveText('本日の降車記録 1件');
+  await expect(page.locator('#modal-body')).toContainText('Notionとは未同期');
+  const sizes=await page.locator('#modal').evaluate(node=>{
+    const sheet=node.querySelector('.sheet').getBoundingClientRect();
+    const stamp=node.querySelector('#dropoff-outcome-time');
+    return {font:parseFloat(getComputedStyle(stamp).fontSize),bottom:sheet.bottom,top:sheet.top};
+  });
+  expect(sizes.font).toBeGreaterThanOrEqual(30);
+  expect(sizes.bottom).toBeLessThanOrEqual(569);
+  expect(sizes.top).toBeGreaterThanOrEqual(-1);
+  await page.waitForTimeout(3200);
+  await expect(page.locator('#modal.dropoff-result-success')).toBeVisible();
+  await page.locator('#modal-actions button').first().click();
+  await expect(page.locator('#modal')).toBeHidden();
+  await page.locator('#drop-btn').click();
+  await expect(page.locator('#modal.dropoff-result-duplicate')).toBeVisible();
+  await expect(page.locator('#modal-title')).toContainText('追加なし');
+  await expect(page.locator('#dropoff-outcome-count')).toHaveText('本日の降車記録 1件');
+  expect(await eventCount()).toBe(1);
+
+  await page.clock.setFixedTime(new Date('2026-11-19T17:20:00+09:00'));
+  const id='20261119172000-123456';
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req='+id,{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#modal.dropoff-result-success')).toBeVisible();
+  await expect(page.locator('#dropoff-outcome-time')).toHaveText('降車 17:20:00');
+  await expect(page.locator('#dropoff-outcome-count')).toHaveText('本日の降車記録 2件');
+  expect(await eventCount()).toBe(2);
+  await page.reload();
+  await expect(page.locator('#modal')).toBeHidden();
+  expect(await eventCount()).toBe(2);
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req='+id,{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#modal.dropoff-result-duplicate')).toBeVisible();
+  await expect(page.locator('#dropoff-outcome-time')).toHaveText('降車 17:20:00');
+  await expect(page.locator('#dropoff-outcome-count')).toHaveText('本日の降車記録 2件');
+  expect(await eventCount()).toBe(2);
+
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req=invalid',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#modal.dropoff-result-error')).toBeVisible();
+  await expect(page.locator('#dropoff-outcome-badge')).toHaveText('保存なし');
+  expect(await eventCount()).toBe(2);
+  expect(errors).toEqual([]);
+});
+
+
+test('YOS TAXI workflow links: read-only history and analysis do not alter shift records', async ({page}) => {
+  const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  await page.clock.setFixedTime(new Date('2026-11-19T18:30:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const original=await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+  await page.goto('./ui-v2.html?yos_action=history',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#history-view')).toBeVisible();
+  expect(page.url()).not.toContain('yos_action');
+  const afterHistory=await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+  expect(afterHistory).toBe(original);
+  await page.goto('./ui-v2.html?yos_action=analysis',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#analysis-view')).toBeVisible();
+  expect(page.url()).not.toContain('yos_action');
+  const afterAnalysis=await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+  expect(afterAnalysis).toBe(original);
+  expect(errors).toEqual([]);
+});
