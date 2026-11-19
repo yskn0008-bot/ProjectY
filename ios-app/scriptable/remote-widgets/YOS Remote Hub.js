@@ -357,9 +357,9 @@ function renderPictureMenu(){
      const info=target?pictureEntry(target):null
      html+='<div class="pic-item"><span class="pic-name">'+pictureEscape(name)+'</span>'
      if(info&&info.available&&Number.isFinite(Number(info.min))&&Number.isFinite(Number(info.max))&&Number(info.max)>Number(info.min)&&Number(info.step)>0){
-       html+='<div class="pic-slider-wrap"><input type="range" min="'+info.min+'" max="'+info.max+'" step="'+info.step+'" value="'+info.value+'" oninput="previewPicValue(event)" onchange="commitPictureSlider(event,\''+target+'\')"><output>'+pictureEscape(info.value)+'</output></div>'
+       html+='<div class="pic-slider-wrap"><input type="range" min="'+info.min+'" max="'+info.max+'" step="'+info.step+'" value="'+info.value+'" oninput="previewPicValue(event)" onchange="commitPictureSlider(event,&quot;'+target+'&quot;)"><output>'+pictureEscape(info.value)+'</output></div>'
      }else if(info&&info.available&&info.options&&info.options.length){
-       html+='<select class="pic-enum" aria-label="'+pictureEscape(name)+'" onchange="commitPictureSelect(event,\''+target+'\')">'
+       html+='<select class="pic-enum" aria-label="'+pictureEscape(name)+'" onchange="commitPictureSelect(event,&quot;'+target+'&quot;)">'
        for(const option of info.options)html+='<option value="'+pictureEscape(option)+'"'+(String(option)===String(info.value)?' selected':'')+'>'+pictureEscape(option)+'</option>'
        html+='</select>'
      }else html+='<span class="pic-manual">テレビで設定</span>'
@@ -395,7 +395,7 @@ function renderPicturePresets(){
  const root=document.getElementById("picturePresets");if(!root)return
  root.innerHTML=PIC_PRESET_IDS.map(key=>{
  const isSaved=Boolean(savedPresets[key])
- return '<div class="pic-preset"><div><strong>'+PIC_PRESET_NAMES[key]+'</strong><div class="pic-manual">'+(isSaved?'登録済み':'未登録')+'</div></div><button '+(!pictureConnected?'disabled':'')+' onclick="savePicturePreset(event,\''+key+'\')">保存</button><button '+(!pictureConnected||!isSaved?'disabled':'')+' onclick="loadPicturePreset(event,\''+key+'\')">呼出</button></div>'
+ return '<div class="pic-preset"><div><strong>'+PIC_PRESET_NAMES[key]+'</strong><div class="pic-manual">'+(isSaved?'登録済み':'未登録')+'</div></div><button '+(!pictureConnected?'disabled':'')+' onclick="savePicturePreset(event,&quot;'+key+'&quot;)">保存</button><button '+(!pictureConnected||!isSaved?'disabled':'')+' onclick="loadPicturePreset(event,&quot;'+key+'&quot;)">呼出</button></div>'
  }).join("")
 }
 function savePicturePreset(e,key){
