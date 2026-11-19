@@ -180,3 +180,23 @@ test('ACTUAL rendered Scriptable WebView script parses and starts the remote but
   assert.ok(window.location.href.includes('device=picture'),'picture click must dispatch native action');
   assert.ok(window.location.href.includes('pictureMode'),'picture click must preserve target');
 });
+
+test('existing 12-key adaptive cursor/playback switching remains BYTE-FOR-BYTE identical to v6.6',()=>{
+  const original=fs.readFileSync(new URL('../scriptable/remote-widgets/picture-v66/YOS Remote Hub.js',import.meta.url),'utf8');
+  const segments=[
+    ['const TV_ACTIONS =','const LIGHT_BUTTONS ='],
+    ['function makeTVKey(','function modeLabel('],
+    ['function setMode(','function renderConfig('],
+    ['function loadMode()','async function sonyJSON('],
+    ['async function inferMode()','function walk(']
+  ];
+  for(const [start,end] of segments){
+    const i=original.indexOf(start),j=original.indexOf(end,i+1);
+    const k=source.indexOf(start),m=source.indexOf(end,k+1);
+    assert.ok(i>=0&&j>i&&k>=0&&m>k,'required existing source segment: '+start);
+    assert.equal(source.slice(k,m),original.slice(i,j),'do not change adaptive control: '+start);
+  }
+  assert.match(source,/const CROSS_NAV = \{ up:"up", left:"left", center:"confirm", right:"right", down:"down" \}/);
+  assert.ok(!source.includes('カーソル操作</button>'));
+  assert.ok(!source.includes('再生操作</button>'));
+});
