@@ -13,6 +13,40 @@ const TOPICS = Object.freeze([
   ['好奇心と学習','curiosity memory neuroscience'],
 ]);
 const clean=x=>String(x||'').replace(/<[^>]*>/g,' ').replace(/&(?:nbsp|amp|lt|gt|quot);/g,' ').replace(/\s+/g,' ').trim();
+// Shortcuts extensions may be killed on long network waits. Reuse only the
+// exact UTC-day's public abstract notes; this cache never stores private input.
+const CACHE_FILE = 'YOS JOURNAL Public Abstract Cache V1.json';
+const HOLD = 'YOS_RESEARCH_HOLD_V1:SOURCE_UNAVAILABLE';
+function cacheStore(){
+  try{
+    const fm=FileManager.local();
+    return {fm,path:fm.joinPath(fm.documentsDirectory(),CACHE_FILE)};
+  }catch(_){return null;}
+}
+function readCache(day){
+  const store=cacheStore();
+  if(!store)return null;
+  try{
+    if(!store.fm.fileExists(store.path))return null;
+    const obj=JSON.parse(store.fm.readString(store.path));
+    if(!obj||obj.day!==day||typeof obj.notes!=='string'||
+      obj.notes.length>10000||!obj.notes.startsWith('YOS_RESEARCH_ABSTRACT_V1')||
+      !obj.notes.includes('自動公開禁止')||!obj.notes.includes('論文リンク: https://')||
+      typeof obj.savedAt!=='number'||Date.now()-obj.savedAt>24*60*60*1000||
+      Date.now()<obj.savedAt)return null;
+    return obj.notes;
+  }catch(_){return null;}
+}
+function writeCache(day,notes){
+  const store=cacheStore();
+  if(!store||typeof notes!=='string'||notes.length>10000)return;
+  try{
+    const obj={day,notes,savedAt:Date.now()};
+    const json=JSON.stringify(obj);
+    store.fm.writeString(store.path,json);
+    if(store.fm.readString(store.path)!==json)throw Error('CACHE_WRITE_FAILED');
+  }catch(_){/* backup cache may be unavailable; do not break a successful output */}
+}
 const safeDoi=x=>typeof x==='string'&&/^10\.\d{4,9}\/[A-Za-z0-9._;()/:+-]{1,160}$/.test(x)?x:null;
 const makeRecord=x=>{
   const title=clean(x?.title).slice(0,240);
@@ -37,9 +71,9 @@ function format(records,topic,query,provider){
 }
 async function fetchStudies(topic){
   const q='https://www.ebi.ac.uk/europepmc/webservices/rest/search?query='+
-    encodeURIComponent(topic[1])+'&format=json&resultType=core&pageSize=8';
+    encodeURIComponent(topic[1])+'&format=json&resultType=core&pageSize=5';
   const r=new Request(q);
-  r.method='GET';r.timeoutInterval=9;
+  r.method='GET';r.timeoutInterval=4;
   r.headers={'Accept':'application/json'};
   // Preserve only same-origin HTTPS redirects; never follow to an arbitrary server.
   r.onRedirect=next=>String(next?.url||'').startsWith('https://www.ebi.ac.uk/europepmc/')?next:null;
@@ -58,9 +92,9 @@ async function fetchStudies(topic){
 }
 async function fetchCrossref(topic){
   // Only publisher-deposited public metadata and abstracts; never treated as full text.
-  const url='https://api.crossref.org/works?rows=8&query='+encodeURIComponent(topic[1]);
+  const url='https://api.crossref.org/works?rows=5&query='+encodeURIComponent(topic[1]);
   const r=new Request(url);
-  r.method='GET';r.timeoutInterval=8;
+  r.method='GET';r.timeoutInterval=3;
   r.headers={'Accept':'application/json'};
   r.onRedirect=next=>String(next?.url||'').startsWith('https://api.crossref.org/')?next:null;
   const payload=await r.loadJSON();
@@ -85,15 +119,20 @@ async function fetchCrossref(topic){
 }
 async function main(){
   // Daily theme rotation, never transmit shortcut input or personal data in a query.
-  const index=Math.floor(new Date().getTime()/86400000)%TOPICS.length;
+  const day=Math.floor(Date.now()/86400000);
+  const index=day%TOPICS.length;
   try{
+    const previous=readCache(day);
+    if(previous){Script.setShortcutOutput(previous);return;}
     let notes;
     try{notes=await fetchStudies(TOPICS[index]);}
     catch(e){notes=await fetchCrossref(TOPICS[index]);}
+    // Always output before optional cache write; local file errors are non-fatal.
     Script.setShortcutOutput(notes);
+    writeCache(day,notes);
   }catch(err){
-    // Do not generate a speculative article after unavailable/blocked sources.
-    Script.setShortcutOutput('YOS_RESEARCH_HOLD_V1:SOURCE_UNAVAILABLE');
+    // Source unavailable: never invent a verified article or retry indefinitely.
+    Script.setShortcutOutput(HOLD);
   }
 }
 try{await main();}
