@@ -512,6 +512,7 @@ function showQuickStatus(result){
  const status=document.getElementById("quickStatus")
  if(result&&result.picture){quickModeButtons("quickPictureModes");quickModeButtons("quickPictureModesPanel")}
  if(result&&result.quick){
+   if(result.quick.picture)showPictureStatus({picture:result.quick.picture})
    quickSound=result.quick.sound||{}
    quickAppsAvailable=result.quick.apps||{}
    quickSoundButtons("quickSoundModes","soundMode")
