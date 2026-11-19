@@ -98,6 +98,7 @@ test('Scriptable shopping uses native Keychain and Notion without Vercel or leak
  assert.match(log.pages[0],/テスト用 洗顔 120g/);
  assert.match(log.pages[0],/example.com\/real-photo.png/);
  assert.match(log.pages[0],/yos-shopping-local-v1/);
+ assert.match(log.pages[0],/<html lang="ja" class="scriptable-native">/);
  assert.doesNotMatch(log.pages[0],/scriptable-private-notion-token/);
  assert.doesNotMatch(log.pages[0],/project-y-yos-ai\.vercel\.app/);
  assert.ok(log.urls.every(u=>u.startsWith('https://api.notion.com/')||u.startsWith('https://raw.githubusercontent.com/')));
@@ -201,4 +202,17 @@ test('native photo picker requires Scriptable Photos permission; no Notion image
  const {log}=await run({query:{action:'photo',id:ID,expectedEditedAt:NOW}});
  assert.equal(log.requests.some(x=>x.method==='PATCH'),false);
  assert.match(log.alerts.at(-1).message,/写真を追加できる/);
+});
+
+test('purchased candidate count is distinct from confirmed sale and price buy timing',()=>{
+ assert.match(HTML,/id="recommendReason"/);
+ assert.match(HTML,/data-filter="selected"/);
+ assert.match(HTML,/id="chipSelectedCount"/);
+ assert.match(JS,/case 'selected':return selected\(item\)/);
+ assert.match(JS,/const selectedCount=count\(selected\)/);
+ assert.match(JS,/購入候補\$\{selectedCount\}件を含む/);
+ assert.match(JS,/const buy=item=>/);
+ assert.match(JS,/recentPrice\(item\)/);
+ assert.match(CSS,/html\.scriptable-native \.shopping-app\{padding-top:8px\}/);
+ assert.doesNotThrow(()=>new Function(JS));
 });

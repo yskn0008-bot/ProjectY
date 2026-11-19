@@ -178,3 +178,8 @@ button[disabled]{cursor:not-allowed;opacity:.55}
  .product-heading{font-size:12px}
  .product-heading-row{min-height:46px}
 }
+
+/* Scriptable WebView already places content below its own top toolbar.
+   Avoid counting the iPhone safe-area twice in the embedded screen. */
+html.scriptable-native .shopping-app{padding-top:8px}
+@media(max-width:430px){html.scriptable-native .shopping-app{padding-top:6px}}

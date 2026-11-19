@@ -82,6 +82,7 @@
         case 'sale':return sale(item);
         case 'buy':return buy(item);
         case 'stock':return restock(item);
+        case 'selected':return selected(item);
         case 'daily':return !item.purchased&&item.type==='日用品';
         case 'beauty':return !item.purchased&&['美容','衛生'].includes(item.category);
         case 'food':return !item.purchased&&item.category==='食品';
@@ -146,6 +147,10 @@
     number('allCount',all);number('saleCount',count(sale));number('chipSaleCount',count(sale));
     number('buyCount',count(buy));number('chipBuyCount',count(buy));
     number('stockCount',count(restock));number('chipStockCount',count(restock));number('recCount',count(recommend)+'件');
+    const selectedCount=count(selected);number('chipSelectedCount',selectedCount);
+    const reason=el('recommendReason');
+    if(reason)reason.textContent=selectedCount?`購入候補${selectedCount}件を含む・価格は要確認`:
+      count(recommend)?'価格を確認してから購入を判断':'現在、値引き・買い時・補充の候補なし';
     document.querySelectorAll('[data-filter]').forEach(node=>{
       const selected=node.dataset.filter===state.filter;
       if(node.classList.contains('chip'))node.classList.toggle('selected',selected);
