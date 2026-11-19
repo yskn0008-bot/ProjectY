@@ -1,6 +1,5 @@
 #define name YOS Shopping 起動
 #define color pink
-#define version 1
 
 // Existing Scriptable script: YOS Shopping.
 // Native Shortcuts Scriptable "Run Script", NOT URL/Open URL/Quick Look.
