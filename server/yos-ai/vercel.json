@@ -26,9 +26,6 @@
     },
     "api/yos/public-config.mjs": {
       "maxDuration": 10
-    },
-    "api/yos/shopping.mjs": {
-      "maxDuration": 30
     }
   },
   "crons": [
