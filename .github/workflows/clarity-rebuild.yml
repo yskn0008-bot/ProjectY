@@ -1,0 +1,114 @@
+name: Clarity Rebuild
+
+on:
+  pull_request:
+    paths:
+      - 'tools/clarity-rebuild/**'
+      - 'ios-app/scriptable/clarity/YOS Clarity Notion Bridge.js'
+      - '.github/workflows/clarity-rebuild.yml'
+  push:
+    branches: ['chatgpt/clarity-rebuild-notion-home-20261020']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Source contracts
+        run: python3 -m unittest discover -s tools/clarity-rebuild/tests -v
+
+      - name: Scriptable syntax
+        run: node --check 'ios-app/scriptable/clarity/YOS Clarity Notion Bridge.js'
+
+      - name: Install Cherri 2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip' -o /tmp/cherri.zip
+          printf '%s  %s\n' '7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9' /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri && unzip -q /tmp/cherri.zip -d /tmp/cherri
+          sudo install -m 0755 "$(find /tmp/cherri -type f -name cherri -print -quit)" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-rebuild
+          cherri './Clarity.cherri' --skip-sign --debug
+          cherri './Clarity Text.cherri' --skip-sign --debug
+          cherri './Clarity Share.cherri' --skip-sign --debug
+          cherri './Clarity Bank Email.cherri' --skip-sign --debug
+          test -f './Clarity Rebuild_unsigned.shortcut'
+          test -f './Clarity Rebuild Text_unsigned.shortcut'
+          test -f './Clarity Rebuild Share_unsigned.shortcut'
+          test -f './Clarity Rebuild Bank Email_unsigned.shortcut'
+          python3 patch_ledger_persistence.py './Clarity Rebuild_unsigned.shortcut'
+          python3 patch_calendar_reminder_wire_format.py './Clarity Rebuild_unsigned.shortcut'
+          mkdir -p artifacts
+          cp './Clarity Rebuild_unsigned.shortcut' artifacts/Clarity-Rebuild-unsigned.shortcut
+          cp './Clarity Rebuild Text_unsigned.shortcut' artifacts/Clarity-Rebuild-Text-unsigned.shortcut
+          cp './Clarity Rebuild Share_unsigned.shortcut' artifacts/Clarity-Rebuild-Share-unsigned.shortcut
+          cp './Clarity Rebuild Bank Email_unsigned.shortcut' artifacts/Clarity-Rebuild-Bank-Email-unsigned.shortcut
+
+      - name: Runtime contract
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('tools/clarity-rebuild/artifacts/Clarity-Rebuild-unsigned.shortcut')
+          root=plistlib.loads(p.read_bytes())
+          ids=[a.get('WFWorkflowActionIdentifier','') for a in root.get('WFWorkflowActions',[])]
+          blob=repr(root)
+          assert sum(i=='is.workflow.actions.dictatetext' for i in ids)==1
+          assert sum(i=='is.workflow.actions.askllm' for i in ids)==1
+          assert 'NEXT_HOME' in blob and 'NEXT_NOTION' in blob
+          assert 'YOS BRAVIA Widget' in blob and 'YOS Light Widget' in blob and 'YOS AC Widget' in blob
+          assert 'YOS%20Clarity%20Notion%20Bridge' in blob
+          assert 'NEXT_MONEY' not in blob and 'money-capture.html' not in blob
+          assert not any(i.endswith('file.append') for i in ids)
+          print('runtime: PASS')
+          PY
+
+      - name: Secret scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE --exclude='*.shortcut' '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|ntn_[A-Za-z0-9_-]{20,}|secret_[A-Za-z0-9_-]{20,}|BEGIN [A-Z ]*PRIVATE KEY|192\.168\.[0-9]+\.[0-9]+)' tools/clarity-rebuild ios-app/scriptable/clarity; then
+            exit 1
+          fi
+
+      - name: Sign
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py --input tools/clarity-rebuild/artifacts/Clarity-Rebuild-unsigned.shortcut --output tools/clarity-rebuild/artifacts/Clarity-Rebuild-signed.shortcut --name 'Clarity Rebuild'
+          python3 tools/clarity-factory/sign_with_hubsign.py --input tools/clarity-rebuild/artifacts/Clarity-Rebuild-Text-unsigned.shortcut --output tools/clarity-rebuild/artifacts/Clarity-Rebuild-Text-signed.shortcut --name 'Clarity Rebuild Text'
+          python3 tools/clarity-factory/sign_with_hubsign.py --input tools/clarity-rebuild/artifacts/Clarity-Rebuild-Share-unsigned.shortcut --output tools/clarity-rebuild/artifacts/Clarity-Rebuild-Share-signed.shortcut --name 'Clarity Rebuild Share'
+          python3 tools/clarity-factory/sign_with_hubsign.py --input tools/clarity-rebuild/artifacts/Clarity-Rebuild-Bank-Email-unsigned.shortcut --output tools/clarity-rebuild/artifacts/Clarity-Rebuild-Bank-Email-signed.shortcut --name 'Clarity Rebuild Bank Email'
+
+      - name: Verify signatures
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          base=Path('tools/clarity-rebuild/artifacts')
+          expected=['Clarity-Rebuild-signed.shortcut','Clarity-Rebuild-Text-signed.shortcut','Clarity-Rebuild-Share-signed.shortcut','Clarity-Rebuild-Bank-Email-signed.shortcut']
+          for name in expected:
+              data=(base/name).read_bytes()
+              assert data.startswith(b'AEA1') and len(data)>500, (name,len(data))
+              print(name, len(data))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clarity-rebuild
+          path: tools/clarity-rebuild/artifacts/*-signed.shortcut
+          if-no-files-found: error
