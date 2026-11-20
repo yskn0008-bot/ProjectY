@@ -184,3 +184,47 @@ The mirror first checks its Upstash cache and otherwise searches the connected N
 - Before `ベースホーム開いて` opens BASE HOME, Clarity refreshes the current Calendar / Reminders / Money snapshot and posts it to the same endpoint.
 - `操作URL` points back to an existing source app or Shortcut. Notion is an operation entry, not a second source of truth.
 - If mirror transport fails, the source operation remains complete and the same stable event can be retried later.
+
+
+# Gmail / iOS notification triage — draft integration (PR #633)
+
+Goal: avoid sending **all** mail/alerts to Notion; triage third-party input first while preserving existing voice/text Clarity raw-first behavior. This module is deterministic and read-only. It is not a remotely hosted AI worker and **does not monitor an inbox by itself**.
+
+## Source contract
+
+Existing authenticated `POST /api/yos/intake` additionally accepts:
+
+- `source: "gmail"`, `inputMode: "email"`, `captureId: "gmail-" + stable actual Gmail message ID`; `rawText` should contain the **subject and short snippet only** (NOT full bodies or attachments), plus optional sender label.
+- `source: "clarity"`, `inputMode: "notification"`: app/source/title/message via existing Clarity notification adapter, not user-issued device instructions.
+- Original `source: "clarity"` voice/text behavior remains unchanged.
+
+Every call uses the existing bearer token. A fake `source` label alone is **not** proof of an authentic Gmail message: only an authorized connector/watcher that reads Gmail IDs from the provider may submit this envelope. Do not expose the bearer token to forwarded emails, notifications, screenshots or logs.
+
+## Pre-record triage
+
+`src/intake/inbound-triage.ts` is fail-closed for unknown input:
+
+1. Critical legal/payment-deadline and high priority sign-in/security or financial-transaction candidates are recorded as `needsReview`.
+2. Delivery updates are retained as normal review candidates.
+3. Obvious marketing/review-request items **without a stronger signal** are ignored, returning `{ok:true,ignored:true}` without a Notion write.
+4. All other unknown content is retained for review, not silently discarded.
+5. Gmail snippets are capped at 3,000 characters, with common numeric OTP formats redacted before Notion persistence; callers must already enforce snippet-only.
+6. None of these actions sends Gmail, edits Gmail labels, creates reminders/calendar items, writes Money/ME transactions, or sends a user notification. A classification `triage` field in the intake response is only a suggestion.
+
+The existing Upstash captureId dedupe is reused when the capture is recorded. Ignored promotional items don't create a processed marker; repeated checks can ignore them safely. Future full-mail ingestion needs Gmail labels/history cursor and a bound on scan volume.
+
+## Actual Gmail ingestion is not yet connected
+
+The installed ChatGPT Gmail connector can read messages inside an **active chat** when the user asks. It is **not** a background credential for the ProjectY server and is not automatically exported into Shortcuts. Do not claim always-on monitoring or automatic Notion writes from the ChatGPT connection.
+
+Two supported ways to add ingestion after owner authorization:
+
+1. Lowest setup burden: iOS Shortcuts **Email** trigger on the existing Mail account -> pass limited event metadata to the authorized intake URL when the Shortcut and token are installed. Availability of the actual email text in Shortcut Input must be tested on-device; trigger alone does not prove it.
+2. Robust unattended server-side route: Gmail API `users.watch` -> Google Cloud Pub/Sub -> Gmail `users.history.list` and `users.messages.get` -> present authenticated intake envelope. It requires the owner's explicit Gmail OAuth authorization, Cloud project/Pub/Sub provisioning, secure token handling, and a daily watch renewal (expiry within seven days). Do not start provisioning or a paid service without permission. This alternative is not implemented by this PR.
+
+The user prefers iPhone Shortcuts automations rather than ChatGPT scheduled tasks; never create ChatGPT automations to substitute for the above.
+
+## Shipping gates
+- GitHub CI checks for type correctness, triage safety and backward compatibility.
+- Never merge to main or configure production without the user's approval for external effects.
+- A complete rollout requires real Gmail arrival, filter execution, deduplicated Notion result, opt-in priority alerts and an iPhone notification test.

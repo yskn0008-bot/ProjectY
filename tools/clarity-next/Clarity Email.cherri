@@ -1,0 +1,27 @@
+#define name Clarity Email
+#define color purple
+#define inputs text, richtext
+
+#include 'actions/text'
+#include 'actions/documents'
+
+// Mail automation entry only. Third-party text must never run Clarity commands.
+// The native Email trigger should pass sender/subject/short preview as Text.
+action 'file.append' appendResolvedFile(
+    variable file: 'WFFile',
+    variable input: 'WFInput'
+) {
+    "WFAppendFileWriteMode": "Append"
+}
+
+const incomingText = getText(ShortcutInput)
+if !incomingText {
+    stop()
+}
+
+const record = text("{CurrentDate}\tEMAIL\t{incomingText}\n")
+const inboxFile = getFile("Clarity Inbox.txt")
+appendResolvedFile(inboxFile, record)
+
+// Fail-safe local record only. No external API credentials, send, or action.
+// Notion delivery is owned by the existing authenticated YOS intake bridge.
