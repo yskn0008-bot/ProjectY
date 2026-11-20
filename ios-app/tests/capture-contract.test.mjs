@@ -37,6 +37,39 @@ test('native service saves captured state before classification', async () => {
   assert.match(service, /return raw/);
 });
 
+test('local event ledger is append-only, protected, private-by-default, and monthly partitioned', async () => {
+  const [models, ledger] = await Promise.all([
+    read('../plugins/yos-capture/ios/Sources/YOSCapturePlugin/YOSEventModels.swift'),
+    read('../plugins/yos-capture/ios/Sources/YOSCapturePlugin/YOSEventLedger.swift')
+  ]);
+  assert.match(models, /case s0 = "S0"/);
+  assert.match(models, /privacy: YOSEventPrivacy = \.s0/);
+  assert.match(ledger, /events-%04d-%02d\.jsonl/);
+  assert.match(ledger, /seekToEnd/);
+  assert.match(ledger, /completeFileProtectionUntilFirstUserAuthentication/);
+  assert.match(ledger, /isExcludedFromBackup = true/);
+  assert.doesNotMatch(ledger, /URLSession|https?:\/\//);
+});
+
+test('capture logs only an evidence pointer into the event ledger, not a second raw-text copy', async () => {
+  const service = await read('../plugins/yos-capture/ios/Sources/YOSCapturePlugin/YOSCaptureService.swift');
+  assert.match(service, /source: "yos_capture"/);
+  assert.match(service, /type: "user_input"/);
+  assert.match(service, /"capture_id": \.string/);
+  assert.match(service, /"input_mode": \.string/);
+  const eventBlock = service.slice(service.indexOf('let event = YOSEvent'), service.indexOf('try? await eventLedger.append'));
+  assert.doesNotMatch(eventBlock, /rawText|raw_text/);
+});
+
+test('Shortcuts receives a silent generic YOS Event App Intent', async () => {
+  const intent = await read('../plugins/yos-capture/ios/Sources/YOSCapturePlugin/YOSCaptureAppIntents.swift');
+  assert.match(intent, /RecordYOSEventIntent: AppIntent/);
+  assert.match(intent, /openAppWhenRun: Bool = false/);
+  assert.match(intent, /YOSEventService\(ledger: ledger\)/);
+  assert.match(intent, /privacy: String/);
+  assert.match(intent, /sourceEventID: String/);
+});
+
 test('EventKit application requires permission and idempotent marker', async () => {
   const source = await read('../plugins/yos-capture/ios/Sources/YOSCapturePlugin/YOSCaptureEventApplier.swift');
   assert.match(source, /requestFullAccessToEvents/);
