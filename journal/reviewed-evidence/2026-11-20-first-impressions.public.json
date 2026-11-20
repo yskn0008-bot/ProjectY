@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "publicOnly": true,
+  "reviewedOn": "2026-11-20",
+  "topic": "Facial attractiveness first impressions — evidence review, not a publication approval",
+  "reviewerMethod": "Directly opened and read original publisher full-text HTML of both studies; separately compared to an existing AI-generated draft.",
+  "sources": [
+    {
+      "id": "S1",
+      "url": "https://journals.sagepub.com/doi/10.1177/03010066241284956",
+      "title": "Anchoring has little effect when forming first impressions of facial attractiveness",
+      "publicationYear": 2024,
+      "originalAccess": "publisher_full_text",
+      "status": "examined"
+    },
+    {
+      "id": "S2",
+      "url": "https://www.nature.com/articles/s41598-017-00526-9",
+      "title": "Forming impressions of facial attractiveness is mandatory",
+      "publicationYear": 2017,
+      "originalAccess": "publisher_full_text",
+      "status": "examined"
+    }
+  ],
+  "claims": [
+    {
+      "id": "C1",
+      "sourceId": "S1",
+      "claim": "In the sequential-photo task, descending versus ascending images differed by about 0.22 points on a 1–7 attractiveness scale in the first experiment.",
+      "status": "supported_in_study",
+      "basis": "Publisher full-text abstract, experiments, and general discussion. Experiment 1 recruited 301 participants.",
+      "limitations": "Experimental ratings of selected celebrity photographs; the study did not establish an effect on real-world romantic or employment decisions."
+    },
+    {
+      "id": "C2",
+      "sourceId": "S1",
+      "claim": "The authors did not detect a significant difference between randomly ordered and ascending/descending photograph sequences in experiment 2.",
+      "status": "supported_in_study",
+      "basis": "Publisher full-text abstract and Experiment 2 (n=307), compared against Experiment 1 ordering groups.",
+      "limitations": "Absence of a detected difference within this design does not prove all first impressions are freely controllable."
+    },
+    {
+      "id": "C3",
+      "sourceId": "S2",
+      "claim": "While learning faces for an identification task, observers still developed attractiveness impressions that influenced later ratings of middle-attractiveness photographs.",
+      "status": "supported_in_study",
+      "basis": "Original 2017 full text, abstract and three experimental findings.",
+      "limitations": "Experimental photograph learning, not a longitudinal or everyday relationship study. Automatic impression formation does not prove lifelong permanence."
+    },
+    {
+      "id": "C4",
+      "sourceId": "S1",
+      "claim": "A person can reliably manipulate any first impression simply by presenting photographs in a planned order.",
+      "status": "not_supported",
+      "basis": "The original study found only a small difference and no convincing real-world evidence.",
+      "limitations": "Do not state as practical advice or verified effect."
+    },
+    {
+      "id": "C5",
+      "sourceId": "S2",
+      "claim": "Initial facial attractiveness impressions are permanent and cannot be changed by later information or interactions.",
+      "status": "not_supported",
+      "basis": "The original study examined difficulty suppressing impressions within experimental conditions, not lifetime permanence.",
+      "limitations": "This is an unsupported extrapolation."
+    }
+  ],
+  "articleAssessment": {
+    "status": "reviewed_with_limitations",
+    "verifiedCoverage": "Only the specified claims, figures and boundaries above were independently checked.",
+    "publishDecision": "hold",
+    "reason": "The existing Notion draft is not identical to a vetted public-only candidate. Article wording, completeness, privacy, copyright, image rights and audience value have not passed the existing publication gate.",
+    "requiresNext": "Create a public-safe source-aligned candidate with no private facts, verify its claims one by one, pass the GitHub editorial gate and review before publication."
+  }
+}
