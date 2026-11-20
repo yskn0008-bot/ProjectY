@@ -58,6 +58,7 @@ jobs:
           test -f './Clarity Share v4_unsigned.shortcut'
           python3 patch_ledger_persistence.py './Clarity Next_unsigned.shortcut'
           python3 patch_calendar_reminder_wire_format.py './Clarity Next_unsigned.shortcut'
+          python3 patch_share_inbox_inline.py './Clarity Share v4_unsigned.shortcut'
           mkdir -p artifacts
           cp './Clarity Next_unsigned.shortcut' artifacts/Clarity-Next-unsigned.shortcut
           cp './Clarity Text_unsigned.shortcut' artifacts/Clarity-Text-unsigned.shortcut
@@ -136,21 +137,33 @@ jobs:
           base=Path('tools/clarity-next/artifacts')
           text_root=plistlib.loads((base/'Clarity-Text-unsigned.shortcut').read_bytes())
           share_root=plistlib.loads((base/'Clarity-Share-v4-unsigned.shortcut').read_bytes())
-          for root in (text_root, share_root):
-              ids=[a.get('WFWorkflowActionIdentifier','') for a in root.get('WFWorkflowActions',[])]
-              blob=repr(root)
-              assert not any(i=='is.workflow.actions.askllm' for i in ids), ids
-              assert 'Clarity Next' in blob
-              assert any(i.endswith('runworkflow') for i in ids), ids
+          text_ids=[a.get('WFWorkflowActionIdentifier','') for a in text_root.get('WFWorkflowActions',[])]
+          text_blob=repr(text_root)
+          assert not any(i=='is.workflow.actions.askllm' for i in text_ids), text_ids
+          assert 'Clarity Next' in text_blob
+          assert any(i.endswith('runworkflow') for i in text_ids), text_ids
+
           share_ids=[a.get('WFWorkflowActionIdentifier','') for a in share_root.get('WFWorkflowActions',[])]
           share_blob=repr(share_root)
           assert 'ActionExtension' in set(share_root.get('WFWorkflowTypes') or [])
           assert share_root.get('WFWorkflowHasShortcutInputVariables') is True
+          assert not any(i=='is.workflow.actions.askllm' for i in share_ids), share_ids
+          assert not any(i=='is.workflow.actions.dictatetext' for i in share_ids), share_ids
+          assert not any(i.endswith('runworkflow') for i in share_ids), share_ids
           assert any('extracttextfromimage' in i for i in share_ids), share_ids
-          assert '__YOS_CLARITY_SHARE_TEXT_V1__' in share_blob
-          assert '__YOS_CLARITY_SHARE_IMAGE_V1__' in share_blob
-          assert '__YOS_CLARITY_SHARE_PDF_V1__' in share_blob
-          print('Clarity thin entry wrappers: PASS')
+          assert share_ids.count('dk.simonbs.Scriptable.RunScriptInlineIntent') == 1, share_ids
+          assert 'YOS_NOTION_INTEGRATION_TOKEN' in share_blob
+          assert '3d35ca88-2895-81ef-9dc8-d5f11ff8e213' in share_blob
+          assert 'https://api.notion.com/v1' in share_blob
+          assert 'share:' in share_blob
+          assert 'DUPLICATE:' in share_blob
+          assert 'OK_TRUNCATED:' in share_blob
+          assert '__YOS_SHARE_INBOX_INLINE__' not in share_blob
+          assert 'project-y-yos-ai.vercel.app' not in share_blob
+          assert 'api.openai.com' not in share_blob
+          assert 'money-capture.html' not in share_blob
+          assert 'Clarity Next' not in share_blob
+          print('Clarity Text wrapper + direct Share Inbox runtime: PASS')
           PY
 
       - name: Secret scan
