@@ -47,7 +47,7 @@ class ArtifactIdentitySourceContractTests(unittest.TestCase):
         self.assertIn('const externalWriteText = text("{externalWrite}")', self.source)
         self.assertIn('if needsReviewText == "はい" {', self.source)
         self.assertIn(
-            'if externalWriteText == "はい" && requiresConfirmationText == "いいえ" {',
+            'if externalWriteText == "はい" && requiresConfirmationText == "いいえ" && executor != "notion" {',
             self.source,
         )
         self.assertIn('if requiresConfirmationText == "はい" {', self.source)

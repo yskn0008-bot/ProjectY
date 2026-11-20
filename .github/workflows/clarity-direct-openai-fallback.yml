@@ -47,6 +47,7 @@ jobs:
           cherri clarity-v1.cherri --skip-sign --debug
           runtime='./Clarity_unsigned.shortcut'
           test -f "$runtime"
+          python3 patch_voice_notion_inline.py "$runtime"
           BUILD_ID='${{ github.event.pull_request.head.sha || github.sha }}'
           python3 patch_build_identity.py "$runtime" "$BUILD_ID"
           python3 validate_clarity_runtime.py "$runtime"
