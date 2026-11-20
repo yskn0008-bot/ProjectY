@@ -12,6 +12,18 @@ import {loadCalendarSources} from './calendar-sources.js';
 import {loadNotionCalendarMoney} from '../widget/morning.js';
 import {allowedOrigin, bearerToken, secureJson, type CorsOptions} from '../api/shared.js';
 
+const CALENDAR_ORIGIN = 'https://yskn0008-bot.github.io';
+const DEVICE_TOKEN = /^yos_cd_[a-f0-9]{64}$/;
+const HEX_HASH = /^[a-f0-9]{64}$/;
+async function verifyCalendarDeviceKey(token: string, expected: string): Promise<boolean> {
+  if (!DEVICE_TOKEN.test(token) || !HEX_HASH.test(expected)) return false;
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token)));
+  const actual = Array.from(digest, b=>b.toString(16).padStart(2,'0')).join('');
+  let difference=0;
+  for (let i=0;i<64;i++) difference |= actual.charCodeAt(i)^expected.charCodeAt(i);
+  return difference===0;
+}
+
 const PROJECTION_NAME = 'YOS Tasks｜MY WAY Read Projection';
 const SHEET_MIME = 'application/vnd.google-apps.spreadsheet';
 const TASK_RANGE = "'Tasks'!A1:J200";
@@ -53,6 +65,7 @@ export interface CreateTaskDashboardHandlerOptions extends CorsOptions {
   googleWorkloadAuth: GoogleWorkloadAuthConfig;
   notionToken?: string;
   habitRedis?: RedisCommandClient;
+  calendarDeviceKeyHash?: string;
   notionDataSourceId?: string;
   fetchImpl?: FetchLike;
 }
@@ -68,17 +81,27 @@ export function createTaskDashboardHandler(options: CreateTaskDashboardHandlerOp
     if (request.method === 'OPTIONS') return preflight(origin);
     if (!['GET', 'PATCH'].includes(request.method)) return secureJson({error: 'Method not allowed'}, 405, origin, {Allow:'GET, PATCH, OPTIONS'});
 
+    const source = new URL(request.url).searchParams.get('source');
     try {
       const idToken = bearerToken(request);
-      const identity = await options.identityVerifier.verify(idToken);
-      await options.identityGate.authorize(identity);
+      if (idToken.startsWith('yos_cd_')) {
+        // The private device key cannot authorize a legacy projection or other origin.
+        if (origin !== CALENDAR_ORIGIN || source !== 'notion') {
+          return secureJson({error:'Device key scope denied'},403,origin);
+        }
+        if (!(await verifyCalendarDeviceKey(idToken, options.calendarDeviceKeyHash ?? ''))) {
+          throw new Error('Device key rejected');
+        }
+      } else {
+        const identity = await options.identityVerifier.verify(idToken);
+        await options.identityGate.authorize(identity);
+      }
     } catch {
       return secureJson({error: 'Authentication failed'}, 401, origin);
     }
 
     // Explicit opt-in: legacy MY WAY callers retain their Google projection contract.
     // A failed authoritative read must never masquerade as a successful stale fallback.
-    const source = new URL(request.url).searchParams.get('source');
     if (source !== null && source !== 'notion') return secureJson({error: 'Unknown task source'}, 400, origin);
     if (request.method === 'PATCH' && source !== 'notion') return secureJson({error: 'Completion requires Notion source'}, 400, origin);
     if (source === 'notion') {

@@ -163,7 +163,7 @@ body.glance-mode .bottom .refresh{min-height:36px;padding:7px 11px;font-size:11p
     <a class="today-btn" id="nativeRefresh" href="scriptable:///run?scriptName=YOS%20Life%20Calendar%20Sync&target=calendar" aria-label="既存Scriptableから端末の予定とリマインダーを読み込む">iPhone予定を更新</a>
     <span id="nativeImportStatus" role="status" style="font-size:11px;color:var(--muted)"></span><button class="today-btn" id="nativeConfirm" type="button" hidden>iPhoneの取込を確認</button>
     <div id="calendarAuthHost" hidden>
-      <div id="calendarGoogleButton"></div><p id="calendarAuthStatus" role="status">本人確認待ち</p>
+      <div id="calendarGoogleButton"></div><p id="calendarAuthStatus" role="status">Notion接続待ち</p>
     </div>
   </div>
   <div class="mode"><div class="segment" role="group" aria-label="表示切替"><button type="button" data-mode="glance" class="active" aria-pressed="true">概要</button><button type="button" data-mode="month" aria-pressed="false">月</button><button type="button" data-mode="week" aria-pressed="false">週</button><button type="button" data-mode="day" aria-pressed="false">日</button></div><button class="today-btn" type="button" id="goToday">今日へ</button></div>
@@ -479,6 +479,8 @@ state.items=state.demo?createDemo():(window.YOS_UNIFIED_CALENDAR?.merge([...life
   }
   if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('../../service-worker.js',{scope:'../../',updateViaCache:'none'}).catch(()=>{});
   load(undefined);
+  // When this iPhone was previously provisioned, refresh without login prompts.
+  if(window.YOS_DAYSTREAM_TASK_AUTH?.hasDeviceKey?.())$('calendarTasksRefresh').click();
 })();
 </script>
 </body>
