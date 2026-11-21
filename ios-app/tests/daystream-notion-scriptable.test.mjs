@@ -200,7 +200,8 @@ test('Notion work-shift calendar mirror must not hide the actual iCloud night sh
  const now=new Date('2026-11-19T12:00:00+09:00');
  const start=new Date('2026-11-20T17:00:00+09:00');
  const end=new Date('2026-11-21T05:00:00+09:00');
- const a=api({CalendarEvent:{between:async()=>[{
+ const testClock=class extends Date{static now(){return now.getTime()}};
+ const a=api({Date:testClock,CalendarEvent:{between:async()=>[{
   identifier:'icloud-work-shift-20261120',title:'夜勤',
   startDate:start,endDate:end,isAllDay:false
  }]}});
@@ -221,7 +222,8 @@ test('other Notion calendar mirrors remain visible through the iCloud source',as
  const now=new Date('2026-11-19T10:00:00+09:00');
  const start=new Date('2026-11-20T08:00:00+09:00');
  const end=new Date('2026-11-20T09:00:00+09:00');
- const a=api({CalendarEvent:{between:async()=>[{
+ const testClock=class extends Date{static now(){return now.getTime()}};
+ const a=api({Date:testClock,CalendarEvent:{between:async()=>[{
    identifier:'calendar-mirror',title:'固定予定',startDate:start,endDate:end,isAllDay:false
  }]}});
  const notionMirror={title:'固定予定',due:start.toISOString(),dueEnd:end.toISOString(),

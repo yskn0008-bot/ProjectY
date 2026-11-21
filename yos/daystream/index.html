@@ -331,6 +331,57 @@ body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
 .move-impact li{padding:8px 6px;border-bottom:1px solid #e3edf4;overflow-wrap:anywhere}
 .move-impact li:before{content:'•';color:#158861;margin-right:7px}
 .move-impact li:last-child{border-bottom:0}
+/* Glass surfaces and status accents on the existing day view. */
+.yos-daystream-web .app{padding-top:26px}
+.flow-title{margin-bottom:15px}
+.flow-title h1{margin-top:6px;font-weight:850}
+.timeline-legend{margin-top:10px;gap:8px}
+.timeline-legend span{font-size:12px;font-weight:700;padding:5px 10px}
+.timeline-legend span:before{width:9px;height:9px}
+.timeline .axis{left:43px}
+.timeline .tick{left:39.5px;pointer-events:none}
+.timeline{--card-inset:56px}
+.timeline .card[data-flow-tone]{
+ background-color:var(--flow-light);
+ background-image:linear-gradient(112deg,#ffffff65,transparent 65%),linear-gradient(105deg,var(--flow-light),var(--flow-other));
+ border-color:var(--flow-edge);border-radius:15px;box-shadow:inset 0 1px 1px #ffffffbc,0 3px 8px #345c8311;
+}
+.timeline .card[data-flow-tone].yos-backdrop.is-overlapped{background:var(--zone-surface)}
+.timeline .card .card-icon{width:29px;height:29px;flex-basis:29px;background:#ffffff7c}
+.timeline .card.compat-positive{--signal-accent:#299d6b}
+.timeline .card.compat-negative{--signal-accent:#ba701f}
+.timeline .card.compat-danger{--signal-accent:#c1475e}
+.timeline .card[data-flow-tone]:is(.compat-positive,.compat-negative,.compat-danger){
+ box-shadow:inset 3px 0 var(--signal-accent),inset 0 1px 1px #ffffffbc,0 3px 8px #345c8311;
+}
+.timeline .card .task-drag-grip{background:transparent}
+.flow-editing .flow-edit-bar{position:sticky;top:0;z-index:15}
+.flow-editing .top{display:contents}
+.flow-editing .flow-edit-bar{padding-inline:14px}
+.timeline .flow-ghost{position:absolute;left:var(--card-inset);right:0;border:2px dashed #8b72c3;border-radius:15px;background:#ede4ff80;pointer-events:none;z-index:5}
+.timeline .card.drag-preview{pointer-events:none;z-index:11;box-shadow:0 12px 26px #55468335}
+.timeline .card.drag-preview[data-placement]{outline-color:var(--placement-ink);box-shadow:inset 3px 0 var(--placement-ink),0 12px 26px #55468335}
+[data-placement=positive]{--placement-ink:#299d6b}
+[data-placement=negative]{--placement-ink:#ba701f}
+[data-placement=danger]{--placement-ink:#c1475e}
+[data-placement=unknown]{--placement-ink:#778ca8}
+
+#flowDragHint{white-space:normal;width:min(340px,calc(100% - 32px));text-align:left;bottom:calc(76px + env(safe-area-inset-bottom));padding:12px 14px}
+.flow-editing #flowDragHint{bottom:calc(16px + env(safe-area-inset-bottom))}
+#flowDragHint strong,#flowDragHint small{display:block}
+#flowDragHint small{margin:3px 0 0;font-weight:550;line-height:1.45}
+#flowDragHint[data-level=negative],.flow-rating span[data-level=negative]{background:#fff2df;color:#834a10;border-color:#e3b56e}
+#flowDragHint[data-level=unknown],.flow-rating span[data-level=unknown]{background:#eef2f9;color:#425570;border-color:#b3c0d4}
+.flow-advice-card{padding:17px 18px;margin-bottom:12px}
+.flow-advice-card h3{display:flex;gap:8px;align-items:center}
+.flow-advice-card h3 span{color:#5368b6}
+.flow-proposal>span[data-level=negative]{background:linear-gradient(145deg,#f2ac56,#ba711d)}
+.flow-proposal>span[data-level=danger]{background:linear-gradient(145deg,#e18c9b,#a4455c)}
+.flow-proposal>span[data-level=unknown]{background:linear-gradient(145deg,#aabcda,#657b9e)}
+#moveOptions{margin-top:10px;display:grid;gap:6px}
+#moveOptions button,#flowCandidates{border:1px solid #b8d8ce;background:#eff8f6;color:#1c5e4a;border-radius:12px;padding:9px 12px;min-height:42px;text-align:left}
+#flowCandidates{margin-top:10px}
+#moveEvidence a{display:inline-block;color:#305a91;margin-top:8px;font-size:12px}
 </style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script></head><body class="yos-daystream-web"><details class="native-tools"><summary>接続・データ</summary><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
 <a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
 <button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
@@ -379,7 +430,7 @@ body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
   <div class="timeline-legend" aria-label="カードの種類"><span class="legend-fixed">固定予定</span><span class="legend-habit">習慣</span><span class="legend-local">タスク</span></div>
   <p class="gesture-help">上下にスワイプでスクロール · ⠿ または長押しからドラッグで時刻移動</p>
   </div>
-  <div id="flowDragHint" hidden aria-hidden="true"></div>
+  <div id="flowDragHint" hidden aria-hidden="true"><strong></strong><small></small></div>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p><button id="yosWebTaskRefresh" type="button">iPhoneでNotionタスクを開く</button>
@@ -394,13 +445,13 @@ body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
     <div class="flow-advice-bar"><button id="moveCancel" type="button" aria-label="キャンセル">‹</button><strong>タイムラインを編集</strong><button id="moveSave" type="button">保存</button></div>
     <section class="flow-advice-card flow-verdict">
       <h2 id="moveHeading"><span aria-hidden="true">💡</span> 配置アドバイス</h2>
-      <div class="flow-proposal"><span aria-hidden="true">＋</span><div><strong id="moveTitle"></strong><p id="moveRange"></p></div></div>
+      <div class="flow-proposal"><span id="flowProposalIcon" aria-hidden="true">＋</span><div><strong id="moveTitle"></strong><p id="moveRange"></p></div></div>
       <label class="move-time">開始時刻 <input id="moveTime" type="time" step="60" required></label>
       <div class="flow-rating"><strong>総合評価</strong><span id="moveAdvice" aria-live="polite"></span></div>
     </section>
-    <section class="flow-advice-card move-impact" aria-label="影響する予定・タスク"><h3>影響するタスク・習慣</h3><ul id="moveImpact"></ul></section>
-    <section class="flow-advice-card"><h3>根拠・詳細</h3><p class="move-scope">表示中の予定の開始・終了時刻で、重複と前後の間隔を判定しています。</p></section>
-    <section class="flow-advice-card" id="flowNextAction" hidden><h3>おすすめの次の行動</h3><button id="moveSuggest" type="button" hidden></button></section>
+    <section class="flow-advice-card move-impact" aria-label="影響する予定・タスク"><h3><span aria-hidden="true">↔</span> 影響するタスク・習慣</h3><ul id="moveImpact"></ul></section>
+    <section class="flow-advice-card" id="moveEvidence"><h3><span aria-hidden="true">▥</span> 根拠・詳細</h3><p class="move-scope" id="moveBasis"></p><a id="moveSource" hidden href="https://sleepeducation.org/healthy-sleep/healthy-sleep-habits/" target="_blank" rel="noopener noreferrer">米国睡眠医学会の睡眠習慣ガイド ↗</a></section>
+    <section class="flow-advice-card" id="flowNextAction"><h3><span aria-hidden="true">☆</span> 配置候補</h3><button id="flowCandidates" type="button">空き時間を探す</button><div id="moveOptions" aria-live="polite"></div></section>
 
   </dialog>
   <div class="focus" id="focus"><b id="focusTitle"></b><p id="focusInfo" aria-live="polite"></p><div class="actions-row"><button id="startActualBtn" class="secondary" hidden>開始を記録</button><button id="doneBtn">完了にする</button><button id="editSelected" class="secondary">編集</button><button id="deleteSelected" class="danger">削除</button><button id="hideFixed" class="secondary" hidden>この画面で隠す</button><button id="closeFocus" class="secondary">閉じる</button></div></div>
@@ -1216,7 +1267,7 @@ document.getElementById('saveBtn').onclick=()=>{const title=document.getElementB
 // Conservative, explainable compatibility signals from the *local day's actual time slots*.
 // Never infer health, travel distance or subjective mood from a title; unknown remains neutral.
 const yosCompatRank={unknown:0,positive:1,negative:2,danger:3};
-function yosCompatibility(rows){
+function yosCompatibility(rows,{previous=[],following=[]}={}){
  const valid=rows.filter(x=>x&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440);
  const result=new Map(valid.map(x=>[x.id,{level:'unknown',reasons:[]}]));
  const add=(item,level,reason)=>{
@@ -1246,7 +1297,29 @@ function yosCompatibility(rows){
    add(a,'negative',msg);add(b,'negative',msg);
   }
  }
+ const sleep=row=>/^(?:睡眠|就寝|仮眠)(?:$|[（( ・])/u.test(row.t);
+ const meal=row=>/朝食|昼食|夕食|食事|夜食|ご飯/u.test(row.t)&&!/準備|買い物|支度/u.test(row.t);
+ const prior=previous.filter(meal).map(row=>({...row,id:null,s:row.s-1440}));
+ const next=following.filter(sleep).map(row=>({...row,id:null,s:row.s+1440}));
+ for(const food of [...prior,...valid.filter(meal)]){
+  const end=food.s+food.d;
+  const bedtime=[...valid.filter(sleep),...next].filter(row=>row.s>=end).sort((a,b)=>a.s-b.s)[0];
+  if(!bedtime||bedtime.s-end>60||/軽食|少量/u.test(food.t))continue;
+  const gap=bedtime.s-end;
+  const large=/大きな食事|大盛り|大量|量が多い/u.test(food.t);
+  const facts='「'+food.t+'」の終了から「'+bedtime.t+'」まで'+gap+'分';
+  const why=large?facts+'。就寝直前の量が多い食事は注意候補':facts+'。食事量が不明';
+  add(food,large?'negative':'unknown',why);
+  add(bedtime,large?'negative':'unknown',why);
+ }
  return result;
+}
+function yosDayCompatibility(rows){
+ const date=parseDay(selectedDay);
+ date.setDate(date.getDate()-1);
+ const previous=dayItems(localISO(date));
+ date.setDate(date.getDate()+2);
+ return yosCompatibility(rows,{previous,following:dayItems(localISO(date))});
 }
 function yosOverlapWindows(rows){
  const sorted=rows.filter(x=>x&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
@@ -1270,7 +1343,7 @@ function yosOverlapWindows(rows){
 }
 let latestCompatibility=new Map();
 function yosRenderCompatibility(){
- latestCompatibility=yosCompatibility(items);
+ latestCompatibility=yosDayCompatibility(items);
  const rows=[...latestCompatibility.values()];
  const counts={positive:0,negative:0,danger:0,unknown:0};
  for(const item of rows)counts[item.level]++;
@@ -1557,62 +1630,92 @@ const moveDialog=document.getElementById('moveDialog');
 const moveTime=document.getElementById('moveTime');
 let pendingMove=null;
 
+const flowSignals={positive:['＋','相乗候補'],negative:['−','注意'],danger:['！','時間衝突'],unknown:['？','不明']};
+
+function placementAt(item,start){
+ const others=items.filter(other=>other!==item).sort((a,b)=>a.s-b.s);
+ const end=start+item.d;
+ const overlaps=others.filter(other=>start<other.s+other.d&&other.s<end);
+ const signal=yosDayCompatibility([...others,{...item,s:start}]).get(item.id);
+ const level=signal?.level||'unknown';
+ return {level,reason:signal?.reasons[0]||'前後の相性を判断できる情報がありません',others,overlaps};
+}
+
 function renderMoveAdvice(){
  if(!pendingMove)return;
  const {item}=pendingMove;
- const start=/^\d{2}:\d{2}$/.test(moveTime.value)
-  ? Number(moveTime.value.slice(0,2))*60+Number(moveTime.value.slice(3)):NaN;
+ const [hours,minutes]=moveTime.value.split(':').map(Number);
+ const start=hours*60+minutes;
  const valid=Number.isInteger(start)&&start>=0&&start+item.d<=1440;
- const moved=valid&&start!==item.s;
  const entries=document.getElementById('moveImpact');
- entries.replaceChildren();
- document.getElementById('moveSave').disabled=!moved;
- document.getElementById('moveRange').textContent=valid
-  ? fmt(start)+'–'+fmt(start+item.d)+' に配置すると…'
-  : '終了時刻が24:00以内になる開始時刻を選んでください';
  const hint=document.getElementById('moveAdvice');
- const suggest=document.getElementById('moveSuggest');
- const nextAction=document.getElementById('flowNextAction');
- suggest.hidden=true;nextAction.hidden=true;
- if(!valid){hint.textContent='この日に収まる時間を指定';hint.dataset.level='';return}
- const end=start+item.d;
- const others=items.filter(other=>other!==item).sort((a,b)=>a.s-b.s);
- const overlaps=others.filter(other=>start<other.s+other.d&&other.s<end);
- hint.textContent=overlaps.length?'時間衝突 '+overlaps.length+'件':'表示中の予定との時間衝突なし';
- hint.dataset.level=overlaps.length?'danger':'clear';
+ const icon=document.getElementById('flowProposalIcon');
+ const basis=document.getElementById('moveBasis');
+ const source=document.getElementById('moveSource');
+ entries.replaceChildren();
+ document.getElementById('moveOptions').replaceChildren();
+ document.getElementById('flowCandidates').disabled=!valid;
+ document.getElementById('moveSave').disabled=!valid||start===item.s;
+ document.getElementById('moveRange').textContent=valid
+  ? fmt(item.s)+' → '+fmt(start)+'–'+fmt(start+item.d)
+  : '終了時刻が24:00以内になる開始時刻を選んでください';
+ const result=valid?placementAt(item,start):{level:'unknown',reason:'開始時刻を指定してください',others:[],overlaps:[]};
+ const {level,reason,others,overlaps}=result;
+ const [mark,name]=flowSignals[level];
+ icon.dataset.level=hint.dataset.level=level;
+ icon.textContent=mark;
+ hint.textContent=mark+' '+name+(overlaps.length?' '+overlaps.length+'件':'');
+ const append=text=>{
+  const row=document.createElement('li');row.textContent=text;entries.append(row);
+ };
  if(overlaps.length){
   for(const other of overlaps){
-   const row=document.createElement('li');
-   const minutes=Math.min(end,other.s+other.d)-Math.max(start,other.s);
-   row.textContent=other.t+' · '+fmt(other.s)+'–'+fmt(other.s+other.d)+'（'+minutes+'分重複）';
-   entries.append(row);
+   const shared=Math.min(start+item.d,other.s+other.d)-Math.max(start,other.s);
+   append(other.t+' · '+fmt(other.s)+'–'+fmt(other.s+other.d)+'（'+shared+'分重複）');
   }
-  let free=start;
-  for(const other of others){
-   if(free<other.s+other.d&&other.s<free+item.d)free=Math.ceil((other.s+other.d)/5)*5;
-  }
-  if(free!==start&&free+item.d<=1440){
-   suggest.hidden=false;nextAction.hidden=false;
-   suggest.textContent='次の空き枠 '+fmt(free)+'–'+fmt(free+item.d);
-   suggest.onclick=()=>{moveTime.value=fmt(free);renderMoveAdvice()};
-  }
- }else{
+ }else if(valid){
+  const end=start+item.d;
   const before=others.filter(other=>other.s+other.d<=start).sort((a,b)=>b.s+b.d-a.s-a.d)[0];
   const after=others.find(other=>other.s>=end);
-  for(const [other,gap,prefix] of [[before,before?start-before.s-before.d:0,'前'],[after,after?after.s-end:0,'次']]){
-   if(!other)continue;
-   const row=document.createElement('li');
-   row.textContent=prefix+'の予定「'+other.t+'」との間隔 '+gap+'分';
-   entries.append(row);
-  }
-  const signal=yosCompatibility([...others,{...item,s:start}]).get(item.id);
-  if(signal?.level==='positive'||signal?.level==='negative'){
-   const row=document.createElement('li');
-   row.textContent=signal.reasons[0];
-   entries.append(row);
-  }
+  if(before)append('前の予定　'+before.t+' · '+(start-before.s-before.d)+'分前に終了');
+  if(after)append('次の予定　'+after.t+' · 終了から'+(after.s-end)+'分後に開始');
  }
+ if(!entries.children.length)append('表示できる関連予定がありません');
+ basis.textContent=reason;
+ source.hidden=!reason.includes('量が多い食事');
 }
+
+document.getElementById('flowCandidates').onclick=()=>{
+ if(!pendingMove)return;
+ const {item}=pendingMove;
+ const [hours,minutes]=moveTime.value.split(':').map(Number);
+ const requested=hours*60+minutes;
+ const others=items.filter(other=>other!==item);
+ const slots=[];
+ for(let start=0;start+item.d<=1440;start+=5){
+  if(start===requested||start===item.s||others.some(other=>start<other.s+other.d&&other.s<start+item.d))continue;
+  slots.push(start);
+ }
+ slots.sort((a,b)=>Math.abs(a-requested)-Math.abs(b-requested)||a-b);
+ const options=document.getElementById('moveOptions');
+ options.replaceChildren();
+ const candidates=[];
+ for(const start of slots){
+  if(candidates.some(time=>Math.abs(time-start)<Math.max(item.d,15)))continue;
+  candidates.push(start);
+  if(candidates.length===3)break;
+ }
+ for(const start of candidates){
+  const button=document.createElement('button');
+  const signal=placementAt(item,start);
+  button.type='button';
+  button.textContent=fmt(start)+'–'+fmt(start+item.d)+'　'+flowSignals[signal.level].join(' ');
+  button.title=signal.reason;
+  button.onclick=()=>{moveTime.value=fmt(start);renderMoveAdvice()};
+  options.append(button);
+ }
+ if(!options.children.length)options.textContent='表示中の予定内に空き枠がありません';
+};
 
 function openMoveDialog(item,start,previousRect){
  if(moveDialog.open||!items.includes(item)||item.f)return;
@@ -1654,7 +1757,7 @@ function wireTaskGestures(el,item){
  const dragHint=document.getElementById('flowDragHint');
  const grip=el.querySelector('.task-drag-grip');
  let gesture=null;
- let armTimer=0,editTimer=0,paintFrame=0;
+ let armTimer=0,editTimer=0,paintFrame=0,ghost=null,lastCandidate=null;
  const clearTimers=()=>{clearTimeout(armTimer);clearTimeout(editTimer)};
  const offset=()=>gesture.y-gesture.startY+window.scrollY-gesture.scrollY;
  const candidateStart=()=>{
@@ -1675,10 +1778,15 @@ function wireTaskGestures(el,item){
   if(direction)window.scrollBy(0,direction*8);
   el.style.transform='translate3d(0,'+offset()+'px,0)';
   const at=candidateStart();
-  label.textContent=fmt(at)+'–'+fmt(at+item.d);
-  const hit=items.some(other=>other!==item&&at<other.s+other.d&&other.s<at+item.d);
-  dragHint.hidden=false;dragHint.dataset.level=hit?'danger':'clear';
-  dragHint.textContent=fmt(at)+'–'+fmt(at+item.d)+(hit?'　時間衝突あり':'　この位置に配置');
+  if(at!==lastCandidate){
+   lastCandidate=at;
+   label.textContent=fmt(at)+'–'+fmt(at+item.d);
+   const {level,reason}=placementAt(item,at);
+   dragHint.hidden=false;
+   dragHint.dataset.level=el.dataset.placement=level;
+   dragHint.firstElementChild.textContent=flowSignals[level].join(' ')+'　'+fmt(item.s)+' → '+fmt(at);
+   dragHint.lastElementChild.textContent=reason;
+  }
   if(window.scrollY!==prior)paintFrame=requestAnimationFrame(paint);
  };
  const begin=(x,y,id,fromGrip)=>{
@@ -1704,7 +1812,16 @@ function wireTaskGestures(el,item){
    event.preventDefault();
    if(gesture.mode==='armed'&&Math.max(ax,ay)>slop){
     clearTimers();el.classList.remove('press-armed');
-    if(ay>=ax){gesture.mode='drag';el.classList.add('drag-preview')}
+    if(ay>=ax){
+     gesture.mode='drag';
+     el.classList.add('drag-preview');
+     ghost=document.createElement('div');
+     ghost.className='flow-ghost';
+     ghost.setAttribute('aria-hidden','true');
+     ghost.style.top=el.style.top;
+     ghost.style.height=el.offsetHeight+'px';
+     tl.append(ghost);
+    }
     else gesture.mode='ignored';
    }
   }else if(gesture.mode==='tap'&&Math.max(ax,ay)>slop){
@@ -1726,6 +1843,7 @@ function wireTaskGestures(el,item){
    previousRect=el.getBoundingClientRect();
   }
   gesture=null;dragHint.hidden=true;clearTimers();cancelAnimationFrame(paintFrame);paintFrame=0;
+  ghost?.remove();ghost=null;lastCandidate=null;delete el.dataset.placement;
   el.classList.remove('press-armed','drag-preview');el.style.transform='';
   label.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
   if(cancelled)return;
@@ -1776,7 +1894,7 @@ function smoothRender(activeId,oldActiveRect){
  });
 }
 function render(){
- latestCompatibility=yosCompatibility(items);
+ latestCompatibility=yosDayCompatibility(items);
  const sorted=[...items].filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
  const backdrops=yosBackdropRows(sorted);
  elasticAxis=elasticEnabled?yosReadableAxis(sorted,scale,backdrops):null;
@@ -1816,6 +1934,7 @@ function render(){
    if(isTask){el.dataset.durationBand=item.d<=5?'xs':item.d<=15?'sm':item.d<=30?'md':item.d<=60?'lg':item.d<=120?'xl':'xxl';}
    if(backdrop){
     el.classList.add('yos-backdrop');
+    if(sorted.some(other=>other!==item&&other.s<item.s+item.d&&item.s<other.s+other.d))el.classList.add('is-overlapped');
     const {lane,count}=backdrops.get(item),start=lane/count,remaining=(count-lane-1)/count;
     el.style.setProperty('--zone-start',start*100+'%');
     el.style.setProperty('--zone-left',1-start);
@@ -1831,7 +1950,7 @@ function render(){
    let statusEl;
    if(compat){
     el.classList.add('compat-'+compat.level);
-    const label={positive:'＋ 相乗候補',negative:'− 余裕不足',danger:'！ 時間衝突'}[compat.level];
+    const label={positive:'＋ 相乗候補',negative:'− 注意',danger:'！ 時間衝突'}[compat.level];
     const reason=compat.reasons[0]||'相性：判断材料不足';
     el.setAttribute('aria-label',[item.t,fmt(item.s)+'–'+fmt(item.s+item.d),reason].join('、'));
     el.title=reason;

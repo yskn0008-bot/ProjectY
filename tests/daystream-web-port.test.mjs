@@ -64,7 +64,23 @@ test('Layer uses the strongest state color and reason, with a visible label',()=
  for(const [state,shade] of [['positive','#dff5ec'],['negative','#fff0da'],['danger','#fce5eb']]){
   assert.ok(html.includes('.timeline .card.compat-'+state+'{--layer-surface:'+shade));
  }
- assert.match(ui,/positive:'＋ 相乗候補',negative:'− 余裕不足',danger:'！ 時間衝突'/);
+ assert.match(ui,/positive:'＋ 相乗候補',negative:'− 注意',danger:'！ 時間衝突'/);
+});
+test('Meal advice uses the planned sleep time and preserves an unknown meal size',()=>{
+ const code=ui.slice(ui.indexOf('const yosCompatRank'),ui.indexOf('function yosDayCompatibility'));
+ const compat=vm.runInNewContext(code+'\nyosCompatibility',{});
+ const sleep={id:2,t:'就寝',s:0,d:90,kind:'schedule',f:1};
+ const food={id:1,t:'夕食（量が多い）',s:1370,d:40,kind:'task'};
+ const context={following:[sleep]};
+ const candidate=compat([food],context).get(1);
+ assert.equal(candidate.level,'negative');
+ assert.match(candidate.reasons[0],/30分/);
+ assert.equal(compat([{...food,t:'夕食'}],context).get(1).level,'unknown');
+ assert.match(compat([{...food,t:'夕食'}],context).get(1).reasons[0],/食事量が不明/);
+ assert.equal(compat([{...food,t:'夕食（軽食）'}],context).get(1).reasons.length,0);
+ assert.equal(compat([{...food,s:1200}],context).get(1).reasons.length,0);
+ const daytime=compat([{...food,s:360},{...sleep,s:420}]);
+ assert.equal(daytime.get(2).level,'negative');
 });
 test('Browser scripts parse without native Scriptable APIs',()=>{
  assert.equal(scripts.length,2);

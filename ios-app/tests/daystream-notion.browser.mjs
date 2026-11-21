@@ -282,7 +282,12 @@ try{
  await time.fill('17:15');
  assert.match(await touchPage.locator('#moveAdvice').innerText(),/時間衝突 1件/);
  assert.match(await touchPage.locator('#moveImpact').innerText(),/夜勤.*30分重複/);
- assert.equal(await touchPage.locator('#moveSuggest').isVisible(),false,'no same-day slot exists after a shift through midnight');
+ assert.equal(await touchPage.locator('#moveOptions button').count(),0,'suggestions require a request');
+ await touchPage.locator('#flowCandidates').click();
+ const options=await touchPage.locator('#moveOptions button').allTextContents();
+ assert.ok(options.length>0&&options.length<=3,'show up to three genuine same-day slots');
+ assert.ok(options.every(text=>Number(text.slice(0,2))*60+Number(text.slice(3,5))+30<=1020),'every candidate avoids the shift through midnight');
+ assert.deepEqual(await read(),original,'showing suggestions does not write');
  if(process.env.DAYSTREAM_SCREENSHOTS){
   await touchPage.screenshot({path:process.env.DAYSTREAM_SCREENSHOTS+'/placement.png'});
  }
