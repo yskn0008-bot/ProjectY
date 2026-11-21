@@ -341,6 +341,7 @@ try{
     backdrop:node.classList.contains('yos-backdrop'),foreground:node.classList.contains('yos-foreground'),
     thickness:r.height,band:node.dataset.durationBand||'',radius:getComputedStyle(node).borderRadius,
     title:b.textContent,time:time.textContent,color:getComputedStyle(node).backgroundColor,
+    accent:getComputedStyle(node).getPropertyValue('--signal-accent').trim(),
     whiteSpace:getComputedStyle(b).whiteSpace,
     textOK:b.scrollWidth<=b.clientWidth+2&&b.scrollHeight<=b.clientHeight+2,
     timeOK:time.scrollWidth<=time.clientWidth+2};
@@ -368,7 +369,7 @@ try{
   }
   assert.ok(byId.get(2105).thickness>byId.get(2110).thickness,
    'long task title wraps instead of being cut in a slim bar');
-  assert.equal(byId.get(2110).color,'rgb(240, 231, 251)','default task uses the lavender surface');
+  assert.equal(byId.get(2110).color,'rgb(231, 222, 252)','default task uses the lavender surface');
   for(const id of [2102,2106,2108,2110]){
    const surface=await p.locator('#tl [data-id="'+id+'"]').evaluate(el=>({
     shadow:getComputedStyle(el).boxShadow,
@@ -377,10 +378,13 @@ try{
    assert.equal(surface.before,'none','left stripe must be hidden for task '+id);
    assert.ok(!surface.shadow.includes('inset 4px'),'left accent shadow absent for task '+id);
   }
-  assert.equal(byId.get(2106).color,'rgb(223, 245, 236)','positive status has a green surface');
-  assert.equal(byId.get(2108).color,'rgb(255, 240, 218)','negative status has an amber surface');
-  assert.equal(byId.get(2102).color,'rgb(252, 229, 235)','overlap has a rose surface');
-  assert.equal(byId.get(2110).radius,'11px','compact task cards keep rounded corners');
+  assert.equal(byId.get(2106).color,'rgb(213, 246, 228)','exercise keeps its category surface');
+  for(const [id,accent] of [[2106,'#299d6b'],[2108,'#ba701f'],[2102,'#c1475e'],[2110,'']]){
+   assert.equal(byId.get(id).accent,accent,'the compatibility accent is independent of the category surface');
+  }
+  assert.equal(byId.get(2108).color,byId.get(2110).color,'advice preserves the task category');
+  assert.equal(byId.get(2102).color,byId.get(2110).color,'conflicts preserve the task category');
+  assert.equal(byId.get(2110).radius,'15px','compact task cards keep rounded corners');
 
   const distinct=await p.locator('#tl [data-id="2100"], #tl [data-id="2102"], #tl [data-id="2110"]').evaluateAll(nodes=>nodes.map(el=>({
    id:Number(el.dataset.id),background:getComputedStyle(el).backgroundColor,
@@ -388,7 +392,6 @@ try{
    borderColor:getComputedStyle(el).borderColor,shadow:getComputedStyle(el).boxShadow,image:getComputedStyle(el).backgroundImage
   })));
   const appearance=new Map(distinct.map(x=>[x.id,x]));
-  assert.equal(appearance.get(2100).background,'rgb(250, 239, 243)','long overlapping sleep span is muted behind cards');
   assert.equal(appearance.get(2100).borderStyle,'solid','long backdrop has a quiet solid outline');
   assert.equal(appearance.get(2102).borderStyle,'solid','short overlapping card has a crisp solid edge');
   assert.equal(appearance.get(2102).border,'1px','short task remains distinct from backdrop');
@@ -399,8 +402,7 @@ try{
   assert.equal(appearance.get(2100).image,'none','long sleep backdrop stays flat');
   for(const id of [2102,2110]){
    const fg=appearance.get(id);
-   if(id===2110)assert.match(fg.image,/linear-gradient/,'ordinary cards use the LIFE FLOW gradient');
-   else assert.equal(fg.image,'none','a collision keeps its warning surface');
+   assert.match(fg.image,/linear-gradient/,'foreground cards keep their category gradient');
    assert.notEqual(fg.shadow,'none','foreground task '+id+' uses a soft separating shadow');
    assert.ok(!fg.shadow.includes('inset 4px'),'do not restore a stripe on task '+id);
   }
@@ -409,7 +411,6 @@ try{
 
   const visible=cells.filter(c=>!c.backdrop).sort((a,b)=>a.top-b.top);
   for(let i=1;i<visible.length;i++)assert.ok(visible[i].top>=visible[i-1].bottom-2,'dense tasks do not cover one another: '+visible[i-1].id+'/'+visible[i].id);
-  for(const id of [2102,2106,2108])assert.notEqual(byId.get(id).color,byId.get(2110).color,'semantic color '+id+' differs from unknown');
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no sideways overflow');
   const grip=p.locator('#tl [data-id="2102"] .task-drag-grip');
   // iPhone has a fixed bottom navigation bar: position the grip in the visible center,
@@ -456,14 +457,14 @@ try{
  assert.match(await card(3).getAttribute('class'),/yos-backdrop/);
  assert.equal(await card(2).locator('.layer-status').textContent(),'！ 時間衝突');
  assert.equal(await card(4).locator('.layer-status').textContent(),'＋ 相乗候補');
- assert.equal(await card(6).locator('.layer-status').textContent(),'− 余裕不足');
+ assert.equal(await card(6).locator('.layer-status').textContent(),'− 注意');
  assert.equal(await card(8).locator('.layer-status').count(),0);
  const sleep=await card(1).boundingBox(),work=await card(3).boundingBox(),testCard=await card(2).boundingBox();
  assert.ok(sleep.x+sleep.width<=work.x,'overlapping long intervals have separate lanes');
  assert.ok(testCard.y>sleep.y&&testCard.y<sleep.y+sleep.height,'short action is inside the sleep window');
  assert.equal(await card(2).evaluate(el=>{
   const rect=el.getBoundingClientRect();
-  return getComputedStyle(el).backgroundColor==='rgb(252, 229, 235)'&&Number(getComputedStyle(el).zIndex)>Number(getComputedStyle(document.querySelector('.yos-backdrop')).zIndex)&&rect.width>0;
+  return getComputedStyle(el).getPropertyValue('--signal-accent').trim()==='#c1475e'&&Number(getComputedStyle(el).zIndex)>Number(getComputedStyle(document.querySelector('.yos-backdrop')).zIndex)&&rect.width>0;
  }),true,'danger tint and foreground stacking are computed by the browser');
  await gp.evaluate(()=>{items.find(item=>item.id===2).s=540;render();updateReview();});
  assert.equal(await card(2).locator('.layer-status').count(),0,'conflict tint disappears when moved clear');
