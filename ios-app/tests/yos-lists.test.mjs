@@ -19,7 +19,7 @@ const sources={
 const ids={task:'a'.repeat(32),shopping:'b'.repeat(32)};
 function row(kind){
  const shopping=kind==='shopping';
- return {id:ids[kind],parent:{data_source_id:sources[kind]},last_edited_time:'2026-11-23T14:00:00.000Z',
+ return {created_time:'2026-11-23T13:00:00.000Z',id:ids[kind],parent:{data_source_id:sources[kind]},last_edited_time:'2026-11-23T14:00:00.000Z',
   properties:shopping?{
    '商品名':{title:[{plain_text:'確認商品'}]},'購入済':{checkbox:false},
    '買い物状態':{select:{name:'購入候補'}},'区分':{select:{name:'欲しいもの'}}
@@ -28,17 +28,32 @@ function row(kind){
    '種類':{select:{name:'Task'}}
   }};
 }
-async function harness(errors={}){
+async function harness(errors={},extras=[]){
  const records={ [ids.task]:row('task'), [ids.shopping]:row('shopping')};
- let writes=0;
+ for(const row of extras)records[row.id]=row;
+ let writes=0,queries=0,cursorAttempts=0;
  class RequestMock{
   constructor(url){this.url=url;this.response={statusCode:200};this.method='GET'}
   async loadJSON(){
    const p=this.url.split('/v1/')[1];
    if(p.startsWith('data_sources/')){
     const kind=p.includes(sources.task)?'task':'shopping';
+    queries++;
     if(errors[kind]){this.response.statusCode=errors[kind].status||400;return {code:errors[kind].code||'validation_error',message:errors[kind].message||'invalid query'};}
-    return {results:[records[ids[kind]]],has_more:false,next_cursor:null};
+    const q=JSON.parse(this.body);
+    if(q.start_cursor){cursorAttempts++;this.response.statusCode=400;return {code:'validation_error',message:'The start_cursor provided is invalid: s:opaque'};}
+    let rows=Object.values(records).filter(r=>r.parent?.data_source_id===sources[kind]);
+    if(q.filter){
+     assert.equal(q.filter.and?.length,2,'time partitions use a bounded AND');
+     assert.equal(q.filter.and[0].timestamp,'created_time');
+     assert.equal(q.filter.and[1].timestamp,'created_time');
+     const start=q.filter.and[0].created_time.on_or_after;
+     const end=q.filter.and[1].created_time.before;
+     rows=rows.filter(r=>r.created_time>=start&&r.created_time<end);
+    }
+    const returned=rows.slice(0,q.page_size||100);
+    return {results:returned,has_more:rows.length>returned.length,
+      next_cursor:rows.length>returned.length?'s:server-invalid-cursor':null};
    }
    const id=p.split('/')[1];
    if(!records[id])throw Error('Unknown test ID');
@@ -52,7 +67,7 @@ async function harness(errors={}){
  }
  const app=await new AsyncFunction('Keychain','Request',testSource)(
   {contains:()=>true,get:()=>'mock-only-token-not-a-secret'},RequestMock);
- return {app,records,get writes(){return writes}};
+ return {app,records,get writes(){return writes},get queries(){return queries},get cursorAttempts(){return cursorAttempts}};
 }
 test('both Notion data sources load and token never enters HTML',async()=>{
  const h=await harness();
@@ -117,5 +132,42 @@ test('both Notion sources failing still produce a diagnostic UI without writes',
  assert.match(data.errors.task,/400/);
  assert.match(data.errors.shopping,/403/);
  assert.doesNotThrow(()=>new Function(h.app.htmlWithData(data).split('<script>')[1].split('</script>')[0]));
+ assert.equal(h.writes,0);
+});
+
+test('285 Tasks in many days load in full without any start_cursor despite invalid server cursors',async()=>{
+ const extras=[];
+ for(let i=1;i<285;i++){
+  const item=row('task');
+  item.id=(1000+i).toString(16).padStart(32,'0');
+  item.created_time=new Date(Date.UTC(2026,8,1)+Math.floor(i/36)*86400000+(i%36)*60000).toISOString();
+  item.properties['やること']={title:[{plain_text:'タスク '+i}]};
+  extras.push(item);
+ }
+ const base=await harness({},extras);
+ const data=await base.app.readAll();
+ assert.equal(data.loaded.task,true);
+ assert.equal(data.loaded.shopping,true);
+ assert.equal(data.tasks.length,285,'never return only the first 100 Tasks');
+ assert.equal(new Set(data.tasks.map(x=>x.id)).size,285,'no overlapping date windows');
+ assert.equal(base.cursorAttempts,0,'never submit Notion invalid cursor');
+ assert.ok(base.queries>3,'partitioned dataset is queried across disjoint windows');
+ assert.equal(base.writes,0,'read-only operations');
+});
+test('large same-timestamp Task batches fail closed instead of silently truncating',async()=>{
+ const extras=[];
+ for(let i=1;i<140;i++){
+  const item=row('task');
+  item.id=(2000+i).toString(16).padStart(32,'0');
+  item.created_time='2026-11-23T13:00:00.000Z';
+  extras.push(item);
+ }
+ const h=await harness({},extras);
+ const data=await h.app.readAll();
+ assert.equal(data.loaded.task,false);
+ assert.equal(data.loaded.shopping,true);
+ assert.equal(data.tasks.length,0,'partial results are never presented as complete');
+ assert.match(data.errors.task,/全件|上限|分割|表示/);
+ assert.equal(h.cursorAttempts,0);
  assert.equal(h.writes,0);
 });
