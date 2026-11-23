@@ -12,6 +12,7 @@ const SOURCES={
  task:'965c6086-32c1-463d-93b4-87a9cb69b3ad',
  shopping:'d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc'
 };
+let lastUndo=null; // Only the most recent completion in this Scriptable session can be reversed.
 const tidy=(x,n=220)=>typeof x==='string'?x.replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,n):'';
 const id32=x=>tidy(x,45).replace(/-/g,'').toLowerCase();
 const validId=x=>/^[0-9a-f]{32}$/.test(id32(x));
@@ -160,6 +161,26 @@ function dayInTokyo(){
 async function perform(request){
  if(!request||typeof request!=='object')throw Error('操作の形式が不正です');
  if(request.action==='refresh')return {action:'refresh',data:await readAll()};
+ if(request.action==='undo-complete'){
+  const id=id32(request.id),expected=tidy(request.expected,65),previous=lastUndo;
+  if(!validId(id)||!previous||previous.id!==id||previous.updatedAt!==expected)
+   throw Error('元に戻せる完了操作が見つかりません。Notionを確認してください');
+  const path='pages/'+id;
+  const before=assertPage(await notion(path),'task',id);
+  if(before.type!=='Task'||before.state!=='完了'||before.updatedAt!==expected)
+   throw Error('他の画面で変更されたため、元に戻せません。更新してください');
+  const fresh=assertPage(await notion(path),'task',id);
+  if(fresh.updatedAt!==expected||fresh.state!=='完了')
+   throw Error('保存直前の変更を検知したため、元に戻す操作を中止しました');
+  if(!['次にやる','実行中','待ち','本人操作','保留'].includes(previous.state))
+   throw Error('元の状態を安全に復元できません');
+  await notion(path,'PATCH',{properties:{'状態':{select:{name:previous.state}}}});
+  const verified=assertPage(await notion(path),'task',id);
+  if(verified.state!==previous.state)
+   throw Error('復元結果が未確認です。再送せず、Notionを確認してください');
+  lastUndo=null;
+  return {action:'undo-complete',kind:'task',item:verified};
+ }
  const kind=request.kind,operation=request.action,id=id32(request.id),expected=tidy(request.expected,65);
  if(!Object.prototype.hasOwnProperty.call(SOURCES,kind)||!validId(id)||!expected)throw Error('更新する項目の識別情報が不正です');
  if(kind==='task'&&operation!=='complete'||kind==='shopping'&&operation!=='purchase')
@@ -176,6 +197,7 @@ async function perform(request){
  const current=await notion(path);
  const before=assertPage(current,kind,id);
  if(before.updatedAt!==expected)throw Error('保存直前に変更を検知したため、中止しました');
+ const previousState=kind==='task'?before.state:null;
  if(kind==='task')await notion(path,'PATCH',{properties:{'状態':{select:{name:'完了'}}}});
  else await notion(path,'PATCH',{properties:{
   '購入済':{checkbox:true},'買い物状態':{select:{name:'購入済'}},
@@ -184,7 +206,11 @@ async function perform(request){
  const verified=assertPage(await notion(path),kind,id);
  if(kind==='task'&&verified.state!=='完了'||kind==='shopping'&&!verified.purchased)
   throw Error('Notion保存結果を読み戻せませんでした。再送せず、更新から確認してください');
- return {action:operation,kind,item:verified};
+ if(kind==='task'){
+  lastUndo=['次にやる','実行中','待ち','本人操作','保留'].includes(previousState)?
+   {id,updatedAt:verified.updatedAt,state:previousState}:null;
+ }
+ return {action:operation,kind,item:verified,canUndo:kind==='task'&&Boolean(lastUndo)};
 }
 
 const HTML=String.raw`<!doctype html>
@@ -234,6 +260,13 @@ main{padding:0 13px}
 .section{color:#294054;font-size:16px;font-weight:800;margin:19px 2px 13px;letter-spacing:-.015em}
 .list{display:flex;flex-direction:column;gap:6px}
 .item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px 10px;display:flex;gap:9px;align-items:center;box-shadow:0 2px 0 rgba(31,52,70,.045)}
+.item--task{display:block;position:relative}
+.item-complete{display:block;width:100%;min-height:44px;text-align:left;appearance:none;-webkit-appearance:none;color:inherit;border:0;background:transparent;border-radius:6px;padding:0 37px 0 0;cursor:pointer}
+.item-complete:active{background:#E8F0F3}
+.item-complete:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.item--task .item-details summary{position:absolute;top:7px;right:7px;min-width:33px;min-height:44px;padding:0;display:flex;align-items:center;justify-content:center;z-index:1;cursor:pointer}
+.item--task .item-details summary::after{position:static;font-size:17px}
+.item--task .item-details p{margin:8px 0 0}
 .item.done{background:#F0F3F3;box-shadow:none}
 .item-body{min-width:0;flex:1}
 .item-details{min-width:0}
@@ -258,6 +291,10 @@ main{padding:0 13px}
 .empty{text-align:center;color:#526779;padding:36px 12px;line-height:1.65;font-weight:600}
 #message{position:fixed;bottom:max(14px,env(safe-area-inset-bottom));left:13px;right:13px;border-radius:14px;padding:13px 15px;background:#294054;color:#FFFFFF;box-shadow:0 7px 24px rgba(14,43,75,.2);font-size:12px;font-weight:700;line-height:1.45;z-index:9;min-height:20px}
 #message[hidden]{display:none}
+#message{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#messageText{flex:1;min-width:0}
+#undo{flex-shrink:0;border:1px solid #D9E5EE;background:#EDF4FA;color:#244865;border-radius:9px;min-height:44px;padding:8px 10px;font-weight:800;font-size:12px}
+#undo[hidden]{display:none}
 .footer{text-align:center;color:#526779;font-size:11px;font-weight:550;line-height:1.6;padding:24px 4px}
 @media(max-width:360px){.tab{font-size:12px}.stat{padding:12px 8px}.stat b{font-size:28px}.stat small{font-size:10px}.item{padding:6px 8px}.item-name{font-size:13px}.action{min-width:59px}}
 @media(prefers-reduced-motion:no-preference){.tab,.refresh,.action{transition:background-color .15s,border-color .15s}}
@@ -274,11 +311,12 @@ main{padding:0 13px}
 <div class="section" id="section"></div><div class="list" id="list"></div>
 <div class="footer">Notion保存は読戻し後に確定表示。Appleリマインダーとは別管理です。</div>
 </main>
-<div id="message" role="status" aria-live="polite" hidden></div>
+<div id="message" role="status" aria-live="polite" hidden><span id="messageText"></span><button id="undo" type="button" hidden>元に戻す</button></div>
 <script>
 'use strict';
 const boot=__BOOT__;
 const state={...boot,tab:'tasks',query:'',busy:false};
+let lastCompletion=null;
 const $=id=>document.getElementById(id);
 const q=[];
 let pendingCallback=null;
@@ -292,7 +330,13 @@ const needsAttention=x=>x.type==='Task'&&(x.state==='本人操作'||x.state==='�
 const overdue=x=>x.due&&x.due.slice(0,10)<new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date());
 const labels=t=>[t.priority||'',t.state||'',t.due?'期限 '+day(t.due):''].filter(Boolean);
 const order=(a,b)=>Number(overdue(b))-Number(overdue(a))||(['P0','P1','P2','P3'].indexOf(a.priority)<0?4:['P0','P1','P2','P3'].indexOf(a.priority))-(['P0','P1','P2','P3'].indexOf(b.priority)<0?4:['P0','P1','P2','P3'].indexOf(b.priority))||String(a.due||'9999').localeCompare(String(b.due||'9999'));
-function notice(message,hide=false){const n=$('message');if(hide){n.hidden=true;return;}n.textContent=message;n.hidden=false;}
+function notice(message,hide=false,undo=false){
+ const n=$('message');if(hide){n.hidden=true;return;}
+ $('messageText').textContent=message;
+ $('undo').hidden=!undo;
+ $('undo').disabled=state.busy;
+ n.hidden=false;
+}
 function render(){
  const ready=state.loaded||{task:true,shopping:true};
  const issues=['task','shopping'].filter(kind=>ready[kind]===false)
@@ -304,7 +348,7 @@ function render(){
  $('nAttention').textContent=ready.task?state.tasks.filter(needsAttention).length:'—';
  const readAt=state.readAt?new Date(state.readAt):null;
  const stamp=readAt?readAt.toLocaleString('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'未確認';
- $('stamp').textContent=(issues.length?'Notion未取得あり ':'Notion取得 ')+stamp+' · '+(issues.length?'失敗した項目は保存不可':'タップでNotionへ保存');
+ $('stamp').textContent=(issues.length?'Notion未取得あり ':'Notion取得 ')+stamp+' · '+(issues.length?'失敗した項目は保存不可':'行をタップで完了／詳細は右端');
  $('stamp').classList.toggle('is-ready',issues.length===0&&Boolean(state.readAt));
  document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===state.tab)));
  $('search').placeholder=state.tab==='tasks'?'タスクを検索':state.tab==='shopping'?'買い物を検索':state.tab==='attention'?'要対応を検索':'案件を検索';
@@ -323,9 +367,17 @@ function render(){
   const task=item.kind==='task',done=task?item.state==='完了':item.purchased;
   const detail=task?item.next:(item.type==='日用品'?'日用品・在庫 '+(item.stock??'未登録'):'');
   const tags=task?labels(item):[item.category,item.type,item.priority].filter(Boolean);
-  const action=task&&item.type==='Task'?'<button class="action" data-action="complete" data-kind="task" data-id="'+safe(item.id)+'" '+(state.busy||ready[item.kind]===false?'disabled':'')+'>完了</button>':
-    !task&&!done?'<button class="action" data-action="purchase" data-kind="shopping" data-id="'+safe(item.id)+'" '+(state.busy?'disabled':'')+'>購入済</button>':'';
-  return '<article class="item'+(done?' done':'')+'"><div class="item-body"><details class="item-details"><summary aria-label="詳細を開く・閉じる：'+safe(item.name)+'"><span class="item-name">'+safe(item.name)+'</span><span class="meta">'+tags.map(t=>'<span class="tag'+(t==='P0'?' urgent':t==='P1'?' high':'')+'">'+safe(t)+'</span>').join('')+'</span></summary>'+
+  const meta='<span class="meta">'+tags.map(t=>'<span class="tag'+(t==='P0'?' urgent':t==='P1'?' high':'')+'">'+safe(t)+'</span>').join('')+'</span>';
+  if(task&&item.type==='Task'){
+   const disabled=state.busy||ready.task===false?'disabled':'';
+   return '<article class="item item--task'+(done?' done':'')+'" data-id="'+safe(item.id)+'"><div class="item-body">'+
+    '<button type="button" class="item-complete" data-action="complete" data-kind="task" data-id="'+safe(item.id)+'" aria-label="「'+safe(item.name)+'」を完了にする" '+disabled+'>'+
+    '<span class="item-name">'+safe(item.name)+'</span>'+meta+'</button></div>'+
+    '<details class="item-details"><summary aria-label="詳細を表示：'+safe(item.name)+'"></summary>'+
+    '<p><b>'+safe(item.name)+'</b>'+(detail?'\n'+safe(detail):'')+'</p></details></article>';
+  }
+  const action=!task&&!done?'<button class="action" data-action="purchase" data-kind="shopping" data-id="'+safe(item.id)+'" '+(state.busy?'disabled':'')+'>購入済</button>':'';
+  return '<article class="item'+(done?' done':'')+'"><div class="item-body"><details class="item-details"><summary aria-label="詳細を開く・閉じる：'+safe(item.name)+'"><span class="item-name">'+safe(item.name)+'</span>'+meta+'</summary>'+
    (detail?'<p>'+safe(detail)+'</p>':'')+'</details></div>'+action+'</article>';
  }).join(''):'<div class="empty">'+(failed?'この項目はNotionから取得できませんでした。右上の更新で再試行してください。':'表示する項目がありません。')+'</div>';
 }
@@ -333,13 +385,21 @@ $('tabs').addEventListener('click',e=>{const tab=e.target.closest('[data-tab]');
 $('search').addEventListener('input',e=>{state.query=e.target.value;render()});
 $('refresh').addEventListener('click',()=>{if(state.busy)return;state.busy=true;notice('Notionの最新情報を取得中…');render();emit({action:'refresh'})});
 $('list').addEventListener('click',e=>{
- const b=e.target.closest('button[data-action]');if(!b||state.busy)return;
+ const b=e.target.closest('button[data-action]');
+ if(!b||state.busy)return;
  const kind=b.dataset.kind,action=b.dataset.action;
  const item=(kind==='task'?state.tasks:state.shopping).find(x=>x.id===b.dataset.id);
  if(!item||state.loaded?.[kind]===false)return;
  if(kind==='shopping'&&!window.confirm('「'+item.name+'」を購入済みとして記録しますか？\\n購入・決済は行いません。'))return;
- state.busy=true;notice('Notionに保存して確認中…');render();
+ state.busy=true;lastCompletion=null;notice('Notionに保存して確認中…');render();
  emit({action,kind,id:item.id,expected:item.updatedAt});
+});
+$('undo').addEventListener('click',()=>{
+ if(state.busy||!lastCompletion)return;
+ state.busy=true;
+ $('undo').disabled=true;
+ notice('Notionで完了を元に戻して確認中…');
+ emit({action:'undo-complete',kind:'task',id:lastCompletion.id,expected:lastCompletion.expected});
 });
 window.YOS_LISTS_REPLY=function(result){
  state.busy=false;
@@ -349,9 +409,21 @@ window.YOS_LISTS_REPLY=function(result){
    if(loaded.task)state.tasks=data.tasks;
    if(loaded.shopping)state.shopping=data.shopping;
    state.loaded=loaded;state.errors=data.errors||{};state.readAt=data.readAt;
+   lastCompletion=null;
   }
-  else if(result.item&&result.kind){const key=result.kind==='task'?'tasks':'shopping';const idx=state[key].findIndex(x=>x.id===result.item.id);if(idx>=0)state[key][idx]=result.item;}
-  notice(result.action==='refresh'&&Object.values(state.loaded||{}).some(v=>v===false)?
+  else if(result.item&&result.kind){
+   const key=result.kind==='task'?'tasks':'shopping';
+   const idx=state[key].findIndex(x=>x.id===result.item.id);
+   if(idx>=0)state[key][idx]=result.item;
+   if(result.action==='complete'&&result.canUndo)
+    lastCompletion={id:result.item.id,expected:result.item.updatedAt};
+   else lastCompletion=null;
+  }
+  if(result.action==='complete')
+   notice('Notionに完了を保存しました。',false,Boolean(lastCompletion));
+  else if(result.action==='undo-complete')
+   notice('Notionで完了を元に戻しました。');
+  else notice(result.action==='refresh'&&Object.values(state.loaded||{}).some(v=>v===false)?
    '一部のNotion項目は未取得です。上部のエラーを確認してください。':'Notionを読み戻して更新を確認しました');
  }else notice('保存・更新は未確認：'+String(result?.error||'不明')+'。再操作前に更新してください');
  render();
