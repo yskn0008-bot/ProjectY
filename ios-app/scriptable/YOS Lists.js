@@ -53,7 +53,9 @@ async function notion(path,method='GET',body=null){
   const scope=path.startsWith('data_sources/'+SOURCES.task+'/')?'YOS Tasks':
     path.startsWith('data_sources/'+SOURCES.shopping+'/')?'YOS Shopping':'ページ更新';
   const code=tidy(reply?.code,50);
-  const reason=tidy(reply?.message,200).replace(/\b(?:secret|ntn)_[\w-]{8,}/gi,'[非表示]');
+  const reason=tidy(reply?.message,200)
+   .replace(/The start_cursor provided is invalid:.*$/i,'The start_cursor provided is invalid')
+   .replace(/\\b(?:secret|ntn)_[\\w-]{8,}/gi,'[非表示]');
   throw Error(scope+'｜HTTP '+(status||'不明')+(code?' '+code:'')+
     (reason?'｜'+reason:'｜Notionの応答理由を取得できません'));
  }
@@ -62,23 +64,53 @@ async function notion(path,method='GET',body=null){
 
 async function readSource(kind){
  const result=[],seen=new Set(),source=SOURCES[kind];
- let cursor=null;
- for(let page=0;page<7;page++){
-  const value=await notion('data_sources/'+source+'/query','POST',{page_size:100,...(cursor?{start_cursor:cursor}:{})});
-  if(!Array.isArray(value.results)||typeof value.has_more!=='boolean')throw Error('Notion一覧の形式が不正です');
-  for(const row of value.results){
+ const path='data_sources/'+source+'/query';
+ function collect(rows){
+  for(const row of rows){
    const id=id32(row?.id);
-   if(!validId(id)||seen.has(id))throw Error('NotionのIDが不正・重複しています');
+   if(!validId(id)||seen.has(id))throw Error('NotionのIDが不正・重複しています。タスク一覧は未取得として保護しました');
    seen.add(id);
    const item=itemFromRow(row,kind);
    if(item)result.push(item);
   }
-  if(!value.has_more)return result;
-  const next=tidy(value.next_cursor,200);
-  if(!next||next===cursor)throw Error('Notionの続きが取得できません');
-  cursor=next;
+  if(seen.size>700)throw Error('Notion一覧が700件を超えました。一部のみの表示を中止します');
  }
- throw Error('Notion一覧が700件を超えました。一部のみの表示を中止します');
+ function checkPage(value){
+  if(!Array.isArray(value?.results)||typeof value.has_more!=='boolean')
+   throw Error('Notion一覧の形式が不正です');
+  return value;
+ }
+ // Keep the 1-request path for short lists (including current YOS Shopping).
+ const first=checkPage(await notion(path,'POST',{page_size:100}));
+ if(!first.has_more){
+  collect(first.results);
+  return result;
+ }
+ // Notion's opaque start_cursor can become invalid between requests.
+ // For large collections use disjoint created_time windows; never reuse a cursor,
+ // and never display an incomplete subset as a successful full result.
+ const earliest=Date.parse('2000-01-01T00:00:00.000Z');
+ const latest=Date.parse('2100-01-01T00:00:00.000Z');
+ let queries=0;
+ async function windowRange(from,to,depth){
+  if(++queries>64)throw Error('Notionの分割取得回数が上限を超えました。一部のみの表示はしません');
+  const filter={and:[
+   {timestamp:'created_time',created_time:{on_or_after:new Date(from).toISOString()}},
+   {timestamp:'created_time',created_time:{before:new Date(to).toISOString()}}
+  ]};
+  const page=checkPage(await notion(path,'POST',{page_size:100,filter}));
+  if(!page.has_more){
+   collect(page.results);
+   return;
+  }
+  if(depth>=40||to-from<=1)throw Error('Notionの同時刻登録が多く、全件取得できません。一部のみの表示はしません');
+  const mid=Math.floor((from+to)/2);
+  if(mid<=from||mid>=to)throw Error('Notionの取得範囲を安全に分割できません');
+  await windowRange(from,mid,depth+1);
+  await windowRange(mid,to,depth+1);
+ }
+ await windowRange(earliest,latest,0);
+ return result;
 }
 async function readAll(){
  // Never let a failed Tasks query hide a healthy Shopping query, or vice versa.
