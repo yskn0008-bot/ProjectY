@@ -16,6 +16,9 @@ on:
       - 'journal/GPT_EDITORIAL.md'
       - 'journal-v2/index.html'
       - 'journal/tests/reader-single-feature.test.mjs'
+      - 'journal/tests/three-story-consumers.test.mjs'
+      - 'ios-app/scriptable/YOS JOURNAL.js'
+      - 'scripts/journal_voicevox_demo.py'
       - 'journal/build-offline-reader-preview.mjs'
       - 'journal/tests/build-offline-reader-preview.test.mjs'
       - 'journal/preview-reviewed-candidate.mjs'
@@ -110,21 +113,8 @@ jobs:
           set -euo pipefail
           node --check journal/build-reviewed-release-bundle.mjs
           node --test journal/tests/build-reviewed-release-bundle.test.mjs
-          mkdir -p /tmp/yos-journal-review-release
-          node journal/build-reviewed-release-bundle.mjs \
-            --candidate journal/editorial-candidates/2026-11-20-first-impressions.public.json \
-            --dossier journal/reviewed-evidence/2026-11-20-first-impressions.public.json \
-            --repo . \
-            --output /tmp/yos-journal-review-release
-      - name: Upload review-only issue bundle (not a publication)
-        uses: actions/upload-artifact@v4
-        with:
-          name: yos-journal-unapproved-release-bundle
-          path: /tmp/yos-journal-review-release/
-          retention-days: 7
-          if-no-files-found: error
       - name: Verify existing reader does not repeat its only story
-        run: node --test journal/tests/reader-single-feature.test.mjs
+        run: node --test journal/tests/reader-single-feature.test.mjs journal/tests/three-story-consumers.test.mjs
       - name: Test privacy, sources, dates, existing edition preservation
         run: node --test journal/tests/gpt-editorial-gate.test.mjs
       - name: Check added or modified GPT candidate JSON from this PR

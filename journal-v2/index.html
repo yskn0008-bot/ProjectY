@@ -146,7 +146,7 @@ for(let n=0;n<d.sections.length;n++){const sec=d.sections[n];parts+='<h2>'+safe(
 parts+=(issue.issuedOn==='2026-11-12'&&i===5?'<p class="note">参考にしたSmartlog記事は「PR」表記のある記事です。商品紹介や印象に関する提案は、公式な医学的根拠とは区別してください。</p>':'')+'<h2>この記事で押さえること</h2><ul>'+((a.keyPoints||[]).map(t=>'<li>'+safe(t)+'</li>').join(''))+'</ul><p class="note">'+safe(a.caveat||'')+'</p><div class="source">出典：'+safe(a.source||'')+'<br><a href="'+safe(a.link||'#')+'" target="_blank" rel="noopener noreferrer">公式・参考情報を読む ↗</a></div>'+(items.length>1?'<div class="related"><b>次の記事も読む</b><button id="nextStory">'+safe(items[(i+1)%items.length].title)+' →</button></div>':'')+'</article>';
 view.innerHTML=parts;imageFallback(view);const next=document.getElementById('nextStory');if(next)next.onclick=()=>{location.hash=issueArticleHash(issue,(i+1)%items.length)};window.scrollTo(0,0)}
 function editionOK(x,date){
- return x?.issuedOn===date&&Array.isArray(x.articles)&&x.articles.length>0;
+ return x?.issuedOn===date&&Array.isArray(x.articles)&&(date>='2026-11-23'?x.articles.length===3:x.articles.length>0);
 }
 async function readEdition(date,retryLatest=false){
  if(editions.has(date))return editions.get(date);
