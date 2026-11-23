@@ -393,7 +393,8 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
       const active = element => {const style=getComputedStyle(element);return style.display!=='none' && style.visibility!=='hidden' && element.getBoundingClientRect().height>0};
       const bad=items.filter(active).filter(element=>element.scrollWidth>element.clientWidth+1 || element.scrollHeight>element.clientHeight+2).map(element=>element.textContent.trim());
       const main=document.querySelector('.view.active');
-      if(main.scrollHeight>main.clientHeight+2)bad.push('sales main internally overflowing');
+      // The pace card and monthly entry intentionally make sales vertically scrollable.
+      if(main.scrollWidth>main.clientWidth+2)bad.push('sales main horizontally overflowing');
       return bad;
     });
     expect(problems, 'sales text overflow at '+width+'x'+height).toEqual([]);
