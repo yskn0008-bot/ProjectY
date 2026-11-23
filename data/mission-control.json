@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T06:32:29+09:00",
+  "updated_at": "2026-11-24T06:40:50+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-830",
+      "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
+      "updated_at": "2026-11-23T21:40:07Z"
+    },
     {
       "id": "github-pr-857",
       "title": "PR #857 YOS JOURNAL｜一次資料照合の非公開プロトタイプと安全テスト",
@@ -31,16 +41,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/890",
       "updated_at": "2026-11-23T13:38:48Z"
-    },
-    {
-      "id": "github-pr-892",
-      "title": "PR #892 Clarity｜入力専用ショートカット（履歴・写真OCR・音声）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/892",
-      "updated_at": "2026-11-23T06:27:05Z"
     },
     {
       "id": "github-pr-894",
@@ -103,14 +103,14 @@
       "updated_at": "2026-11-23T21:16:20Z"
     },
     {
-      "id": "github-pr-929",
-      "title": "PR #929 YOS Home Scenes｜Close・共有と5タブの重なり修正",
+      "id": "github-pr-930",
+      "title": "PR #930 YOS ファイル調査｜Siri対応・iCloud Drive読み取り専用棚卸し",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/929",
-      "updated_at": "2026-11-23T21:31:37Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/930",
+      "updated_at": "2026-11-23T21:40:17Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T21:31:27Z"
+      "updated_at": "2026-11-23T21:40:19Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-0a67ac4fe2b4",
+      "title": "Merge PR #929: avoid Scriptable Close and Share toolbar overlap",
+      "completed_at": "2026-11-23T21:38:00Z",
+      "result": "GitHub mainへ反映（0a67ac4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0a67ac4fe2b48d69a4c615febd63eb3981749a89"
+    },
+    {
+      "id": "github-commit-4c30e856131b",
+      "title": "chore(installer): pin toolbar-safe Home Scenes",
+      "completed_at": "2026-11-23T21:30:16Z",
+      "result": "GitHub mainへ反映（4c30e85）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4c30e856131b8e5e19190f1e1499f919f6fc4028"
+    },
+    {
+      "id": "github-commit-9b1a0209998f",
+      "title": "test(home-scenes): preserve toolbar clearance on compact screens",
+      "completed_at": "2026-11-23T21:30:13Z",
+      "result": "GitHub mainへ反映（9b1a020）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9b1a0209998fbbd40d7982aa6e102120a3ae6dce"
+    },
+    {
+      "id": "github-commit-6d857f498e14",
+      "title": "fix(home-scenes): clear native Scriptable Close and Share overlay",
+      "completed_at": "2026-11-23T21:30:11Z",
+      "result": "GitHub mainへ反映（6d857f4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6d857f498e1476413147591332b8830ade6065cb"
+    },
+    {
       "id": "github-commit-aec0ebcda405",
       "title": "Merge PR #928: YOS Home Scenes five independent safe presets",
       "completed_at": "2026-11-23T21:23:08Z",
       "result": "GitHub mainへ反映（aec0ebc）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aec0ebcda40582260f8a3e61112bf3738a707551"
-    },
-    {
-      "id": "github-commit-1fc4a8b04d83",
-      "title": "chore(installer): pin five-scene YOS Home Scenes source",
-      "completed_at": "2026-11-23T21:15:43Z",
-      "result": "GitHub mainへ反映（1fc4a8b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1fc4a8b04d839feb2f7ac8db3bb7c1ead0fe7446"
-    },
-    {
-      "id": "github-commit-664b650c6d89",
-      "title": "test(home-scenes): cover five presets, legacy migration and fail-closed isolation",
-      "completed_at": "2026-11-23T21:15:40Z",
-      "result": "GitHub mainへ反映（664b650）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/664b650c6d89b20211431872d7e1caf8a76fb5d7"
-    },
-    {
-      "id": "github-commit-05b8fc7cfa0f",
-      "title": "feat(home-scenes): add five independent safe presets while preserving existing settings",
-      "completed_at": "2026-11-23T21:14:57Z",
-      "result": "GitHub mainへ反映（05b8fc7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/05b8fc7cfa0f4f21964cc81ee8ffcb5fbaa930de"
-    },
-    {
-      "id": "github-commit-5c5fbb47734a",
-      "title": "fix(home-scenes): compact departure, four appliances and save to one screen",
-      "completed_at": "2026-11-23T21:11:36Z",
-      "result": "GitHub mainへ反映（5c5fbb4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5c5fbb47734a88b0a74b83b38ee861143e2df145"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T06:32:29+09:00",
+      "last_update": "2026-11-24T06:40:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -365,7 +365,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T06:32:29+09:00",
+      "last_update": "2026-11-24T06:40:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T06:32:29+09:00",
+      "last_update": "2026-11-24T06:40:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "886ea78ec7d86899cb187e779fdc00d671c27885880879b2913d5ac62bb86669"
+  "github_snapshot_hash": "f7511b87bcefeb70dd567d0eea384c73914235f41798d387b8c5493910f22ac5"
 }
