@@ -8,6 +8,8 @@ on:
       - 'taxi/tests/ui-v2-field-report.test.mjs'
       - 'taxi/verified-revenue-v1.js'
       - 'taxi/tests/verified-revenue-v1.test.mjs'
+      - 'taxi/tests/verified-revenue-offline.test.mjs'
+      - 'taxi/service-worker.js'
       - 'taxi/research.html'
       - 'taxi/build_research_feed.py'
       - 'taxi/test_research_feed.py'
@@ -26,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test YOS TAXI strategy and wait clock (Node)
-        run: node --test taxi/tests/ui-v2-wait-clock.test.mjs taxi/tests/ui-v2-field-report.test.mjs taxi/tests/verified-revenue-v1.test.mjs
+        run: node --test taxi/tests/ui-v2-wait-clock.test.mjs taxi/tests/ui-v2-field-report.test.mjs taxi/tests/verified-revenue-v1.test.mjs taxi/tests/verified-revenue-offline.test.mjs
       - name: Check fixed URLs, no duplicate ledger and native source code
         shell: bash
         run: |
