@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#fff"><title>YOS JOURNAL｜Widgy見出し5記事</title>
+<style>
+/* The font family, weights, type sizes and 107x85 photo sizes match the existing JOURNAL web reader. */
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:#202020;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;font-size:17px;line-height:1.75;-webkit-text-size-adjust:100%}
+main{max-width:660px;min-width:280px;margin:0 auto;padding:0 18px 16px;background:#fff}
+header{height:57px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8e8e8;gap:10px}
+header b{font-size:19px;font-weight:800;letter-spacing:-.04em}
+header small{font-size:12px;color:#666}
+.info{margin:8px 0 0;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#666}
+.info b{color:#202020;font-weight:400}
+#list{display:flex;flex-direction:column;gap:0}
+.item{display:grid;grid-template-columns:107px minmax(0,1fr);gap:14px;border:0;border-bottom:1px solid #cfcfcf;padding:18px 0;background:#fff;text-align:left;color:inherit;width:100%;align-items:start;text-decoration:none;line-height:1.35}
+.item img,.blank{width:107px;height:85px;object-fit:cover;background:#eee}
+.blank{display:grid;place-items:center;color:#879096;font-size:11px;letter-spacing:.04em;font-weight:400}
+.meta{display:block;font-size:11px;color:#666;line-height:1.35;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400}
+.item strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;font-size:17px;line-height:1.48;font-weight:700;letter-spacing:normal;margin:2px 0 5px;overflow-wrap:anywhere}
+footer{padding-top:16px;text-align:right}
+footer a{color:#202020;text-decoration:none;font-size:12px;font-weight:400}
+#empty{font-size:14px;color:#777;line-height:1.6;padding:20px 0}
+@media(max-width:600px){
+ .item{padding-block:6px;line-height:1.35}
+ .item strong{line-height:1.28;margin-bottom:3px}
+}
+@media(max-width:350px){
+ .item{grid-template-columns:94px minmax(0,1fr);gap:10px}
+ .item img,.blank{width:94px;height:80px}
+ .item strong{font-size:16px}
+}
+</style></head><body><main><header><b>YOS JOURNAL</b></header><div class="info"><b id="count">最新公開記事</b><span id="status">確認中</span></div><section id="list" aria-live="polite"><p id="empty">公開記事を読み込んでいます…</p></section><footer><a href="./" rel="noopener noreferrer">JOURNALを開く ↗</a></footer></main>
+<script>
+(()=>{'use strict';
+const root='https://yskn0008-bot.github.io/ProjectY/journal-v2/';
+const raw='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/';
+const day=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+const valid=x=>x&&/^\d{4}-\d{2}-\d{2}$/.test(x.issuedOn)&&x.issuedOn<=day()&&Array.isArray(x.articles)&&x.articles.length;
+const fallback=[{issuedOn:'2026-11-19',articles:[
+ {title:'午後のテカリ。洗面台へ戻る前に、鏡の前で数秒。',category:'SELF / 身だしなみ',image:'https://commons.wikimedia.org/wiki/Special:FilePath/Man_grooming_in_a_modern_bathroom_mirror_during_evening_hours_while_checking_reflection.jpg?width=800'},
+ {title:'会話は、相手のひと言を拾うと深くなる。',category:'PRESENCE / 会話',image:'https://commons.wikimedia.org/wiki/Special:FilePath/Coffee%2C_conversation_and_collaboration_-_ATTT_2025.jpg?width=800'},
+ {title:'那覇で30分。いつもの沖縄を、違う目で見る。',category:'EXPERIENCE / 沖縄',image:'https://commons.wikimedia.org/wiki/Special:FilePath/Okinawa_Prefectural_Museum_%26_Art_Museum_(Okinawa).jpg?width=800'}
+]}, {issuedOn:'2026-11-18',articles:[
+ {title:'宜野湾の産業まつりは、近場の楽しみを広げる2日間。',category:'LIFE / LOCAL',image:'https://commons.wikimedia.org/wiki/Special:FilePath/Food%20in%20okinawa%20festival.jpg?width=960'},
+ {title:'沖縄のDX展示会で、AIが出展者探しを手伝う。',category:'TECH / DISCOVERY',image:'https://commons.wikimedia.org/wiki/Special:FilePath/Modern%20industrial%20robot%20in%20action%20during%20a%20technology%20exhibition%20in%20a%20large%20hall.jpg?width=960'}
+]}];
+const el=(type,cls,txt)=>{const node=document.createElement(type);if(cls)node.className=cls;if(txt!=null)node.textContent=txt;return node};
+function draw(issues,verified){
+ const container=document.getElementById('list');container.replaceChildren();
+ let shown=0;
+ for(const edition of issues.filter(valid).sort((a,b)=>b.issuedOn.localeCompare(a.issuedOn))){
+  for(let i=0;i<edition.articles.length&&shown<5;i++){
+   const a=edition.articles[i];if(!a||typeof a.title!=='string'||!a.title.trim())continue;
+   const row=el('a','item');row.href=root+(edition.issuedOn===day()?'#article-'+i:'#archive-'+edition.issuedOn+'-'+i);row.rel='noopener noreferrer';
+   if(typeof a.image==='string'&&a.image.length<1400&&/^https:\/\//i.test(a.image)){
+    const img=el('img');img.src=a.image;img.alt='';img.loading='eager';img.referrerPolicy='no-referrer';img.onerror=()=>img.replaceWith(el('div','blank',String(a.category||'JOURNAL').split('/')[0].trim().slice(0,12)));row.append(img);
+   }else row.append(el('div','blank',String(a.category||'JOURNAL').split('/')[0].trim().slice(0,12)));
+   const side=el('span');side.append(el('small','meta',edition.issuedOn+'  ｜  '+String(a.category||'JOURNAL').slice(0,55)),el('strong','',a.title));row.append(side);container.append(row);shown++;
+  }
+  if(shown>=5)break;
+ }
+ if(!shown)container.append(el('p','', '公開記事を確認できません。'));
+ document.getElementById('count').textContent=shown+'記事の見出し';
+ document.getElementById('status').textContent=verified?'公開データ取得済み':'保存済み見本／更新未確認';
+}
+async function get(url){
+ const ac=new AbortController(),timeout=setTimeout(()=>ac.abort(),6500);
+ try{const r=await fetch(url,{cache:'no-store',signal:ac.signal});if(!r.ok)throw Error(String(r.status));return await r.json()}finally{clearTimeout(timeout)}
+}
+(async()=>{
+ try{const idx=await get('./archive-index.json');if(Array.isArray(idx?.editions)&&idx.editions.some(valid)){draw(idx.editions,true);return}}catch(_){}
+ try{const latest=await get(raw+'ios-app/scriptable/journal/latest.json');if(valid(latest)){
+  const [older,earlier]=await Promise.all([
+   get(raw+'journal/editions/2026-11-19.json').catch(()=>null),
+   get(raw+'journal/editions/2026-11-18.json').catch(()=>null)
+  ]);
+  draw([latest,...(valid(older)?[older]:[]),...(valid(earlier)?[earlier]:[])],true);return;
+ }}catch(_){}
+ draw(fallback,false);
+})();
+})();
+</script></body></html>

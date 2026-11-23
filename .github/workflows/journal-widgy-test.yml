@@ -1,0 +1,26 @@
+name: YOS JOURNAL Widgy 3-headline view
+on:
+  pull_request:
+    paths:
+      - 'journal-v2/widgy.html'
+      - 'journal/tests/widgy-three-headlines.test.mjs'
+      - '.github/workflows/journal-widgy-test.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'journal-v2/widgy.html'
+      - 'journal/tests/widgy-three-headlines.test.mjs'
+      - '.github/workflows/journal-widgy-test.yml'
+permissions:
+  contents: read
+jobs:
+  widget-headlines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check Widgy JavaScript and 3-article rendering
+        run: node --test journal/tests/widgy-three-headlines.test.mjs

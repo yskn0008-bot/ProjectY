@@ -62,8 +62,8 @@
       "id": "sleep-scene",
       "name": "YOS Sleep Scene",
       "path": "ios-app/scriptable/remote-widgets/YOS Sleep Scene.js",
-      "commit": "808d9e797a5734a4f7326e0471d6a4474244bc38",
-      "sha256": "987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8"
+      "commit": "bf8dfa7c291eb97e45e7c7b34964b6c28616e74c",
+      "sha256": "5db5b1e0278e9ab0da3c25f2a74a0a5d8682962ad9ac2de3cfd29c8dc98ac47f"
     },
     {
       "id": "journal-book",
@@ -104,8 +104,8 @@
       "id": "daystream-notion",
       "name": "YOS DAYSTREAM Notion",
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
-      "commit": "10f99c0488b09f26b4c1fca1413a94823451825b",
-      "sha256": "713e4cb170c78e8c49a5117ae796fe31be51e18000a9e18a16ad7d1a280858a6"
+      "commit": "ca3fbb5db5324d49daaba1addbf3f69792d3379e",
+      "sha256": "00002ddc6f3d8a4e48898510cd3e870b95b1b3a90ea43e7dc85e0e88885d0dd8"
     },
     {
       "id": "ikemen-magazine",
