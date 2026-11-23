@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T01:17:18+09:00",
+  "updated_at": "2026-11-24T01:36:58+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-23T05:39:00Z"
+    },
+    {
+      "id": "github-pr-870",
+      "title": "PR #870 BRAVIA｜4台リモコン保護・画質ワンタップ／音声／アプリ／HDMI3クイック操作 TEST",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/870",
+      "updated_at": "2026-11-19T16:53:18Z"
     },
     {
       "id": "github-pr-878",
@@ -70,7 +80,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/894",
-      "updated_at": "2026-11-23T16:16:23Z"
+      "updated_at": "2026-11-23T16:19:34Z"
     },
     {
       "id": "github-pr-901",
@@ -93,24 +103,14 @@
       "updated_at": "2026-11-23T14:59:27Z"
     },
     {
-      "id": "github-pr-904",
-      "title": "PR #904 YOS Remote｜外出・帰宅の家電ON/OFF/維持プリセット",
+      "id": "github-pr-906",
+      "title": "PR #906 fix(daystream): restore movable Notion tasks and category-colored timeline",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/904",
-      "updated_at": "2026-11-23T16:14:02Z"
-    },
-    {
-      "id": "github-pr-905",
-      "title": "PR #905 fix YOS Lists｜Notion HTTP 400でも画面を開き原因を表示",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/905",
-      "updated_at": "2026-11-23T16:08:32Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/906",
+      "updated_at": "2026-11-23T16:35:44Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T16:16:22Z"
+      "updated_at": "2026-11-23T16:35:30Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-e588d74aa224",
-      "title": "Merge PR #893: DAYSTREAM 1-tap read-only Notion timeline and safe storage",
-      "completed_at": "2026-11-23T15:52:11Z",
-      "result": "GitHub mainへ反映（e588d74）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e588d74aa224db7a684f5f06d22319dbe88c6ef0"
+      "id": "github-commit-53785a7f8952",
+      "title": "feat(remote): configurable departure/arrival Home Scenes via YOS Remote",
+      "completed_at": "2026-11-23T16:32:49Z",
+      "result": "GitHub mainへ反映（53785a7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/53785a7f8952055a614ad3fe0677188080e12716"
     },
     {
-      "id": "github-commit-8e4e0bb89975",
-      "title": "Merge PR #903: YOS Lists shortcut-ready Notion UI",
-      "completed_at": "2026-11-23T15:45:31Z",
-      "result": "GitHub mainへ反映（8e4e0bb）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8e4e0bb899756580d5723d2403ca6e6d5844258f"
+      "id": "github-commit-358019c3632b",
+      "title": "Merge PR #905: YOS Lists Notion HTTP 400 safe display and diagnostics",
+      "completed_at": "2026-11-23T16:28:36Z",
+      "result": "GitHub mainへ反映（358019c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/358019c3632bd90bf621c5650f4505814d6416a7"
     },
     {
-      "id": "github-commit-54dfb999c15e",
-      "title": "test(daystream): read collapsed sync-status text without requiring visible panel",
-      "completed_at": "2026-11-23T15:02:46Z",
-      "result": "GitHub mainへ反映（54dfb99）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/54dfb999c15ed398f8fe2ccee462026a3454453b"
+      "id": "github-commit-41c50d4af964",
+      "title": "chore(yos-lists): pin diagnostic safe UI source in existing installer",
+      "completed_at": "2026-11-23T16:07:25Z",
+      "result": "GitHub mainへ反映（41c50d4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/41c50d4af964fc9a4923505f11dbcf8a40350e2b"
     },
     {
-      "id": "github-commit-2068f1ce8d77",
-      "title": "test(daystream): read-only Notion cards must not expose editable task copy",
-      "completed_at": "2026-11-23T15:01:00Z",
-      "result": "GitHub mainへ反映（2068f1c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2068f1ce8d77ad5f706093e9e2d4eefc2155aeb7"
+      "id": "github-commit-58740a438acb",
+      "title": "test(yos-lists): assert real Notion 400 is attributed and UI still opens on partial/full outage",
+      "completed_at": "2026-11-23T16:06:57Z",
+      "result": "GitHub mainへ反映（58740a4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/58740a438acbd73e8e12317fbab33688339404da"
     },
     {
-      "id": "github-commit-9c983b8011a4",
-      "title": "test(daystream): record projected and rendered cards for browser regression diagnosis",
-      "completed_at": "2026-11-23T15:00:51Z",
-      "result": "GitHub mainへ反映（9c983b8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9c983b8011a478d143816e63fca0693e63bf4af7"
+      "id": "github-commit-9fdc7b9db08e",
+      "title": "fix(yos-lists): surface Notion 400 response details and keep UI open when either source fails",
+      "completed_at": "2026-11-23T16:06:05Z",
+      "result": "GitHub mainへ反映（9fdc7b9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9fdc7b9db08e0a3ea9263eee2732614f932b6d18"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T01:17:18+09:00",
+      "last_update": "2026-11-24T01:36:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 72件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T01:17:18+09:00",
+      "last_update": "2026-11-24T01:36:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T01:17:18+09:00",
+      "last_update": "2026-11-24T01:36:58+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "69af1320a2197f383673bb039b50c88c1778089e17776bb3ce03b12e9c1a2819"
+  "github_snapshot_hash": "bae4d33d3d65a1a78d3581ae5969be6ff8e775069c96b8a40bdf75e24c0a4a2e"
 }

@@ -167,8 +167,15 @@
       "id": "yos-lists",
       "name": "YOS Lists",
       "path": "ios-app/scriptable/YOS Lists.js",
-      "commit": "01dc08afec397eb483fac608b665371179c7d5fb",
-      "sha256": "1dd4699e56545f56e0fa3969e383cc5bb66830d472693dccb15e81596fd903f0"
+      "commit": "9fdc7b9db08e0a3ea9263eee2732614f932b6d18",
+      "sha256": "b246ef314f83e3623f961d6186835be32ff6a859f4a782d6776b60774576b546"
+    },
+    {
+      "id": "home-scenes",
+      "name": "YOS Home Scenes",
+      "path": "ios-app/scriptable/remote-widgets/YOS Home Scenes.js",
+      "commit": "8260aa3e08f8bfc40e89a75759406ff7cd2d6d53",
+      "sha256": "460e1e80d49992c228396e8413730a3eeddeb2950f8224264cebe4cd1c1e25a9"
     }
   ]
 }
