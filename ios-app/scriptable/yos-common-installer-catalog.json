@@ -174,8 +174,8 @@
       "id": "yos-lists",
       "name": "YOS Lists",
       "path": "ios-app/scriptable/YOS Lists.js",
-      "commit": "ebfb82b1a3fb75dd23e9be94ff54a7eb381ea900",
-      "sha256": "5a5696ce51be5f227c0d988af0fe98f4ecea463d5b6234461f7379a66e68495b"
+      "commit": "2c6e848ad9a3d9dcd61c1a94c8a3fd13714baaaf",
+      "sha256": "54a5986d449afa40e577136f918bc91760d37a4b23ba4e1999c162a80f425286"
     },
     {
       "id": "home-scenes",
