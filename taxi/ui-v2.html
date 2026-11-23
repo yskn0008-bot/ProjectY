@@ -263,6 +263,24 @@
 .view.strategy .strat-row small{display:block;white-space:normal;line-height:1.4;font-size:clamp(11px,3.1vw,13px)}
 .view.strategy .strategy-foot{flex:0 0 auto;min-height:51px;padding:8px 12px}
 @media(max-width:350px){.view.strategy .strategy-action,.view.strategy .wait-card{padding:11px}.wait-card #wait-toggle{width:100%}}
+
+/* One-tap field report: accessible sheet, visually separate from action recommendation. */
+.field-open{min-height:54px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;border:1px solid #48657e;border-radius:14px;background:#172c40;color:#f3f8ff;text-align:left;padding:10px 14px}
+.field-open strong{font-size:clamp(15px,4vw,18px)}.field-open span{color:#b7cbdc;font-size:clamp(12px,3.2vw,14px);overflow-wrap:anywhere;text-align:right}
+.field-layer[hidden]{display:none!important}.field-layer{position:fixed;z-index:30;inset:0;display:flex;align-items:flex-end;justify-content:center;background:#06101cc9}
+.field-sheet{width:min(100%,460px);max-height:88dvh;overflow-y:auto;overscroll-behavior:contain;border-radius:24px 24px 0 0;padding:19px 17px calc(20px + var(--safe-bottom));background:#f1f3f6;color:#1c3044;box-shadow:0 -18px 50px #0006}
+.field-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.field-top h2{font-size:21px;line-height:1.3;margin:0;font-weight:900}
+.field-close{min-width:44px;min-height:44px;border:0;background:#e0e7ee;color:#284056;border-radius:50%;font-size:24px}
+.field-hint{color:#64788d;font-size:13px;line-height:1.5;margin:10px 0 14px}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.field-choice{min-height:54px;min-width:0;border:1px solid #d7e1eb;background:#fff;color:#22384d;border-radius:13px;padding:10px 11px;text-align:left;font-size:clamp(13px,3.7vw,16px);font-weight:850;line-height:1.35;white-space:normal}
+.field-choice:active{background:#e5f0f7}.field-subtitle{font-size:13px;font-weight:900;color:#566e84;margin:16px 0 8px}
+.field-previous{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px;border-radius:12px;background:#e4eaf0}
+.field-previous span{color:#30495f;font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+.field-undo{min-height:44px;flex:0 0 auto;padding:8px 11px;font-weight:800;font-size:12px;border:1px solid #bac9d8;border-radius:10px;background:white;color:#30495f}
+.field-undo:disabled{opacity:.45}.field-disclaimer{font-size:12px;line-height:1.5;color:#627589;margin:12px 0 0}
+@media(max-width:350px){.field-sheet{padding-left:12px;padding-right:12px}.field-choice{padding:9px 7px}.field-open{padding:9px 10px}}
+
 </style>
 </head>
 <body>
@@ -308,6 +326,7 @@
 <p id="wait-guidance">安全に停車してから待機開始を記録してください。降車時刻からは推定しません。</p>
 <div class="wait-actions"><span id="wait-started">正確な待機開始：未記録</span><button type="button" id="wait-toggle">待機を開始</button></div>
 </section>
+<button type="button" class="field-open" id="field-open" aria-haspopup="dialog" aria-controls="field-layer"><strong>現状を報告</strong><span id="field-summary" aria-live="polite">報告なし ›</span></button>
 <details class="strategy-evidence"><summary>根拠・取得時刻・信頼度を確認</summary><div class="evidence-body">
 <p>推薦の元データ：未取得（現在地・GO／無線・人流・競合）</p><p>データ取得時刻：なし ／ 判断の信頼度：判定不可</p>
 <p>時間帯別エリア案と5・10・15・20・30分の節目は未検証の仮説です。移動を強制する指示ではありません。待機開始はこの端末で明示記録した時刻だけを使用します。</p>
@@ -320,6 +339,24 @@
 <main class="view analysis" id="analysis-view" aria-label="営業分析画面"><div class="section-head">確認できる数値だけを表示</div><div class="statgrid"><div class="stat"><small>降車ボタン記録</small><strong id="analysis-drops">0件</strong></div><div class="stat"><small>日報の売上</small><strong>未接続</strong></div><div class="stat"><small>実車時間率</small><strong>未計測</strong></div><div class="stat"><small>空車時間</small><strong>未計測</strong></div></div><div class="panel analysis-note">過去の紙日報に降車時刻がない場合、正確な空車時間は算出できません。新しい降車タップと、日報から得る乗車時刻・乗車番号を照合できたものだけ分析に利用します。</div><div class="panel analysis-memo">計画中：<br>① 日報写真と前回写真の差分読取<br>② 降車時刻との一意な照合<br>③ Notion正本へ認証付きの安全な登録<br>④ 30乗務の実績で那覇戦略の再校正</div><div class="footer-card"><svg><use href="#icon-info"/></svg>未確認情報を実績・確定売上として扱わない</div></main>
 <nav class="nav" aria-label="画面切替"><button type="button" class="active" data-page="sales"><svg><use href="#icon-car"/></svg>営業</button><button type="button" data-page="strategy"><svg><use href="#icon-pin"/></svg>戦略</button><button type="button" data-page="history"><svg><use href="#icon-note"/></svg>履歴</button><button type="button" data-page="analysis"><svg><use href="#icon-bars"/></svg>分析</button></nav>
 <div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="操作確認"><div class="sheet"><button class="close" type="button" id="close-modal" aria-label="閉じる">×</button><h2 id="modal-title">確認</h2><div id="dropoff-outcome" class="dropoff-outcome" hidden><span id="dropoff-outcome-badge"></span><strong id="dropoff-outcome-time"></strong><span id="dropoff-outcome-count"></span></div><p id="modal-body"></p><div id="modal-actions" class="buttonrow"></div></div></div>
+<section class="field-layer" id="field-layer" role="dialog" aria-modal="true" aria-labelledby="field-title" hidden>
+<div class="field-sheet"><div class="field-top"><h2 id="field-title">現状を報告</h2><button id="field-close" class="field-close" type="button" aria-label="閉じる">×</button></div>
+<p class="field-hint">安全に停車中、確認できた事実をタップするだけ。入力や会話は不要です。</p>
+<div class="field-grid">
+<button class="field-choice" data-observation="go_none">GO反応なし</button>
+<button class="field-choice" data-observation="radio_none">無線反応なし</button>
+<button class="field-choice" data-observation="supply_many">空車が多い</button>
+<button class="field-choice" data-observation="queue_still">待機列が動かない</button>
+<button class="field-choice" data-observation="queue_moves">待機列が進んだ</button>
+<button class="field-choice" data-observation="go_yes">GO反応あり</button>
+<button class="field-choice" data-observation="radio_yes">無線反応あり</button>
+<button class="field-choice" data-observation="supply_few">空車が少ない</button>
+<button class="field-choice" data-observation="traffic_issue">周辺に異常</button>
+<button class="field-choice" data-observation="location_wrong">現在地の情報が違う</button>
+</div>
+<p class="field-subtitle">最後の報告</p><div class="field-previous"><span id="field-last">報告なし</span><button type="button" class="field-undo" id="field-undo" disabled>直前の報告を取消</button></div>
+<p class="field-disclaimer">これは本人の現場観測の記録です。GO・無線の公式データではありません。十分な根拠がない場合、YOSの判断は「未判定」のままです。</p>
+</div></section>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div>
 <script>
@@ -400,6 +437,61 @@
    button.dataset.running=String(view.running);
  }
 
+
+ // Manual field observations never imply automated demand or GO/dispatch telemetry.
+ const FIELD_STORE='yos-taxi-field-reports-v1';
+ const fieldLabels=Object.freeze({go_none:'GO反応なし',radio_none:'無線反応なし',supply_many:'空車が多い',queue_still:'待機列が動かない',queue_moves:'待機列が進んだ',go_yes:'GO反応あり',radio_yes:'無線反応あり',supply_few:'空車が少ない',traffic_issue:'周辺に異常',location_wrong:'現在地の情報が違う'});
+ function readField(){
+   try{
+     const raw=localStorage.getItem(FIELD_STORE);
+     if(raw===null)return {entries:[],error:false};
+     const value=JSON.parse(raw);
+     if(!value||value.version!==1||!Array.isArray(value.entries)||value.entries.some(e=>
+       !e||typeof e.id!=='string'||typeof e.businessDate!=='string'||typeof e.shiftStart!=='string'||
+       typeof e.at!=='string'||!Number.isFinite(Date.parse(e.at))||!Object.hasOwn(fieldLabels,e.kind)||
+       (e.voidedAt!==undefined&&(typeof e.voidedAt!=='string'||!Number.isFinite(Date.parse(e.voidedAt))))))return {entries:[],error:true};
+     return {entries:value.entries,error:false};
+   }catch{return {entries:[],error:true}}
+ }
+ let fieldData=readField(),lastUndone=null;
+ const currentFields=()=>fieldData.entries.filter(e=>e.businessDate===state.businessDate&&e.shiftStart===state.shiftStart&&!e.voidedAt);
+ function renderField(){
+   const latest=currentFields().at(-1);
+   const label=latest?fieldLabels[latest.kind]+' · '+time(latest.at):'報告なし';
+   $('field-summary').textContent=label+' ›';$('field-last').textContent=latest?label+'（端末内）':'報告なし';
+   $('field-undo').disabled=fieldData.error||!isActive()||!latest||latest.id===lastUndone;
+ }
+ function openField(){fieldData=readField();renderField();$('field-layer').hidden=false;$('field-close').focus()}
+ function closeField(){$('field-layer').hidden=true;$('field-open').focus()}
+ function reportField(kind){
+   if(!Object.hasOwn(fieldLabels,kind)){toast('報告項目が不正です');return false}
+   if(!isActive()){toast('営業中の記録がないため、報告は保存しません');return false}
+   const latest=readField();
+   if(latest.error){fieldData=latest;renderField();toast('既存報告が読めないため保存しません');return false}
+   const at=instant(),last=latest.entries.at(-1);
+   if(last&&!last.voidedAt&&last.businessDate===state.businessDate&&last.shiftStart===state.shiftStart&&last.kind===kind&&Date.parse(at)-Date.parse(last.at)<4000){
+     fieldData=latest;renderField();toast('同じ報告を記録済みです');return false;
+   }
+   const entry={id:typeof crypto.randomUUID==='function'?crypto.randomUUID():'report-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
+     businessDate:state.businessDate,shiftStart:state.shiftStart,at,kind,source:'manual-tap',locationStatus:'unverified'};
+   const entries=[...latest.entries,entry];
+   try{localStorage.setItem(FIELD_STORE,JSON.stringify({version:1,entries}))}
+   catch{toast('保存失敗。報告は追加していません');return false}
+   fieldData={entries,error:false};lastUndone=null;renderField();closeField();
+   toast('現場報告を保存しました。自動判断は未接続です');return true;
+ }
+ function undoField(){
+   if(!isActive()){toast('営業中の報告のみ取り消せます');return false}
+   const latest=readField();
+   if(latest.error){fieldData=latest;renderField();toast('記録を読めないため取り消せません');return false}
+   const target=[...latest.entries].reverse().find(e=>e.businessDate===state.businessDate&&e.shiftStart===state.shiftStart&&!e.voidedAt);
+   if(!target||target.id===lastUndone){toast('取り消せる直前の報告がありません');return false}
+   const entries=latest.entries.map(e=>e.id===target.id?{...e,voidedAt:instant()}:e);
+   try{localStorage.setItem(FIELD_STORE,JSON.stringify({version:1,entries}))}
+   catch{toast('保存失敗。取消は未反映です');return false}
+   fieldData={entries,error:false};lastUndone=target.id;renderField();toast('直前の報告を取り消しました。履歴は保持しています');return true;
+ }
+
  const money=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
  const number=n=>typeof n==='number'&&Number.isFinite(n)?n:null;
  const save=s=>{try{localStorage.setItem(STORE,JSON.stringify(s));state=s;return true}catch{notify('保存失敗：端末内記録は更新されませんでした');return false}};
@@ -451,7 +543,7 @@
  const strategyDetail=['退勤・ホテル／GO・無線が中心','飲食移動は回転と次客の早さ','深夜割増。待機過多は避ける','帰宅需要を検証。供給過多に注意','降車後の再乗車と帰庫を比較'];
  function updatePlan(){const band=activeBand(),item=advice[band]||['次の営業に向けて需要を確認','時間帯による初期仮説・現地需要は未確認'];$('decision-text').textContent=item[0];$('decision-sub').textContent=item[1];document.querySelectorAll('[data-band]').forEach(x=>{const slot=Number(x.dataset.band);x.classList.toggle('selected',slot===band);x.classList.toggle('current',slot===(band<0?0:band))});const localHour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(new Date()));const stratSlot=localHour>=17&&localHour<20?0:localHour>=20&&localHour<22?1:localHour>=22?2:localHour<2?3:localHour>=2&&localHour<5?4:-1;document.querySelectorAll('[data-strat]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.strat)===stratSlot));}
  function render(){const now=new Date();$('current-clock').textContent=time(now);const active=isActive(),ended=isEnded();$('status-label').textContent=active?'営業中':ended?'営業終了':'営業前';$('status-dot').className='status-dot '+(active?'':ended?'end':'off');const d=drops();$('ride-count').textContent=d.length+'件';$('pending-count').textContent=d.filter(e=>!e.matched).length+'件';$('analysis-drops').textContent=d.length+'件';$('report-clock').textContent='日報未反映';$('last-reflected').textContent='最終反映：なし（日報）';$('sync-status').textContent='Notion未接続';// Pending Notion integration: never infer a fare from a tap or metadata from a photograph.
- $('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';updatePlan();renderWait();renderHistory()}
+ $('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';updatePlan();renderWait();renderField();renderHistory()}
  function renderHistory(){const list=$('history-list');list.replaceChildren();const events=dayEvents().slice().reverse();if(!events.length){const el=document.createElement('div');el.className='log';el.textContent='この営業日の記録はまだありません。';list.append(el)}events.forEach(e=>{const row=document.createElement(e.type==='dropoff'?'button':'div');if(e.type==='dropoff')row.type='button';row.className='log'+(e.voidedAt?' voided':'');const a=document.createElement('div');const title=document.createElement('b');title.textContent=e.type==='dropoff'?(e.voidedAt?'降車記録・取消済':'降車時刻'):e.type==='shift_start'?'営業開始':'営業終了';const caption=document.createElement('small');caption.textContent=' '+time(e.at,true)+' ・ '+(e.type==='dropoff'?(e.voidedAt?'取消履歴':'日報未照合'):'端末内記録');a.append(title,document.createElement('br'),caption);const b=document.createElement('span');b.className='badge';b.textContent=e.type==='dropoff'?'訂正':'端末内';row.append(a,b);if(e.type==='dropoff')row.addEventListener('click',()=>{openSheet(e.voidedAt?'降車記録を復帰':'降車記録を取り消す',`記録時刻 ${time(e.at,true)}。取り消しても履歴は削除しません。`,[{text:e.voidedAt?'取消を戻す':'記録を取消',primary:true,run:()=>{const s=structuredClone(state);const target=s.events.find(x=>x.id===e.id);if(!target)return;if(target.voidedAt)delete target.voidedAt;else target.voidedAt=instant();if(save(s)){render();toast('降車記録の状態を更新しました')}}}])});list.append(row)})}
  function navigate(page){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===page+'-view'));document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page))}
  function openSheet(title,body,actions=[]){$('modal').classList.remove('dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true;$('modal-title').textContent=title;$('modal-body').textContent=body;const area=$('modal-actions');area.replaceChildren();const cancel=document.createElement('button');cancel.textContent='閉じる';cancel.addEventListener('click',closeSheet);area.append(cancel);actions.forEach(a=>{const btn=document.createElement('button');btn.textContent=a.text;btn.classList.toggle('primary',a.primary===true);btn.addEventListener('click',()=>{closeSheet();a.run()});area.append(btn)});$('modal').classList.add('open')}
@@ -471,6 +563,12 @@
   '【安全】走行中の画面操作・注視はしない。乗車拒否・違法待機・休憩削減は行わない。'
  ];
  function showM100(){openSheet('M100｜営業判断ルール',m100Rules.join('\n\n'));$('modal').classList.add('m100-open')}
+ $('field-open').addEventListener('click',openField);
+ $('field-close').addEventListener('click',closeField);
+ $('field-layer').addEventListener('click',e=>{if(e.target===$('field-layer'))closeField()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('field-layer').hidden)closeField()});
+ document.querySelectorAll('[data-observation]').forEach(b=>b.addEventListener('click',()=>reportField(b.dataset.observation)));
+ $('field-undo').addEventListener('click',undoField);
  $('m100-rule-btn').addEventListener('click',showM100);
  $('wait-toggle').addEventListener('click',()=>{if(confirmedWait())finishWait();else startWait()});
  // Shortcut widget deep-link: the action runs ONLY in the storage container that opens this URL.
@@ -516,7 +614,7 @@
  render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait()},15000);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')renderWait()});
  addEventListener('pageshow',renderWait);
- window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand,waitClock:{get:()=>waitView(),start:startWait,stop:finishWait,refresh:renderWait}};
+ window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand,waitClock:{get:()=>waitView(),start:startWait,stop:finishWait,refresh:renderWait},fieldReport:{list:()=>structuredClone(currentFields()),record:reportField,undo:undoField,refresh:renderField}};
  if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 })();
 </script>
