@@ -63,7 +63,7 @@ def forecast_period_time(s: str | None) -> dt.datetime | None:
     This rule is ONLY for forecast target periods. Publication and feed timestamps
     still require an explicit timezone and are never inferred from a date.
     """
-    if isinstance(s, str) and re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}", s):
+    if isinstance(s, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", s):
         try:
             day = dt.date.fromisoformat(s)
         except ValueError:
