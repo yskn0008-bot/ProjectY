@@ -363,9 +363,10 @@ const order=(a,b)=>Number(overdue(b))-Number(overdue(a))||(['P0','P1','P2','P3']
 // Manual ordering is stored in the existing YOS Tasks 実行順 number property.
 // Legacy numbers below 2,000,000 remain untouched. Unranked tasks retain the previous
 // overdue/priority/date sequence; moving one task only writes that task's property.
+// Completed Task pages remain in the baseline, so tapping another Task complete does not shift the remaining ranks.
 const RANK_BASE=2000000,RANK_LIMIT=4000000,RANK_GAP=1024,RANK_MARGIN=128;
 function defaultRanks(){
- const rows=state.tasks.filter(isOpen).slice().sort((a,b)=>order(a,b)||a.id.localeCompare(b.id));
+ const rows=state.tasks.filter(t=>t.type==='Task').slice().sort((a,b)=>order(a,b)||a.id.localeCompare(b.id));
  return new Map(rows.map((t,i)=>[t.id,RANK_BASE+(i+RANK_MARGIN)*RANK_GAP]));
 }
 function effectiveRank(t,defaults){
