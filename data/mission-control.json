@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T01:29:39+09:00",
+  "updated_at": "2026-11-24T01:33:44+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-830",
+      "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
+      "updated_at": "2026-11-19T16:21:23Z"
+    },
     {
       "id": "github-pr-857",
       "title": "PR #857 YOS JOURNAL｜一次資料照合の非公開プロトタイプと安全テスト",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-23T14:59:27Z"
     },
     {
-      "id": "github-pr-904",
-      "title": "PR #904 YOS Remote｜外出・帰宅の家電ON/OFF/維持プリセット",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/904",
-      "updated_at": "2026-11-23T16:14:02Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T16:28:33Z"
+      "updated_at": "2026-11-23T16:32:12Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-53785a7f8952",
+      "title": "feat(remote): configurable departure/arrival Home Scenes via YOS Remote",
+      "completed_at": "2026-11-23T16:32:49Z",
+      "result": "GitHub mainへ反映（53785a7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/53785a7f8952055a614ad3fe0677188080e12716"
+    },
+    {
       "id": "github-commit-358019c3632b",
       "title": "Merge PR #905: YOS Lists Notion HTTP 400 safe display and diagnostics",
       "completed_at": "2026-11-23T16:28:36Z",
@@ -241,13 +248,6 @@
       "completed_at": "2026-11-23T16:06:05Z",
       "result": "GitHub mainへ反映（9fdc7b9）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9fdc7b9db08e0a3ea9263eee2732614f932b6d18"
-    },
-    {
-      "id": "github-commit-e588d74aa224",
-      "title": "Merge PR #893: DAYSTREAM 1-tap read-only Notion timeline and safe storage",
-      "completed_at": "2026-11-23T15:52:11Z",
-      "result": "GitHub mainへ反映（e588d74）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e588d74aa224db7a684f5f06d22319dbe88c6ef0"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T01:29:39+09:00",
+      "last_update": "2026-11-24T01:33:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 72件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 71件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T01:29:39+09:00",
+      "last_update": "2026-11-24T01:33:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T01:29:39+09:00",
+      "last_update": "2026-11-24T01:33:44+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "792d84811f9926d2a9488c3843164f5a38017ee40977e9c71a4019332d5f9fef"
+  "github_snapshot_hash": "69e22b92eea20ecf7c8204b945dd9ef46cd4aa64d92a43d7cf00c0fa6cb91d51"
 }
