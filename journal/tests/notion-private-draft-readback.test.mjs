@@ -60,3 +60,30 @@ test('closed on incomplete pagination, HTTP failures and missing token',async()=
  await assert.rejects(()=>readPrivateInbox({token:'mock-notion-token',maxPages:1,fetcher:async()=>({ok:true,json:async()=>({results:[],has_more:true,next_cursor:'next'})})}),/PAGINATION_INCOMPLETE/);
  await assert.rejects(()=>readPrivateInbox({token:'mock-notion-token',fetcher:async()=>({ok:false,status:403})}),/NOTION_HTTP_403/);
 });
+
+
+test('reads private JOURNAL drafts delivered by existing Clarity Inbox Bridge without accepting Clarity captures',()=>{
+ const body=payload+'\n追加の研究本文';
+ const meta='2026-11-24T10:20:30.123Z · YOS JOURNAL Draft · journal:edition-20261124-001';
+ const bridge=[par(meta),par(body.slice(0,1500)),par(body.slice(1500)),{type:'divider',divider:{}}]
+   .filter((b,i)=>i!==2||body.length>1500);
+ const drafts=inspectDrafts([par('Clarity unrelated raw'),...pack(),...bridge]);
+ assert.equal(drafts.length,2);
+ assert.equal(drafts[1].receipt,'journal:edition-20261124-001');
+ assert.equal(drafts[1].content,body);
+ assert.equal(drafts[1].state,'private_unverified_never_publish');
+ assert.throws(()=>inspectDrafts(bridge.slice(0,-1)),/INCOMPLETE_BRIDGE_DRAFT/);
+ assert.throws(()=>inspectDrafts([...bridge,...bridge]),/DUPLICATE_BRIDGE_ID/);
+ assert.throws(()=>inspectDrafts([par(meta),par('不正な記事'),{type:'divider',divider:{}}]),/UNSAFE_BRIDGE_DRAFT/);
+ assert.equal(inspectDrafts([par('2026-11-24T10:20:30.123Z · Clarity Text · clarity:other-12345678'),par(body),{type:'divider',divider:{}}]).length,0);
+});
+
+test('private JOURNAL bridge reconstructs 36k multi-block text and rejects missing divider',()=>{
+ const body=payload+'\n'+'研究記事'.repeat(3600);
+ const meta='2026-11-24T10:20:30.123Z · YOS JOURNAL Draft · journal:edition-long-0001';
+ const blocks=[par(meta),...Array.from({length:Math.ceil(body.length/1500)},(_,i)=>par(body.slice(i*1500,(i+1)*1500))),{type:'divider',divider:{}}];
+ const got=inspectDrafts(blocks);
+ assert.equal(got.length,1);
+ assert.equal(got[0].content,body);
+ assert.throws(()=>inspectDrafts(blocks.slice(0,-1)),/INCOMPLETE_BRIDGE_DRAFT/);
+});
