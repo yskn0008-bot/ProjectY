@@ -169,7 +169,7 @@ const q=[];
 let pendingCallback=null;
 function emit(x){q.push(x);if(pendingCallback){const cb=pendingCallback;pendingCallback=null;cb(q.shift());}}
 window.YOS_LISTS_WAIT=function(cb){pendingCallback=cb;if(q.length){pendingCallback=null;cb(q.shift());}};
-const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\\'':'&#39;'}[c]));
+const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]||'&#39;'));
 const day=x=>{if(!x)return'';try{return new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric'}).format(new Date(x.length===10?x+'T00:00:00+09:00':x))}catch{return x.slice(0,10)}};
 const isOpen=x=>x.state!=='完了'&&x.type==='Task';
 const isShopping=x=>!x.purchased&&x.type==='欲しいもの';
