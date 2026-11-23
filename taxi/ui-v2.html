@@ -264,6 +264,36 @@
 .view.strategy .strategy-foot{flex:0 0 auto;min-height:51px;padding:8px 12px}
 @media(max-width:350px){.view.strategy .strategy-action,.view.strategy .wait-card{padding:11px}.wait-card #wait-toggle{width:100%}}
 
+/* One-tap field report: accessible sheet, visually separate from action recommendation. */
+.field-open{min-height:54px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;border:1px solid #48657e;border-radius:14px;background:#172c40;color:#f3f8ff;text-align:left;padding:10px 14px}
+.field-open strong{font-size:clamp(15px,4vw,18px)}.field-open span{color:#b7cbdc;font-size:clamp(12px,3.2vw,14px);overflow-wrap:anywhere;text-align:right}
+.field-layer[hidden]{display:none!important}.toast{z-index:40}.field-layer{position:fixed;z-index:30;inset:0;display:flex;align-items:flex-end;justify-content:center;background:#06101cc9}
+.field-sheet{width:min(100%,460px);max-height:88dvh;overflow-y:auto;overscroll-behavior:contain;border-radius:24px 24px 0 0;padding:19px 17px calc(20px + var(--safe-bottom));background:#f1f3f6;color:#1c3044;box-shadow:0 -18px 50px #0006}
+.field-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.field-top h2{font-size:21px;line-height:1.3;margin:0;font-weight:900}
+.field-close{min-width:44px;min-height:44px;border:0;background:#e0e7ee;color:#284056;border-radius:50%;font-size:24px}
+.field-hint{color:#64788d;font-size:13px;line-height:1.5;margin:10px 0 14px}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.field-choice{min-height:54px;min-width:0;border:1px solid #d7e1eb;background:#fff;color:#22384d;border-radius:13px;padding:10px 11px;text-align:left;font-size:clamp(13px,3.7vw,16px);font-weight:850;line-height:1.35;white-space:normal}
+.field-choice:active{background:#e5f0f7}.field-subtitle{font-size:13px;font-weight:900;color:#566e84;margin:16px 0 8px}
+.field-previous{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px;border-radius:12px;background:#e4eaf0}
+.field-previous span{color:#30495f;font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+.field-undo{min-height:44px;flex:0 0 auto;padding:8px 11px;font-weight:800;font-size:12px;border:1px solid #bac9d8;border-radius:10px;background:white;color:#30495f}
+.field-undo:disabled{opacity:.45}.field-disclaimer{font-size:12px;line-height:1.5;color:#627589;margin:12px 0 0}
+@media(max-width:350px){.field-sheet{padding-left:12px;padding-right:12px}.field-choice{padding:9px 7px}.field-open{padding:9px 10px}}
+
+
+/* YOS consent-based handoff; the action card stays neutral until a separately verified decision engine exists. */
+.field-yos-send[hidden],.field-yos-response[hidden],#googleSignIn[hidden]{display:none!important}
+.field-yos-send{flex:0 0 auto;min-height:48px;width:100%;border:1px solid #567ca0;border-radius:13px;background:#102c44;color:#e5f3ff;font-weight:800;font-size:clamp(13px,3.6vw,16px);text-align:center;padding:9px 12px}
+.field-yos-send:disabled{opacity:.58}
+.field-yos-response{flex:0 0 auto;min-width:0;border:1px solid #69899f;border-radius:14px;padding:12px 14px;background:#142b3b;line-height:1.5}
+.field-yos-response strong{display:block;font-size:14px;color:#c9e4f5}
+.field-yos-response p{margin:7px 0 0;font-size:clamp(13px,3.5vw,15px);white-space:pre-wrap;overflow-wrap:anywhere;max-height:28dvh;overflow-y:auto}
+.field-yos-response small{display:block;margin-top:7px;color:#adbdcb;line-height:1.45}
+#googleSignIn{flex:0 0 auto;padding:12px;border-radius:14px;background:#f1f3f6;color:#273b50}
+#googleSignIn p{margin:0 0 9px;font-size:13px;line-height:1.5}
+#googleSignInButton{min-height:44px}
+
 /* YOS TAXI light UI preview — visual-only redesign; existing storage and records unchanged */
 :root{color-scheme:light;--bg:#f1f6ff;--navy:#e9f2ff;--panel:#fff;--edge:#bad3ef;--gold:#2369cf;--cyan:#15b6c9;--dim:#667c9e;--white:#162b50;--green:#1bbda4}
 html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(160deg,#f8fbff 0%,#edf4ff 50%,#f6f1ff 100%);box-shadow:0 0 0 1px #d4e1f6}
@@ -272,7 +302,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 .status-card{min-height:47px;flex:0 0 47px;color:#1a3a67}.status-note{background:#edf5ff;border-color:#c8dcf4;color:#41658e}.status-divider{border-color:#d4e2f5}
 .sales-card{flex:0 0 133px;min-height:133px;background:linear-gradient(120deg,#14b4ce,#2e7ee4 65%,#8a8df5);border:0;box-shadow:0 9px 20px #257dcc33}.sales-card .metrics span,.sales-card .metrics strong{color:white}.sales-card .metrics .main-value{font-size:32px}.sales-card .metrics>div+div{border-color:#ffffff66}.sales-card .bar{background:#ffffff5c}.sales-card .bar b{background:#4de5c8}
 .pace-card{flex:0 0 auto;padding:13px}.pace-heading{display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:900}.pace-heading #monthly-open{min-height:44px;border:1px solid #bad7f4;border-radius:11px;padding:5px 9px;background:#e9f4ff;color:#246aa6;font-size:12px;font-weight:800}.pace-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.pace-grid>div{padding:10px 12px;background:#f4f8ff;border-radius:13px}.pace-grid small{display:block;font-size:11px;color:#5a7090}.pace-grid strong{display:block;margin-top:6px;font-size:18px;color:#163d79}.pace-card p{margin:9px 2px 0;font-size:10px;color:#7286a4;line-height:1.5}
-.quick{flex:0 0 67px;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr)}.quick #drop-btn{background:#e9f3ff;border:1px solid #b8d8f3;color:#2466a1;box-shadow:none}.quick #drop-btn .copy b{font-size:16px}.quick #drop-btn .copy small{font-size:10px}.quick #drop-btn svg{width:21px;height:21px}.quick .photo{background:linear-gradient(115deg,#17c6c7,#46a4ed);border:0;color:#fff;box-shadow:0 6px 16px #25b6ce42}.quick .photo .copy b{font-size:18px}.quick .photo .copy small{font-size:11px;color:#f1ffff}
+.quick{flex:0 0 67px;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr)}.quick #drop-btn{background:#e9f3ff;border:1px solid #b8d8f3;color:#2466a1;box-shadow:none}.quick #drop-btn .copy b{font-size:16px;white-space:normal;overflow-wrap:anywhere;line-height:1.15}.quick #drop-btn .copy small{font-size:10px}.quick #drop-btn svg{width:21px;height:21px}.quick .photo{background:linear-gradient(115deg,#17c6c7,#46a4ed);border:0;color:#fff;box-shadow:0 6px 16px #25b6ce42}.quick .photo .copy b{font-size:18px;white-space:normal;overflow-wrap:anywhere;line-height:1.15}.quick .photo .copy small{font-size:11px;color:#f1ffff}
 .decision{flex:0 0 73px;min-height:73px;background:linear-gradient(115deg,#e5f9ff,#e9e8ff);border:1px solid #a9d8f4;box-shadow:none;color:#193e73}.decision small{color:#1985b5}.decision strong{color:#173a71}.decision span{color:#5d7197}.decision:after{opacity:.12}
 .periods{flex:0 0 135px;min-height:135px;background:#fff}.period{color:#1e416c}.period+.period{border-color:#e3ebf8}.period time{background:#e9f3ff;color:#2468a6}.period small{color:#657c9c}.period.selected{background:#edf9ff;outline-color:#70c7e8;color:#1466a7}.period.selected time{background:#cdeefe;color:#1466a7}.period.selected small{color:#567c9c}
 .kpis{flex:0 0 74px;min-height:74px}.kpi-value{font-size:17px}.kpis>div+div{border-color:#d6e3f5}.kpis .pending,.kpis .pending .kpi-label{color:#ae6c18}.footer-card{flex:0 0 30px;min-height:30px;background:#eaf2ff;border-color:#d4e1f2;color:#547094}.footer-card i{border-color:#c5d7ed}
@@ -325,6 +355,11 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 <p id="wait-guidance">安全に停車してから待機開始を記録してください。降車時刻からは推定しません。</p>
 <div class="wait-actions"><span id="wait-started">正確な待機開始：未記録</span><button type="button" id="wait-toggle">待機を開始</button></div>
 </section>
+<button type="button" class="field-open" id="field-open" aria-haspopup="dialog" aria-controls="field-layer"><strong>現状を報告</strong><span id="field-summary" aria-live="polite">報告なし ›</span></button>
+
+<button class="field-yos-send" id="field-yos-send" type="button" hidden>YOSに現状を送って相談</button>
+<div id="googleSignIn" hidden><p>YOSへ送る前に、Googleで本人確認します。認証情報は端末に保存しません。</p><div id="googleSignInButton"></div></div>
+<section id="field-yos-response" class="field-yos-response" aria-live="polite" hidden><strong id="field-yos-status">端末内の報告は未送信</strong><p id="field-yos-answer" hidden></p><small id="field-yos-note">YOSの回答は参考情報です。根拠不足なら「未判定」のままです。</small></section>
 <details class="strategy-evidence"><summary>根拠・取得時刻・信頼度を確認</summary><div class="evidence-body">
 <p>推薦の元データ：未取得（現在地・GO／無線・人流・競合）</p><p>データ取得時刻：なし ／ 判断の信頼度：判定不可</p>
 <p>時間帯別エリア案と5・10・15・20・30分の節目は未検証の仮説です。移動を強制する指示ではありません。待機開始はこの端末で明示記録した時刻だけを使用します。</p>
@@ -337,8 +372,28 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 <main class="view analysis" id="analysis-view" aria-label="営業分析画面"><div class="section-head">確認できる数値だけを表示</div><div class="statgrid"><div class="stat"><small>降車ボタン記録</small><strong id="analysis-drops">0件</strong></div><div class="stat"><small>日報の売上</small><strong>未接続</strong></div><div class="stat"><small>実車時間率</small><strong>未計測</strong></div><div class="stat"><small>空車時間</small><strong>未計測</strong></div></div><div class="panel analysis-note">過去の紙日報に降車時刻がない場合、正確な空車時間は算出できません。新しい降車タップと、日報から得る乗車時刻・乗車番号を照合できたものだけ分析に利用します。</div><div class="panel analysis-memo">計画中：<br>① 日報写真と前回写真の差分読取<br>② 降車時刻との一意な照合<br>③ Notion正本へ認証付きの安全な登録<br>④ 30乗務の実績で那覇戦略の再校正</div><div class="footer-card"><svg><use href="#icon-info"/></svg>未確認情報を実績・確定売上として扱わない</div></main>
 <nav class="nav" aria-label="画面切替"><button type="button" class="active" data-page="sales"><svg><use href="#icon-car"/></svg>営業</button><button type="button" data-page="strategy"><svg><use href="#icon-pin"/></svg>戦略</button><button type="button" data-page="history"><svg><use href="#icon-note"/></svg>履歴</button><button type="button" data-page="analysis"><svg><use href="#icon-bars"/></svg>分析</button></nav>
 <div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="操作確認"><div class="sheet"><button class="close" type="button" id="close-modal" aria-label="閉じる">×</button><h2 id="modal-title">確認</h2><div id="dropoff-outcome" class="dropoff-outcome" hidden><span id="dropoff-outcome-badge"></span><strong id="dropoff-outcome-time"></strong><span id="dropoff-outcome-count"></span></div><p id="modal-body"></p><div id="modal-actions" class="buttonrow"></div></div></div>
+<section class="field-layer" id="field-layer" role="dialog" aria-modal="true" aria-labelledby="field-title" hidden>
+<div class="field-sheet"><div class="field-top"><h2 id="field-title">現状を報告</h2><button id="field-close" class="field-close" type="button" aria-label="閉じる">×</button></div>
+<p class="field-hint">安全に停車中、確認できた事実をタップするだけ。入力や会話は不要です。</p>
+<div class="field-grid">
+<button class="field-choice" data-observation="go_none">GO反応なし</button>
+<button class="field-choice" data-observation="radio_none">無線反応なし</button>
+<button class="field-choice" data-observation="supply_many">空車が多い</button>
+<button class="field-choice" data-observation="queue_still">待機列が動かない</button>
+<button class="field-choice" data-observation="queue_moves">待機列が進んだ</button>
+<button class="field-choice" data-observation="go_yes">GO反応あり</button>
+<button class="field-choice" data-observation="radio_yes">無線反応あり</button>
+<button class="field-choice" data-observation="supply_few">空車が少ない</button>
+<button class="field-choice" data-observation="traffic_issue">周辺に異常</button>
+<button class="field-choice" data-observation="location_wrong">現在地の情報が違う</button>
+</div>
+<p class="field-subtitle">最後の報告</p><div class="field-previous"><span id="field-last">報告なし</span><button type="button" class="field-undo" id="field-undo" disabled>直前の報告を取消</button></div>
+<p class="field-disclaimer">これは本人の現場観測の記録です。GO・無線の公式データではありません。十分な根拠がない場合、YOSの判断は「未判定」のままです。</p>
+</div></section>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div>
+<script src="../yos/hj/yos-ai-client.js"></script>
+<script src="../yos/hj/yos-auth.js"></script>
 <script>
 'use strict';
 (()=>{
@@ -417,6 +472,166 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
    button.dataset.running=String(view.running);
  }
 
+
+ // Manual field observations never imply automated demand or GO/dispatch telemetry.
+ const FIELD_STORE='yos-taxi-field-reports-v1';
+ const fieldLabels=Object.freeze({go_none:'GO反応なし',radio_none:'無線反応なし',supply_many:'空車が多い',queue_still:'待機列が動かない',queue_moves:'待機列が進んだ',go_yes:'GO反応あり',radio_yes:'無線反応あり',supply_few:'空車が少ない',traffic_issue:'周辺に異常',location_wrong:'現在地の情報が違う'});
+ function readField(){
+   try{
+     const raw=localStorage.getItem(FIELD_STORE);
+     if(raw===null)return {entries:[],error:false};
+     const value=JSON.parse(raw);
+     if(!value||value.version!==1||!Array.isArray(value.entries)||value.entries.some(e=>
+       !e||typeof e.id!=='string'||typeof e.businessDate!=='string'||typeof e.shiftStart!=='string'||
+       typeof e.at!=='string'||!Number.isFinite(Date.parse(e.at))||!Object.hasOwn(fieldLabels,e.kind)||
+       (e.voidedAt!==undefined&&(typeof e.voidedAt!=='string'||!Number.isFinite(Date.parse(e.voidedAt))))))return {entries:[],error:true};
+     return {entries:value.entries,error:false};
+   }catch{return {entries:[],error:true}}
+ }
+ let fieldData=readField();
+ const shiftFieldEntries=entries=>entries.filter(e=>e.businessDate===state.businessDate&&e.shiftStart===state.shiftStart);
+ const currentFields=()=>shiftFieldEntries(fieldData.entries).filter(e=>!e.voidedAt);
+ function renderField(){
+   const latest=currentFields().at(-1),mostRecent=shiftFieldEntries(fieldData.entries).at(-1);
+   const label=latest?fieldLabels[latest.kind]+' · '+time(latest.at):'報告なし';
+   $('field-summary').textContent=label+' ›';$('field-last').textContent=latest?label+'（端末内）':'報告なし';
+   $('field-undo').disabled=fieldData.error||!isActive()||!mostRecent||Boolean(mostRecent.voidedAt);
+   renderYosSend();
+ }
+ function openField(){fieldData=readField();renderField();$('field-layer').hidden=false;$('field-close').focus()}
+ function closeField(){$('field-layer').hidden=true;$('field-open').focus()}
+ function reportField(kind){
+   if(!Object.hasOwn(fieldLabels,kind)){toast('報告項目が不正です');return false}
+   if(!isActive()){toast('営業中の記録がないため、報告は保存しません');return false}
+   const latest=readField();
+   if(latest.error){fieldData=latest;renderField();toast('既存報告が読めないため保存しません');return false}
+   const at=instant(),last=latest.entries.at(-1);
+   if(last&&!last.voidedAt&&last.businessDate===state.businessDate&&last.shiftStart===state.shiftStart&&last.kind===kind&&Date.parse(at)-Date.parse(last.at)<4000){
+     fieldData=latest;renderField();toast('同じ報告を記録済みです');return false;
+   }
+   const entry={id:typeof crypto.randomUUID==='function'?crypto.randomUUID():'report-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
+     businessDate:state.businessDate,shiftStart:state.shiftStart,at,kind,source:'manual-tap',locationStatus:'unverified'};
+   const entries=[...latest.entries,entry];
+   try{localStorage.setItem(FIELD_STORE,JSON.stringify({version:1,entries}))}
+   catch{toast('保存失敗。報告は追加していません');return false}
+   fieldData={entries,error:false};renderField();closeField();
+   toast('現場報告を保存しました。自動判断は未接続です');return true;
+ }
+ function undoField(){
+   if(!isActive()){toast('営業中の報告のみ取り消せます');return false}
+   const latest=readField();
+   if(latest.error){fieldData=latest;renderField();toast('記録を読めないため取り消せません');return false}
+   const target=shiftFieldEntries(latest.entries).at(-1);
+   if(!target||target.voidedAt){toast('取り消せる直前の報告がありません');return false}
+   const entries=latest.entries.map(e=>e.id===target.id?{...e,voidedAt:instant()}:e);
+   try{localStorage.setItem(FIELD_STORE,JSON.stringify({version:1,entries}))}
+   catch{toast('保存失敗。取消は未反映です');return false}
+   fieldData={entries,error:false};renderField();toast('直前の報告を取り消しました。履歴は保持しています');return true;
+ }
+
+
+ // Prepare an authenticated YOS /api/yos/chat input. Never send automatically or synthesize a location.
+ function prepareYosFieldRequest(now=Date.now()){
+   const records=readField();
+   if(records.error)return {status:'storage-error',request:null,reason:'現場報告の保存内容が不正'};
+   if(!isActive())return {status:'shift-unconfirmed',request:null,reason:'営業中の本人記録がない'};
+   const shiftTime=Date.parse(state.shiftStart);
+   if(!Number.isFinite(shiftTime)||!Number.isFinite(now))return {status:'invalid-time',request:null,reason:'勤務時刻を確認できない'};
+   const maxAgeMs=30*60000;
+   const fresh=records.entries.filter(e=>{
+     const at=Date.parse(e.at);
+     return e.businessDate===state.businessDate&&e.shiftStart===state.shiftStart
+       &&!e.voidedAt&&e.source==='manual-tap'&&Object.hasOwn(fieldLabels,e.kind)
+       &&Number.isFinite(at)&&at>=shiftTime&&at<=now+30000&&now-at<=maxAgeMs;
+   }).sort((a,b)=>Date.parse(a.at)-Date.parse(b.at)).slice(-10);
+   if(!fresh.length)return {status:'no-fresh-facts',request:null,reason:'過去30分の有効な現場報告がない'};
+   const lines=fresh.map(e=>'・'+new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit'}).format(new Date(e.at))+'　'+fieldLabels[e.kind]);
+   const wait=confirmedWait(now);
+   const waitMinutes=wait?Math.floor(Math.max(0,now-Date.parse(wait.startedAt))/60000):null;
+   const prompt=[
+     '【YOS TAXI｜本人の定型タップ報告】',
+     '営業日：'+state.businessDate,
+     '報告元：本人による手動タップ（GO・無線の公式データではない）',
+     '現在地：未確認。エリア、需要、空車台数、配車結果を推測しない。',
+     '観測（過去30分の本人申告、最大10件）：',
+     ...lines,
+     waitMinutes===null?'正確な待機開始時刻：未確認':'端末で開始を記録した待機時間：'+waitMinutes+'分',
+     '依頼：事実・推測・未確認を区別。確認済み情報が足りなければ「未判定」と明示し、移動先や最適待機時間を断定しない。安全に停車中に確認できる、短い返答と次の確認項目だけ示す。'
+   ].join('\n');
+   // The existing YOS chat API accepts userText; transport and Google ID token are not configured here.
+   return {status:'prepared-not-sent',request:{userText:prompt},eventsUsed:fresh.map(e=>e.id),source:'manual-tap',sent:false};
+ }
+
+
+ let yosPending=false,yosAnsweredEventIds=null;
+ function renderYosSend(){
+   const prepared=prepareYosFieldRequest();
+   $('field-yos-send').hidden=prepared.status!=='prepared-not-sent';
+   $('field-yos-send').disabled=yosPending;
+   $('field-yos-send').textContent=yosPending?'YOSに確認中…':'YOSに現状を送って相談';
+   if(yosAnsweredEventIds&&(prepared.status!=='prepared-not-sent'
+     ||prepared.eventsUsed.join('|')!==yosAnsweredEventIds.join('|'))){
+     $('field-yos-status').textContent='報告が変更されたか古くなったため、前の回答は現在の判断ではありません。';
+     $('field-yos-answer').hidden=true;
+     $('field-yos-answer').textContent='';
+     yosAnsweredEventIds=null;
+   }
+ }
+ // Network call ONLY after direct user click; no automatic send and no token/AI answer in localStorage.
+ async function sendFieldToYos(){
+   if(yosPending)return false;
+   const prepared=prepareYosFieldRequest();
+   if(prepared.status!=='prepared-not-sent'){
+     $('field-yos-response').hidden=false;
+     $('field-yos-answer').hidden=true;
+     $('field-yos-status').textContent='送信できません：新しい現場報告と営業中の状態を確認してください。';
+     renderYosSend();return false;
+   }
+   $('field-yos-response').hidden=false;
+   $('field-yos-answer').hidden=true;
+   if(typeof window.YosAiClient!=='function'||typeof window.YOS_AUTH?.getGoogleIdToken!=='function'){
+     $('field-yos-status').textContent='接続機能が読み込まれていません。現場報告は端末に保存済みです。';
+     return false;
+   }
+   const baseUrl=String(window.YOS_AI_BASE_URL||'');
+   if(baseUrl!=='https://project-y-yos-ai.vercel.app'){
+     $('field-yos-status').textContent='YOSの公式接続先を確認できません。送信しません。';
+     return false;
+   }
+   yosPending=true;renderYosSend();
+   $('field-yos-status').textContent='Googleで本人確認し、YOSへ照会しています…';
+   try{
+     const client=new window.YosAiClient({baseUrl,getGoogleIdToken:window.YOS_AUTH.getGoogleIdToken});
+     const result=await client.chat(prepared.request);
+     const answer=typeof result?.answer==='string'?result.answer.trim():'';
+     if(!answer||answer.length>10000)throw Error('Unusable YOS response');
+     const nowPrepared=prepareYosFieldRequest();
+     if(nowPrepared.status!=='prepared-not-sent'
+       ||nowPrepared.eventsUsed.join('|')!==prepared.eventsUsed.join('|')){
+       $('field-yos-status').textContent='新しい報告があるため、返答を現在の判断としては表示しません。';
+       $('field-yos-answer').hidden=true;
+       yosAnsweredEventIds=null;
+       return false;
+     }
+     yosAnsweredEventIds=[...prepared.eventsUsed];
+     $('field-yos-status').textContent='YOSから参考回答を受信しました（確定指示ではありません）';
+     $('field-yos-answer').textContent=answer;
+     $('field-yos-answer').hidden=false;
+     return true;
+   }catch(error){
+     const code=Number(error?.status);
+     $('field-yos-status').textContent=code===401?'本人認証が完了しませんでした。端末内の報告は保持しています。'
+       :code===403?'この画面からのYOS接続許可が確認できません。送信は未完了です。'
+       :code===429?'YOSの利用回数制限中です。報告は端末内に保持しています。'
+       :'YOSへの照会は完了していません。端末内の報告は保持しています。';
+     $('field-yos-answer').hidden=true;
+     yosAnsweredEventIds=null;
+     return false;
+   }finally{
+     yosPending=false;renderYosSend();
+   }
+ }
+
  const money=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
  const number=n=>typeof n==='number'&&Number.isFinite(n)?n:null;
  const save=s=>{try{localStorage.setItem(STORE,JSON.stringify(s));state=s;return true}catch{notify('保存失敗：端末内記録は更新されませんでした');return false}};
@@ -468,7 +683,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
  const strategyDetail=['退勤・ホテル／GO・無線が中心','飲食移動は回転と次客の早さ','深夜割増。待機過多は避ける','帰宅需要を検証。供給過多に注意','降車後の再乗車と帰庫を比較'];
  function updatePlan(){const band=activeBand(),item=advice[band]||['次の営業に向けて需要を確認','時間帯による初期仮説・現地需要は未確認'];$('decision-text').textContent=item[0];$('decision-sub').textContent=item[1];document.querySelectorAll('[data-band]').forEach(x=>{const slot=Number(x.dataset.band);x.classList.toggle('selected',slot===band);x.classList.toggle('current',slot===(band<0?0:band))});const localHour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(new Date()));const stratSlot=localHour>=17&&localHour<20?0:localHour>=20&&localHour<22?1:localHour>=22?2:localHour<2?3:localHour>=2&&localHour<5?4:-1;document.querySelectorAll('[data-strat]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.strat)===stratSlot));}
  function render(){const now=new Date();$('current-clock').textContent=time(now);const active=isActive(),ended=isEnded();$('status-label').textContent=active?'営業中':ended?'営業終了':'営業前';$('status-dot').className='status-dot '+(active?'':ended?'end':'off');const d=drops();$('ride-count').textContent=d.length+'件';$('pending-count').textContent=d.filter(e=>!e.matched).length+'件';$('analysis-drops').textContent=d.length+'件';$('report-clock').textContent='日報未反映';$('last-reflected').textContent='最終反映：なし（日報）';$('sync-status').textContent='Notion未接続';// Pending Notion integration: never infer a fare from a tap or metadata from a photograph.
- $('remaining-shift').textContent='未確認';$('remaining-target').textContent='未確認';$('required-hourly').textContent='算出不可';$('confirmed-hourly').textContent='算出不可';$('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';updatePlan();renderWait();renderHistory()}
+ $('remaining-shift').textContent='未確認';$('remaining-target').textContent='未確認';$('required-hourly').textContent='算出不可';$('confirmed-hourly').textContent='算出不可';$('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';updatePlan();renderWait();renderField();renderHistory()}
  function renderHistory(){const list=$('history-list');list.replaceChildren();const events=dayEvents().slice().reverse();if(!events.length){const el=document.createElement('div');el.className='log';el.textContent='この営業日の記録はまだありません。';list.append(el)}events.forEach(e=>{const row=document.createElement(e.type==='dropoff'?'button':'div');if(e.type==='dropoff')row.type='button';row.className='log'+(e.voidedAt?' voided':'');const a=document.createElement('div');const title=document.createElement('b');title.textContent=e.type==='dropoff'?(e.voidedAt?'降車記録・取消済':'降車時刻'):e.type==='shift_start'?'営業開始':'営業終了';const caption=document.createElement('small');caption.textContent=' '+time(e.at,true)+' ・ '+(e.type==='dropoff'?(e.voidedAt?'取消履歴':'日報未照合'):'端末内記録');a.append(title,document.createElement('br'),caption);const b=document.createElement('span');b.className='badge';b.textContent=e.type==='dropoff'?'訂正':'端末内';row.append(a,b);if(e.type==='dropoff')row.addEventListener('click',()=>{openSheet(e.voidedAt?'降車記録を復帰':'降車記録を取り消す',`記録時刻 ${time(e.at,true)}。取り消しても履歴は削除しません。`,[{text:e.voidedAt?'取消を戻す':'記録を取消',primary:true,run:()=>{const s=structuredClone(state);const target=s.events.find(x=>x.id===e.id);if(!target)return;if(target.voidedAt)delete target.voidedAt;else target.voidedAt=instant();if(save(s)){render();toast('降車記録の状態を更新しました')}}}])});list.append(row)})}
  function renderMonthly(){const now=new Date(),fmt=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'numeric'}).format(now);$('monthly-title').textContent=fmt;const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit'}).formatToParts(now),year=Number(parts.find(x=>x.type==='year').value),month=Number(parts.find(x=>x.type==='month').value),days=new Date(year,month,0).getDate(),offset=new Date(year,month-1,1).getDay(),cal=$('monthly-calendar');cal.replaceChildren();for(const name of ['日','月','火','水','木','金','土']){const el=document.createElement('span');el.className='month-weekday';el.textContent=name;cal.append(el)}for(let i=0;i<offset;i++){const el=document.createElement('span');el.className='month-blank';cal.append(el)}for(let d=1;d<=days;d++){const el=document.createElement('div');el.className='month-day';const date=document.createElement('b');date.textContent=String(d);const val=document.createElement('small');val.textContent='—';el.append(date,val);cal.append(el)}}
  function navigate(page){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===page+'-view'));document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page))}
@@ -489,6 +704,13 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
   '【安全】走行中の画面操作・注視はしない。乗車拒否・違法待機・休憩削減は行わない。'
  ];
  function showM100(){openSheet('M100｜営業判断ルール',m100Rules.join('\n\n'));$('modal').classList.add('m100-open')}
+ $('field-open').addEventListener('click',openField);
+ $('field-close').addEventListener('click',closeField);
+ $('field-layer').addEventListener('click',e=>{if(e.target===$('field-layer'))closeField()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('field-layer').hidden)closeField()});
+ document.querySelectorAll('[data-observation]').forEach(b=>b.addEventListener('click',()=>reportField(b.dataset.observation)));
+ $('field-undo').addEventListener('click',undoField);
+ $('field-yos-send').addEventListener('click',sendFieldToYos);
  $('m100-rule-btn').addEventListener('click',showM100);
  $('wait-toggle').addEventListener('click',()=>{if(confirmedWait())finishWait();else startWait()});
  // Shortcut widget deep-link: the action runs ONLY in the storage container that opens this URL.
@@ -531,10 +753,10 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
    if(action==='m100'){navigate('strategy');showM100();}
  }
  $('monthly-open').addEventListener('click',()=>navigate('monthly'));$('status-btn').addEventListener('click',changeShift);$('drop-btn').addEventListener('click',()=>stampDropoff());$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
- renderMonthly();render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait()},15000);
- document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')renderWait()});
- addEventListener('pageshow',renderWait);
- window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand,waitClock:{get:()=>waitView(),start:startWait,stop:finishWait,refresh:renderWait}};
+ renderMonthly();render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait();renderYosSend()},15000);
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderWait();renderYosSend()}});
+ addEventListener('pageshow',()=>{renderWait();renderYosSend()});
+ window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand,waitClock:{get:()=>waitView(),start:startWait,stop:finishWait,refresh:renderWait},fieldReport:{list:()=>structuredClone(currentFields()),record:reportField,undo:undoField,refresh:renderField,prepareYosRequest:prepareYosFieldRequest,sendToYos:sendFieldToYos}};
  if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 })();
 </script>
