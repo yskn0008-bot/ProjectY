@@ -390,6 +390,11 @@ test('dragging to the very first or last row stays inside the dedicated numeric 
  assert.ok(top>=2000000&&top<ranks.get('a'),'a Task can be dragged above the first auto Task');
  assert.ok(bottom>ranks.get('c')&&bottom<=4000000,'a Task can be dragged below the last auto Task');
  assert.equal(h.effectiveRank(rows[1],ranks),ranks.get('b'),'existing legacy 実行順=7 remains baseline, not reinterpreted');
+ rows[0].state='完了';
+ const afterCompletion=h.defaultRanks();
+ assert.equal(afterCompletion.get('b'),ranks.get('b'),'completing an unrelated Task does not shift manual anchors');
+ assert.equal(afterCompletion.get('c'),ranks.get('c'),'other active Task rank remains stable');
+ rows[0].state='次にやる';
  const moved={...rows[2],manualRank:top};
  assert.equal([rows[0],rows[1],moved].sort((a,b)=>h.effectiveRank(a,ranks)-h.effectiveRank(b,ranks))[0].id,'c');
 });
