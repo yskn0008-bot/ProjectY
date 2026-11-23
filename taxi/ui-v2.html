@@ -755,6 +755,9 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
    if(!$('revenue-is-total').checked||!$('revenue-checked').checked){
      $('revenue-status').textContent='日報と営業日・金額の確認が必要です。';return;
    }
+   if(api.detectText($('revenue-text').value).kind==='ride-history'){
+     $('revenue-status').textContent='営業履歴の個別運賃は累積総収入として記録できません。紙日報を選んでください。';return;
+   }
    if(!crypto.subtle?.digest){$('revenue-status').textContent='写真の重複検知が使えません。保存しません。';return}
    let hash;
    try{
