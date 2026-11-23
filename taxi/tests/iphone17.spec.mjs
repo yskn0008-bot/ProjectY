@@ -387,7 +387,7 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
     expect(cockpit.kpiCells,'only measured counters shown').toBe(2);
     expect(cockpit.dropFont,'primary action must remain legible').toBeGreaterThanOrEqual(width<=350?12:16);
     expect(cockpit.statusFont,'shift status must remain legible').toBeGreaterThanOrEqual(width<=350?15:17);
-    await expect(page.locator('#photo-btn')).toContainText('日報写真');
+    await expect(page.locator('#photo-btn')).toContainText('経過日報を送る');
     let problems = await page.evaluate(() => {
       const items=[...document.querySelectorAll('.quick .copy b,.quick .copy small,.decision strong,.decision span,.period b,.period small,.kpi-label,.kpi-value,.footer-card span')];
       const active = element => {const style=getComputedStyle(element);return style.display!=='none' && style.visibility!=='hidden' && element.getBoundingClientRect().height>0};
