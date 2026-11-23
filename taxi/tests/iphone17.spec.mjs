@@ -1118,3 +1118,22 @@ test('monthly revenue counts the latest daily snapshot only when confirmed tax b
   await expect(page.locator('#monthly-sum-value')).toHaveText('区分混在');
   await expect(page.locator('#monthly-notice')).toContainText('合計を表示しません');
 });
+
+
+
+test('monthly calendar keeps the prior business month at 02:00 after local midnight',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-12-01T02:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const saved=await page.evaluate(()=>{
+    const api=window.YosTaxiConfirmedRevenueV1;
+    return api.confirm({
+      businessDate:'2026-11-30',amountYen:21950,taxBasis:'tax-included',reportClock:'23:30',
+      photoSha256:'sha256:'+'b'.repeat(64),photoKind:'paper-total'
+    }).status;
+  });
+  expect(saved).toBe('saved');
+  await page.locator('#monthly-open').click();
+  await expect(page.locator('#monthly-title')).toHaveText('2026年11月');
+  await expect(page.locator('#monthly-sum-value')).toHaveText('¥21,950');
+  await expect(page.locator('#monthly-calendar .month-day small').filter({hasText:'21,950'})).toHaveCount(1);
+});
