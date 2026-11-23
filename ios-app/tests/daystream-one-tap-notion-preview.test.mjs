@@ -73,7 +73,7 @@ test('old imported YOS Direct and local notion task edits take precedence',()=>{
  assert.ok(!today.some(x=>x.t==='起床'||x.t==='美容用品'));
 });
 test('cross-midnight sessions are clipped per day without changing their Notion source',()=>{
- const {project}=preview([task('z','yos-daystream-ideal-20261123-free','夜の自由時間',
+ const {project}=preview([task('0','yos-daystream-ideal-20261123-free','夜の自由時間',
  '2026-11-23T23:50:00+09:00','2026-11-24T00:20:00+09:00','毎日')]);
  const a=project('2026-11-23',[]),b=project('2026-11-24',[]);
  assert.deepEqual(a.map(x=>[x.s,x.d]),[[23*60+50,10]]);
