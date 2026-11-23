@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T00:30:37+09:00",
+  "updated_at": "2026-11-24T00:46:35+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-23T05:39:00Z"
+    },
+    {
+      "id": "github-pr-870",
+      "title": "PR #870 BRAVIA｜4台リモコン保護・画質ワンタップ／音声／アプリ／HDMI3クイック操作 TEST",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/870",
+      "updated_at": "2026-11-19T16:53:18Z"
     },
     {
       "id": "github-pr-878",
@@ -80,7 +90,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/894",
-      "updated_at": "2026-11-23T15:29:31Z"
+      "updated_at": "2026-11-23T15:32:04Z"
     },
     {
       "id": "github-pr-901",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-23T14:59:27Z"
     },
     {
-      "id": "github-pr-903",
-      "title": "PR #903 YOS Lists｜ショートカット起動・Notionタスク/買い物の即時反映UI",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/903",
-      "updated_at": "2026-11-23T15:06:30Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T15:29:11Z"
+      "updated_at": "2026-11-23T15:45:33Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-b262ed48581a",
-      "title": "Merge PR #895: DAYSTREAM Notion ideal-day sync and overnight split",
-      "completed_at": "2026-11-23T14:35:41Z",
-      "result": "GitHub mainへ反映（b262ed4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b262ed48581a3f629cab064871c9a92f95e30f75"
+      "id": "github-commit-8e4e0bb89975",
+      "title": "Merge PR #903: YOS Lists shortcut-ready Notion UI",
+      "completed_at": "2026-11-23T15:45:31Z",
+      "result": "GitHub mainへ反映（8e4e0bb）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8e4e0bb899756580d5723d2403ca6e6d5844258f"
     },
     {
-      "id": "github-commit-cc2e3a812278",
-      "title": "Merge pull request #899 from yskn0008-bot/fix/scriptable-icon-header-managed-update-20261123",
-      "completed_at": "2026-11-23T10:40:19Z",
-      "result": "GitHub mainへ反映（cc2e3a8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cc2e3a812278d64cefd05ea67bd8a23272c7c1c8"
+      "id": "github-commit-148f7c554e86",
+      "title": "test(yos-lists): cover readback verification, stale writes, token isolation and installer pin",
+      "completed_at": "2026-11-23T14:59:55Z",
+      "result": "GitHub mainへ反映（148f7c5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/148f7c554e8665014486763ddeab420645e9a3b9"
     },
     {
-      "id": "github-commit-39273b39b681",
-      "title": "Preserve latest sleep-scene installer pin while updating DAYSTREAM #895",
-      "completed_at": "2026-11-23T10:33:13Z",
-      "result": "GitHub mainへ反映（39273b3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/39273b39b681286fe157df468405c9cb37b99f9b"
+      "id": "github-commit-f1a806a6a413",
+      "title": "chore(yos-lists): pin latest validated Scriptable SHA256 in common installer",
+      "completed_at": "2026-11-23T14:59:02Z",
+      "result": "GitHub mainへ反映（f1a806a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f1a806a6a41392a3fda3a7bb1f84e2827a092f9f"
     },
     {
-      "id": "github-commit-7902ef4fb705",
-      "title": "Merge latest main into DAYSTREAM #895 without altering unrelated files",
-      "completed_at": "2026-11-23T10:32:56Z",
-      "result": "GitHub mainへ反映（7902ef4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7902ef4fb705222fb7e11eae9c778e957ca9713b"
+      "id": "github-commit-01dc08afec39",
+      "title": "fix(yos-lists): support older Scriptable JavaScriptCore runtime",
+      "completed_at": "2026-11-23T14:58:23Z",
+      "result": "GitHub mainへ反映（01dc08a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/01dc08afec397eb483fac608b665371179c7d5fb"
     },
     {
-      "id": "github-commit-4562544ef385",
-      "title": "fix(installer): accept only exact Scriptable icon metadata and preserve rollback",
-      "completed_at": "2026-11-23T10:27:36Z",
-      "result": "GitHub mainへ反映（4562544）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4562544ef3856b86317810f0bc630622360e0178"
+      "id": "github-commit-32c767b58b83",
+      "title": "feat(yos-lists): register verified target in existing common installer",
+      "completed_at": "2026-11-23T14:57:47Z",
+      "result": "GitHub mainへ反映（32c767b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/32c767b58b8331b6e4e771e09e7d060acec979ae"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T00:30:37+09:00",
+      "last_update": "2026-11-24T00:46:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 72件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T00:30:37+09:00",
+      "last_update": "2026-11-24T00:46:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T00:30:37+09:00",
+      "last_update": "2026-11-24T00:46:35+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "7cf20a463ddd43ba737916003506ce6e7d51b866572857f205067f0a76c2be53"
+  "github_snapshot_hash": "0d524d49068413cc99bd41667f960847d887e3565d94f21b32850caaf98c5990"
 }
