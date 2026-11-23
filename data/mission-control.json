@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T05:52:31+09:00",
+  "updated_at": "2026-11-24T05:55:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -83,16 +83,6 @@
       "updated_at": "2026-11-23T14:59:27Z"
     },
     {
-      "id": "github-pr-909",
-      "title": "PR #909 YOS Home Scenes｜設定画面をミニマルなiOSデザインへ変更",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/909",
-      "updated_at": "2026-11-23T20:51:50Z"
-    },
-    {
       "id": "github-pr-914",
       "title": "PR #914 YOS Lists｜淡すぎないパステル配色へ微調整",
       "type": "GitHub PR",
@@ -113,6 +103,16 @@
       "updated_at": "2026-11-23T20:48:28Z"
     },
     {
+      "id": "github-pr-924",
+      "title": "PR #924 YOS Lists｜タップ直後に1行だけ即時切替、Notion確定後に反映",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/924",
+      "updated_at": "2026-11-23T20:53:20Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T20:51:39Z"
+      "updated_at": "2026-11-23T20:54:27Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-ed1335fb61ef",
+      "title": "design(home-scenes): release approved navy glass Scriptable UI",
+      "completed_at": "2026-11-23T20:54:46Z",
+      "result": "GitHub mainへ反映（ed1335f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ed1335fb61efde94a80da3d7834824d96cd2089d"
+    },
+    {
       "id": "github-commit-aef3c529d978",
       "title": "Merge PR #923: retain completed YOS Lists rows in-session with safe per-task undo",
       "completed_at": "2026-11-23T20:39:43Z",
@@ -241,13 +248,6 @@
       "completed_at": "2026-11-23T20:31:44Z",
       "result": "GitHub mainへ反映（d1acf6a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d1acf6a831d8b542d42827deed33b6f8235b81e1"
-    },
-    {
-      "id": "github-commit-47e5c58cb418",
-      "title": "fix(yos-lists): include task ID in per-row undo receipt for safe consistency check",
-      "completed_at": "2026-11-23T20:31:32Z",
-      "result": "GitHub mainへ反映（47e5c58）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/47e5c58cb41827892110cdfc57964c375c0d5588"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T05:52:31+09:00",
+      "last_update": "2026-11-24T05:55:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -365,7 +365,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T05:52:31+09:00",
+      "last_update": "2026-11-24T05:55:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T05:52:31+09:00",
+      "last_update": "2026-11-24T05:55:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "99c05d96516f5f39032edd83e7023f6595cafb5e15060a438f32111807888c0f"
+  "github_snapshot_hash": "215f4493489e36f1e2b4b19be501db722f34351dbceceaebfaca5a17826e5292"
 }
