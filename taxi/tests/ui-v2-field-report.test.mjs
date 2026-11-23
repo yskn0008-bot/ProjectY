@@ -83,6 +83,8 @@ test('undo retains a voided audit entry and stops repeated accidental cancellati
   assert.equal(all.length,2);
   assert.ok(all[1].voidedAt);
   assert.equal(r.undo(),false);
+  const afterReload=env({field:e.store.get(FIELD)});
+  assert.equal(afterReload.window.YOSTaxiPreview.fieldReport.undo(),false);
   assert.equal(e.store.get(OLD)!==undefined,true);
 });
 test('report persists through reload and midnight; only same shift events visible',()=>{
