@@ -26,6 +26,10 @@ const mockFile={
  fileExists:p=>written.has(p),
  createDirectory:p=>written.set(p,'dir'),
  writeImage:(p,img)=>written.set(p,img),
+ writeString:(p,s)=>written.set(p,s),
+ readString:p=>written.get(p),
+ copy:(a,b)=>written.set(b,written.get(a)),
+ remove:p=>written.delete(p),
 };
 const api=new Function('DrawContext','FileManager','Color','Rect','Size','Font',
  code+'; return {yosXlRows,yosXlImage,yosXlExport}')(MockDrawContext,{iCloud:()=>mockFile},MockColor,MockRect,MockSize,
@@ -64,8 +68,36 @@ test('XL renderer only exports a private generated image after a valid projectio
  assert.equal(result.ok,true);
  assert.match(result.path,/\/YOS_Widgets\/YOS_DAYSTREAM_XL.png$/);
  assert.ok(written.has(result.path));
+ assert.equal(written.get(result.path.replace('.png','.owner.txt')),'YOS DAYSTREAM XL generated image v1');
  assert.ok(captures.some(x=>x.includes('今日のタイムライン')));
  assert.doesNotMatch(JSON.stringify(written),/YOS_NOTION_INTEGRATION_TOKEN|Bearer/);
+});
+test('unknown same-name image and orphaned receipt are preserved',()=>{
+ written.clear();
+ const path='/icloud/Scriptable/YOS_Widgets/YOS_DAYSTREAM_XL.png';
+ written.set(path,{personal:true});
+ assert.throws(()=>api.yosXlExport([],null),/既存の同名画像を保護/);
+ assert.deepEqual(written.get(path),{personal:true});
+ written.delete(path);
+ written.set(path.replace('.png','.owner.txt'),'YOS DAYSTREAM XL generated image v1');
+ assert.throws(()=>api.yosXlExport([],null),/管理記録が一致しません/);
+ assert.equal(written.has(path),false);
+});
+test('previous generated image is restored after a failed replacement',()=>{
+ written.clear();
+ const first=api.yosXlExport([],null),old=written.get(first.path);
+ const normal=mockFile.writeImage;
+ mockFile.writeImage=(p,img)=>{written.set(p,img);throw Error('disk full')};
+ try{assert.throws(()=>api.yosXlExport([],null),/disk full/)}
+ finally{mockFile.writeImage=normal}
+ assert.equal(written.get(first.path),old);
+ assert.equal(written.has(first.path.replace('.png','.previous.png')),false);
+});
+test('daily task is not shown before its first source day; fictional events stay hidden',()=>{
+ const earlier=new Date('2026-11-22T12:00:00+09:00');
+ assert.deepEqual(api.yosXlRows([t('新しい習慣','2026-11-23T16:00:00+09:00','2026-11-23T16:30:00+09:00')],null,earlier).rows,[]);
+ const p=api.yosXlRows([],{allDayDays:{'2026-11-24':['YOS-TEST-fixture','本当の予定']}},now);
+ assert.deepEqual(p.rows.map(x=>x.title),['本当の予定']);
 });
 test('fails without platform APIs without altering existing plan or network',()=>{
  const noPlatform=new Function(code+';return yosXlExport;')();
