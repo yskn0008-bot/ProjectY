@@ -61,10 +61,10 @@ test('only approved routines and 2026-11-23 ideal-day entries are direct-importe
  const excluded=row('2026-11-23T06:55:00Z','2026-11-23T07:10:00Z','未承認の理想タスク','9'.repeat(32),'yos-daystream-ideal-20261123-unapproved');
  const projected=[approved,calendar,ordinary,meal,journal,free,excluded].map(r=>a.project(r));
  assert.deepEqual([...a.nativeDirectRows(projected)].map(x=>[x.title,x.s,x.d]),[
-  ['歯磨き',870,5],
   ['起床後の食事・Clarity記録',910,20],
   ['YOS JOURNAL｜3記事を読む',930,10],
-  ['自由時間｜休息・好きなこと',940,15]
+  ['自由時間｜休息・好きなこと',940,15],
+  ['歯磨き',870,5]
  ]);
  assert.equal(projected.length,7,'nonapproved sources remain in the full Notion snapshot');
 });
