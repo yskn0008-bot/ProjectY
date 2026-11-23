@@ -109,6 +109,8 @@ async function readSource(kind){
    {timestamp:'created_time',created_time:{on_or_after:new Date(from).toISOString()}},
    {timestamp:'created_time',created_time:{before:new Date(to).toISOString()}}
   ]};
+  // Pace Notion bulk reads to respect the ~3 requests/sec API limit.
+  await new Promise(resolve=>Timer.schedule(0.4,false,resolve));
   const page=checkPage(await queryPage({page_size:100,filter}));
   if(!page.has_more){
    collect(page.results);
