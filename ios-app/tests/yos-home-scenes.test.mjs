@@ -8,7 +8,9 @@ const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-insta
 const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
 const program=new AsyncFunction('args','Keychain','Script','Request','importModule','Timer','WebView',source);
 const key='yos.home-scenes.presets.v1';
-const blank=()=>({schema:1,departure:{tv:'keep',light:'keep',ac:'keep',floor:'keep'},arrival:{tv:'keep',light:'keep',ac:'keep',floor:'keep'}});
+const row=()=>({tv:'keep',light:'keep',ac:'keep',floor:'keep'});
+const blank=()=>({schema:1,departure:row(),arrival:row(),sleep:row(),wake:row(),night:row()});
+const legacyBlank=()=>({schema:1,departure:row(),arrival:row()});
 function harness(options={}){
   const data=new Map(),events=[],outputs=[],webs=[];
   if(options.prefs!==undefined)data.set(key,typeof options.prefs==='string'?options.prefs:JSON.stringify(options.prefs));
@@ -94,16 +96,18 @@ test('malformed settings fail closed without touching devices',async()=>{
   const h=harness({prefs:'{"schema":2}'});await assert.rejects(h.execute('外出'));
   assert.deepEqual(h.events,[]);
 });
-test('editor displays both modes and saves without dispatching device commands',async()=>{
+test('editor displays five scenes and saves without dispatching device commands',async()=>{
   const h=harness();await h.execute('');
   assert.equal(h.webs.length,1);
-  assert.match(h.webs[0].html,/>外出<\/button>/);
+  for(const mode of ['外出','帰宅','就寝','起床','夜'])assert.match(h.webs[0].html,new RegExp('>'+mode+'<\\/button>'));
   assert.match(h.webs[0].html,/フロアランプ/);
-  const p=blank();p.departure.tv='off';p.arrival.ac='on';
+  const p=blank();p.departure.tv='off';p.arrival.ac='on';p.sleep.light='off';p.wake.floor='on';p.night.ac='keep';
   const accepted=h.webs[0].shouldAllowRequest({url:'https://yos-scenes.local/__save?value='+encodeURIComponent(JSON.stringify(p))});
   assert.equal(accepted,false);
   assert.equal(JSON.parse(h.data.get(key)).departure.tv,'off');
   assert.equal(JSON.parse(h.data.get(key)).arrival.ac,'on');
+  assert.equal(JSON.parse(h.data.get(key)).sleep.light,'off');
+  assert.equal(JSON.parse(h.data.get(key)).wake.floor,'on');
   assert.deepEqual(h.events,[]);
 });
 test('compact one-screen design has only mode, four appliance rows and save',async()=>{
@@ -116,6 +120,10 @@ test('compact one-screen design has only mode, four appliance rows and save',asy
   assert.match(html,/<nav class="tabs"/);
   assert.match(html,/>外出<\/button>/);
   assert.match(html,/>帰宅<\/button>/);
+  assert.match(html,/>就寝<\/button>/);
+  assert.match(html,/>起床<\/button>/);
+  assert.match(html,/>夜<\/button>/);
+  assert.equal((html.match(/data-mode="(?:departure|arrival|sleep|wake|night)"/g)||[]).length,5);
   assert.match(html,/id="devices"/);
   assert.match(html,/aria-label="家電4台の動作設定"/);
   assert.match(html,/>設定を保存<\/button>/);
@@ -133,4 +141,73 @@ test('compact one-screen design has only mode, four appliance rows and save',asy
   assert.ok(embedded);
   assert.doesNotThrow(()=>new Function(embedded[1]));
   assert.deepEqual(h.events,[]);
+});
+
+test('all five scene names and aliases route to independent plans',async()=>{
+  const names=[['外出','departure'],['departure','departure'],['帰宅','arrival'],['return','arrival'],['就寝','sleep'],['bedtime','sleep'],['起床','wake'],['morning','wake'],['夜','night'],['night','night']];
+  for(const [alias,mode] of names){
+    const p=blank();p[mode].tv='off';
+    const h=harness({prefs:p,tvStatus:'active'});
+    await h.execute(alias);
+    assert.equal(h.outputs[0].scene,mode);
+    assert.equal(h.events.filter(e=>e.name==='tv'&&e.method==='setPowerStatus').length,1);
+    assert.equal(h.events.filter(e=>e.name==='ac'||e.name==='light'||e.name==='tapo').length,0);
+  }
+});
+test('newly added sleep, wake and night start all-keep, with no appliance commands',async()=>{
+  for(const mode of ['就寝','起床','夜']){
+    const h=harness();
+    await h.execute(mode);
+    assert.deepEqual(h.events,[]);
+    assert.deepEqual(h.outputs[0].results.map(x=>x.status),['維持','維持','維持','維持']);
+  }
+});
+test('legacy two-scene settings are read without mutation, then explicitly saved with five scenes',async()=>{
+  const old=legacyBlank();old.departure.tv='off';old.arrival.ac='on';
+  const h=harness({prefs:old,tvStatus:'active'});
+  const exactOriginal=h.data.get(key);
+  await h.execute('起床');
+  assert.deepEqual(h.events,[],'migrated wake is all-keep');
+  assert.equal(h.data.get(key),exactOriginal,'read must not rewrite existing preferences');
+  await h.execute('外出');
+  assert.equal(h.events.filter(x=>x.name==='tv'&&x.method==='setPowerStatus').length,1);
+  await h.execute('');
+  const html=h.webs.at(-1).html;
+  for(const mode of ['departure','arrival','sleep','wake','night'])assert.match(html,new RegExp('"'+mode+'":\\{'));
+  const newPrefs=blank();newPrefs.departure.tv='off';newPrefs.arrival.ac='on';newPrefs.sleep.light='off';
+  h.webs.at(-1).shouldAllowRequest({url:'https://yos-scenes.local/__save?value='+encodeURIComponent(JSON.stringify(newPrefs))});
+  const saved=JSON.parse(h.data.get(key));
+  assert.equal(saved.departure.tv,'off');
+  assert.equal(saved.arrival.ac,'on');
+  assert.equal(saved.sleep.light,'off');
+  assert.equal(saved.wake.floor,'keep');
+});
+test('different sleep, wake and night settings never leak between scenes',async()=>{
+  const p=blank();p.sleep.tv='off';p.wake.floor='on';p.night.light='on';
+  for(const [mode,expectedName] of [['就寝','tv'],['起床','tapo'],['夜','light']]){
+    const h=harness({prefs:p,tvStatus:'active',floorOn:false});
+    await h.execute(mode);
+    const significant=h.events.filter(x=>x.name==='tv'&&x.method==='setPowerStatus'||x.name==='light'||x.name==='tapo'&&x.method==='set_device_info');
+    assert.equal(significant.length,1);
+    assert.equal(significant[0].name,expectedName);
+    assert.equal(h.outputs[0].results.filter(r=>r.choice!=='keep').length,1);
+  }
+});
+test('unrecognized parameter and invalid new-mode setting fail closed without sending commands',async()=>{
+  const h=harness();await assert.rejects(h.execute('外泊'));assert.deepEqual(h.events,[]);
+  const broken=blank();broken.sleep.ac='toggle';
+  const bad=harness({prefs:broken});
+  await assert.rejects(bad.execute('外出'));
+  assert.deepEqual(bad.events,[],'invalid new-scene preferences must stop even legacy scene');
+  const old=legacyBlank();old.departure.tv='on';delete old.arrival;
+  const badLegacy=harness({prefs:old});
+  await assert.rejects(badLegacy.execute('夜'));
+  assert.deepEqual(badLegacy.events,[]);
+});
+test('editor does not execute appliance commands even if all five scenes contain on/off',async()=>{
+  const p=blank();for(const mode of ['departure','arrival','sleep','wake','night'])for(const device of ['tv','light','ac','floor'])p[mode][device]='on';
+  const h=harness({prefs:p});await h.execute('edit');
+  assert.deepEqual(h.events,[]);
+  assert.equal(h.webs.length,1);
+  assert.match(h.webs[0].html,/aria-label="シーンの切り替え"/);
 });
