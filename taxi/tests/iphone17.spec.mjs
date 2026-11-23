@@ -904,3 +904,74 @@ test('Taxi scheduled evidence: unknown source publication date is not a failed r
  await expect(page.locator('#feed-meta')).not.toContainText('一部の公式情報を取得できませんでした');
  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
 });
+
+
+test('field report: tap, reload, duplicate guard and one-item undo on simulated iPhone', async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-23T20:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#status-btn')).toBeVisible();
+  // Use the same real UI route that creates a confirmed local shift, not a mocked API.
+  await page.locator('#status-btn').click();
+  await page.locator('#modal-actions button.primary').click();
+  await page.locator('[data-page="strategy"]').click();
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
+  await page.locator('#field-open').click();
+  await expect(page.locator('#field-layer')).toBeVisible();
+  await page.locator('[data-observation="go_none"]').click();
+  await expect(page.locator('#field-layer')).toBeHidden();
+  await expect(page.locator('#field-summary')).toContainText('GO反応なし');
+  const readStored=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('yos-taxi-field-reports-v1')));
+  expect((await readStored()).entries).toHaveLength(1);
+  await page.locator('#field-open').click();
+  await page.locator('[data-observation="go_none"]').click();
+  expect((await readStored()).entries).toHaveLength(1);
+  await page.locator('#field-close').click();
+  // Changing the observed fact creates a second event, not a fabricated recommendation.
+  await page.locator('#field-open').click();
+  await page.locator('[data-observation="queue_still"]').click();
+  expect((await readStored()).entries).toHaveLength(2);
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
+  // Reload must retain local observations, and undo must not cascade to older observations.
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="strategy"]').click();
+  await expect(page.locator('#field-summary')).toContainText('待機列が動かない');
+  await page.locator('#field-open').click();
+  await page.locator('#field-undo').click();
+  const audit=await readStored();
+  expect(audit.entries).toHaveLength(2);
+  expect(audit.entries[1].voidedAt).toBeTruthy();
+  expect(audit.entries[0].voidedAt).toBeUndefined();
+  await expect(page.locator('#field-undo')).toBeDisabled();
+  await expect(page.locator('#field-last')).toContainText('GO反応なし');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="strategy"]').click();
+  await page.locator('#field-open').click();
+  await expect(page.locator('#field-undo')).toBeDisabled();
+  expect((await readStored()).entries).toHaveLength(2);
+});
+
+test('field report: narrow viewports keep text and every tap target accessible',async ({page})=>{
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="strategy"]').click();
+  await page.locator('#field-open').click();
+  await expect(page.locator('#field-layer')).toBeVisible();
+  for(const width of [320,375,390,402]){
+    await page.setViewportSize({width,height:700});
+    const layout=await page.evaluate(()=>{
+      const sheet=document.querySelector('.field-sheet'),buttons=[...document.querySelectorAll('.field-choice,.field-close,.field-undo')];
+      const rect=sheet.getBoundingClientRect();
+      return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,
+        sheet:{left:rect.left,right:rect.right,width:rect.width},
+        buttons:buttons.map(el=>({label:el.textContent.trim(),width:el.getBoundingClientRect().width,
+          height:el.getBoundingClientRect().height,overflow:el.scrollWidth>el.clientWidth+1}))};
+    });
+    expect(layout.documentWidth,'horizontal overflow at '+width).toBeLessThanOrEqual(layout.viewport);
+    expect(layout.sheet.left,'left clipping at '+width).toBeGreaterThanOrEqual(-1);
+    expect(layout.sheet.right,'right clipping at '+width).toBeLessThanOrEqual(layout.viewport+1);
+    for(const b of layout.buttons){
+      expect(b.width,b.label+' tap width at '+width).toBeGreaterThanOrEqual(44);
+      expect(b.height,b.label+' tap height at '+width).toBeGreaterThanOrEqual(44);
+      expect(b.overflow,b.label+' text overflow at '+width).toBe(false);
+    }
+  }
+});
