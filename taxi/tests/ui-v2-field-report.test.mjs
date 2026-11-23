@@ -126,3 +126,61 @@ test('observations never invent a recommendation, GO data feed or actual taxi su
   assert.equal(r.list().length,2);
   assert.ok(r.list().every(x=>x.source==='manual-tap'));
 });
+
+
+test('YOS handoff includes only confirmed local manual reports, with no network call',()=>{
+  const e=env(),r=e.window.YOSTaxiPreview.fieldReport,old=e.store.get(OLD);
+  r.record('go_none');e.clock.now+=60000;r.record('supply_many');
+  const saved=e.store.get(FIELD);
+  const result=r.prepareYosRequest();
+  assert.equal(result.status,'prepared-not-sent');
+  assert.equal(result.sent,false);
+  assert.equal(result.source,'manual-tap');
+  assert.deepEqual(Array.from(result.eventsUsed),JSON.parse(saved).entries.map(x=>x.id));
+  assert.match(result.request.userText,/GO反応なし/);
+  assert.match(result.request.userText,/空車が多い/);
+  assert.match(result.request.userText,/本人による手動タップ/);
+  assert.match(result.request.userText,/現在地：未確認/);
+  assert.match(result.request.userText,/未判定/);
+  assert.doesNotMatch(result.request.userText,/¥|回送先：/);
+  assert.equal(e.store.get(FIELD),saved);
+  assert.equal(e.store.get(OLD),old);
+  assert.equal(e.store.get('yos-taxi-ops-v1'),'keep-legacy');
+});
+test('YOS handoff never includes canceled reports or fabricated location',()=>{
+  const e=env(),r=e.window.YOSTaxiPreview.fieldReport;
+  r.record('go_yes');e.clock.now+=5000;r.record('queue_still');r.undo();
+  const result=r.prepareYosRequest();
+  assert.equal(result.status,'prepared-not-sent');
+  assert.match(result.request.userText,/GO反応あり/);
+  assert.doesNotMatch(result.request.userText,/待機列が動かない/);
+  assert.match(result.request.userText,/現在地：未確認/);
+});
+test('YOS handoff fails closed without a fresh observation or confirmed shift',()=>{
+  const inactive=env({ledger:null}).window.YOSTaxiPreview.fieldReport.prepareYosRequest();
+  assert.equal(inactive.status,'shift-unconfirmed');assert.equal(inactive.request,null);
+  const noReport=env().window.YOSTaxiPreview.fieldReport.prepareYosRequest();
+  assert.equal(noReport.status,'no-fresh-facts');assert.equal(noReport.request,null);
+  const e=env(),r=e.window.YOSTaxiPreview.fieldReport;
+  r.record('radio_none');e.clock.now+=31*60000;
+  const stale=r.prepareYosRequest();
+  assert.equal(stale.status,'no-fresh-facts');assert.equal(stale.request,null);
+});
+test('YOS handoff rejects corrupt storage and excludes another shift event',()=>{
+  const bad=env({field:'{broken'}).window.YOSTaxiPreview.fieldReport.prepareYosRequest();
+  assert.equal(bad.status,'storage-error');assert.equal(bad.request,null);
+  const previous=JSON.stringify({version:1,entries:[{id:'past',businessDate:'2026-11-22',shiftStart:'2026-11-22T17:00:00+09:00',at:'2026-11-23T19:59:00+09:00',kind:'go_none',source:'manual-tap',locationStatus:'unverified'}]});
+  const shifted=env({field:previous}).window.YOSTaxiPreview.fieldReport.prepareYosRequest();
+  assert.equal(shifted.status,'no-fresh-facts');
+});
+test('YOS handoff uses the explicitly started wait timer, not last dropoff time',()=>{
+  const e=env(),r=e.window.YOSTaxiPreview.fieldReport;
+  r.record('go_none');e.clock.now+=3*60000;
+  const before=r.prepareYosRequest().request.userText;
+  assert.match(before,/正確な待機開始時刻：未確認/);
+  assert.equal(e.window.YOSTaxiPreview.waitClock.start(),true);
+  e.clock.now+=5*60000;
+  const after=r.prepareYosRequest().request.userText;
+  assert.match(after,/端末で開始を記録した待機時間：5分/);
+  assert.doesNotMatch(after,/正確な待機開始時刻：未確認/);
+});
