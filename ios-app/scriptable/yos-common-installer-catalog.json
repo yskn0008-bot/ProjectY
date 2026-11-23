@@ -52,6 +52,13 @@
       "sha256": "ee8959104a4d239b8b277fa368824a8810a03e682183a18d95b90dd99fd64d9b"
     },
     {
+      "id": "remote-power-toggle",
+      "name": "YOS Remote Power Toggle",
+      "path": "ios-app/scriptable/remote-widgets/YOS Remote Power Toggle.js",
+      "commit": "3aa2865dbb1c32c178477e8c8032f0d692f8b7ca",
+      "sha256": "88896201c7204b61f614ef47c6d3f50c6b6155676547b8f8bfbb23809b4547b3"
+    },
+    {
       "id": "tapo-h110-core",
       "name": "YOS Tapo H110 Core",
       "path": "ios-app/scriptable/remote-widgets/YOS Tapo H110 Core.js",
