@@ -8,6 +8,9 @@
 #include 'actions/media'
 #include 'actions/shortcuts'
 
+// Optional folder is omitted; missing history must not stop first-run use.
+action 'documentpicker.open' getClarityHistory(text path: 'WFGetFilePath', bool notFoundError: 'WFFileErrorIfNotFound')
+
 /*
  * YOS Clarity native input only.
  * Standalone new shortcut. Never changes existing Clarity Text/Share/Next.
@@ -23,7 +26,7 @@ menu "Clarity｜入力方法" {
         @rawInput = "{typed}"
     item "履歴から選択":
         @historyMode = true
-        const existing = getFile("Clarity Input History.txt", , false)
+        const existing = getClarityHistory("Clarity Input History.txt", false)
         if !existing {
             alert("まだ履歴がありません。最初に文字入力をしてください。", "Clarity 入力")
             stop()
@@ -58,7 +61,7 @@ if !content {
 // Line-based search history; never writes to existing Clarity Inbox or ledger.
 // Collapse newlines to keep one capture per history row.
 const row = replaceText("\n", " ", content)
-const storedFile = getFile("Clarity Input History.txt", , false)
+const storedFile = getClarityHistory("Clarity Input History.txt", false)
 @oldText = ""
 if storedFile {
     const old = getText(storedFile)
