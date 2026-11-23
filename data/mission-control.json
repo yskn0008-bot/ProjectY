@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T02:07:55+09:00",
+  "updated_at": "2026-11-24T02:09:06+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-23T05:39:00Z"
+    },
+    {
+      "id": "github-pr-870",
+      "title": "PR #870 BRAVIA｜4台リモコン保護・画質ワンタップ／音声／アプリ／HDMI3クイック操作 TEST",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/870",
+      "updated_at": "2026-11-19T16:53:18Z"
     },
     {
       "id": "github-pr-878",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-23T16:49:51Z"
     },
     {
-      "id": "github-pr-910",
-      "title": "PR #910 YOS Sleep｜家電を動かさず睡眠集中モードとSleep Cycleを開始する準備",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/910",
-      "updated_at": "2026-11-23T17:06:40Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T17:06:49Z"
+      "updated_at": "2026-11-23T17:08:21Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-ea7d93d0c141",
+      "title": "Merge PR #910: safe focus-only sleep without appliance actions",
+      "completed_at": "2026-11-23T17:08:31Z",
+      "result": "GitHub mainへ反映（ea7d93d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ea7d93d0c1419d74dd7f1f208031d2a6518b0efc"
+    },
+    {
+      "id": "github-commit-036efa42b1fc",
+      "title": "test(installer): enforce real manual edit guard for any Sleep Scene version",
+      "completed_at": "2026-11-23T17:06:18Z",
+      "result": "GitHub mainへ反映（036efa4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/036efa42b1fcfda7079e3aaf7bcc74f0e93bf549"
+    },
+    {
       "id": "github-commit-c6f603e45f5a",
       "title": "fix(journal): show five headlines before Widgy screenshot capture",
       "completed_at": "2026-11-23T17:02:12Z",
@@ -222,32 +236,18 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c6f603e45f5a6917d8b15eebdeaa494d7e4063fc"
     },
     {
-      "id": "github-commit-f5508b1468ef",
-      "title": "Merge PR #908: YOS Lists cursor-free Notion Tasks loading",
-      "completed_at": "2026-11-23T16:52:01Z",
-      "result": "GitHub mainへ反映（f5508b1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f5508b1468efacfd52953eee89136674e2292b96"
+      "id": "github-commit-f9d47ad6510c",
+      "title": "test(sleep): preserve floor-mode coverage after focus-only guard refactor",
+      "completed_at": "2026-11-23T17:00:14Z",
+      "result": "GitHub mainへ反映（f9d47ad）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f9d47ad6510c6494876521bbb5b1abf00ee36c8f"
     },
     {
-      "id": "github-commit-053221d8a029",
-      "title": "Merge latest main into PR #908, retaining all existing installer targets and applying only YOS Lists cursor fix",
-      "completed_at": "2026-11-23T16:49:39Z",
-      "result": "GitHub mainへ反映（053221d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/053221d8a029c6386061a7b5f170180f2d5bde0a"
-    },
-    {
-      "id": "github-commit-412befe0399c",
-      "title": "feat(remote): add safe one-button light and AC toggle (#907)",
-      "completed_at": "2026-11-23T16:47:56Z",
-      "result": "GitHub mainへ反映（412befe）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/412befe0399ca57703c7fa81a1843b649849b41b"
-    },
-    {
-      "id": "github-commit-e3281fcc0f4c",
-      "title": "Merge PR #906: restore DAYSTREAM synced task moves and category colors",
-      "completed_at": "2026-11-23T16:45:06Z",
-      "result": "GitHub mainへ反映（e3281fc）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e3281fcc0f4c2bb1907530df7acf441fae1efb26"
+      "id": "github-commit-c479616a558f",
+      "title": "merge(main): preserve current installer targets while integrating sleep Focus guard",
+      "completed_at": "2026-11-23T16:59:04Z",
+      "result": "GitHub mainへ反映（c479616）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c479616a558f3b19d799963dc01b7683d2a819c2"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T02:07:55+09:00",
+      "last_update": "2026-11-24T02:09:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 72件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T02:07:55+09:00",
+      "last_update": "2026-11-24T02:09:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T02:07:55+09:00",
+      "last_update": "2026-11-24T02:09:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6d827334806ad47f447e80186643041a899316b3a21dee265fcb4f2bf181750d"
+  "github_snapshot_hash": "1b44b6492faff3d92a49746cd71b0b37aa39c11283d5ef93b0b23f785584545d"
 }
