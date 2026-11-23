@@ -235,6 +235,34 @@
 .strategy-foot{width:100%;text-align:left;font:inherit;cursor:pointer}
 .strategy-foot:focus-visible{outline:2px solid #fff5a9;outline-offset:2px}
 .modal.m100-open .sheet p{font-size:15px;line-height:1.7;white-space:pre-line}
+
+/* Strategy: legibility takes priority over the former no-scroll layout. */
+.view.strategy{overflow-y:auto;overflow-x:hidden;justify-content:flex-start;overscroll-behavior:contain;padding-bottom:calc(14px + var(--safe-bottom))}
+.view.strategy .strategy-action{--tone:#afc0cf;flex:0 0 auto;min-width:0;padding:15px;display:flex;flex-direction:column;gap:7px;border:1px solid var(--tone);border-radius:17px;background:linear-gradient(125deg,#1b3040,#0c1b2e)}
+.strategy-action[data-decision="wait"]{--tone:#51DDBC}.strategy-action[data-decision="cruise"]{--tone:#F4BC55}.strategy-action[data-decision="move"]{--tone:#85AFFC}
+.strategy-action .decision-kicker{color:var(--tone);font-size:clamp(13px,3.6vw,16px);font-weight:900}
+.view.strategy .strategy-action strong{color:var(--tone);font-size:clamp(26px,7.5vw,34px);line-height:1.2}
+.view.strategy .strategy-action p{margin:0;font-size:clamp(13px,3.6vw,16px);line-height:1.45;overflow-wrap:anywhere}
+.view.strategy .wait-card{flex:0 0 auto;min-width:0;padding:14px;display:flex;flex-direction:column;gap:8px}
+.wait-card .wait-caption{color:#cfe7fa;font-size:clamp(13px,3.6vw,16px);font-weight:900}
+.wait-card #wait-next{font-size:clamp(22px,6.5vw,30px);line-height:1.25;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.wait-card #wait-guidance{font-size:clamp(13px,3.5vw,15px);line-height:1.45;margin:0}
+.wait-card .wait-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.wait-card #wait-started{flex:1 1 150px;color:#bbd6e9;font-size:clamp(12px,3.3vw,14px)}
+.wait-card #wait-toggle{min-height:44px;min-width:126px;padding:8px 12px;border:1px solid #86c6e5;border-radius:11px;background:#174463;color:white;font-weight:900;font-size:clamp(13px,3.5vw,16px)}
+.wait-card #wait-toggle[data-running="true"]{background:#374b59;border-color:#afc0cd}
+.wait-card #wait-toggle:disabled{opacity:.5}
+.view.strategy .strategy-evidence{flex:0 0 auto;border:1px solid #395b75;border-radius:12px;background:#092238}
+.strategy-evidence summary{min-height:44px;padding:11px 13px;cursor:pointer;font-size:clamp(13px,3.6vw,15px);font-weight:850}
+.strategy-evidence .evidence-body{padding:0 13px 13px;font-size:clamp(12px,3.2vw,14px);line-height:1.6}
+.strategy-evidence .evidence-body p{margin:5px 0;overflow-wrap:anywhere}
+.view.strategy .section-head{flex:0 0 auto;min-height:25px;margin-top:5px}
+.view.strategy .strat-list{flex:0 0 auto;min-height:0;gap:5px}
+.view.strategy .strat-row{flex:0 0 auto;min-height:44px;padding:8px 10px}
+.view.strategy .strat-row b{font-size:clamp(14px,3.9vw,17px);white-space:normal;overflow:visible}
+.view.strategy .strat-row small{display:block;white-space:normal;line-height:1.4;font-size:clamp(11px,3.1vw,13px)}
+.view.strategy .strategy-foot{flex:0 0 auto;min-height:51px;padding:8px 12px}
+@media(max-width:350px){.view.strategy .strategy-action,.view.strategy .wait-card{padding:11px}.wait-card #wait-toggle{width:100%}}
 </style>
 </head>
 <body>
@@ -271,13 +299,22 @@
 <div class="footer-card"><svg><use href="#icon-info"/></svg><span id="last-reflected">日報の最終反映：なし</span><i></i><svg><use href="#icon-link"/></svg><span id="sync-status">Notion未接続</span></div>
 </main>
 <main class="view strategy" id="strategy-view" aria-label="運行戦略画面">
-<section class="intro"><small>◎ 今夜の基本戦略・検証中</small><strong id="strategy-main">松山・久茂地の需要を検証</strong><p id="strategy-detail">降車後の次客を重視。現地需要は未確認。</p></section>
-<div class="section-head"><svg><use href="#icon-clock"/></svg>17:00〜05:00｜時間帯別の戦略</div>
+<section class="strategy-action" id="strategy-action" data-decision="unknown" aria-label="現在の判断">
+<span class="decision-kicker">◎ 現在の判断｜自動推薦は未接続</span><strong id="strategy-main">◌ 未判定</strong>
+<p id="strategy-detail">現在地・配車反応・人流の確認データはありません。待つ・流す・移動は停車中に比較してください。</p>
+</section>
+<section class="panel wait-card" aria-label="待機時計">
+<span class="wait-caption">◷ 次の再判断（暫定ルール）</span><strong id="wait-next">待機開始未記録</strong>
+<p id="wait-guidance">安全に停車してから待機開始を記録してください。降車時刻からは推定しません。</p>
+<div class="wait-actions"><span id="wait-started">正確な待機開始：未記録</span><button type="button" id="wait-toggle">待機を開始</button></div>
+</section>
+<details class="strategy-evidence"><summary>根拠・取得時刻・信頼度を確認</summary><div class="evidence-body">
+<p>推薦の元データ：未取得（現在地・GO／無線・人流・競合）</p><p>データ取得時刻：なし ／ 判断の信頼度：判定不可</p>
+<p>時間帯別エリア案と5・10・15・20・30分の節目は未検証の仮説です。移動を強制する指示ではありません。待機開始はこの端末で明示記録した時刻だけを使用します。</p>
+</div></details>
+<div class="section-head"><svg><use href="#icon-clock"/></svg>17:00〜05:00｜時間帯別の仮説</div>
 <div class="strat-list"><button class="strat-row" data-strat="0"><time>17–20</time><span class="strat-copy"><b>久茂地・泉崎・旭橋</b><small>退勤・ホテル・飲食／GO・無線</small></span></button><button class="strat-row" data-strat="1"><time>20–22</time><span class="strat-copy"><b>久茂地・牧志・安里</b><small>短中距離の回転と次客獲得を重視</small></span></button><button class="strat-row" data-strat="2"><time>22–00</time><span class="strat-copy"><b>松山・久茂地・前島</b><small>深夜割増・長い付け待ちは避ける</small></span></button><button class="strat-row" data-strat="3"><time>00–02</time><span class="strat-copy"><b>松山・久茂地・若狭</b><small>帰宅需要、空車の多さに注意</small></span></button><button class="strat-row" data-strat="4"><time>02–05</time><span class="strat-copy"><b>降車地・帰庫動線</b><small>残存需要と帰庫への回送を比較</small></span></button></div>
-<div class="section-head"><svg><use href="#icon-target"/></svg>判断ルール（停車中のみ）</div>
-<div class="panel rules"><span><svg><use href="#icon-target"/></svg>5〜10分観察 → 15分で見直し</span><span><svg><use href="#icon-target"/></svg>長距離後は次客・帰路を比較</span><span><svg><use href="#icon-target"/></svg>高額客より、次の乗車までの時間を最小化</span></div>
-<button type="button" class="strategy-foot" id="m100-rule-btn" aria-label="M100営業判断の6つのルールを停車中に確認"><span>◎ M100｜営業判断の型（仮説）</span><strong>待つ・流す・移動の3択を確認 ›</strong></button>
-<div class="footer-card"><svg><use href="#icon-info"/></svg>営業実績で未検証の初期仮説。15分は強制移動の条件ではありません。</div>
+<button type="button" class="strategy-foot" id="m100-rule-btn" aria-label="M100営業判断ルールを停車中に確認"><span>◎ M100｜営業判断の型（仮説）</span><strong>判断ルールの詳細を開く ›</strong></button>
 </main>
 <main class="view history" id="history-view" aria-label="記録履歴画面"><div class="section-head">端末内｜降車・乗務記録</div><div class="panel history-sub">本画面は端末内の降車時刻を保存します。日報との自動照合・Notion保存は未接続。旧UIの記録は保持しています。</div><div id="history-list" class="history-list"></div><div class="history-controls"><button class="secondary-btn" id="export-btn">JSONバックアップを保存</button><button class="secondary-btn" id="history-info-btn">旧UIの記録を開く</button></div><div class="footer-card"><svg><use href="#icon-info"/></svg>保存先：この端末内のみ。Notion未連携</div></main>
 <main class="view analysis" id="analysis-view" aria-label="営業分析画面"><div class="section-head">確認できる数値だけを表示</div><div class="statgrid"><div class="stat"><small>降車ボタン記録</small><strong id="analysis-drops">0件</strong></div><div class="stat"><small>日報の売上</small><strong>未接続</strong></div><div class="stat"><small>実車時間率</small><strong>未計測</strong></div><div class="stat"><small>空車時間</small><strong>未計測</strong></div></div><div class="panel analysis-note">過去の紙日報に降車時刻がない場合、正確な空車時間は算出できません。新しい降車タップと、日報から得る乗車時刻・乗車番号を照合できたものだけ分析に利用します。</div><div class="panel analysis-memo">計画中：<br>① 日報写真と前回写真の差分読取<br>② 降車時刻との一意な照合<br>③ Notion正本へ認証付きの安全な登録<br>④ 30乗務の実績で那覇戦略の再校正</div><div class="footer-card"><svg><use href="#icon-info"/></svg>未確認情報を実績・確定売上として扱わない</div></main>
@@ -296,7 +333,73 @@
  const dateKey=(d=new Date())=>{const x=new Date(d.getTime()-CUTOVER*3600000);return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(x)};
  const empty=()=>({businessDate:dateKey(),shiftStart:null,shiftEnd:null,events:[],photos:[],version:1});
  const parse=()=>{try{const s=JSON.parse(localStorage.getItem(STORE)||'null');return s?.version===1&&Array.isArray(s.events)&&Array.isArray(s.photos)?s:empty()}catch{return empty()}};
- let state=parse(),selectedFile=null,toastHandle=null,modalAction=null;
+ let state=parse(),selectedFile=null,toastHandle=null;
+
+ // Only explicitly tapped wait time is known. Separate schema protects the existing shift/photo/event ledger.
+ const WAIT_STORE='yos-taxi-wait-clock-v1';
+ function loadWait(){
+   try{
+     const raw=localStorage.getItem(WAIT_STORE);
+     if(raw===null)return {record:null,error:false};
+     const w=JSON.parse(raw);
+     if(!w||w.version!==1||typeof w.businessDate!=='string'||typeof w.shiftStart!=='string'
+       ||typeof w.startedAt!=='string'||(w.endedAt!==null&&typeof w.endedAt!=='string')
+       ||!Number.isFinite(Date.parse(w.shiftStart))||!Number.isFinite(Date.parse(w.startedAt))
+       ||(w.endedAt!==null&&!Number.isFinite(Date.parse(w.endedAt))))return {record:null,error:true};
+     return {record:w,error:false};
+   }catch{return {record:null,error:true}}
+ }
+ let waitData=loadWait();
+ const waitSteps=[
+   {at:5,label:'5分観察',note:'周囲の需要・配車反応・競合を観察（仮説）'},
+   {at:10,label:'10分点検',note:'同じ場所で待つ理由を点検（仮説）'},
+   {at:15,label:'15分再判定',note:'待機継続の根拠を再確認（仮説）'},
+   {at:20,label:'20分再検討',note:'流し・移動・撤退を比較。強制移動ではありません（仮説）'},
+   {at:30,label:'30分原因確認',note:'長期待機の原因と次の需要を確認（仮説）'}
+ ];
+ function confirmedWait(now=Date.now()){
+   const w=waitData.record;
+   if(waitData.error||!w||w.endedAt||!isActive()||w.businessDate!==state.businessDate||w.shiftStart!==state.shiftStart)return null;
+   const start=Date.parse(w.startedAt),shift=Date.parse(state.shiftStart);
+   if(!Number.isFinite(start)||!Number.isFinite(shift)||start<shift||start>now+30000)return null;
+   // A later dropoff makes uninterrupted waiting impossible; never count ride time as wait.
+   if(state.events.some(e=>e.type==='dropoff'&&!e.voidedAt&&Date.parse(e.at)>=start))return null;
+   return w;
+ }
+ function waitView(now=Date.now()){
+   const w=confirmedWait(now);
+   if(!w)return {running:false,next:'待機開始未記録',note:waitData.error?'待機記録を読めません。保存内容を確認してください。':'安全に停車してから待機開始を記録してください。降車時刻からは推定しません。'};
+   const elapsed=Math.max(0,(now-Date.parse(w.startedAt))/60000),step=waitSteps.find(a=>elapsed<a.at);
+   if(!step)return {running:true,next:'30分超｜原因を確認',note:'節目は仮説です。待つ・流す・移動を停車中に再検討してください。',startedAt:w.startedAt};
+   return {running:true,next:'あと'+Math.ceil(step.at-elapsed)+'分｜'+step.label,note:step.note+'。走行中の操作・注視は禁止。',startedAt:w.startedAt};
+ }
+ function writeWait(record){
+   try{localStorage.setItem(WAIT_STORE,JSON.stringify(record));waitData={record,error:false};return true}
+   catch{toast('待機時計の保存に失敗。開始・終了は記録されていません');return false}
+ }
+ function startWait(){
+   if(waitData.error){toast('待機記録の形式が不正です。保護のため新規保存しません');return false}
+   if(!isActive()){toast('この端末で営業中と確認できる場合のみ待機を記録します');return false}
+   if(confirmedWait()){renderWait();return false} // duplicate tap
+   const record={version:1,businessDate:state.businessDate,shiftStart:state.shiftStart,startedAt:instant(),endedAt:null};
+   if(!writeWait(record))return false;
+   renderWait();toast('待機開始を端末に記録しました');return true;
+ }
+ function finishWait(reason='manual'){
+   const w=waitData.record;
+   if(waitData.error||!w||w.endedAt||w.businessDate!==state.businessDate||w.shiftStart!==state.shiftStart)return false;
+   if(!writeWait({...w,endedAt:instant(),endedReason:reason}))return false;
+   renderWait();return true;
+ }
+ function renderWait(){
+   const view=waitView(),button=$('wait-toggle');
+   $('wait-next').textContent=view.next;$('wait-guidance').textContent=view.note;
+   $('wait-started').textContent=view.running?'開始 '+time(view.startedAt,true)+'（端末で記録）':'正確な待機開始：未記録';
+   button.disabled=waitData.error||(!view.running&&!isActive());
+   button.textContent=view.running?'待機を終了':isActive()?'待機を開始':'営業中に利用';
+   button.dataset.running=String(view.running);
+ }
+
  const money=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
  const number=n=>typeof n==='number'&&Number.isFinite(n)?n:null;
  const save=s=>{try{localStorage.setItem(STORE,JSON.stringify(s));state=s;return true}catch{notify('保存失敗：端末内記録は更新されませんでした');return false}};
@@ -330,6 +433,7 @@
    const last=[...dayEvents()].reverse().find(e=>e.type==='dropoff');
    if(last&&Date.parse(at)-Date.parse(last.at)<4000){showDropoffResult('duplicate','4秒以内の連続操作を防止しました。新しい記録は追加していません。',last.at);return false}
    if(withEvent('dropoff',at,token)){
+     finishWait('dropoff');
      render();
      showDropoffResult('success','この画面の端末内に保存しました。紙の日報・Notionとは未同期です。',at);
      return true;
@@ -341,13 +445,13 @@
  const base=state.businessDate===today?structuredClone(state):{...structuredClone(state),businessDate:today,shiftStart:null,shiftEnd:null};
  if(!base.shiftStart){openSheet('営業を開始',`営業開始の時刻を端末に記録します。`,[{text:'開始する',primary:true,run:()=>{const s=structuredClone(base);s.shiftStart=instant();if(commitShift(s,'shift_start')){render();toast('営業開始を記録しました')}}}]);return}
  if(!base.shiftEnd){openSheet('営業終了',`営業終了時刻を記録します。降車ボタンの未照合件数：${drops().filter(x=>!x.matched).length}件。`,[{text:'終了する',primary:true,run:()=>{const s=structuredClone(base);s.shiftEnd=instant();if(commitShift(s,'shift_end')){render();toast('営業終了を記録しました')}}}]);return}toast('この営業日は終了済みです')}
- function commitShift(s,type){s.events.push({id:crypto.randomUUID?.()||`local-${Date.now()}`,businessDate:s.businessDate,type,at:type==='shift_start'?s.shiftStart:s.shiftEnd,matched:false});return save(s)}
+ function commitShift(s,type){s.events.push({id:crypto.randomUUID?.()||`local-${Date.now()}`,businessDate:s.businessDate,type,at:type==='shift_start'?s.shiftStart:s.shiftEnd,matched:false});const ok=save(s);if(ok&&type==='shift_end')finishWait('shift_end');return ok}
  function activeBand(d=new Date()){const h=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(d));if(h>=17&&h<22)return 0;if(h>=22||h<2)return 1;if(h>=2&&h<5)return 2;return -1}
  const advice=[['久茂地・牧志で回転','次客までの時間を重視'],['松山・久茂地の需要','同じ待ち方は15分で見直す'],['降車先の次客を確認','帰庫までの効率も比較']];
  const strategyDetail=['退勤・ホテル／GO・無線が中心','飲食移動は回転と次客の早さ','深夜割増。待機過多は避ける','帰宅需要を検証。供給過多に注意','降車後の再乗車と帰庫を比較'];
- function updatePlan(){const band=activeBand(),item=advice[band]||['次の営業に向けて需要を確認','時間帯による初期仮説・現地需要は未確認'];$('decision-text').textContent=item[0];$('decision-sub').textContent=item[1];$('strategy-main').textContent=item[0];document.querySelectorAll('[data-band]').forEach(x=>{const slot=Number(x.dataset.band);x.classList.toggle('selected',slot===band);x.classList.toggle('current',slot===(band<0?0:band))});const localHour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(new Date()));const stratSlot=localHour>=17&&localHour<20?0:localHour>=20&&localHour<22?1:localHour>=22?2:localHour<2?3:localHour>=2&&localHour<5?4:-1;document.querySelectorAll('[data-strat]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.strat)===stratSlot));$('strategy-detail').textContent=stratSlot<0?'営業時間外。次回の需要は未確認':strategyDetail[stratSlot]}
+ function updatePlan(){const band=activeBand(),item=advice[band]||['次の営業に向けて需要を確認','時間帯による初期仮説・現地需要は未確認'];$('decision-text').textContent=item[0];$('decision-sub').textContent=item[1];document.querySelectorAll('[data-band]').forEach(x=>{const slot=Number(x.dataset.band);x.classList.toggle('selected',slot===band);x.classList.toggle('current',slot===(band<0?0:band))});const localHour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(new Date()));const stratSlot=localHour>=17&&localHour<20?0:localHour>=20&&localHour<22?1:localHour>=22?2:localHour<2?3:localHour>=2&&localHour<5?4:-1;document.querySelectorAll('[data-strat]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.strat)===stratSlot));}
  function render(){const now=new Date();$('current-clock').textContent=time(now);const active=isActive(),ended=isEnded();$('status-label').textContent=active?'営業中':ended?'営業終了':'営業前';$('status-dot').className='status-dot '+(active?'':ended?'end':'off');const d=drops();$('ride-count').textContent=d.length+'件';$('pending-count').textContent=d.filter(e=>!e.matched).length+'件';$('analysis-drops').textContent=d.length+'件';$('report-clock').textContent='日報未反映';$('last-reflected').textContent='最終反映：なし（日報）';$('sync-status').textContent='Notion未接続';// Pending Notion integration: never infer a fare from a tap or metadata from a photograph.
- $('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';updatePlan();renderHistory()}
+ $('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';updatePlan();renderWait();renderHistory()}
  function renderHistory(){const list=$('history-list');list.replaceChildren();const events=dayEvents().slice().reverse();if(!events.length){const el=document.createElement('div');el.className='log';el.textContent='この営業日の記録はまだありません。';list.append(el)}events.forEach(e=>{const row=document.createElement(e.type==='dropoff'?'button':'div');if(e.type==='dropoff')row.type='button';row.className='log'+(e.voidedAt?' voided':'');const a=document.createElement('div');const title=document.createElement('b');title.textContent=e.type==='dropoff'?(e.voidedAt?'降車記録・取消済':'降車時刻'):e.type==='shift_start'?'営業開始':'営業終了';const caption=document.createElement('small');caption.textContent=' '+time(e.at,true)+' ・ '+(e.type==='dropoff'?(e.voidedAt?'取消履歴':'日報未照合'):'端末内記録');a.append(title,document.createElement('br'),caption);const b=document.createElement('span');b.className='badge';b.textContent=e.type==='dropoff'?'訂正':'端末内';row.append(a,b);if(e.type==='dropoff')row.addEventListener('click',()=>{openSheet(e.voidedAt?'降車記録を復帰':'降車記録を取り消す',`記録時刻 ${time(e.at,true)}。取り消しても履歴は削除しません。`,[{text:e.voidedAt?'取消を戻す':'記録を取消',primary:true,run:()=>{const s=structuredClone(state);const target=s.events.find(x=>x.id===e.id);if(!target)return;if(target.voidedAt)delete target.voidedAt;else target.voidedAt=instant();if(save(s)){render();toast('降車記録の状態を更新しました')}}}])});list.append(row)})}
  function navigate(page){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===page+'-view'));document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page))}
  function openSheet(title,body,actions=[]){$('modal').classList.remove('dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true;$('modal-title').textContent=title;$('modal-body').textContent=body;const area=$('modal-actions');area.replaceChildren();const cancel=document.createElement('button');cancel.textContent='閉じる';cancel.addEventListener('click',closeSheet);area.append(cancel);actions.forEach(a=>{const btn=document.createElement('button');btn.textContent=a.text;btn.classList.toggle('primary',a.primary===true);btn.addEventListener('click',()=>{closeSheet();a.run()});area.append(btn)});$('modal').classList.add('open')}
@@ -359,7 +463,7 @@
  const m100Rules=[
   '1｜降車前：次の一手を仮決め。降車先の次客・帰庫動線を考慮。',
   '2｜空車時：安全な停車場所で「待つ・流す・移動」を比較。需要が未確認なら移動先を断定しない。',
-  '3｜5分で観察、10分で点検、15分で再判断、30分で原因確認。すべて暫定の見直し目安で、強制移動ではない。',
+  '3｜5分観察、10分点検、15分再判定、20分で流し・移動・撤退を再検討、30分原因確認。暫定目安で強制移動ではない。',
   '4｜移動は、回送時間を含めても改善が見込める場合のみ。人気エリアへの無根拠な回送を避ける。',
   '5｜1乗車ではなく次客獲得までの1サイクルで比較。ロング客も歓迎し、降車後の機会を含めて評価。',
   '6｜営業後：日報の実売上・乗車数・空車時間（確認できたものだけ）を比較。30乗務を初期観察の目安にする。',
@@ -368,6 +472,7 @@
  ];
  function showM100(){openSheet('M100｜営業判断ルール',m100Rules.join('\n\n'));$('modal').classList.add('m100-open')}
  $('m100-rule-btn').addEventListener('click',showM100);
+ $('wait-toggle').addEventListener('click',()=>{if(confirmedWait())finishWait();else startWait()});
  // Shortcut widget deep-link: the action runs ONLY in the storage container that opens this URL.
  // iOS standalone PWA storage is separate from Safari; never create a new shift silently.
  function handleShortcutLink(){
@@ -408,8 +513,10 @@
    if(action==='m100'){navigate('strategy');showM100();}
  }
  $('status-btn').addEventListener('click',changeShift);$('drop-btn').addEventListener('click',()=>stampDropoff());$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
- render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan()},30000);
- window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand};
+ render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait()},15000);
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')renderWait()});
+ addEventListener('pageshow',renderWait);
+ window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand,waitClock:{get:()=>waitView(),start:startWait,stop:finishWait,refresh:renderWait}};
  if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 })();
 </script>
