@@ -44,6 +44,7 @@ try{
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),null,'preview never writes a plan');
   // Native iPhone request: release directly saves; nearby bars visibly react while moving.
   const dragCard=page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'歯磨き'});
+  await page.evaluate(()=>{window.__dragDebug=[];for(const kind of ['pointerdown','pointermove','pointerup','pointercancel','mousedown','mousemove','mouseup','dragstart'])document.addEventListener(kind,e=>window.__dragDebug.push({kind,y:e.clientY,x:e.clientX,target:e.target?.className,button:e.button,pointerId:e.pointerId}),true)});
   await dragCard.scrollIntoViewIfNeeded();
   const gripBox=await dragCard.locator('.task-drag-grip').boundingBox();
   assert.ok(gripBox,'drag grip is reachable');
@@ -53,11 +54,11 @@ try{
   await page.mouse.move(dragX,dragY-55,{steps:12});
   await page.waitForTimeout(90);
   const dragDebug=await dragCard.evaluate(el=>({active:el.classList.contains('drag-preview'),css:el.className,transform:el.style.transform,scroll:scrollY}));
-  assert.equal(dragDebug.active,true,'bar lifts under the finger: '+JSON.stringify(dragDebug));
+  assert.equal(dragDebug.active,true,'bar lifts under the finger: '+JSON.stringify({dragDebug,events:await page.evaluate(()=>window.__dragDebug)}));
   assert.ok(await page.locator('#tl .card.drag-neighbor').count()>0,'other bars react during the drag');
   await page.mouse.up();
   assert.equal(await page.locator('#moveDialog').isVisible(),false,'drop never opens placement advice');
-  assert.notEqual(await page.evaluate(()=>items.find(x=>x.t==='水を飲む').s),beforeDrag,'drop saves the new time');
+  assert.notEqual(await page.evaluate(()=>items.find(x=>x.t==='歯磨き').s),beforeDrag,'drop saves the new time');
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),null,'direct Notion drag never changes the manual plan');
   const startCard=page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'起床'});
   await startCard.locator('.task-drag-grip').click();
