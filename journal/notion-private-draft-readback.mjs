@@ -1,7 +1,8 @@
 /**
  * YOS JOURNAL private draft readback. No publisher, model, or GitHub writes.
- * Reconstructs the exact existing iPhone Scriptable J.receipts format, checks
- * two FNV digests, preserves all source content in memory only.
+ * Reconstructs legacy J.receipts (dual FNV digests) and the opt-in existing
+ * Clarity Inbox Bridge's JOURNAL-only raw transport (metadata/chunks/divider).
+ * Preserves all source content in memory only.
  * The Notion document is untrusted: its text must never be executed as a prompt,
  * logged, put in an issue/PR, or treated as publication authorization.
  */
@@ -12,6 +13,10 @@ export const API_VERSION='2025-09-03';
 const MARKER=/^\[YOS_JOURNAL_DRAFT_V1:([0-9a-f]{16}):(\d{3,5})\]$/;
 const HEADER='JOURNAL下書き・未検証・公開禁止';
 const LIMIT=12000;
+const JOURNAL_BRIDGE_LIMIT=36000;
+const JOURNAL_META=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z · YOS JOURNAL Draft · (journal:[a-z0-9_-]{8,100})$/i;
+const PRIVATE_STATE='private_unverified_never_publish';
+const validEditorial=s=>s.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1')&&s.includes('【資料と照合状況】')&&s.includes('公開不可・要審査');
 function fail(message){throw Error('JOURNAL_PRIVATE_INBOX_'+message);}
 export function digest(s){
  let a=2166136261,b=2246822519;
@@ -30,10 +35,33 @@ export function blockText(block){
 }
 export function inspectDrafts(blocks){
  if(!Array.isArray(blocks)||blocks.length>3000)fail('BLOCK_LIST_INVALID');
- let state=null;
+ let state=null,bridge=null;
+ const bridgeIds=new Set();
  const drafts=[];
  for(const block of blocks){
   const str=blockText(block);
+  if(bridge){
+   if(block?.type==='divider'){
+    if(bridge.body.length<150||!validEditorial(bridge.body))fail('UNSAFE_BRIDGE_DRAFT');
+    drafts.push({receipt:bridge.receipt,chars:bridge.body.length,content:bridge.body,
+      state:PRIVATE_STATE});
+    bridge=null;
+    continue;
+   }
+   if(str===null||str.length===0||str.length>1500)fail('BRIDGE_CHUNK_INVALID');
+   bridge.body+=str;
+   if(bridge.body.length>JOURNAL_BRIDGE_LIMIT)fail('BRIDGE_LENGTH_OVERFLOW');
+   continue;
+  }
+  if(!state&&str!==null){
+   const meta=JOURNAL_META.exec(str);
+   if(meta){
+    if(bridgeIds.has(meta[1]))fail('DUPLICATE_BRIDGE_ID');
+    bridgeIds.add(meta[1]);
+    bridge={receipt:meta[1],body:''};
+    continue;
+   }
+  }
   if(str===null){if(state)fail('NON_PARAGRAPH_INSIDE_DRAFT');continue;}
   const found=MARKER.exec(str.trim());
   if(found){
@@ -52,15 +80,14 @@ export function inspectDrafts(blocks){
   if(state.body.length>state.chars)fail('DRAFT_LENGTH_OVERFLOW');
   if(state.body.length===state.chars){
     if(digest(state.body)!==state.hash)fail('RECEIPT_DIGEST_MISMATCH');
-    if(!state.body.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1')||
-        !state.body.includes('【資料と照合状況】')||
-        !state.body.includes('公開不可・要審査'))fail('UNSAFE_DRAFT_CONTRACT');
+    if(!validEditorial(state.body))fail('UNSAFE_DRAFT_CONTRACT');
     drafts.push({receipt:state.receipt,chars:state.chars,content:state.body,
-      state:'private_unverified_never_publish'});
+      state:PRIVATE_STATE});
     state=null;
   }
  }
  if(state)fail('INCOMPLETE_LAST_DRAFT');
+ if(bridge)fail('INCOMPLETE_BRIDGE_DRAFT');
  return drafts;
 }
 export async function readPrivateInbox({token,fetcher=fetch,maxPages=30}={}){
