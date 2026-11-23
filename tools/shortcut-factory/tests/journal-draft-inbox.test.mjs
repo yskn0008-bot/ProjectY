@@ -6,16 +6,24 @@ import {runInNewContext} from 'node:vm';
 const source=readFileSync(new URL('../journal_draft_inbox_inline.js',import.meta.url),'utf8');
 const raw='【YOS_EDITORIAL_DRAFT_V1】\\n【状態: 下書き・出典独立照合待ち】\\n【記事見出し】記事の見出し\\n【本文】'+
 '未確認の内容は公開せず、必ず人間による独立検証を行う。'.repeat(10)+'\\n【公開不可・要審査】';
-function mock({input=raw,key=true,loss=false,responseBad=false,outputError=false,records,failWrite=false}={}){
- const store=records??new Map(),calls=[],outputs=[],done=[];
+function mock({input=raw,key=true,loss=false,responseBad=false,readbackLoss=false,readbackBad=false,outputError=false,records,failWrite=false}={}){
+ const store=records??new Map(),calls=[],outputs=[],done=[],blocks=new Map();
  class Request {
    constructor(url){this.url=url;this.response={statusCode:200};}
    async loadJSON(){
      calls.push({url:this.url,method:this.method,body:this.body});
      assert.ok(this.url.startsWith('https://api.notion.com/v1/'));
+     if(this.method==='GET'){
+       if(readbackLoss)throw Error('get_lost');
+       const id=this.url.split('/').at(-1);
+       const block=blocks.get(id);
+       return readbackBad&&id==='fake-1'?{...block,paragraph:{rich_text:[{type:'text',text:{content:'wrong'}}]}}:block;
+     }
      const segs=JSON.parse(this.body).children;
      if(loss)throw Error('response_lost');
-     return {results:segs.map((x,i)=>({...x,id:'fake-'+i, ...(responseBad&&i===1?{type:'divider'}:{})}))};
+     const created=segs.map((x,i)=>({...x,id:'fake-'+i, ...(responseBad&&i===1?{type:'divider'}:{})}));
+     for(const b of created)blocks.set(b.id,b);
+     return {results:created};
    }
  }
  const Keychain={contains:()=>key,get:()=>key?'ntn_test_private_token':''};
@@ -27,17 +35,19 @@ function mock({input=raw,key=true,loss=false,responseBad=false,outputError=false
  const execute=async()=>runInNewContext('(async()=>{'+source+'})()',context);
  return {execute,store,calls,outputs,done};
 }
-test('valid API reply is submitted, but not claimed as independently verified',async()=>{
- const t=mock();await t.execute();assert.match(t.outputs[0],/NOTION_SUBMITTED:NOTION_API_ACK_PENDING_READBACK/);
- assert.equal(t.calls.length,1);assert.equal(t.done.length,1);
+test('only independently GET-verified Notion content reports success',async()=>{
+ const t=mock();await t.execute();assert.match(t.outputs[0],/NOTION_VERIFIED:NOTION_INDEPENDENT_READBACK_MATCH/);
+ assert.equal(t.calls.filter(c=>c.method==='PATCH').length,1);
+ assert.ok(t.calls.some(c=>c.method==='GET'));assert.equal(t.done.length,1);
 });
 test('same draft is not retransmitted on rerun',async()=>{
- const t=mock();await t.execute();await t.execute();assert.equal(t.calls.length,1);
- assert.match(t.outputs[1],/ALREADY_SUBMITTED_CHECK_PENDING/);assert.equal(t.done.length,2);
+ const t=mock();await t.execute();await t.execute();
+ assert.equal(t.calls.filter(c=>c.method==='PATCH').length,1);
+ assert.match(t.outputs[1],/ALREADY_READBACK_VERIFIED/);assert.equal(t.done.length,2);
 });
 test('lost acknowledgement is held without blind retransmission',async()=>{
  const t=mock({loss:true});await t.execute();await t.execute();
- assert.equal(t.calls.length,1);assert.match(t.outputs[1],/PREVIOUS_RESULT_UNKNOWN/);assert.equal(t.done.length,2);
+ assert.equal(t.calls.filter(c=>c.method==='PATCH').length,1);assert.match(t.outputs[1],/PREVIOUS_RESULT_UNKNOWN/);assert.equal(t.done.length,2);
 });
 test('missing Keychain token causes no network and no receipt write',async()=>{
  const t=mock({key:false});await t.execute();assert.equal(t.calls.length,0);
@@ -45,7 +55,7 @@ test('missing Keychain token causes no network and no receipt write',async()=>{
 });
 test('malformed Notion response cannot report sent',async()=>{
  const t=mock({responseBad:true});await t.execute();await t.execute();
- assert.match(t.outputs[0],/NOTION_HELD/);assert.equal(t.calls.length,1);
+ assert.match(t.outputs[0],/NOTION_HELD/);assert.equal(t.calls.filter(c=>c.method==='PATCH').length,1);
 });
 test('failure writing receipt blocks Notion submission',async()=>{
  const t=mock({failWrite:true});await t.execute();assert.equal(t.calls.length,0);assert.equal(t.done.length,1);
@@ -60,6 +70,24 @@ test('invalid and oversize drafts are not sent',async()=>{
 });
 test('different draft content receives distinct receipts',async()=>{
  const store=new Map(),a=mock({records:store}),b=mock({records:store,input:raw.replace('記事の見出し','別の記事')});
- await a.execute();await b.execute();assert.equal(a.calls.length,1);assert.equal(b.calls.length,1);
+ await a.execute();await b.execute();assert.equal(a.calls.filter(c=>c.method==='PATCH').length,1);assert.equal(b.calls.filter(c=>c.method==='PATCH').length,1);
  assert.equal(JSON.parse(store.values().next().value).length,2);
+});
+
+test('GET outage never falsely confirms nor resubmits the draft',async()=>{
+ const t=mock({readbackLoss:true});await t.execute();await t.execute();
+ assert.match(t.outputs[0],/NOTION_PENDING:NOTION_READBACK_PENDING/);
+ assert.match(t.outputs[1],/NOTION_PENDING:NOTION_READBACK_PENDING/);
+ assert.equal(t.calls.filter(c=>c.method==='PATCH').length,1);
+});
+test('GET content mismatch never reports verified',async()=>{
+ const t=mock({readbackBad:true});await t.execute();
+ assert.match(t.outputs[0],/NOTION_PENDING:NOTION_READBACK_PENDING/);
+ assert.equal(t.calls.filter(c=>c.method==='PATCH').length,1);
+});
+test('legacy submitted receipt without block IDs stays pending without retransmission',async()=>{
+ const t=mock();
+ const digest='[YOS_JOURNAL_DRAFT_V1:0000000000000000:123]';
+ t.store.set('YOS JOURNAL Draft Receipt Cache.json',JSON.stringify([{id:digest,status:'submitted'}]));
+ await t.execute();assert.equal(t.calls.filter(c=>c.method==='PATCH').length,1);
 });
