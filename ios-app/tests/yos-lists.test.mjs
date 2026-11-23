@@ -250,3 +250,62 @@ test('compact row layout keeps high-value fields and an independent 44px complet
  assert.doesNotThrow(()=>new Function(html.split('<script>')[1].split('</script>')[0]));
  assert.equal(h.writes,0,'compact display does not mutate Notion');
 });
+
+test('tap-to-complete row uses full width, preserves details control and purchase button',async()=>{
+ const css=source.slice(source.indexOf('<style>'),source.indexOf('</style>')+8);
+ assert.match(css,/\.item--task\{display:block;position:relative/);
+ assert.match(css,/\.item-complete\{[^}]*width:100%;min-height:44px/);
+ assert.match(css,/\.item--task \.item-details summary\{[^}]*min-height:44px/);
+ assert.match(css,/#undo\{[^}]*min-height:44px/);
+ assert.match(source,/<button type="button" class="item-complete" data-action="complete"/);
+ assert.match(source,/e\.target\.closest\('\.item-details'\)/,'detail chevron never completes');
+ assert.match(source,/class="item-details"><summary aria-label="詳細を表示/);
+ assert.doesNotMatch(source,/<button class="action" data-action="complete"/,'old separate task completion button is removed');
+ assert.match(source,/<button class="action" data-action="purchase"/,'Shopping purchase UI preserved');
+ const h=await harness();
+ const html=h.app.htmlWithData(await h.app.readAll());
+ assert.match(html,/id="undo"/);
+ assert.doesNotThrow(()=>new Function(html.split('<script>')[1].split('</script>')[0]));
+ assert.equal(h.writes,0);
+});
+test('single tap completion is readback-verified and undo restores original Task state',async()=>{
+ const h=await harness();
+ const data=await h.app.readAll();
+ const initial=data.tasks[0];
+ const completed=await h.app.perform({action:'complete',kind:'task',id:initial.id,expected:initial.updatedAt});
+ assert.equal(completed.item.state,'完了');
+ assert.equal(completed.canUndo,true);
+ assert.equal(h.writes,1);
+ const restored=await h.app.perform({action:'undo-complete',kind:'task',id:completed.item.id,expected:completed.item.updatedAt});
+ assert.equal(restored.item.state,'次にやる');
+ assert.equal(h.writes,2);
+ await assert.rejects(()=>h.app.perform({action:'undo-complete',kind:'task',id:completed.item.id,expected:completed.item.updatedAt}),/元に戻せる/);
+ assert.equal(h.writes,2);
+});
+test('undo rejects forged target and changed Notion state without a PATCH',async()=>{
+ const h=await harness();
+ const task=(await h.app.readAll()).tasks[0];
+ const done=await h.app.perform({action:'complete',kind:'task',id:task.id,expected:task.updatedAt});
+ await assert.rejects(()=>h.app.perform({action:'undo-complete',kind:'task',id:ids.shopping,expected:done.item.updatedAt}),/元に戻せる/);
+ h.records[ids.task].last_edited_time='2026-11-23T14:02:00.000Z';
+ await assert.rejects(()=>h.app.perform({action:'undo-complete',kind:'task',id:task.id,expected:done.item.updatedAt}),/他の画面/);
+ assert.equal(h.writes,1);
+});
+test('priority/overdue/date order is deterministic and drag-and-drop is not pretended',()=>{
+ assert.match(source,/const overdue=x=>x\.due&&x\.due\.slice\(0,10\)</);
+ assert.match(source,/const order=\(a,b\)=>Number\(overdue\(b\)\)-Number\(overdue\(a\)\)/);
+ assert.match(source,/items\.sort\(\(a,b\)=>a\.kind==='task'&&b\.kind==='task'\?order\(a,b\)/);
+ assert.doesNotMatch(source,/draggable="true"|data-drag-handle|dragstart/);
+});
+
+test('undo restores a waiting Task to waiting, not an invented default state',async()=>{
+ const h=await harness();
+ h.records[ids.task].properties['状態']={select:{name:'待ち'}};
+ const original=(await h.app.readAll()).tasks[0];
+ assert.equal(original.state,'待ち');
+ const done=await h.app.perform({action:'complete',kind:'task',id:original.id,expected:original.updatedAt});
+ assert.equal(done.item.state,'完了');
+ const undone=await h.app.perform({action:'undo-complete',kind:'task',id:done.item.id,expected:done.item.updatedAt});
+ assert.equal(undone.item.state,'待ち');
+ assert.equal(h.writes,2);
+});
