@@ -1013,6 +1013,47 @@ test('YOS field consultation requires explicit tap and keeps the recommendation 
 });
 
 
+test('strategy research displays only fresh official-source evidence, never taxi-demand recommendations',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T12:00:00+09:00'));
+  let requests=0;
+  await page.route('**/research-feed.json?*',async route=>{
+    requests++;
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      schema:1,generatedAt:'2026-11-24T11:30:00+09:00',sources:[
+        {id:'jma',name:'気象庁｜沖縄本島中南部',status:'ok',summary:'くもり、時々雨'},
+        {id:'naha_rss',name:'那覇市｜公式更新',status:'ok',summary:'対象見出し0件'},
+        {id:'cruise_catalog',name:'沖縄県｜クルーズ',status:'error',summary:'取得失敗'}
+      ]})});
+  });
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="strategy"]').click();
+  expect(requests).toBe(0); // no unrequested network call
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
+  await page.locator('#strategy-research-load').click();
+  await expect(page.locator('#strategy-research-status')).toContainText('公式情報 2件取得');
+  await expect(page.locator('#strategy-research-sources')).toContainText('くもり、時々雨');
+  await expect(page.locator('#strategy-research-sources')).toContainText('未取得');
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
+  expect(requests).toBe(1);
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
+  await page.clock.setFixedTime(new Date('2026-11-24T15:30:00+09:00'));
+  await page.waitForTimeout(250);
+  await expect(page.locator('#strategy-research-status')).toContainText('配信が古い');
+  await expect(page.locator('#strategy-research-sources>div')).toHaveCount(0);
+});
+
+test('strategy research fails closed on malformed or unavailable official feed',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T12:00:00+09:00'));
+  await page.route('**/research-feed.json?*',async route=>route.fulfill({status:200,contentType:'application/json',body:'{"schema":1,"sources":[],"generatedAt":"bad"}'}));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="strategy"]').click();
+  await page.locator('#strategy-research-load').click();
+  await expect(page.locator('#strategy-research-status')).toContainText('取得失敗');
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
 test('photo-linked confirmed revenue: keeps the paper total, refuses duplicate image and preserves old storage',async({page})=>{
   await page.clock.setFixedTime(new Date('2026-11-21T20:50:00+09:00'));
   await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
