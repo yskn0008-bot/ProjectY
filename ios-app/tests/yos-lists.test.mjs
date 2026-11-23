@@ -28,7 +28,7 @@ function row(kind){
    '種類':{select:{name:'Task'}}
   }};
 }
-async function harness(){
+async function harness(errors={}){
  const records={ [ids.task]:row('task'), [ids.shopping]:row('shopping')};
  let writes=0;
  class RequestMock{
@@ -37,6 +37,7 @@ async function harness(){
    const p=this.url.split('/v1/')[1];
    if(p.startsWith('data_sources/')){
     const kind=p.includes(sources.task)?'task':'shopping';
+    if(errors[kind]){this.response.statusCode=errors[kind].status||400;return {code:errors[kind].code||'validation_error',message:errors[kind].message||'invalid query'};}
     return {results:[records[ids[kind]]],has_more:false,next_cursor:null};
    }
    const id=p.split('/')[1];
@@ -90,4 +91,31 @@ test('installer pins exact source and preserves existing target',()=>{
  assert.match(entry.commit,/^[a-f0-9]{40}$/);
  assert.equal(entry.sha256,createHash('sha256').update(source,'utf8').digest('hex'));
  assert.ok(manifest.targets.find(x=>x.id==='shopping'&&x.name==='YOS Shopping'));
+});
+
+test('Tasks HTTP 400 is attributed to Tasks and Shopping still opens',async()=>{
+ const h=await harness({task:{status:400,code:'validation_error',message:'body.page_size is not accepted'}});
+ const result=await h.app.readAll();
+ assert.equal(result.loaded.task,false);
+ assert.equal(result.loaded.shopping,true);
+ assert.equal(result.tasks.length,0);
+ assert.equal(result.shopping.length,1);
+ assert.match(result.errors.task,/YOS Tasks/);
+ assert.match(result.errors.task,/HTTP 400/);
+ assert.match(result.errors.task,/validation_error/);
+ assert.match(result.errors.task,/page_size/);
+ assert.ok(h.app.htmlWithData(result).includes('body.page_size'));
+ assert.equal(h.writes,0);
+});
+test('both Notion sources failing still produce a diagnostic UI without writes',async()=>{
+ const h=await harness({
+  task:{status:400,code:'invalid_request',message:'task query invalid'},
+  shopping:{status:403,code:'restricted_resource',message:'shopping not shared'}
+ });
+ const data=await h.app.readAll();
+ assert.deepEqual(data.loaded,{task:false,shopping:false});
+ assert.match(data.errors.task,/400/);
+ assert.match(data.errors.shopping,/403/);
+ assert.doesNotThrow(()=>new Function(h.app.htmlWithData(data).split('<script>')[1].split('</script>')[0]));
+ assert.equal(h.writes,0);
 });
