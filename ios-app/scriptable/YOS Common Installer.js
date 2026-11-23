@@ -351,9 +351,105 @@ async function install(entry){
     throw Error(restored?'更新に失敗したため、元のコードを復元しました':'更新に失敗し、復旧確認ができません。バックアップを保護しました');
   }
 }
+// Self-update is intentionally opt-in. The release manifest is separate from
+// the code to avoid a self-referential SHA256; it is published only after merge.
+const SELF_MANIFEST=ROOT+'main/ios-app/scriptable/yos-common-installer-release.json';
+function validateSelfRelease(release){
+  if(!release||release.schema!==1||release.name!==SELF||
+    release.path!=='ios-app/scriptable/YOS Common Installer.js'||
+    typeof release.commit!=='string'||!/^[a-f0-9]{40}$/.test(release.commit)||
+    typeof release.sha256!=='string'||!/^[a-f0-9]{64}$/.test(release.sha256)||
+    !Array.isArray(release.priorSha256)||release.priorSha256.length<1||release.priorSha256.length>20||
+    release.priorSha256.some(x=>typeof x!=='string'||!/^[a-f0-9]{64}$/.test(x)))
+    throw Error('自己更新の配布情報が不正です。変更していません');
+  return release;
+}
+async function updateSelf(){
+  const locations=stores(),matches=[];
+  for(const loc of locations){
+    const target=loc.fm.joinPath(loc.fm.documentsDirectory(),SELF+'.js');
+    if(loc.fm.fileExists(target))matches.push({...loc,target});
+  }
+  if(matches.length!==1)throw Error('正規インストーラーが'+matches.length+'件です。保存先を一意に特定できないため停止しました');
+  const selected=matches[0],{fm,target}=selected;
+  // Do not touch the separately named orange copy.
+  const original=await readable(fm,target),oldHash=digest(original);
+  if(!original.includes('// YOS_SCRIPT_NAME: '+SELF))
+    throw Error('既存本体の正式名称を確認できません。変更していません');
+  const release=validateSelfRelease(JSON.parse(await get(SELF_MANIFEST)));
+  if(oldHash!==release.sha256&&!hasOnlyScriptableIconHeader(original,release.sha256)&&
+    !release.priorSha256.some(hash=>oldHash===hash||hasOnlyScriptableIconHeader(original,hash)))
+    throw Error('既存本体が配布元の既知の旧版と一致しません。個人編集を保護して停止しました');
+  if(oldHash===release.sha256||hasOnlyScriptableIconHeader(original,release.sha256)){
+    await inform('更新不要','共通インストーラーは検証済みの最新版です。',null);return;
+  }
+  const url=ROOT+release.commit+'/'+release.path.split('/').map(encodeURIComponent).join('/');
+  const next=await verifiedSource({...release,id:'installer-self'},url);
+  if(!next.startsWith('// Variables used by Scriptable.')||
+    !next.split(/\r?\n/).slice(0,12).includes('// YOS_SCRIPT_NAME: '+SELF)||
+    digest(next)!==release.sha256)throw Error('新しいインストーラーの検証に失敗しました');
+  const ok=await confirm('共通インストーラーの自己更新',
+    '保存先：'+selected.kind+'\n現在：'+oldHash.slice(0,16)+'\n更新：'+release.sha256.slice(0,16)+
+    '\n既存本体をバックアップし、同じ名前の本体だけを更新します。別名の「最新版」は変更しません。','バックアップして更新');
+  if(!ok)return;
+  // No writes before consent. Preserve backup if any later step fails.
+  const backupDir=fm.joinPath(basePath(fm),'backups');
+  ensureDir(fm,backupDir);
+  const backup=fm.joinPath(backupDir,encodeURIComponent(SELF)+'-'+oldHash+'.txt');
+  if(fm.fileExists(backup)){
+    if(await readable(fm,backup)!==original)throw Error('バックアップが一致しません。更新を停止しました');
+  }else writeChecked(fm,backup,original);
+  if(digest(await readable(fm,target))!==oldHash)throw Error('更新直前に本体が変更されました');
+  for(const loc of locations){
+    if(loc.kind!==selected.kind&&loc.fm.fileExists(loc.fm.joinPath(loc.fm.documentsDirectory(),SELF+'.js')))
+      throw Error('別の保存先に同名本体が見つかりました');
+  }
+  try{
+    writeChecked(fm,target,next);
+  }catch(error){
+    // A failed write can leave a partial file, not just the exact new hash.
+    // Restore any changed bytes only if the same path is still present.
+    try{
+      if(!fm.fileExists(target))throw Error('更新対象が消失しました');
+      const damaged=await readable(fm,target);
+      if(digest(damaged)!==oldHash)writeChecked(fm,target,original);
+      if(digest(await readable(fm,target))===oldHash)
+        throw Error('更新に失敗したため元の本体に復旧しました');
+    }catch(recovery){
+      if(String(recovery.message||'').includes('復旧しました'))throw recovery;
+    }
+    throw Error('更新失敗。復旧確認できません。バックアップは保護しました');
+  }
+  // UI failure must never trigger a rollback of an already verified update.
+  await inform('共通インストーラー更新完了','バックアップ保存済み。次回起動時に新しいコードが使われます。',null);
+}
+// Read-only bootstrap inventory: never select, rewrite, or delete either installer.
+async function diagnoseInstallerCopies(){
+  const names=[SELF,SELF+' 最新版'],found=[],locations=stores();
+  for(const loc of locations){
+    for(const name of names){
+      const path=loc.fm.joinPath(loc.fm.documentsDirectory(),name+'.js');
+      if(!loc.fm.fileExists(path))continue;
+      try{
+        const code=await readable(loc.fm,path);
+        const sha=digest(code);
+        const normalized=code.replace(/^\/\/ Variables used by Scriptable\.\r?\n\/\/ These must be at the very top of the file\. Do not edit\.\r?\n\/\/ icon-color: [a-z0-9-]+; icon-glyph: [a-z0-9-]+;\r?\n/,'');
+        found.push({name,kind:loc.kind,sha,normalizedSha:digest(normalized),bytes:code.length});
+      }catch(error){throw Error('インストーラーを読み取れません：'+name+' / '+loc.kind+'。変更していません');}
+    }
+  }
+  const summary=found.length?found.map(x=>x.name+' / '+x.kind+' / SHA256 '+x.sha.slice(0,16)+' / 本文 '+x.normalizedSha.slice(0,16)).join('\n'):'対象スクリプトが見つかりません';
+  await inform('インストーラーの読み取り診断',summary+'\n診断のみ。更新・削除・改名・受領証変更はしていません。',null);
+  return found;
+}
 try{
-  const targets=validateCatalog(JSON.parse(await get(CATALOG)));
   const chosenId=typeof args==='undefined'?'':String(args.shortcutParameter||args.queryParameters?.script||'');
+  if(chosenId==='installer-self-update'){
+    await updateSelf();
+  }else if(chosenId==='installer-diagnose'){
+    await diagnoseInstallerCopies();
+  }else{
+  const targets=validateCatalog(JSON.parse(await get(CATALOG)));
   let entry;
   if(chosenId){
     entry=targets.find(x=>x.id===chosenId);
@@ -361,10 +457,15 @@ try{
   }else{
     const a=new Alert();a.title='YOS 共通インストーラー';a.message='GitHubの検証済みコードを正式名称で導入します。既存の別コードは保護します。';
     for(const t of targets)a.addAction(t.name);
+    a.addAction('共通インストーラーを更新');
+    a.addAction('共通インストーラーの安全診断（読み取りのみ）');
     a.addCancelAction('中止');
     const index=await a.presentAlert();
-    if(index>=0)entry=targets[index];
+    if(index===targets.length)await updateSelf();
+    else if(index===targets.length+1)await diagnoseInstallerCopies();
+    else if(index>=0)entry=targets[index];
   }
   if(entry)await install(entry);
+  }
 }catch(error){await inform('YOS導入・更新は未完了',String(error.message||error)+'\n元のコードを確認してから再試行してください。',null)}
 finally{Script.complete()}

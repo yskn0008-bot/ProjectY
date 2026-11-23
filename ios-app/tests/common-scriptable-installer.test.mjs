@@ -22,6 +22,8 @@ async function run(options={}){
  const sources=options.sources||fixtures,choices=[...(options.choices||[0,-1])],alerts=[],opened=[],requests=[];
  class Request{constructor(url){this.url=url;this.response=null;this.headers={};requests.push(url)}
  async loadString(){if(options.offline)throw Error('network offline');this.response={statusCode:options.status||200};if(this.url.includes('yos-common-installer-catalog.json'))return JSON.stringify(catalog);
+ if(this.url.includes('yos-common-installer-release.json'))return JSON.stringify(options.selfRelease||{});
+ if(options.selfRelease&&this.url.includes('/'+options.selfRelease.commit+'/')&&this.url.endsWith('YOS%20Common%20Installer.js'))return options.selfSource;
  for(const t of catalog.targets)if(this.url.includes('/'+t.commit+'/')&&this.url.endsWith(t.path.split('/').map(encodeURIComponent).join('/')))return options.corruptRaw?'// WRONG RAW CONTENT':sources[t.id];
  throw Error('unexpected '+this.url)}
  async loadJSON(){if(options.offline)throw Error('network offline');this.response={statusCode:200};
@@ -629,4 +631,103 @@ test('Scriptable icon header managed update interrupted is fully restorable',asy
   assert.equal(cloud.files.get(rec),oldReceipt);
   assert.equal(cloud.files.has(marker),false);
   assert.match(r.alerts.at(-1).message,/復旧しました/);
+});
+
+test('installer-diagnose reads both existing copies without network or writes',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const pink='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nPINK';
+ const orange='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: brown; icon-glyph: magic;\n'+pink;
+ cloud.files.set('/icloud/YOS Common Installer.js',pink);
+ local.files.set('/local/YOS Common Installer 最新版.js',orange);
+ const beforeCloud=[...cloud.files],beforeLocal=[...local.files];
+ const r=await run({cloud,local,id:'installer-diagnose'});
+ assert.deepEqual([...cloud.files],beforeCloud);
+ assert.deepEqual([...local.files],beforeLocal);
+ assert.equal(r.requests.length,0);
+ assert.equal(r.opened.length,0);
+ assert.match(r.alerts.at(-1).message,/YOS Common Installer 最新版/);
+ assert.match(r.alerts.at(-1).message,/iCloud/);
+ assert.match(r.alerts.at(-1).message,/local/);
+ assert.match(r.alerts.at(-1).message,/変更はしていません/);
+});
+test('installer-diagnose leaves absent copies untouched',async()=>{
+ const r=await run({id:'installer-diagnose'});
+ assert.equal(r.cloud.files.size,0);
+ assert.equal(r.local.files.size,0);
+ assert.equal(r.requests.length,0);
+ assert.match(r.alerts.at(-1).message,/見つかりません/);
+});
+
+test('installer inventory is accessible from existing catalog menu and never writes',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const scriptPath='/icloud/YOS Common Installer.js',old='// YOS Common Installer existing code';
+ cloud.files.set(scriptPath,old);
+ const r=await run({cloud,local,choices:[shipped.targets.length+1,-1]});
+ assert.equal(cloud.files.get(scriptPath),old);
+ assert.equal(cloud.files.size,1);
+ assert.equal(local.files.size,0);
+ assert.match(r.alerts.at(-1).title,/読み取り診断/);
+ assert.match(r.alerts.at(-1).message,/iCloud/);
+ assert.equal(r.opened.length,0);
+});
+
+test('self-update refuses absent or duplicated canonical installer without writes',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ let r=await run({cloud,local,id:'installer-self-update'});
+ assert.match(r.alerts.at(-1).message,/正規インストーラーが0件/);
+ assert.equal(r.requests.length,0);
+ cloud.files.set('/icloud/YOS Common Installer.js','// YOS_SCRIPT_NAME: YOS Common Installer');
+ local.files.set('/local/YOS Common Installer.js','// YOS_SCRIPT_NAME: YOS Common Installer');
+ r=await run({cloud,local,id:'installer-self-update'});
+ assert.match(r.alerts.at(-1).message,/正規インストーラーが2件/);
+ assert.equal(r.requests.length,0);
+ assert.equal(cloud.files.size,1);assert.equal(local.files.size,1);
+});
+test('self-update network failure preserves existing code and makes no backup',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),target='/icloud/YOS Common Installer.js';
+ const original='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nold';
+ cloud.files.set(target,original);
+ const r=await run({cloud,local,id:'installer-self-update',offline:true});
+ assert.equal(cloud.files.get(target),original);
+ assert.equal(cloud.files.size,1);
+ assert.match(r.alerts.at(-1).title,/未完了/);
+});
+
+
+test('self-update rejects unknown modified code before fetching payload or writing',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),target='/icloud/YOS Common Installer.js';
+ const old='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nCUSTOM';
+ cloud.files.set(target,old);
+ const selfSource='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nNEW';
+ const selfRelease={schema:1,name:'YOS Common Installer',path:'ios-app/scriptable/YOS Common Installer.js',commit:'a'.repeat(40),sha256:hash(selfSource),priorSha256:['b'.repeat(64)]};
+ const r=await run({cloud,local,id:'installer-self-update',selfRelease,selfSource});
+ assert.equal(cloud.files.get(target),old);
+ assert.equal(cloud.files.size,1);
+ assert.equal(r.requests.length,1,'must not fetch payload after unknown hash');
+ assert.match(r.alerts.at(-1).message,/既知の旧版と一致しません/);
+});
+test('self-update requires consent and keeps orange duplicate unchanged',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),target='/icloud/YOS Common Installer.js',orange='/local/YOS Common Installer 最新版.js';
+ const old='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nOLD';
+ const next='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nNEW';
+ cloud.files.set(target,old);local.files.set(orange,'ORANGE');
+ const selfRelease={schema:1,name:'YOS Common Installer',path:'ios-app/scriptable/YOS Common Installer.js',commit:'a'.repeat(40),sha256:hash(next),priorSha256:[hash(old)]};
+ let r=await run({cloud,local,id:'installer-self-update',selfRelease,selfSource:next,choices:[-1]});
+ assert.equal(cloud.files.get(target),old);assert.equal(cloud.files.size,1);
+ r=await run({cloud,local,id:'installer-self-update',selfRelease,selfSource:next,choices:[0,-1]});
+ assert.equal(cloud.files.get(target),next);
+ assert.equal(local.files.get(orange),'ORANGE');
+ assert.equal(cloud.files.get('/icloud/YOS Common Installer Data/backups/YOS%20Common%20Installer-'+hash(old)+'.txt'),old);
+});
+test('self-update recovers a partially written file',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),target='/icloud/YOS Common Installer.js';
+ const old='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nOLD';
+ const next='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nNEW';
+ cloud.files.set(target,old);
+ const selfRelease={schema:1,name:'YOS Common Installer',path:'ios-app/scriptable/YOS Common Installer.js',commit:'a'.repeat(40),sha256:hash(next),priorSha256:[hash(old)]};
+ const write=cloud.writeString.bind(cloud);let sabotage=true;
+ cloud.writeString=(p,v)=>{if(p===target&&sabotage){sabotage=false;write(p,'PARTIAL');throw Error('interrupted')}write(p,v)};
+ const r=await run({cloud,local,id:'installer-self-update',selfRelease,selfSource:next,choices:[0,-1]});
+ assert.equal(cloud.files.get(target),old);
+ assert.match(r.alerts.at(-1).message,/復旧しました/);
 });
