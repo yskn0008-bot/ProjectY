@@ -109,3 +109,48 @@ test('original Focus-only sleep and individual device modes remain available',()
   assert.match(source,/if\(MODE==="choose"\)/);
   assert.match(source,/const CHOICE_TTL_MS=120000/);
 });
+
+test('focus-only prepares a one-use all-keep plan with no appliance credentials',async()=>{
+  const store=new Map();
+  const ready=await run('focus-only',{store});
+  assert.equal(ready.error,null);
+  assert.equal(ready.outputs[0],'READY');
+  assert.equal(ready.requests.length,0);
+  assert.deepEqual(JSON.parse(store.get(CHOICE)).choices,{tv:'keep',light:'keep',floor:'keep',ac:'keep'});
+  const started=await run('sleep',{store});
+  assert.equal(started.error,null);
+  assert.equal(started.requests.length,0);
+  assert.match(started.outputs.join(' '),/家電操作なし/);
+  assert.equal(store.has(CHOICE),false);
+  assert.ok(store.has(USED));
+});
+
+test('focus-only skips a duplicate Focus event and does not replay the legacy fixed scene',async()=>{
+  const store=new Map();
+  await run('focus-only',{store});
+  await run('sleep',{store});
+  const repeat=await run('sleep',{store});
+  assert.equal(repeat.error,null);
+  assert.equal(repeat.requests.length,0);
+  assert.match(repeat.outputs.join(' '),/重複実行しません/);
+});
+
+test('focus-only replaces a pending appliance selection',async()=>{
+  const store=new Map(Object.entries(saved));
+  await run('choose',{store,clicks:[5]});
+  const ready=await run('focus-only',{store});
+  assert.equal(ready.outputs[0],'READY');
+  const done=await run('sleep',{store});
+  assert.equal(done.error,null);
+  assert.equal(done.requests.length,0);
+  assert.match(done.outputs.join(' '),/家電操作なし/);
+});
+
+test('expired focus-only plan fails closed and cannot touch devices',async()=>{
+  const store=new Map();
+  await run('focus-only',{store,now:1000000});
+  const late=await run('sleep',{store,now:1120001});
+  assert.ok(late.error);
+  assert.equal(late.requests.length,0);
+  assert.equal(store.has(CHOICE),false);
+});
