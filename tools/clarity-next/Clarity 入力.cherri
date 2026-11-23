@@ -1,6 +1,6 @@
 #define name Clarity 入力
 #define color purple
-#define version 1
+#define version 18
 
 #include 'actions/text'
 #include 'actions/documents'
