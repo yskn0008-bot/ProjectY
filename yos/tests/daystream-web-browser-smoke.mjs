@@ -394,11 +394,11 @@ try{
   const appearance=new Map(distinct.map(x=>[x.id,x]));
   assert.equal(appearance.get(2100).borderStyle,'solid','long backdrop has a quiet solid outline');
   assert.equal(appearance.get(2102).borderStyle,'solid','short overlapping card has a crisp solid edge');
-  assert.equal(appearance.get(2102).border,'1.5px','short task keeps a darker color-matched boundary');
+  assert.equal(appearance.get(2102).border,'2px','short task keeps a darker color-matched boundary');
   assert.equal(appearance.get(2102).borderColor,'rgb(135, 96, 179)','same-tone short tasks remain individually outlined');
   assert.notEqual(appearance.get(2102).shadow,'none','foreground cards retain a separating shadow in any browser color notation');
   assert.notEqual(appearance.get(2100).background,appearance.get(2102).background,'background sleep does not look like the red foreground');
-  assert.equal(appearance.get(2110).border,'1.5px','neutral cards also have a clear border');
+  assert.equal(appearance.get(2110).border,'2px','neutral cards also have a clear border');
 
   assert.equal(appearance.get(2100).image,'none','long sleep backdrop stays flat');
   for(const id of [2102,2110]){
