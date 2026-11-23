@@ -23,7 +23,7 @@ menu "Clarity｜入力方法" {
         @rawInput = "{typed}"
     item "履歴から選択":
         @historyMode = true
-        const existing = getFile("Clarity Input History.txt", false)
+        const existing = getFile("Clarity Input History.txt", , false)
         if !existing {
             alert("まだ履歴がありません。最初に文字入力をしてください。", "Clarity 入力")
             stop()
@@ -58,7 +58,7 @@ if !content {
 // Line-based search history; never writes to existing Clarity Inbox or ledger.
 // Collapse newlines to keep one capture per history row.
 const row = replaceText("\n", " ", content)
-const storedFile = getFile("Clarity Input History.txt", false)
+const storedFile = getFile("Clarity Input History.txt", , false)
 @oldText = ""
 if storedFile {
     const old = getText(storedFile)
