@@ -110,6 +110,20 @@ test('editor displays five scenes and saves without dispatching device commands'
   assert.equal(JSON.parse(h.data.get(key)).wake.floor,'on');
   assert.deepEqual(h.events,[]);
 });
+test('native Scriptable Close and Share toolbar cannot overlap scene tabs',async()=>{
+  const h=harness();await h.execute('');
+  const html=h.webs[0].html;
+  assert.match(html,/viewport-fit=cover/);
+  assert.match(html,/padding:max\(72px,env\(safe-area-inset-top\)\) 13px max\(13px,env\(safe-area-inset-bottom\)\)/);
+  assert.match(html,/height:100dvh/);
+  assert.match(html,/overflow:hidden/);
+  assert.match(html,/@media\(max-height:550px\)\{\.screen\{gap:7px;padding-bottom:7px\}/);
+  assert.doesNotMatch(html,/padding-top:7px/,'compact iPhone layout must not remove native toolbar clearance');
+  for(const label of ['外出','帰宅','就寝','起床','夜'])assert.match(html,new RegExp('>'+label+'<\\/button>'));
+  assert.match(html,/>設定を保存<\/button>/);
+  assert.deepEqual(h.events,[],'opening the editor is read-only for appliances');
+});
+
 test('compact one-screen design has only mode, four appliance rows and save',async()=>{
   const h=harness();await h.execute('');
   const html=h.webs[0].html;
