@@ -373,3 +373,23 @@ test('real draggable UI uses shared details grip; tap completion remains separat
  assert.doesNotMatch(source,/<div class="summary">/);
  assert.equal(h.writes,0,'UI generation never touches Notion');
 });
+
+
+test('dragging to the very first or last row stays inside the dedicated numeric range',()=>{
+ const web=source.split('<script>')[1].split('</script>')[0];
+ const from=web.indexOf('const RANK_BASE='),to=web.indexOf('function notice(',from);
+ assert.ok(from>0&&to>from,'rank helper is present inside WebView');
+ const rows=[{id:'a',name:'A',type:'Task',state:'次にやる',manualRank:null},
+  {id:'b',name:'B',type:'Task',state:'次にやる',manualRank:7},
+  {id:'c',name:'C',type:'Task',state:'次にやる',manualRank:null}];
+ const f=new Function('state','isOpen','order',web.slice(from,to)+'return {defaultRanks,effectiveRank,calcReorderRank};');
+ const h=f({tasks:rows},x=>x.type==='Task'&&x.state!=='完了',(a,b)=>a.name.localeCompare(b.name));
+ const ranks=h.defaultRanks();
+ const top=h.calcReorderRank(null,rows[0],ranks);
+ const bottom=h.calcReorderRank(rows[2],null,ranks);
+ assert.ok(top>=2000000&&top<ranks.get('a'),'a Task can be dragged above the first auto Task');
+ assert.ok(bottom>ranks.get('c')&&bottom<=4000000,'a Task can be dragged below the last auto Task');
+ assert.equal(h.effectiveRank(rows[1],ranks),ranks.get('b'),'existing legacy 実行順=7 remains baseline, not reinterpreted');
+ const moved={...rows[2],manualRank:top};
+ assert.equal([rows[0],rows[1],moved].sort((a,b)=>h.effectiveRank(a,ranks)-h.effectiveRank(b,ranks))[0].id,'c');
+});
