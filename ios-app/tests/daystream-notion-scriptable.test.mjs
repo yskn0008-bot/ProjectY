@@ -266,7 +266,7 @@ test('other Notion calendar mirrors remain visible through the iCloud source',as
 });
 
 test('Scriptable shows verified Notion tasks read-only when WebView storage is blocked',()=>{
- const body=script.match(/const BROWSER_DIRECT_IMPORT=String.raw`([\\s\\S]*?)`;/)?.[1];
+ const body=script.match(/const BROWSER_DIRECT_IMPORT=String.raw`([\s\S]*?)`;/)?.[1];
  assert.ok(body,'native direct browser script exists');
  const id='a'.repeat(32);
  const seed=[{id,day:'2026-11-23',title:'食事・Clarity記録',s:910,d:20,done:false}];
