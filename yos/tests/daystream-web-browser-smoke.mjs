@@ -421,8 +421,8 @@ try{
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2);await p.mouse.down();
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2+130,{steps:12});await p.mouse.up();
   assert.equal(await p.locator('#moveDialog').isVisible(),false,'drag drop must not open the large placement sheet');
-  assert.equal(await p.evaluate(()=>items.find(x=>x.id===2102).s===345),false,'drag drop commits immediately without extra confirmation');
   const dragState=await p.evaluate(()=>({s:items.find(x=>x.id===2102).s,note:note.textContent,events:window.__yosDragTrace,scrollY:scrollY}));
+  assert.notEqual(dragState.s,345,'drag drop commits immediately without extra confirmation: '+JSON.stringify(dragState));
   assert.notEqual(dragState.s,345,'the grip actually moves a task: '+JSON.stringify(dragState));
   await p.locator('#yosUndoBtn').click();
   assert.equal(await p.evaluate(()=>items.find(x=>x.id===2102).s),345,'undo reverses task move');
