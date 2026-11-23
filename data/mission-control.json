@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T01:52:54+09:00",
+  "updated_at": "2026-11-24T02:01:14+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-23T05:39:00Z"
-    },
-    {
-      "id": "github-pr-878",
-      "title": "PR #878 YOS JOURNAL｜11月20日研究特集を既存誌面へ発行するレビュー（未公開）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/878",
-      "updated_at": "2026-11-19T16:59:27Z"
     },
     {
       "id": "github-pr-890",
@@ -110,7 +100,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/910",
-      "updated_at": "2026-11-23T16:50:50Z"
+      "updated_at": "2026-11-23T17:00:20Z"
+    },
+    {
+      "id": "github-pr-911",
+      "title": "PR #911 fix(journal): render 5 headlines immediately before Widgy screenshot fetch",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/911",
+      "updated_at": "2026-11-23T17:00:23Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T16:52:02Z"
+      "updated_at": "2026-11-23T17:00:25Z"
     },
     {
       "id": "github-issue-234",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T01:52:54+09:00",
+      "last_update": "2026-11-24T02:01:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T01:52:54+09:00",
+      "last_update": "2026-11-24T02:01:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T01:52:54+09:00",
+      "last_update": "2026-11-24T02:01:14+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "bd7cfa7a9a7ba59ef70ae06e6874f356cd84c317cb43a833cb361445e7995cc8"
+  "github_snapshot_hash": "20c0634e9049dc6c8fed1750973781037db4980e6ec312479e167714fd02d9f1"
 }
