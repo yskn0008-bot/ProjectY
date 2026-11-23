@@ -384,7 +384,7 @@ try{
   }
   assert.equal(byId.get(2108).color,byId.get(2110).color,'advice preserves the task category');
   assert.equal(byId.get(2102).color,byId.get(2110).color,'conflicts preserve the task category');
-  assert.equal(byId.get(2110).radius,'15px','compact task cards keep rounded corners');
+  assert.equal(byId.get(2110).radius,'8px','compact contiguous task keeps a gentle rounded edge');
 
   const distinct=await p.locator('#tl [data-id="2100"], #tl [data-id="2102"], #tl [data-id="2110"]').evaluateAll(nodes=>nodes.map(el=>({
    id:Number(el.dataset.id),background:getComputedStyle(el).backgroundColor,
@@ -394,10 +394,11 @@ try{
   const appearance=new Map(distinct.map(x=>[x.id,x]));
   assert.equal(appearance.get(2100).borderStyle,'solid','long backdrop has a quiet solid outline');
   assert.equal(appearance.get(2102).borderStyle,'solid','short overlapping card has a crisp solid edge');
-  assert.equal(appearance.get(2102).border,'1px','short task remains distinct from backdrop');
+  assert.equal(appearance.get(2102).border,'2px','short task keeps a darker color-matched boundary');
+  assert.equal(appearance.get(2102).borderColor,'rgb(135, 96, 179)','same-tone short tasks remain individually outlined');
   assert.notEqual(appearance.get(2102).shadow,'none','foreground cards retain a separating shadow in any browser color notation');
   assert.notEqual(appearance.get(2100).background,appearance.get(2102).background,'background sleep does not look like the red foreground');
-  assert.equal(appearance.get(2110).border,'1px','neutral cards also have a border');
+  assert.equal(appearance.get(2110).border,'2px','neutral cards also have a clear border');
 
   assert.equal(appearance.get(2100).image,'none','long sleep backdrop stays flat');
   for(const id of [2102,2110]){
@@ -420,18 +421,9 @@ try{
   await p.evaluate(()=>{const el=document.querySelector('#tl [data-id="2102"]');window.__yosDragTrace=[];for(const name of ['pointerdown','pointermove','pointerup','pointercancel','touchstart','touchmove','touchend'])el.addEventListener(name,e=>window.__yosDragTrace.push({event:name,y:e.clientY,pointerType:e.pointerType,button:e.button,target:e.target.className}),true)});
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2);await p.mouse.down();
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2+130,{steps:12});await p.mouse.up();
-  await p.locator('#moveDialog').waitFor();
-  const sheet=await p.locator('.move-sheet-content').boundingBox();
-  const viewportHeight=await p.evaluate(()=>innerHeight);
-  assert.ok(sheet.y>=viewportHeight*.25,'placement panel leaves the timeline visible above it: '+JSON.stringify({sheet,viewportHeight}));
-  assert.ok(sheet.y+sheet.height<=viewportHeight+1,'placement panel stays within the viewport: '+JSON.stringify({sheet,viewportHeight}));
-  assert.equal(await p.locator('#moveSave').isVisible(),true);
-  assert.equal(await p.locator('#moveCancel').isVisible(),true);
-  assert.equal(await p.locator('#moveSource').isVisible(),false,'generic placement advice hides the sleep reference');
-
-  assert.equal(await p.evaluate(()=>items.find(x=>x.id===2102).s),345,'preview never writes before confirmation');
-  await p.locator('#moveSave').click();
+  assert.equal(await p.locator('#moveDialog').isVisible(),false,'drag drop must not open the large placement sheet');
   const dragState=await p.evaluate(()=>({s:items.find(x=>x.id===2102).s,note:note.textContent,events:window.__yosDragTrace,scrollY:scrollY}));
+  assert.notEqual(dragState.s,345,'drag drop commits immediately without extra confirmation: '+JSON.stringify(dragState));
   assert.notEqual(dragState.s,345,'the grip actually moves a task: '+JSON.stringify(dragState));
   await p.locator('#yosUndoBtn').click();
   assert.equal(await p.evaluate(()=>items.find(x=>x.id===2102).s),345,'undo reverses task move');

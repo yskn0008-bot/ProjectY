@@ -14,15 +14,27 @@ test('Web port uses the DAYSTREAM light appearance and existing navigation',()=>
  assert.match(native,/YOS_LIFE_LEARNING_LIVE_START/);
  assert.match(html,/YOS_LIFE_LEARNING_LIVE_START/);
 });
-test('Move confirmation uses the existing undo/redo and browser plan',()=>{
+test('Direct drop saves immediately, keeps explicit time edit and undo/redo',()=>{
  assert.match(html,/id="yosUndoBtn"/);
  assert.match(html,/id="yosRedoBtn"/);
  assert.match(html,/function yosHistoryRestore\(direction\)/);
  assert.match(html,/yosHistorySnapshot\(\)/);
  assert.match(html,/<dialog id="moveDialog"/);
- assert.match(html,/if\(mode==='tap'\)showFocusFor\(item\)/);
- assert.match(html,/if\(next!==item.s\)openMoveDialog/);
+ assert.match(html,/if\(mode==='tap'\)\{clearNeighbors\(\);showFocusFor\(item\)/);
+ assert.match(html,/function commitDraggedTime\(item,next,previousRect\)/);
+ assert.match(html,/commitDraggedTime\(item,next,previousRect\)/);
+ assert.doesNotMatch(html,/if\(next!==item.s\)openMoveDialog/);
  assert.match(html,/if\(!saved\)item.s=original/);
+ assert.match(html,/const reactToNeighbors=\(\)=>/);
+ assert.match(html,/\.card\.drag-neighbor/);
+ assert.doesNotMatch(html,/flow-ghost/,'drag must leave no outline at its former position');
+ assert.match(html,/item\.d<=15&&\[\.\.\.String\(item\.t\|\|''\)\]\.length<=9\)el\.classList\.add\('short-row'\)/);
+ assert.match(html,/\.card\.short-row \.task-copy b/);
+ for(const tone of ['blue','mint','violet','peach']){
+  assert.match(html,new RegExp(`\\.card\\[data-flow-tone=${tone}\\]\\{--flow-stroke:#[0-9a-f]{6};--flow-type:#[0-9a-f]{6}\\}`));
+ }
+ assert.match(html,/font-family:ui-rounded,"Hiragino Maru Gothic ProN"/);
+ assert.match(html,/border:2px solid var\(--flow-stroke\)/);
  assert.doesNotMatch(html,/addEventListener\('scroll',restoreScroll/);
 });
 

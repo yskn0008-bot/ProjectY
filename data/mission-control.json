@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T05:52:31+09:00",
+  "updated_at": "2026-11-24T05:57:10+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-23T20:46:43Z"
+    },
+    {
+      "id": "github-pr-878",
+      "title": "PR #878 YOS JOURNAL｜11月20日研究特集を既存誌面へ発行するレビュー（未公開）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/878",
+      "updated_at": "2026-11-19T16:59:27Z"
     },
     {
       "id": "github-pr-890",
@@ -83,16 +93,6 @@
       "updated_at": "2026-11-23T14:59:27Z"
     },
     {
-      "id": "github-pr-909",
-      "title": "PR #909 YOS Home Scenes｜設定画面をミニマルなiOSデザインへ変更",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/909",
-      "updated_at": "2026-11-23T20:51:50Z"
-    },
-    {
       "id": "github-pr-914",
       "title": "PR #914 YOS Lists｜淡すぎないパステル配色へ微調整",
       "type": "GitHub PR",
@@ -103,14 +103,14 @@
       "updated_at": "2026-11-23T17:46:13Z"
     },
     {
-      "id": "github-pr-920",
-      "title": "PR #920 fix(daystream): fluid direct-drop drag with reactive neighboring bars",
+      "id": "github-pr-924",
+      "title": "PR #924 YOS Lists｜タップ直後に1行だけ即時切替、Notion確定後に反映",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/920",
-      "updated_at": "2026-11-23T20:48:28Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/924",
+      "updated_at": "2026-11-23T20:55:41Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T20:51:39Z"
+      "updated_at": "2026-11-23T20:56:22Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-aef3c529d978",
-      "title": "Merge PR #923: retain completed YOS Lists rows in-session with safe per-task undo",
-      "completed_at": "2026-11-23T20:39:43Z",
-      "result": "GitHub mainへ反映（aef3c52）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aef3c529d978f7ef18b232b5066e562763089862"
+      "id": "github-commit-d18aca87b031",
+      "title": "Merge pull request #920 from yskn0008-bot/fix/daystream-direct-spring-drag-20261124",
+      "completed_at": "2026-11-23T20:56:14Z",
+      "result": "GitHub mainへ反映（d18aca8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d18aca87b031521084dc77bb026e986813d33031"
     },
     {
-      "id": "github-commit-1d66958cc4a2",
-      "title": "Sync PR #923 with updated mission-control main retaining completed-row fixes and other installer targets",
-      "completed_at": "2026-11-23T20:39:12Z",
-      "result": "GitHub mainへ反映（1d66958）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1d66958cc4a2b7bc2fbe61af8d0a78bd23b64c2e"
+      "id": "github-commit-8385e2b4e0d2",
+      "title": "chore(daystream): preserve latest YOS Home Scenes installer pin before release",
+      "completed_at": "2026-11-23T20:55:37Z",
+      "result": "GitHub mainへ反映（8385e2b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8385e2b4e0d22cc31afe0cfd877ecef28106f0fd"
     },
     {
-      "id": "github-commit-e7f79dce7f53",
-      "title": "Sync PR #923 with latest main preserving mission-control updates and all installer targets",
-      "completed_at": "2026-11-23T20:37:19Z",
-      "result": "GitHub mainへ反映（e7f79dc）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e7f79dce7f53d14b473851e08c91e110720557e4"
+      "id": "github-commit-ed1335fb61ef",
+      "title": "design(home-scenes): release approved navy glass Scriptable UI",
+      "completed_at": "2026-11-23T20:54:46Z",
+      "result": "GitHub mainへ反映（ed1335f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ed1335fb61efde94a80da3d7834824d96cd2089d"
     },
     {
-      "id": "github-commit-d1acf6a831d8",
-      "title": "chore(yos-lists): repin verified per-task undo receipt source in common installer",
-      "completed_at": "2026-11-23T20:31:44Z",
-      "result": "GitHub mainへ反映（d1acf6a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d1acf6a831d8b542d42827deed33b6f8235b81e1"
+      "id": "github-commit-3211da0dcef7",
+      "title": "fix(daystream): keep all task drag grips finger-reachable, not just short rows",
+      "completed_at": "2026-11-23T20:48:27Z",
+      "result": "GitHub mainへ反映（3211da0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3211da0dcef7b413801c4c581d0660411c9f5bff"
     },
     {
-      "id": "github-commit-47e5c58cb418",
-      "title": "fix(yos-lists): include task ID in per-row undo receipt for safe consistency check",
-      "completed_at": "2026-11-23T20:31:32Z",
-      "result": "GitHub mainへ反映（47e5c58）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/47e5c58cb41827892110cdfc57964c375c0d5588"
+      "id": "github-commit-6b53ec32abd7",
+      "title": "Keep full-size touch target for compact task dragging",
+      "completed_at": "2026-11-23T20:47:55Z",
+      "result": "GitHub mainへ反映（6b53ec3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6b53ec32abd7ed615770424e46bfd7f52e598fcd"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T05:52:31+09:00",
+      "last_update": "2026-11-24T05:57:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T05:52:31+09:00",
+      "last_update": "2026-11-24T05:57:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T05:52:31+09:00",
+      "last_update": "2026-11-24T05:57:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "99c05d96516f5f39032edd83e7023f6595cafb5e15060a438f32111807888c0f"
+  "github_snapshot_hash": "88f8c601ece7f20411070965f7df2bc730f77b46d5f818070ebfc63a54108eb9"
 }
