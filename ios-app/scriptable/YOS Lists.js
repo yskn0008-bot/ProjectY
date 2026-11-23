@@ -92,7 +92,7 @@ async function perform(request){
  if(!request||typeof request!=='object')throw Error('操作の形式が不正です');
  if(request.action==='refresh')return {action:'refresh',data:await readAll()};
  const kind=request.kind,operation=request.action,id=id32(request.id),expected=tidy(request.expected,65);
- if(!Object.hasOwn(SOURCES,kind)||!validId(id)||!expected)throw Error('更新する項目の識別情報が不正です');
+ if(!Object.prototype.hasOwnProperty.call(SOURCES,kind)||!validId(id)||!expected)throw Error('更新する項目の識別情報が不正です');
  if(kind==='task'&&operation!=='complete'||kind==='shopping'&&operation!=='purchase')
   throw Error('許可されていない更新操作です');
  const path='pages/'+id;
