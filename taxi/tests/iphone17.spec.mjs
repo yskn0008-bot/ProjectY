@@ -1045,6 +1045,10 @@ test('photo-linked confirmed revenue: keeps the paper total, refuses duplicate i
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ops-v1'))).toBeNull();
   await page.reload({waitUntil:'domcontentloaded'});
   await expect(page.locator('#sales-value')).toContainText('21,950');
+  await page.locator('#monthly-open').click();
+  await expect(page.locator('#monthly-sum-value')).toHaveText('区分未確認');
+  await expect(page.locator('#monthly-calendar .month-day small').filter({hasText:'21,950'})).toHaveCount(1);
+  await page.locator('[data-page="sales"]').click();
   await page.locator('#photo-input').setInputFiles({name:'same-photo.png',mimeType:'image/png',buffer:mockImage});
   await page.locator('#modal-actions button.primary').click();
   await page.locator('#revenue-amount').fill('24000');
@@ -1082,4 +1086,35 @@ test('confirmed revenue: closing verification while photo digest is pending neve
   await page.waitForTimeout(80);
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
   await expect(page.locator('#modal')).not.toHaveClass(/open/);
+});
+
+
+test('monthly revenue counts the latest daily snapshot only when confirmed tax bases match',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-22T20:50:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const statuses=await page.evaluate(()=>{
+    const api=window.YosTaxiConfirmedRevenueV1;
+    const mk=(day,amount,basis,c)=>({
+      businessDate:day,amountYen:amount,taxBasis:basis,reportClock:null,
+      photoSha256:'sha256:'+c.repeat(64),photoKind:'paper-total'
+    });
+    return [
+      api.confirm(mk('2026-11-21',21950,'tax-included','a')).status,
+      api.confirm(mk('2026-11-22',14750,'tax-included','b')).status
+    ];
+  });
+  expect(statuses).toEqual(['saved','saved']);
+  await page.locator('#monthly-open').click();
+  await expect(page.locator('#monthly-sum-value')).toHaveText('¥36,700');
+  await expect(page.locator('#monthly-sum-label')).toContainText('2日');
+  await expect(page.locator('#monthly-notice')).toContainText('確定月商ではありません');
+  await page.evaluate(()=>{
+    const api=window.YosTaxiConfirmedRevenueV1;
+    api.confirm({businessDate:'2026-11-23',amountYen:30000,taxBasis:'tax-excluded',
+      reportClock:null,photoSha256:'sha256:'+'c'.repeat(64),photoKind:'paper-total'});
+  });
+  await page.locator('[data-page="sales"]').click();
+  await page.locator('#monthly-open').click();
+  await expect(page.locator('#monthly-sum-value')).toHaveText('区分混在');
+  await expect(page.locator('#monthly-notice')).toContainText('合計を表示しません');
 });
