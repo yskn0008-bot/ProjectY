@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T06:20:14+09:00",
+  "updated_at": "2026-11-24T06:24:00+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,6 +31,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/890",
       "updated_at": "2026-11-23T13:38:48Z"
+    },
+    {
+      "id": "github-pr-891",
+      "title": "PR #891 feat(morning): show DAYSTREAM next step in existing Today Note (draft)",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/891",
+      "updated_at": "2026-11-23T06:20:18Z"
     },
     {
       "id": "github-pr-892",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-23T21:16:20Z"
     },
     {
-      "id": "github-pr-928",
-      "title": "PR #928 YOS Home Scenes｜外出・帰宅・就寝・起床・夜の5シーン個別設定",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/928",
-      "updated_at": "2026-11-23T21:19:12Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T21:17:59Z"
+      "updated_at": "2026-11-23T21:23:19Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-aec0ebcda405",
+      "title": "Merge PR #928: YOS Home Scenes five independent safe presets",
+      "completed_at": "2026-11-23T21:23:08Z",
+      "result": "GitHub mainへ反映（aec0ebc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aec0ebcda40582260f8a3e61112bf3738a707551"
+    },
+    {
+      "id": "github-commit-1fc4a8b04d83",
+      "title": "chore(installer): pin five-scene YOS Home Scenes source",
+      "completed_at": "2026-11-23T21:15:43Z",
+      "result": "GitHub mainへ反映（1fc4a8b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1fc4a8b04d839feb2f7ac8db3bb7c1ead0fe7446"
+    },
+    {
+      "id": "github-commit-664b650c6d89",
+      "title": "test(home-scenes): cover five presets, legacy migration and fail-closed isolation",
+      "completed_at": "2026-11-23T21:15:40Z",
+      "result": "GitHub mainへ反映（664b650）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/664b650c6d89b20211431872d7e1caf8a76fb5d7"
+    },
+    {
+      "id": "github-commit-05b8fc7cfa0f",
+      "title": "feat(home-scenes): add five independent safe presets while preserving existing settings",
+      "completed_at": "2026-11-23T21:14:57Z",
+      "result": "GitHub mainへ反映（05b8fc7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/05b8fc7cfa0f4f21964cc81ee8ffcb5fbaa930de"
+    },
+    {
       "id": "github-commit-5c5fbb47734a",
       "title": "fix(home-scenes): compact departure, four appliances and save to one screen",
       "completed_at": "2026-11-23T21:11:36Z",
       "result": "GitHub mainへ反映（5c5fbb4）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5c5fbb47734a88b0a74b83b38ee861143e2df145"
-    },
-    {
-      "id": "github-commit-46f615537fc8",
-      "title": "Merge PR #924: instant YOS Lists tap feedback with verified Notion save",
-      "completed_at": "2026-11-23T21:04:32Z",
-      "result": "GitHub mainへ反映（46f6155）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/46f615537fc874057786f1c47d698959fa0226da"
-    },
-    {
-      "id": "github-commit-bc6eaa1bd087",
-      "title": "Sync PR #924 with latest main preserving DAYSTREAM and all other installer targets",
-      "completed_at": "2026-11-23T21:02:57Z",
-      "result": "GitHub mainへ反映（bc6eaa1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bc6eaa1bd087aaf3c7756ed043d63046524067e0"
-    },
-    {
-      "id": "github-commit-d18aca87b031",
-      "title": "Merge pull request #920 from yskn0008-bot/fix/daystream-direct-spring-drag-20261124",
-      "completed_at": "2026-11-23T20:56:14Z",
-      "result": "GitHub mainへ反映（d18aca8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d18aca87b031521084dc77bb026e986813d33031"
-    },
-    {
-      "id": "github-commit-8385e2b4e0d2",
-      "title": "chore(daystream): preserve latest YOS Home Scenes installer pin before release",
-      "completed_at": "2026-11-23T20:55:37Z",
-      "result": "GitHub mainへ反映（8385e2b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8385e2b4e0d22cc31afe0cfd877ecef28106f0fd"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T06:20:14+09:00",
+      "last_update": "2026-11-24T06:24:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 75件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T06:20:14+09:00",
+      "last_update": "2026-11-24T06:24:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T06:20:14+09:00",
+      "last_update": "2026-11-24T06:24:00+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "dcd9b855b6116a610b6b1f8cca0799f42c32095592bbae7c6df8bb611786ae7d"
+  "github_snapshot_hash": "a06f1477713e4ee1663e1437764a0f39cb852cf223e5ae4bf2fc2ae2ea9db557"
 }
