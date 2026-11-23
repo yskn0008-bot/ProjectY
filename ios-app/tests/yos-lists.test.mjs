@@ -256,7 +256,8 @@ test('tap-to-complete row uses full width, preserves details control and purchas
  assert.match(css,/\.item-complete\{[^}]*width:100%;min-height:44px/);
  assert.match(css,/\.item--task \.item-details summary\{[^}]*min-height:44px/);
  assert.match(css,/#undo\{[^}]*min-height:44px/);
- assert.match(source,/<button type="button" class="item-complete" data-action="complete"/);
+ assert.match(source,/const actionName=done\?'undo-complete':'complete'/);
+ assert.match(source,/class="item-complete" data-action="'\+actionName/);
  assert.match(source,/e\.target\.closest\('\.item-details'\)/,'detail chevron never completes');
  assert.match(source,/class="item-details"><summary aria-label=/);
  assert.doesNotMatch(source,/<button class="action" data-action="complete"/,'old separate task completion button is removed');
