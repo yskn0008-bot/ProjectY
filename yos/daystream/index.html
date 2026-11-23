@@ -254,23 +254,145 @@ body.yos-daystream-web .yos-web-port,.yos-daystream-web .dock{background:#ffffff
  .timeline .card-icon{flex-basis:16px;width:16px;height:16px}
  .actions{gap:4px}.actions .iconbtn{width:27px}
 }
-</style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
+/* LIFE FLOW overview, timeline editing and placement review. */
+html body.yos-daystream-web{
+ background:radial-gradient(170px 280px at 100% 14%,#b6ecdcad 0,transparent 100%),
+ radial-gradient(230px 390px at 0 56%,#dfe9ff 0,transparent 100%),
+ radial-gradient(300px 210px at 64% 0,#e9dcff 0,transparent 100%),
+ linear-gradient(160deg,#ecf9ff 0,#fdfaff 36%,#f7fbff 78%,#fff3e3 100%);
+ background-attachment:fixed;
+}
+.top{padding-inline:16px}
+.yos-daystream-web .app{padding-top:14px}
+.flow-title{margin:3px 0 12px}
+.flow-title .daystream-brand{font-size:19px;font-weight:700;line-height:1.2;color:#22465a}
+.flow-title .daystream-brand span{font-size:14px;font-weight:550;letter-spacing:.075em}
+.flow-title h1{font-size:clamp(25px,7vw,35px);letter-spacing:-.06em;line-height:1.23;margin:4px 0;color:#131c33}
+.flow-date-row,.flow-date-pill{display:flex;align-items:center;gap:7px}
+.flow-date-pill{flex:1;justify-content:space-between;border:1px solid #ffffffbe;border-radius:26px;min-width:0;background:linear-gradient(100deg,#fff9,#e8f5ffc9);box-shadow:0 4px 12px #aac5e82b}
+.flow-date-pill button,.flow-edit-bar button,.flow-advice-bar button{border:0;background:transparent;color:#142640;min-width:37px;min-height:43px;font-size:25px;line-height:1}
+#dateTitle{font-size:clamp(13px,4vw,18px);white-space:nowrap}
+.flow-date-row #dateBtn{width:43px;height:43px;border-radius:50%;flex:none;background:#ffffff91}
+#flowEdit,#flowDone{border:1px solid #ffffffa6;border-radius:21px;background:#e1f4eb;color:#165e48;padding:0 11px;min-height:37px;font-size:12px;font-weight:750}
+body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
+.calendar-modes{min-height:30px;border-radius:24px;background:#e3ebf4a8;margin:9px 16px 2px}
+.calendar-modes button{min-height:27px;border-radius:20px;font-size:11px}
+.yos-daystream-web .calendar-modes button.active{background:linear-gradient(110deg,#238564,#338f70)}
+.flow-tools{margin:4px 16px;color:#415b76}
+.flow-tools>summary{cursor:pointer;font-size:10px;text-align:right;padding:2px 5px}
+.flow-tools .actions{justify-content:flex-end;margin:5px 0}
+.flow-tools .summary,.flow-tools .microtools{margin-inline:0}
+.flow-add#addBtn{position:fixed;right:max(15px,calc((100vw - 610px)/2));bottom:calc(67px + env(safe-area-inset-bottom));z-index:17;width:45px;height:45px;border-radius:15px;background:linear-gradient(135deg,#2c9575,#14765c);box-shadow:0 7px 17px #24745844}
+.flow-add svg{width:23px;height:23px}
+.compat-status:not(:has(button)){display:none}
+.timeline-legend{justify-content:center;margin:5px 10px 0}
+.timeline-legend span{background:#ffffffd1;padding:4px 8px;box-shadow:0 3px 8px #6071ad13}
+.gesture-help{display:none}
+.timeline-wrap{margin:17px 14px 16px 12px}
+.timeline{--card-inset:59px}
+.timeline .axis{left:45px;width:2px;background:linear-gradient(#86c8af,#62a6ec 38%,#ac92e8 62%,#76b7e2)}
+.timeline .hour{border:0}
+.timeline .hour span{left:0;color:#2d3e56;font-size:12px;font-weight:540}
+.timeline .tick{left:42px;width:8px;height:8px;background:var(--flow-edge,#5a9cda)}
+[data-flow-tone=blue]{--flow-light:#d7ebff;--flow-other:#dfe7fb;--flow-edge:#6aafe9;--flow-ink:#206bc0}
+[data-flow-tone=mint]{--flow-light:#d5f6e4;--flow-other:#e7f4dc;--flow-edge:#77bf9f;--flow-ink:#148961}
+[data-flow-tone=violet]{--flow-light:#e7defc;--flow-other:#f2e2fc;--flow-edge:#ae93e4;--flow-ink:#794dc4}
+[data-flow-tone=peach]{--flow-light:#ffebdb;--flow-other:#fff1e9;--flow-edge:#eca77d;--flow-ink:#b85c33}
+.timeline .card[data-flow-tone]{border-color:var(--flow-edge);background-image:linear-gradient(105deg,var(--flow-light),var(--flow-other));padding-inline:8px 6px;gap:8px}
+.timeline .card[data-flow-tone].yos-backdrop{background-image:none}
+.timeline .card .card-icon{color:var(--flow-ink);background:#fff8;width:25px;height:25px;flex-basis:25px;border-radius:8px}
+.timeline .card .card-icon svg{width:18px;height:18px;stroke-width:2}
+.timeline .card .fixed-label{opacity:.85}
+.timeline .card .task-drag-grip{color:var(--flow-ink);background:#ffffff6e}
+.timeline .card.drag-preview{outline:2px dashed var(--flow-ink);outline-offset:2px}
+.timeline .card.yos-backdrop>.card-icon,.timeline .card.yos-backdrop>.fixed-label{position:sticky;top:0}
+#flowDragHint{position:fixed;bottom:calc(72px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:20;max-width:92vw;padding:9px 13px;background:#f0fff7;border:1px solid #65b99b;border-radius:13px;box-shadow:0 5px 18px #54718a35;color:#195c49;font-weight:750;white-space:nowrap;pointer-events:none}
+#flowDragHint[data-level=danger]{background:#fff0f4;border-color:#db93a8;color:#853650}
+.flow-edit-bar{display:none}
+.flow-editing .flow-edit-bar,.flow-advice-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f9fbffe8;border-bottom:1px solid #dbe6ef;padding:3px 2px}
+.flow-editing :is(.flow-title,.flow-date-row,.calendar-modes,.flow-tools,#gestureHelp,.dock,.flow-add,.native-tools){display:none}
+.flow-editing .timeline{margin-top:23px}
+.move-sheet:open{width:min(460px,100%);max-width:100%;max-height:100dvh;height:100dvh;margin:0 auto;padding:0 12px 24px;border:0;border-radius:0;background:radial-gradient(ellipse at 100% 0,#d5edff,transparent 68%),linear-gradient(170deg,#e2e7fb,#f0ebf8 60%,#f3f8e8);overflow:auto}
+.flow-advice-bar{position:sticky;top:0;z-index:2;margin:0 -12px 9px;padding:4px 12px}
+.flow-advice-bar #moveSave{min-height:34px;padding:0 14px;border:0;border-radius:24px;background:#288b68;color:white;font-size:13px;font-weight:750}
+.flow-advice-card{padding:16px;margin:0 0 10px;border-radius:23px;background:#ffffffdf;border:1px solid #ffffffed;box-shadow:0 5px 15px #606b9824}
+.flow-advice-card h2,.flow-advice-card h3{color:#172038;font-size:16px;font-weight:780}
+.flow-proposal{display:flex;gap:12px;align-items:center;margin:16px 0}
+.flow-proposal>span{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:linear-gradient(150deg,#5ece8c,#148e50);color:white;font-size:28px;font-weight:750}
+.flow-proposal strong{font-size:19px;overflow-wrap:anywhere}
+.flow-proposal #moveRange{color:#4d637d;margin:2px 0 0}
+.flow-rating{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:10px;margin-top:12px;border-top:1px solid #ccd8e5}
+.flow-rating span{background:#d8f5e3;color:#166046;border-radius:14px;padding:5px 9px;text-align:center;font-size:12px;font-weight:700}
+.flow-rating span[data-level=danger]{background:#ffe4eb;color:#922f4d}
+.move-impact ul{padding:0;margin:8px 0 0;list-style:none}
+.move-impact li{padding:8px 6px;border-bottom:1px solid #e3edf4;overflow-wrap:anywhere}
+.move-impact li:before{content:'•';color:#158861;margin-right:7px}
+.move-impact li:last-child{border-bottom:0}
+/* Glass surfaces and status accents on the existing day view. */
+.yos-daystream-web .app{padding-top:26px}
+.flow-title{margin-bottom:15px}
+.flow-title h1{margin-top:6px;font-weight:850}
+.timeline-legend{margin-top:10px;gap:8px}
+.timeline-legend span{font-size:12px;font-weight:700;padding:5px 10px}
+.timeline-legend span:before{width:9px;height:9px}
+.timeline .axis{left:43px}
+.timeline .tick{left:39.5px;pointer-events:none}
+.timeline{--card-inset:56px}
+.timeline .card[data-flow-tone]{
+ background-color:var(--flow-light);
+ background-image:linear-gradient(112deg,#ffffff65,transparent 65%),linear-gradient(105deg,var(--flow-light),var(--flow-other));
+ border-color:var(--flow-edge);border-radius:15px;box-shadow:inset 0 1px 1px #ffffffbc,0 3px 8px #345c8311;
+}
+.timeline .card[data-flow-tone].yos-backdrop.is-overlapped{background:color-mix(in srgb,var(--flow-light) 50%,white)}
+.timeline .card .card-icon{width:29px;height:29px;flex-basis:29px;background:#ffffff7c}
+.timeline .card.compat-positive{--signal-accent:#299d6b}
+.timeline .card.compat-negative{--signal-accent:#ba701f}
+.timeline .card.compat-danger{--signal-accent:#c1475e}
+.timeline .card[data-flow-tone]:is(.compat-positive,.compat-negative,.compat-danger){
+ box-shadow:inset 3px 0 var(--signal-accent),inset 0 1px 1px #ffffffbc,0 3px 8px #345c8311;
+}
+.timeline .card .task-drag-grip{background:transparent}
+.flow-editing .flow-edit-bar{position:sticky;top:0;z-index:15}
+.flow-editing .top{display:contents}
+.flow-editing .flow-edit-bar{padding-inline:14px}
+.timeline .flow-ghost{position:absolute;left:var(--card-inset);right:0;border:2px dashed #8b72c3;border-radius:15px;background:#ede4ff80;pointer-events:none;z-index:5}
+.timeline .card.drag-preview{pointer-events:none;z-index:11;box-shadow:0 12px 26px #55468335}
+.timeline .card.drag-preview[data-placement]{outline-color:var(--placement-ink);box-shadow:inset 3px 0 var(--placement-ink),0 12px 26px #55468335}
+[data-placement=positive]{--placement-ink:#299d6b}
+[data-placement=negative]{--placement-ink:#ba701f}
+[data-placement=danger]{--placement-ink:#c1475e}
+[data-placement=unknown]{--placement-ink:#778ca8}
+
+#flowDragHint{white-space:normal;width:min(340px,calc(100% - 32px));text-align:left;bottom:calc(76px + env(safe-area-inset-bottom));padding:12px 14px}
+.flow-editing #flowDragHint{bottom:calc(16px + env(safe-area-inset-bottom))}
+#flowDragHint strong,#flowDragHint small{display:block}
+#flowDragHint small{margin:3px 0 0;font-weight:550;line-height:1.45}
+#flowDragHint[data-level=negative],.flow-rating span[data-level=negative]{background:#fff2df;color:#834a10;border-color:#e3b56e}
+#flowDragHint[data-level=unknown],.flow-rating span[data-level=unknown]{background:#eef2f9;color:#425570;border-color:#b3c0d4}
+.flow-advice-card{padding:17px 18px;margin-bottom:12px}
+.flow-advice-card h3{display:flex;gap:8px;align-items:center}
+.flow-advice-card h3 span{color:#5368b6}
+.flow-proposal>span[data-level=negative]{background:linear-gradient(145deg,#f2ac56,#ba711d)}
+.flow-proposal>span[data-level=danger]{background:linear-gradient(145deg,#e18c9b,#a4455c)}
+.flow-proposal>span[data-level=unknown]{background:linear-gradient(145deg,#aabcda,#657b9e)}
+#moveOptions{margin-top:10px;display:grid;gap:6px}
+#moveOptions button,#flowCandidates{border:1px solid #b8d8ce;background:#eff8f6;color:#1c5e4a;border-radius:12px;padding:9px 12px;min-height:42px;text-align:left}
+#flowCandidates{margin-top:10px}
+#moveEvidence a{display:inline-block;color:#305a91;margin-top:8px;font-size:12px}
+</style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script></head><body class="yos-daystream-web"><details class="native-tools"><summary>接続・データ</summary><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
 <a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
 <button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
 <button id="yosWebHistory" type="button">行動学習</button>
 <span class="yos-web-port-note" id="yosWebSourceState">端末内だけに保存 · Notion/Appleカレンダー自動同期は未接続 · Scriptableのデータは変更しません</span>
 <input id="yosWebFile" type="file" accept=".json,.txt,.ics,application/json,text/plain,text/calendar" hidden>
-</div><section id="yosWebHistoryPanel" class="yos-web-port-dialog" hidden aria-label="行動学習の候補"><div id="yosWebHistoryRows"></div></section>
+</div></details><section id="yosWebHistoryPanel" class="yos-web-port-dialog" hidden aria-label="行動学習の候補"><div id="yosWebHistoryRows"></div></section>
 <div class="app">
   <div class="top">
-    <div class="headrow"><div><div class="daystream-brand">YOS <span>/ DAYSTREAM</span></div><h1>1日のタイムライン</h1><div class="daystream-date"><span id="dateTitle">今日</span> <span id="dayCaption"></span></div></div>
-      <div class="actions">
+    <div class="flow-edit-bar"><button id="flowBack" type="button" aria-label="編集を閉じる">‹</button><strong>タイムラインを編集</strong><button id="flowDone" type="button">完了</button></div>
+    <div class="flow-title"><div class="daystream-brand">YOS <span>/ LIFE FLOW</span></div><h1>1日のタイムライン</h1></div>
+    <div class="flow-date-row"><div class="flow-date-pill"><button id="flowPrev" type="button" aria-label="前の日">‹</button><strong id="dateTitle">今日</strong><button id="flowNext" type="button" aria-label="次の日">›</button><span id="dayCaption" hidden></span></div>
         <button class="iconbtn" type="button" id="dateBtn" aria-label="月カレンダーを開く" aria-controls="monthPicker" aria-expanded="false"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></button>
-        <button class="iconbtn" id="searchBtn" aria-label="検索"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></button>
-        <button class="iconbtn" id="addBtn" aria-label="予定を追加"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></svg></button>
-        <button class="iconbtn" id="moreBtn" aria-label="メニュー"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
-      </div>
-    </div>
+    <button id="flowEdit" type="button">編集</button></div>
     <div class="week" id="weekStrip" aria-label="日付切り替え"></div>
     <input type="date" id="datePicker" hidden aria-label="表示日付（内部）">
     <section class="month-pop" id="monthPicker" hidden aria-label="日付を選ぶ月カレンダー">
@@ -279,7 +401,12 @@ body.yos-daystream-web .yos-web-port,.yos-daystream-web .dock{background:#ffffff
       <p class="coverage" id="monthCoverage"></p>
     </section>
   </div>
-  <div class="calendar-modes" id="calendarModes" role="group" aria-label="DAYSTREAM表示切替"><button type="button" data-view="month" aria-pressed="false">月</button><button type="button" data-view="week" aria-pressed="false">週</button><button type="button" data-view="day" aria-pressed="true">日・24時間</button></div>
+  <div class="calendar-modes" id="calendarModes" role="group" aria-label="DAYSTREAM表示切替"><button type="button" data-view="day" aria-pressed="true">24時間</button><button type="button" data-view="week" aria-pressed="false">週</button><button type="button" data-view="month" aria-pressed="false">月</button></div>
+  <details class="flow-tools"><summary>表示・操作</summary>      <div class="actions">
+        <button class="iconbtn" id="searchBtn" aria-label="検索"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></button>
+
+        <button class="iconbtn" id="moreBtn" aria-label="メニュー"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
+      </div>
   <section class="summary" aria-label="今日の概要">
     <div class="metric"><span class="ring" id="progressRing" style="--pct:0%"></span><span class="stack"><label>今日の進捗</label><strong id="todayProgress">—</strong></span></div>
     <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="m8 11 2 2 5-5m-7 8h8"/></svg>タスク</label><strong id="taskCount">—</strong></div>
@@ -287,16 +414,20 @@ body.yos-daystream-web .yos-web-port,.yos-daystream-web .dock{background:#ffffff
     <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16A8 8 0 0 1 8 4 8 8 0 1 0 20 16Z"/></svg>睡眠予定</label><strong id="sleepInfo">—</strong></div>
   </section>
   <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
-  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><div class="yos-history-actions" role="group" aria-label="操作の取り消しとやり直し"><button id="yosUndoBtn" class="yos-history-button" type="button" aria-label="操作を戻す" title="操作を戻す" disabled>↶</button><button id="yosRedoBtn" class="yos-history-button" type="button" aria-label="操作を進める" title="操作を進める" disabled>↷</button></div><button class="zoomBtn" id="elasticBtn" type="button" aria-pressed="true" aria-label="時間枠の自動サイズ調整を切り替え">自動サイズ ON</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
+  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="elasticBtn" type="button" aria-pressed="true" aria-label="時間枠の自動サイズ調整を切り替え">自動サイズ ON</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
+  </details>
   <div class="all-day" id="dayAllDay" hidden aria-label="終日の予定"></div>
   <div class="editor-backdrop" id="editorBackdrop" aria-hidden="true"></div>
   <div class="editor" id="editor" role="dialog" aria-modal="true" aria-labelledby="editorTitle"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><div class="duration-control"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" aria-label="所要時間（分）"><label for="newDuration">分</label></div><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><span class="edit-end" id="editEnd">終了予定：10:30</span><div id="shortcutField"><label for="shortcutPicker">ショートカット（任意）</label><select id="shortcutPicker" class="shortcut-picker" aria-label="登録済みショートカットから選ぶ"><option value="">候補から選ぶ</option></select><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">設定したショートカットはここから実行できます。実行しても自動完了にはなりません。</small><a id="runShortcut" class="editor-shortcut-run" href="#" hidden>ショートカットを実行</a></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
   <section class="week-overview" id="weekOverview" hidden aria-label="週の予定"><div class="week-overview-head"><button id="weekPrev" type="button" aria-label="前週">‹</button><strong id="weekCaption"></strong><button id="weekNext" type="button" aria-label="翌週">›</button></div><div id="weekAgenda"></div><p class="coverage" id="weekCoverage"></p></section>
+  <button class="iconbtn flow-add" id="addBtn" aria-label="予定を追加"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></svg></button>
+  <div class="yos-history-actions" role="group" aria-label="操作の取り消しとやり直し"><button id="yosUndoBtn" class="yos-history-button" type="button" aria-label="操作を戻す" title="操作を戻す" disabled>↶</button><button id="yosRedoBtn" class="yos-history-button" type="button" aria-label="操作を進める" title="操作を進める" disabled>↷</button></div>
   <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
   <div id="gestureHelp">
   <div class="timeline-legend" aria-label="カードの種類"><span class="legend-fixed">固定予定</span><span class="legend-habit">習慣</span><span class="legend-local">タスク</span></div>
   <p class="gesture-help">上下にスワイプでスクロール · ⠿ または長押しからドラッグで時刻移動</p>
   </div>
+  <div id="flowDragHint" hidden aria-hidden="true"><strong></strong><small></small></div>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p><button id="yosWebTaskRefresh" type="button">iPhoneでNotionタスクを開く</button>
@@ -308,13 +439,17 @@ body.yos-daystream-web .yos-web-port,.yos-daystream-web .dock{background:#ffffff
   <section class="tabbox" id="aiPanel"><h3>AIプラン</h3><p>AIとの連携は未実装です。実行状況を確認せずに予定の自動変更はしません。</p><p class="muted">追加や時間変更はタイムラインで手動操作できます。</p></section>
   <div class="gesture-delete" id="gestureDelete" hidden aria-live="polite"><span id="gestureDeleteTitle"></span><button id="gestureDeleteConfirm" type="button">削除</button><button id="gestureDeleteCancel" class="cancel" type="button">戻す</button></div>
   <dialog id="moveDialog" class="move-sheet" aria-labelledby="moveHeading">
-    <header><h2 id="moveHeading">配置アドバイス</h2><p id="moveTitle"></p></header>
-    <label class="move-time">開始時刻 <input id="moveTime" type="time" step="60" required></label>
-    <p id="moveRange"></p>
-    <section class="move-impact" aria-label="影響する予定・タスク"><h3 id="moveAdvice" aria-live="polite"></h3><ul id="moveImpact"></ul></section>
-    <button id="moveSuggest" type="button" hidden></button>
-    <p class="move-scope">表示中の時間枠から計算。移動はこの端末の時間割に保存します。</p>
-    <footer><button id="moveCancel" type="button">キャンセル</button><button id="moveSave" type="button">移動を保存</button></footer>
+    <div class="flow-advice-bar"><button id="moveCancel" type="button" aria-label="キャンセル">‹</button><strong>タイムラインを編集</strong><button id="moveSave" type="button">保存</button></div>
+    <section class="flow-advice-card flow-verdict">
+      <h2 id="moveHeading"><span aria-hidden="true">💡</span> 配置アドバイス</h2>
+      <div class="flow-proposal"><span id="flowProposalIcon" aria-hidden="true">＋</span><div><strong id="moveTitle"></strong><p id="moveRange"></p></div></div>
+      <label class="move-time">開始時刻 <input id="moveTime" type="time" step="60" required></label>
+      <div class="flow-rating"><strong>総合評価</strong><span id="moveAdvice" aria-live="polite"></span></div>
+    </section>
+    <section class="flow-advice-card move-impact" aria-label="影響する予定・タスク"><h3><span aria-hidden="true">↔</span> 影響するタスク・習慣</h3><ul id="moveImpact"></ul></section>
+    <section class="flow-advice-card" id="moveEvidence"><h3><span aria-hidden="true">▥</span> 根拠・詳細</h3><p class="move-scope" id="moveBasis"></p><a id="moveSource" hidden href="https://sleepeducation.org/healthy-sleep/healthy-sleep-habits/" target="_blank" rel="noopener noreferrer">米国睡眠医学会の睡眠習慣ガイド ↗</a></section>
+    <section class="flow-advice-card" id="flowNextAction"><h3><span aria-hidden="true">☆</span> 配置候補</h3><button id="flowCandidates" type="button">空き時間を探す</button><div id="moveOptions" aria-live="polite"></div></section>
+
   </dialog>
   <div class="focus" id="focus"><b id="focusTitle"></b><p id="focusInfo" aria-live="polite"></p><div class="actions-row"><button id="startActualBtn" class="secondary" hidden>開始を記録</button><button id="doneBtn">完了にする</button><button id="editSelected" class="secondary">編集</button><button id="deleteSelected" class="danger">削除</button><button id="hideFixed" class="secondary" hidden>この画面で隠す</button><button id="closeFocus" class="secondary">閉じる</button></div></div>
 </div>
@@ -923,7 +1058,8 @@ const glyphs={
  bath:'<path d="M3 13h18l-2 7H5zM7 10c-3-3 3-4 0-7m6 7c-3-3 3-4 0-7m6 7c-3-3 3-4 0-7"/>',
  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/>'};
 function eventIcon(item){const t=item.t||'';const type=/睡眠|就寝/.test(t)?'sleep':/歩|ウォーキング/.test(t)?'walk':/朝食|昼食|夕食|ご飯/.test(t)?'meal':/入浴|お風呂/.test(t)?'bath':/運動|筋トレ/.test(t)?'fitness':/会議/.test(t)?'meeting':/集中|作業/.test(t)?'laptop':/仕事/.test(t)?'work':'clock';return '<svg viewBox="0 0 24 24" aria-hidden="true">'+glyphs[type]+'</svg>'}
-let density='overview',scale=27;
+const flowScale=22;
+let density='overview',scale=flowScale;
 let zoom=null,selectedId=null;
 function yosElasticAxis(rows,baseScale){
  const valid=rows.filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440);
@@ -1014,8 +1150,12 @@ function yosReadableAxis(rows,baseScale,backdrops){
   const natural=base.coordinate(end)-base.coordinate(start);
   if(natural<required)spans.push({start,end,extra:required-natural});
  }
+ // Compress leading empty hours in the daily overview while keeping the time map invertible.
+ const first=rows[0]?.s??0;
+ const leading=baseScale===flowScale?base.coordinate(Math.min(first,360)):0;
+ const compress=p=>p-Math.min(p,leading)*.72;
  const coordinate=minute=>{
-  const m=Math.max(0,Math.min(1440,minute));let result=base.coordinate(m);
+  const m=Math.max(0,Math.min(1440,minute));let result=compress(base.coordinate(m));
   for(const band of spans){if(m<=band.start)continue;result+=band.extra*(m>=band.end?1:(m-band.start)/(band.end-band.start))}
   return result;
  };
@@ -1124,7 +1264,7 @@ document.getElementById('saveBtn').onclick=()=>{const title=document.getElementB
 // Conservative, explainable compatibility signals from the *local day's actual time slots*.
 // Never infer health, travel distance or subjective mood from a title; unknown remains neutral.
 const yosCompatRank={unknown:0,positive:1,negative:2,danger:3};
-function yosCompatibility(rows){
+function yosCompatibility(rows,{previous=[],following=[]}={}){
  const valid=rows.filter(x=>x&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440);
  const result=new Map(valid.map(x=>[x.id,{level:'unknown',reasons:[]}]));
  const add=(item,level,reason)=>{
@@ -1154,7 +1294,29 @@ function yosCompatibility(rows){
    add(a,'negative',msg);add(b,'negative',msg);
   }
  }
+ const sleep=row=>/^(?:睡眠|就寝|仮眠)(?:$|[（( ・])/u.test(row.t);
+ const meal=row=>/朝食|昼食|夕食|食事|夜食|ご飯/u.test(row.t)&&!/準備|買い物|支度/u.test(row.t);
+ const prior=previous.filter(meal).map(row=>({...row,id:null,s:row.s-1440}));
+ const next=following.filter(sleep).map(row=>({...row,id:null,s:row.s+1440}));
+ for(const food of [...prior,...valid.filter(meal)]){
+  const end=food.s+food.d;
+  const bedtime=[...valid.filter(sleep),...next].filter(row=>row.s>=end).sort((a,b)=>a.s-b.s)[0];
+  if(!bedtime||bedtime.s-end>60||/軽食|少量/u.test(food.t))continue;
+  const gap=bedtime.s-end;
+  const large=/大きな食事|大盛り|大量|量が多い/u.test(food.t);
+  const facts='「'+food.t+'」の終了から「'+bedtime.t+'」まで'+gap+'分';
+  const why=large?facts+'。就寝直前の量が多い食事は注意候補':facts+'。食事量が不明';
+  add(food,large?'negative':'unknown',why);
+  add(bedtime,large?'negative':'unknown',why);
+ }
  return result;
+}
+function yosDayCompatibility(rows){
+ const date=parseDay(selectedDay);
+ date.setDate(date.getDate()-1);
+ const previous=dayItems(localISO(date));
+ date.setDate(date.getDate()+2);
+ return yosCompatibility(rows,{previous,following:dayItems(localISO(date))});
 }
 function yosOverlapWindows(rows){
  const sorted=rows.filter(x=>x&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
@@ -1178,7 +1340,7 @@ function yosOverlapWindows(rows){
 }
 let latestCompatibility=new Map();
 function yosRenderCompatibility(){
- latestCompatibility=yosCompatibility(items);
+ latestCompatibility=yosDayCompatibility(items);
  const rows=[...latestCompatibility.values()];
  const counts={positive:0,negative:0,danger:0,unknown:0};
  for(const item of rows)counts[item.level]++;
@@ -1236,7 +1398,7 @@ function showDay(iso){
 }
 function renderWeek(){
  const d=parseDay(selectedDay), label=['日','月','火','水','木','金','土'];
- document.getElementById('dateTitle').textContent=(d.getMonth()+1)+'/'+d.getDate()+'（'+label[d.getDay()]+'）';
+ document.getElementById('dateTitle').textContent=(d.getMonth()+1)+'月'+d.getDate()+'日（'+label[d.getDay()]+'）';
  document.getElementById('dayCaption').textContent=selectedDay===todayISO?'今日':'';
  const strip=document.getElementById('weekStrip');strip.textContent='';
  const monday=new Date(d);monday.setDate(d.getDate()-((d.getDay()+6)%7));
@@ -1345,10 +1507,22 @@ function setCalendarMode(mode){
  renderDayAllDay();setTab('timeline');
 }
 for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>setCalendarMode(b.dataset.view);
+function shiftFlowDay(offset){
+ const day=parseDay(selectedDay);day.setDate(day.getDate()+offset);
+ setCalendarMode('day');showDay(localISO(day));
+}
+document.getElementById('flowPrev').onclick=()=>shiftFlowDay(-1);
+document.getElementById('flowNext').onclick=()=>shiftFlowDay(1);
+document.getElementById('flowEdit').onclick=()=>{
+ setCalendarMode('day');document.body.classList.add('flow-editing');window.scrollTo(0,0);
+};
+function exitFlowEdit(){document.body.classList.remove('flow-editing')}
+document.getElementById('flowBack').onclick=exitFlowEdit;
+document.getElementById('flowDone').onclick=exitFlowEdit;
 document.getElementById('weekPrev').onclick=()=>{const d=parseDay(selectedDay);d.setDate(d.getDate()-7);showDay(localISO(d))};
 document.getElementById('weekNext').onclick=()=>{const d=parseDay(selectedDay);d.setDate(d.getDate()+7);showDay(localISO(d))};
 function setTab(name){
- if(name!=='timeline')hideSwipeDelete();
+ if(name!=='timeline'){hideSwipeDelete();exitFlowEdit()}
  document.getElementById('gestureHelp').hidden=name!=='timeline'||calendarMode!=='day';
  for(const b of document.querySelectorAll('[data-tab]')){b.classList.toggle('active',b.dataset.tab===name);b.setAttribute('aria-current',b.dataset.tab===name?'page':'false');}
  document.getElementById('calendarModes').hidden=name!=='timeline';
@@ -1379,7 +1553,7 @@ document.getElementById('yosTestToggle').onclick=()=>{
  smoothRender();updateReview();
 };
 document.getElementById('elasticBtn').onclick=()=>{elasticEnabled=!elasticEnabled;const btn=document.getElementById('elasticBtn');btn.textContent=elasticEnabled?'自動サイズ ON':'自動サイズ OFF';btn.setAttribute('aria-pressed',String(elasticEnabled));smoothRender();};
-document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?27:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';smoothRender();};
+document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?flowScale:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';smoothRender();};
 document.getElementById('searchBtn').onclick=()=>{const row=document.getElementById('searchRow');row.hidden=!row.hidden;if(!row.hidden){setTab('timeline');document.getElementById('searchInput').focus()}else{searchText='';document.getElementById('searchInput').value='';render()}};
 document.getElementById('searchInput').oninput=e=>{searchText=e.target.value.trim().toLocaleLowerCase();render()};
 document.getElementById('moreBtn').onclick=()=>{
@@ -1453,61 +1627,92 @@ const moveDialog=document.getElementById('moveDialog');
 const moveTime=document.getElementById('moveTime');
 let pendingMove=null;
 
+const flowSignals={positive:['＋','相乗候補'],negative:['−','注意'],danger:['！','時間衝突'],unknown:['？','不明']};
+
+function placementAt(item,start){
+ const others=items.filter(other=>other!==item).sort((a,b)=>a.s-b.s);
+ const end=start+item.d;
+ const overlaps=others.filter(other=>start<other.s+other.d&&other.s<end);
+ const signal=yosDayCompatibility([...others,{...item,s:start}]).get(item.id);
+ const level=signal?.level||'unknown';
+ return {level,reason:signal?.reasons[0]||'前後の相性を判断できる情報がありません',others,overlaps};
+}
+
 function renderMoveAdvice(){
  if(!pendingMove)return;
  const {item}=pendingMove;
- const start=/^\d{2}:\d{2}$/.test(moveTime.value)
-  ? Number(moveTime.value.slice(0,2))*60+Number(moveTime.value.slice(3)):NaN;
+ const [hours,minutes]=moveTime.value.split(':').map(Number);
+ const start=hours*60+minutes;
  const valid=Number.isInteger(start)&&start>=0&&start+item.d<=1440;
- const moved=valid&&start!==item.s;
  const entries=document.getElementById('moveImpact');
+ const hint=document.getElementById('moveAdvice');
+ const icon=document.getElementById('flowProposalIcon');
+ const basis=document.getElementById('moveBasis');
+ const source=document.getElementById('moveSource');
  entries.replaceChildren();
- document.getElementById('moveSave').disabled=!moved;
+ document.getElementById('moveOptions').replaceChildren();
+ document.getElementById('flowCandidates').disabled=!valid;
+ document.getElementById('moveSave').disabled=!valid||start===item.s;
  document.getElementById('moveRange').textContent=valid
   ? fmt(item.s)+' → '+fmt(start)+'–'+fmt(start+item.d)
   : '終了時刻が24:00以内になる開始時刻を選んでください';
- const hint=document.getElementById('moveAdvice');
- const suggest=document.getElementById('moveSuggest');
- suggest.hidden=true;
- if(!valid){hint.textContent='この日に収まる時間を指定';hint.dataset.level='';return}
- const end=start+item.d;
- const others=items.filter(other=>other!==item).sort((a,b)=>a.s-b.s);
- const overlaps=others.filter(other=>start<other.s+other.d&&other.s<end);
- hint.textContent=overlaps.length?'時間衝突 '+overlaps.length+'件':'表示中の予定との時間衝突なし';
- hint.dataset.level=overlaps.length?'danger':'clear';
+ const result=valid?placementAt(item,start):{level:'unknown',reason:'開始時刻を指定してください',others:[],overlaps:[]};
+ const {level,reason,others,overlaps}=result;
+ const [mark,name]=flowSignals[level];
+ icon.dataset.level=hint.dataset.level=level;
+ icon.textContent=mark;
+ hint.textContent=mark+' '+name+(overlaps.length?' '+overlaps.length+'件':'');
+ const append=text=>{
+  const row=document.createElement('li');row.textContent=text;entries.append(row);
+ };
  if(overlaps.length){
   for(const other of overlaps){
-   const row=document.createElement('li');
-   const minutes=Math.min(end,other.s+other.d)-Math.max(start,other.s);
-   row.textContent=other.t+' · '+fmt(other.s)+'–'+fmt(other.s+other.d)+'（'+minutes+'分重複）';
-   entries.append(row);
+   const shared=Math.min(start+item.d,other.s+other.d)-Math.max(start,other.s);
+   append(other.t+' · '+fmt(other.s)+'–'+fmt(other.s+other.d)+'（'+shared+'分重複）');
   }
-  let free=start;
-  for(const other of others){
-   if(free<other.s+other.d&&other.s<free+item.d)free=Math.ceil((other.s+other.d)/5)*5;
-  }
-  if(free!==start&&free+item.d<=1440){
-   suggest.hidden=false;
-   suggest.textContent='次の空き枠 '+fmt(free)+'–'+fmt(free+item.d);
-   suggest.onclick=()=>{moveTime.value=fmt(free);renderMoveAdvice()};
-  }
- }else{
+ }else if(valid){
+  const end=start+item.d;
   const before=others.filter(other=>other.s+other.d<=start).sort((a,b)=>b.s+b.d-a.s-a.d)[0];
   const after=others.find(other=>other.s>=end);
-  for(const [other,gap,prefix] of [[before,before?start-before.s-before.d:0,'前'],[after,after?after.s-end:0,'次']]){
-   if(!other)continue;
-   const row=document.createElement('li');
-   row.textContent=prefix+'の予定「'+other.t+'」との間隔 '+gap+'分';
-   entries.append(row);
-  }
-  const signal=yosCompatibility([...others,{...item,s:start}]).get(item.id);
-  if(signal?.level==='positive'||signal?.level==='negative'){
-   const row=document.createElement('li');
-   row.textContent=signal.reasons[0];
-   entries.append(row);
-  }
+  if(before)append('前の予定　'+before.t+' · '+(start-before.s-before.d)+'分前に終了');
+  if(after)append('次の予定　'+after.t+' · 終了から'+(after.s-end)+'分後に開始');
  }
+ if(!entries.children.length)append('表示できる関連予定がありません');
+ basis.textContent=reason;
+ source.hidden=!reason.includes('量が多い食事');
 }
+
+document.getElementById('flowCandidates').onclick=()=>{
+ if(!pendingMove)return;
+ const {item}=pendingMove;
+ const [hours,minutes]=moveTime.value.split(':').map(Number);
+ const requested=hours*60+minutes;
+ const others=items.filter(other=>other!==item);
+ const slots=[];
+ for(let start=0;start+item.d<=1440;start+=5){
+  if(start===requested||start===item.s||others.some(other=>start<other.s+other.d&&other.s<start+item.d))continue;
+  slots.push(start);
+ }
+ slots.sort((a,b)=>Math.abs(a-requested)-Math.abs(b-requested)||a-b);
+ const options=document.getElementById('moveOptions');
+ options.replaceChildren();
+ const candidates=[];
+ for(const start of slots){
+  if(candidates.some(time=>Math.abs(time-start)<Math.max(item.d,15)))continue;
+  candidates.push(start);
+  if(candidates.length===3)break;
+ }
+ for(const start of candidates){
+  const button=document.createElement('button');
+  const signal=placementAt(item,start);
+  button.type='button';
+  button.textContent=fmt(start)+'–'+fmt(start+item.d)+'　'+flowSignals[signal.level].join(' ');
+  button.title=signal.reason;
+  button.onclick=()=>{moveTime.value=fmt(start);renderMoveAdvice()};
+  options.append(button);
+ }
+ if(!options.children.length)options.textContent='表示中の予定内に空き枠がありません';
+};
 
 function openMoveDialog(item,start,previousRect){
  if(moveDialog.open||!items.includes(item)||item.f)return;
@@ -1546,9 +1751,10 @@ document.getElementById('moveSave').onclick=()=>{
 function wireTaskGestures(el,item){
  const holdToMove=260,holdToEdit=750,slop=7;
  const label=el.querySelector('small');
+ const dragHint=document.getElementById('flowDragHint');
  const grip=el.querySelector('.task-drag-grip');
  let gesture=null;
- let armTimer=0,editTimer=0,paintFrame=0;
+ let armTimer=0,editTimer=0,paintFrame=0,ghost=null,lastCandidate=null;
  const clearTimers=()=>{clearTimeout(armTimer);clearTimeout(editTimer)};
  const offset=()=>gesture.y-gesture.startY+window.scrollY-gesture.scrollY;
  const candidateStart=()=>{
@@ -1569,7 +1775,15 @@ function wireTaskGestures(el,item){
   if(direction)window.scrollBy(0,direction*8);
   el.style.transform='translate3d(0,'+offset()+'px,0)';
   const at=candidateStart();
-  label.textContent=fmt(at)+'–'+fmt(at+item.d);
+  if(at!==lastCandidate){
+   lastCandidate=at;
+   label.textContent=fmt(at)+'–'+fmt(at+item.d);
+   const {level,reason}=placementAt(item,at);
+   dragHint.hidden=false;
+   dragHint.dataset.level=el.dataset.placement=level;
+   dragHint.firstElementChild.textContent=flowSignals[level].join(' ')+'　'+fmt(item.s)+' → '+fmt(at);
+   dragHint.lastElementChild.textContent=reason;
+  }
   if(window.scrollY!==prior)paintFrame=requestAnimationFrame(paint);
  };
  const begin=(x,y,id,fromGrip)=>{
@@ -1595,7 +1809,16 @@ function wireTaskGestures(el,item){
    event.preventDefault();
    if(gesture.mode==='armed'&&Math.max(ax,ay)>slop){
     clearTimers();el.classList.remove('press-armed');
-    if(ay>=ax){gesture.mode='drag';el.classList.add('drag-preview')}
+    if(ay>=ax){
+     gesture.mode='drag';
+     el.classList.add('drag-preview');
+     ghost=document.createElement('div');
+     ghost.className='flow-ghost';
+     ghost.setAttribute('aria-hidden','true');
+     ghost.style.top=el.style.top;
+     ghost.style.height=el.offsetHeight+'px';
+     tl.append(ghost);
+    }
     else gesture.mode='ignored';
    }
   }else if(gesture.mode==='tap'&&Math.max(ax,ay)>slop){
@@ -1616,7 +1839,8 @@ function wireTaskGestures(el,item){
    el.style.transform='translate3d(0,'+offset()+'px,0)';
    previousRect=el.getBoundingClientRect();
   }
-  gesture=null;clearTimers();cancelAnimationFrame(paintFrame);paintFrame=0;
+  gesture=null;dragHint.hidden=true;clearTimers();cancelAnimationFrame(paintFrame);paintFrame=0;
+  ghost?.remove();ghost=null;lastCandidate=null;delete el.dataset.placement;
   el.classList.remove('press-armed','drag-preview');el.style.transform='';
   label.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
   if(cancelled)return;
@@ -1667,13 +1891,19 @@ function smoothRender(activeId,oldActiveRect){
  });
 }
 function render(){
- latestCompatibility=yosCompatibility(items);
+ latestCompatibility=yosDayCompatibility(items);
  const sorted=[...items].filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
  const backdrops=yosBackdropRows(sorted);
  elasticAxis=elasticEnabled?yosReadableAxis(sorted,scale,backdrops):null;
  tl.querySelectorAll('.hour,.card,.tick').forEach(n=>n.remove());
  const bottom=yFor(1440);
- for(let h=0;h<=24;h++){const el=document.createElement('div');el.className='hour';el.style.top=yFor(h*60)+'px';el.innerHTML='<span>'+fmt(h*60)+'</span>';tl.append(el)}
+ let lastLabel=-24;
+ for(let h=0;h<=24;h++){
+  const y=yFor(h*60);
+  if(h!==24&&(y-lastLabel<22||bottom-y<20))continue;
+  const el=document.createElement('div');el.className='hour';el.style.top=y+'px';
+  el.innerHTML='<span>'+fmt(h*60).replace(/^0(?=\d)/,'')+'</span>';tl.append(el);lastLabel=y;
+ }
  // Keep short cards readable and pack simultaneous starts above interval backdrops.
  const visualOffsets=new Map();const groups=new Map();
  const zones=[...backdrops.keys()];
@@ -1701,6 +1931,7 @@ function render(){
    if(isTask){el.dataset.durationBand=item.d<=5?'xs':item.d<=15?'sm':item.d<=30?'md':item.d<=60?'lg':item.d<=120?'xl':'xxl';}
    if(backdrop){
     el.classList.add('yos-backdrop');
+    if(sorted.some(other=>other!==item&&other.s<item.s+item.d&&item.s<other.s+other.d))el.classList.add('is-overlapped');
     const {lane,count}=backdrops.get(item),start=lane/count,remaining=(count-lane-1)/count;
     el.style.setProperty('--zone-start',start*100+'%');
     el.style.setProperty('--zone-left',1-start);
@@ -1716,7 +1947,7 @@ function render(){
    let statusEl;
    if(compat){
     el.classList.add('compat-'+compat.level);
-    const label={positive:'＋ 相乗候補',negative:'− 余裕不足',danger:'！ 時間衝突'}[compat.level];
+    const label={positive:'＋ 相乗候補',negative:'− 注意',danger:'！ 時間衝突'}[compat.level];
     const reason=compat.reasons[0]||'相性：判断材料不足';
     el.setAttribute('aria-label',[item.t,fmt(item.s)+'–'+fmt(item.s+item.d),reason].join('、'));
     el.title=reason;
@@ -1724,6 +1955,10 @@ function render(){
      statusEl=document.createElement('span');statusEl.className='layer-status';statusEl.textContent=label;
     }
    }
+   const theme=/就寝準備|読書|リラックス|会議/.test(item.t)?'violet':
+    /ウォーキング|起床|朝の準備|運動|筋トレ|入浴|スキンケア/.test(item.t)||item.kind==='habit'?'mint':
+    /夕食/.test(item.t)?'peach':item.f||item.kind==='schedule'||/睡眠|就寝|朝食|昼食|仕事|作業/.test(item.t)?'blue':'violet';
+   el.dataset.flowTone=theme;
    const iconEl=document.createElement('span');iconEl.className='card-icon';iconEl.innerHTML=eventIcon(item);el.append(iconEl);
    const titleEl=document.createElement('b');titleEl.textContent=item.t;
    const timeEl=document.createElement('small');timeEl.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
@@ -1748,7 +1983,7 @@ function render(){
    if(density==='overview')el.classList.add('compact');
    if(searchText&&!item.t.toLocaleLowerCase().includes(searchText))el.style.display='none';
    el.dataset.id=String(item.id);if(item.done)el.classList.add('done');tl.append(el);
-   const tick=document.createElement('div');tick.className='tick';tick.style.top=(natural-3)+'px';tl.append(tick);
+   const tick=document.createElement('div');tick.className='tick';tick.dataset.flowTone=theme;tick.style.top=(natural-3)+'px';tl.append(tick);
    if(item.f)el.addEventListener('click',()=>showFocusFor(item));
    else wireTaskGestures(el,item);
  });

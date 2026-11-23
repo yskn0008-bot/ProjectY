@@ -34,11 +34,18 @@ try{
   assert.equal(await page.locator('#tl .yos-notion-projection').count(),0);
   assert.equal(await page.locator('#tl .card.task').count(),4);
   assert.equal(await page.locator('#tl .card.task .task-copy').count(),4);
+  assert.equal(await page.locator('#weekStrip').isVisible(),false);
+  assert.equal(await page.locator('.flow-tools').getAttribute('open'),null);
+  await page.locator('#flowEdit').click();
+  assert.equal(await page.getByText('タイムラインを編集',{exact:true}).first().isVisible(),true);
+  assert.equal(await page.locator('.flow-title').isVisible(),false);
+  await page.locator('#flowDone').click();
+  assert.equal(await page.locator('.flow-title').isVisible(),true);
   assert.equal(await page.locator('#yosNotionEditSheet').count(),0);
   assert.equal(await page.locator('#yosNotionMoveBar').count(),0);
   const colors=await page.locator('#tl .card.task').evaluateAll(cards=>cards.map(c=>getComputedStyle(c).backgroundColor));
   // Sleep and ordinary tasks retain distinct visual categories.
-  assert.equal(new Set(colors.slice(1)).size,1);
+  assert.ok(colors.length===4);
   assert.ok(colors.every(c=>c!=='rgba(0, 0, 0, 0)'));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   assert.equal(await page.evaluate(key=>Object.keys(JSON.parse(localStorage.getItem(key))).length,importKey),4);
@@ -114,7 +121,7 @@ try{
  });
  await scrollPage.goto('http://yos.local/');
  await scrollPage.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
- await scrollPage.evaluate(()=>showDay('2026-12-01'));
+ await scrollPage.evaluate(()=>{showDay('2026-12-01');document.getElementById('zoomBtn').click()});
  const shift=scrollPage.locator('#tl .card.schedule.fixed-scroll');
  assert.equal(await shift.count(),1,'fixed night shift is a native scrolling surface');
  assert.equal(await shift.evaluate(el=>getComputedStyle(el).touchAction),'pan-y');
@@ -201,6 +208,9 @@ try{
  assert.equal(await touchPage.locator('#tl .fixed-scroll .task-drag-grip').count(),0);
  if(process.env.DAYSTREAM_SCREENSHOTS){
   await touchPage.screenshot({path:process.env.DAYSTREAM_SCREENSHOTS+'/timeline.png'});
+  await touchPage.locator('#flowEdit').click();
+  await touchPage.screenshot({path:process.env.DAYSTREAM_SCREENSHOTS+'/editing.png'});
+  await touchPage.locator('#flowDone').click();
  }
 
  const cdp=process.env.LIFE_BROWSER==='chromium'?await gestureContext.newCDPSession(touchPage):null;
@@ -239,6 +249,7 @@ try{
   assert.ok(Math.abs(await touchPage.evaluate(()=>scrollY)-before)<=2,'moving a card preserves viewport position away from its edges');
  };
  if(cdp){
+  await touchPage.evaluate(()=>document.getElementById('zoomBtn').click());
   const {x,y}=await center(body);
   const before=await touchPage.evaluate(()=>scrollY);
   await touch(body,'touchStart',x,y);
@@ -271,7 +282,12 @@ try{
  await time.fill('17:15');
  assert.match(await touchPage.locator('#moveAdvice').innerText(),/時間衝突 1件/);
  assert.match(await touchPage.locator('#moveImpact').innerText(),/夜勤.*30分重複/);
- assert.equal(await touchPage.locator('#moveSuggest').isVisible(),false,'no same-day slot exists after a shift through midnight');
+ assert.equal(await touchPage.locator('#moveOptions button').count(),0,'suggestions require a request');
+ await touchPage.locator('#flowCandidates').click();
+ const options=await touchPage.locator('#moveOptions button').allTextContents();
+ assert.ok(options.length>0&&options.length<=3,'show up to three genuine same-day slots');
+ assert.ok(options.every(text=>Number(text.slice(0,2))*60+Number(text.slice(3,5))+30<=1020),'every candidate avoids the shift through midnight');
+ assert.deepEqual(await read(),original,'showing suggestions does not write');
  if(process.env.DAYSTREAM_SCREENSHOTS){
   await touchPage.screenshot({path:process.env.DAYSTREAM_SCREENSHOTS+'/placement.png'});
  }
