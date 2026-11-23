@@ -32,7 +32,7 @@ const mockFile={
  remove:p=>written.delete(p),
 };
 const api=new Function('DrawContext','FileManager','Color','Rect','Size','Font',
- code+'; return {yosXlRows,yosXlImage,yosXlExport}')(MockDrawContext,{iCloud:()=>mockFile},MockColor,MockRect,MockSize,
+ code+'; return {yosXlRows,yosXlImage,yosXlExport,yosXlReadMoves}')(MockDrawContext,{iCloud:()=>mockFile},MockColor,MockRect,MockSize,
  {semiboldSystemFont:n=>n,regularSystemFont:n=>n});
 const now=new Date('2026-11-24T12:00:00+09:00');
 const t=(title,start,end,repeat='daily',done=false)=>({title,startAt:start,endAt:end,repeat,done});
@@ -98,6 +98,38 @@ test('daily task is not shown before its first source day; fictional events stay
  assert.deepEqual(api.yosXlRows([t('新しい習慣','2026-11-23T16:00:00+09:00','2026-11-23T16:30:00+09:00')],null,earlier).rows,[]);
  const p=api.yosXlRows([],{allDayDays:{'2026-11-24':['YOS-TEST-fixture','本当の予定']}},now);
  assert.deepEqual(p.rows.map(x=>x.title),['本当の予定']);
+});
+test('verified per-day move changes the rendered image without modifying the source task',()=>{
+ const id='a'.repeat(32),task={...t('起床','2026-11-23T14:20:00+09:00','2026-11-23T14:50:00+09:00'),id};
+ const move={['2026-11-24|notion:'+id]:930};
+ const p=api.yosXlRows([task],null,now,move);
+ assert.equal(p.localMovesConfirmed,true);
+ assert.equal(p.localMovesApplied,true);
+ assert.equal(p.rows[0].minute,930);
+ assert.equal(task.startAt,'2026-11-23T14:20:00+09:00');
+ captures.length=0;api.yosXlImage(p);
+ assert.ok(captures.some(x=>x.includes('端末内移動反映')));
+});
+test('invalid or unreadable move storage stays at Notion time and is labeled',async()=>{
+ const id='b'.repeat(32),task={...t('食事','2026-11-23T17:00:00+09:00','2026-11-23T17:30:00+09:00'),id};
+ const bad={['2026-11-24|notion:'+id]:1430};
+ const p=api.yosXlRows([task],null,now,bad);
+ assert.equal(p.rows[0].minute,1020);
+ assert.equal(p.localMovesApplied,false);
+ assert.equal((await api.yosXlReadMoves({evaluateJavaScript:async s=>{
+  assert.equal(s,"localStorage.getItem('YOS_DAYSTREAM_NOTION_MOVES_V1')");return JSON.stringify(bad);
+ }}))['2026-11-24|notion:'+id],1430);
+ assert.equal(await api.yosXlReadMoves({evaluateJavaScript:async()=>{throw Error('storage denied')}}),null);
+ assert.equal(api.yosXlRows([task],null,now,null).localMovesConfirmed,false);
+ captures.length=0;api.yosXlImage(api.yosXlRows([task],null,now,null));
+ assert.ok(captures.some(x=>x.includes('移動未反映')));
+});
+test('app WebView reads only existing move storage; Siri retains original presentation route',()=>{
+ assert.match(script,/const view=new WebView\(\);await view\.loadHTML\(output,UI_BASE_URL\)/);
+ assert.match(script,/const moves=await yosXlReadMoves\(view\)/);
+ assert.match(script,/await view\.present\(true\)/);
+ assert.match(script,/await WebView\.loadHTML\(output,UI_BASE_URL,null,true\)/);
+ assert.doesNotMatch(code,/localStorage\.setItem|localStorage\.removeItem/);
 });
 test('fails without platform APIs without altering existing plan or network',()=>{
  const noPlatform=new Function(code+';return yosXlExport;')();
