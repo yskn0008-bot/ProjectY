@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
+// Include the read-only daily/overnight projection contract in the existing CI job.
+import './daystream-one-tap-notion-preview.test.mjs';
 
 const script=readFileSync(new URL('../scriptable/YOS DAYSTREAM Notion.js',import.meta.url),'utf8');
 const root=new URL('../../',import.meta.url);
