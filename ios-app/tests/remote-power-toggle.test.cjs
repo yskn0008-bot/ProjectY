@@ -66,6 +66,12 @@ async function run(input, opts = {}) {
   result = await run('light', { choice: 1 });
   assert.equal(result.calls[0][1], 'POWER OFF');
   await assert.rejects(run('ac', { acRaw: {}, choice: -1 }), /キャンセル/);
+  // Explicit controls remain deterministic even when IR status data is absent.
+  result = await run('light on', { choice: -1 });
+  assert.equal(result.calls[0][1], 'POWER ON');
+  result = await run('ac off', { acRaw: {} });
+  assert.equal(result.calls[0][1].on, false);
+
 
   process.stdout.write('PASS remote power toggle: first-run, flip, failure, AC profile, reset, cancel\n');
 })().catch(error => { console.error(error); process.exitCode = 1; });
