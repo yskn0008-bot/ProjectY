@@ -97,7 +97,7 @@ test('malformed settings fail closed without touching devices',async()=>{
 test('editor displays both modes and saves without dispatching device commands',async()=>{
   const h=harness();await h.execute('');
   assert.equal(h.webs.length,1);
-  assert.match(h.webs[0].html,/Home Scenes/);
+  assert.match(h.webs[0].html,/>外出<\/button>/);
   assert.match(h.webs[0].html,/フロアランプ/);
   const p=blank();p.departure.tv='off';p.arrival.ac='on';
   const accepted=h.webs[0].shouldAllowRequest({url:'https://yos-scenes.local/__save?value='+encodeURIComponent(JSON.stringify(p))});
@@ -123,7 +123,7 @@ test('compact one-screen design has only mode, four appliance rows and save',asy
   assert.match(html,/\["light","照明","Ceiling"\]/);
   assert.match(html,/\["ac","エアコン","SHARP"\]/);
   assert.match(html,/\["floor","フロアランプ","Tapo"\]/);
-  assert.match(html,/button\.dataset\.value=value/);
+  assert.match(html,/b\.dataset\.value=value/);
   assert.match(html,/aria-pressed/);
   assert.match(html,/replaceChildren\(\)/);
   assert.match(html,/--ink:#f5f7ff/);
