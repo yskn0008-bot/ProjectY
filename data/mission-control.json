@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T04:34:12+09:00",
+  "updated_at": "2026-11-24T04:36:01+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-857",
-      "title": "PR #857 YOS JOURNAL｜一次資料照合の非公開プロトタイプと安全テスト",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
-      "updated_at": "2026-11-23T05:39:00Z"
-    },
     {
       "id": "github-pr-890",
       "title": "PR #890 Draft: YOS TAXI 戦略の未判定カード・明示待機タイマー最小改修",
@@ -60,7 +50,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/894",
-      "updated_at": "2026-11-23T19:33:25Z"
+      "updated_at": "2026-11-23T19:34:25Z"
     },
     {
       "id": "github-pr-901",
@@ -113,6 +103,16 @@
       "updated_at": "2026-11-23T19:06:43Z"
     },
     {
+      "id": "github-pr-919",
+      "title": "PR #919 YOS Lists｜タスク行タップで完了・詳細は∨・直前の完了を戻す",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/919",
+      "updated_at": "2026-11-23T19:35:23Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T19:33:35Z"
+      "updated_at": "2026-11-23T19:35:30Z"
     },
     {
       "id": "github-issue-234",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T04:34:12+09:00",
+      "last_update": "2026-11-24T04:36:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 75件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T04:34:12+09:00",
+      "last_update": "2026-11-24T04:36:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T04:34:12+09:00",
+      "last_update": "2026-11-24T04:36:01+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e83b568010a48248879a71231c07dd30e9a744e59412e9b57df17fcb9d9952e2"
+  "github_snapshot_hash": "a43c3164b6894947eaf90062f78f443a0d68492db5314377364d5eba2e79526a"
 }
