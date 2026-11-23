@@ -378,7 +378,7 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
 .timeline .card.short-row .card-icon{width:5px;flex:0 0 5px;height:55%;border-radius:4px;padding:0;background:var(--flow-ink)}
 .timeline .card.short-row .card-icon svg{display:none}
 .timeline .card.short-row .task-copy,.timeline .card.short-row .event-copy{display:flex;flex-direction:row;align-items:center;gap:6px;min-width:0;height:100%}
-.timeline .card.short-row .task-copy b,.timeline .card.short-row .event-copy b{font-size:13px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;min-width:0}
+.timeline .card.short-row .task-copy b,.timeline .card.short-row .event-copy b{font-size:13px;line-height:1.15;white-space:normal;overflow-wrap:anywhere;flex:1 1 auto;min-width:0}
 .timeline .card.short-row .task-meta{flex:0 0 auto;white-space:nowrap}
 .timeline .card.short-row .task-meta small,.timeline .card.short-row .task-copy small{font-size:10px;line-height:1.1;white-space:nowrap}
 .timeline .card.short-row .task-drag-grip{flex-basis:18px;min-width:18px;margin:0;padding:0;font-size:17px;border:0}
@@ -2025,7 +2025,7 @@ function render(){
    const top=natural+(visualOffsets.get(item)||0);
    lastBottom=Math.max(lastBottom,top+height);
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
-   if(!backdrop&&item.d<=15)el.classList.add('short-row');
+   if(!backdrop&&item.d<=15&&[...String(item.t||'')].length<=9)el.classList.add('short-row');
    if(item.f)el.classList.add('fixed-scroll');
    if(isTask){el.dataset.durationBand=item.d<=5?'xs':item.d<=15?'sm':item.d<=30?'md':item.d<=60?'lg':item.d<=120?'xl':'xxl';}
    if(backdrop){
