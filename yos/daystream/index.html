@@ -1787,6 +1787,10 @@ function commitDraggedTime(item,next,previousRect){
  return saved;
 }
 function wireTaskGestures(el,item){
+ // Keep the gesture thresholds and hint reference from the original controller.
+ // Without these, pointermove throws before entering drag mode.
+ const holdToMove=260,holdToEdit=750,slop=7;
+ const dragHint=document.getElementById('flowDragHint');
  const label=el.querySelector('.task-meta small');
  const grip=el.querySelector('.task-drag-grip');
  let gesture=null,armTimer=0,editTimer=0,paintFrame=0,ghost=null,lastCandidate=null;
