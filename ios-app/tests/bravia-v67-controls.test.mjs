@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import vm from 'node:vm';
 
 const prev=fs.readFileSync(new URL('../scriptable/remote-widgets/picture-v66/YOS Remote Hub.js',import.meta.url),'utf8');
 const src=fs.readFileSync(new URL('../scriptable/remote-widgets/picture-v67/YOS Remote Hub.js',import.meta.url),'utf8');
@@ -93,4 +94,11 @@ test('secrets stay out of UI and startup never changes picture or VPN',()=>{
  assert.doesNotMatch(media,/YOS_NOTION_INTEGRATION_TOKEN|ftp:|api\.github\.com/);
  const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
  assert.doesNotThrow(()=>new AsyncFunction(src));
+});
+
+test('embedded remote screen JavaScript parses (not merely Scriptable outer script)',()=>{
+ const begin=src.indexOf('<script>\nconst REMOTES='),end=src.indexOf('</script></body></html>',begin);
+ assert.ok(begin>=0&&end>begin,'remote script was found');
+ const htmlJS=src.slice(begin+8,end).replace(/\$\{JSON\.stringify\([^)]*\)\}/g,'[]');
+ assert.doesNotThrow(()=>new vm.Script(htmlJS));
 });
