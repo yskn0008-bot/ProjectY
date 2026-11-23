@@ -658,7 +658,7 @@ test('verified old Sleep Scene with only a Scriptable icon banner remains update
  await run({cloud,local,id:'sleep-scene',choices:[-1]});
  const name='YOS Sleep Scene',path='/icloud/'+name+'.js';
  const old=fs.readFileSync(new URL('fixtures/YOS Sleep Scene original v1.0.js',import.meta.url),'utf8');
- const banner='// Variables used by Scriptable.\\n// These must be at the very top of the file. Do not edit.\\n// icon-color: deep-green; icon-glyph: magic;\\n';
+ const banner='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: deep-green; icon-glyph: magic;\n';
  cloud.files.set(path,banner+old);
  const rec='/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.receipt.json';
  const oldReceipt=JSON.parse(cloud.files.get(rec));oldReceipt.sha256='5db5b1e0278e9ab0da3c25f2a74a0a5d8682962ad9ac2de3cfd29c8dc98ac47f';cloud.files.set(rec,JSON.stringify(oldReceipt));
