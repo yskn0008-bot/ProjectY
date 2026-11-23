@@ -42,7 +42,7 @@ test('Notion preview keeps independent morning and next-day sleep titles',()=>{
  ];
  const out=a.nativeDirectRows(p.map(r=>a.project(r)));
  assert.deepEqual([...out].map(x=>x.title),['睡眠','起床','水を飲む']);
- assert.deepEqual(out.map(x=>[x.repeat,x.done]),[['once',false],['once',false],['once',false]]);
+ assert.deepEqual(JSON.parse(JSON.stringify(out.map(x=>[x.repeat,x.done]))),[['once',false],['once',false],['once',false]]);
  assert.equal(out[0].startAt,'2026-11-30T21:10:00Z');
  assert.equal(out[0].endAt,'2026-12-01T05:20:00Z');
 });
