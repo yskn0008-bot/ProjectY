@@ -6,7 +6,6 @@
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
 const UI_REF='d6173496a9a21c1d2f67c9fba68bcb4462755d3e';
 const ROOT='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/';
-const UI_BASE_URL='https://yskn0008-bot.github.io/ProjectY/yos/daystream/';
 const SOURCE='965c6086-32c1-463d-93b4-87a9cb69b3ad';
 const STATES=['次にやる','実行中','本人操作','待ち','保留','完了'];
 const clean=(x,n=120)=>String(x??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,n);
@@ -275,7 +274,7 @@ function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCale
   if(!out.includes(marker))throw Error('DAYSTREAMのカレンダー接続箇所が一致しません');
   out=out.replace(marker," const nativeCalendar="+deviceJSON+";");
  }
- out=out.replace('<head>','<head><base href="'+UI_BASE_URL+'">')
+ out=out.replace('<head>','<head><base href="https://yskn0008-bot.github.io/ProjectY/yos/daystream/">')
  .replace('<body class="yos-daystream-web">','<body class="yos-daystream-web"><div id="yosNativeBoot" role="status" style="position:fixed;inset:0;z-index:99999;background:#f4f8fd;color:#1d2d44;padding:80px 20px;font-family:-apple-system,sans-serif">DAYSTREAMを読み込んでいます…</div>');
  // Never start a service worker from the native HTML presentation.
  out=out.replace("if('serviceWorker' in navigator)","if(false)");
@@ -328,7 +327,7 @@ async function main(){
  const deviceCalendar=await readDeviceCalendar(native,data.tasks);
  const output=buildHTML(html,adapters,native,wizard,snapshot,directRows,deviceCalendar,deviceCalendarStatus);
  stage='画面表示';
- await WebView.loadHTML(output,UI_BASE_URL,null,true);
+ await WebView.loadHTML(output,null,null,true);
 }
 // SCRIPTABLE_ENTRY
 try{await main()}catch(error){
