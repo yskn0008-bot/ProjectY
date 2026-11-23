@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-22T07:58:31+09:00",
+  "updated_at": "2026-11-23T14:02:25+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/771",
       "updated_at": "2026-11-18T16:35:41Z"
+    },
+    {
+      "id": "github-pr-789",
+      "title": "PR #789 feat(remote): YOS Remote Web — iPhone Scriptable WebView with native LAN appliance bridge",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/789",
+      "updated_at": "2026-11-17T07:29:19Z"
     },
     {
       "id": "github-pr-818",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-19T16:59:27Z"
     },
     {
-      "id": "github-pr-885",
-      "title": "PR #885 YOS DAYSTREAM｜LIFE FLOWの画面構成を実装",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/885",
-      "updated_at": "2026-11-21T16:58:36Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-21T20:58:15Z"
+      "updated_at": "2026-11-23T05:01:45Z"
     },
     {
       "id": "github-issue-234",
@@ -205,39 +205,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-db62a652cf4c",
-      "title": "chore(yos-ai): retry deferred approved release (1/4)",
-      "completed_at": "2026-11-19T21:47:09Z",
-      "result": "GitHub mainへ反映（db62a65）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/db62a652cf4ca4497a4565104bea2281b13b9a82"
+      "id": "github-commit-b86d8687efb5",
+      "title": "Publish YOS DAYSTREAM LIFE FLOW (#885)",
+      "completed_at": "2026-11-23T05:01:41Z",
+      "result": "GitHub mainへ反映（b86d868）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b86d8687efb556bf6fc9d90f52ef369136843ea5"
     },
     {
-      "id": "github-commit-25c90267848e",
-      "title": "feat(shortcuts): Notion YOS Shopping and Pricey native research launcher (#884)",
-      "completed_at": "2026-11-19T18:03:50Z",
-      "result": "GitHub mainへ反映（25c9026）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/25c90267848e8014ddd59a995d53bc5a36263a0c"
+      "id": "github-commit-cad67e39a337",
+      "title": "Refresh the established daystream-notion installer pin",
+      "completed_at": "2026-11-21T16:56:05Z",
+      "result": "GitHub mainへ反映（cad67e3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cad67e39a3370ebf66ba71e5d8f149eed129a6f4"
     },
     {
-      "id": "github-commit-dabd7243a8c0",
-      "title": "feat(taxi): parse official Naha cruise reservations and distinguish source staleness",
-      "completed_at": "2026-11-19T18:00:30Z",
-      "result": "GitHub mainへ反映（dabd724）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dabd7243a8c0e3bcf670ac32cdbd4910be452e02"
+      "id": "github-commit-6b014e717439",
+      "title": "Pin Scriptable to the verified category and placement display",
+      "completed_at": "2026-11-21T16:56:01Z",
+      "result": "GitHub mainへ反映（6b014e7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6b014e717439caf2deb84701a52242ce36194045"
     },
     {
-      "id": "github-commit-c883c5e8273d",
-      "title": "Merge YOS DAYSTREAM touch and light UI release (#882)",
-      "completed_at": "2026-11-19T17:53:27Z",
-      "result": "GitHub mainへ反映（c883c5e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c883c5e8273d1646a473c0905648ead6d61b4df2"
+      "id": "github-commit-dba6d171f5fa",
+      "title": "Keep LIFE FLOW category colors independent of placement status",
+      "completed_at": "2026-11-21T16:55:59Z",
+      "result": "GitHub mainへ反映（dba6d17）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dba6d171f5fa72287bee63a8eed4384e80ef14ee"
     },
     {
-      "id": "github-commit-32081111fdb7",
-      "title": "Pin the reviewed DAYSTREAM build in the existing installer",
-      "completed_at": "2026-11-19T17:46:14Z",
-      "result": "GitHub mainへ反映（3208111）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/32081111fdb7e7d66eb0e679590238e86d755273"
+      "id": "github-commit-af5f4c5a1711",
+      "title": "Update the existing daystream-notion installer pin",
+      "completed_at": "2026-11-21T16:53:30Z",
+      "result": "GitHub mainへ反映（af5f4c5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/af5f4c5a1711f47d35d57c5c02f249557a2258d0"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-22T07:58:31+09:00",
+      "last_update": "2026-11-23T14:02:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 66件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 65件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-22T07:58:31+09:00",
+      "last_update": "2026-11-23T14:02:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-22T07:58:31+09:00",
+      "last_update": "2026-11-23T14:02:25+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "aa5e98838bbe96812df7aea43230c52d2b94c8e42b711452069383e30a5be055"
+  "github_snapshot_hash": "15492ac894c96a264edc46a97754686f6e316155e2a61ebcead6357589324e3f"
 }
