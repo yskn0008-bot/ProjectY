@@ -65,6 +65,17 @@ async function notion(path,method='GET',body=null){
 async function readSource(kind){
  const result=[],seen=new Set(),source=SOURCES[kind];
  const path='data_sources/'+source+'/query';
+ async function queryPage(body){
+  for(let attempt=0;attempt<3;attempt++){
+   try{return await notion(path,'POST',body)}
+   catch(err){
+    if(!/HTTP 429\b/.test(String(err?.message))||attempt===2)throw err;
+    // Only retry a rejected read query; never blindly resend PATCH mutations.
+    await new Promise(resolve=>Timer.schedule(attempt+1,false,resolve));
+   }
+  }
+  throw Error('Notion取得の再試行が上限に達しました');
+ }
  function collect(rows){
   for(const row of rows){
    const id=id32(row?.id);
@@ -81,7 +92,7 @@ async function readSource(kind){
   return value;
  }
  // Keep the 1-request path for short lists (including current YOS Shopping).
- const first=checkPage(await notion(path,'POST',{page_size:100}));
+ const first=checkPage(await queryPage({page_size:100}));
  if(!first.has_more){
   collect(first.results);
   return result;
@@ -98,7 +109,7 @@ async function readSource(kind){
    {timestamp:'created_time',created_time:{on_or_after:new Date(from).toISOString()}},
    {timestamp:'created_time',created_time:{before:new Date(to).toISOString()}}
   ]};
-  const page=checkPage(await notion(path,'POST',{page_size:100,filter}));
+  const page=checkPage(await queryPage({page_size:100,filter}));
   if(!page.has_more){
    collect(page.results);
    return;
@@ -109,7 +120,14 @@ async function readSource(kind){
   await windowRange(from,mid,depth+1);
   await windowRange(mid,to,depth+1);
  }
- await windowRange(earliest,latest,0);
+ // Query the recent 120-day window first. The older/future windows are still
+ // queried, so older items are not silently omitted. This keeps daily use fast.
+ const now=Date.now(),day=24*60*60*1000;
+ const recentStart=Math.max(earliest,Math.min(latest-2,now-120*day));
+ const recentEnd=Math.min(latest,Math.max(recentStart+1,now+3*day));
+ await windowRange(recentStart,recentEnd,0);
+ if(recentStart>earliest)await windowRange(earliest,recentStart,0);
+ if(recentEnd<latest)await windowRange(recentEnd,latest,0);
  return result;
 }
 async function readAll(){
