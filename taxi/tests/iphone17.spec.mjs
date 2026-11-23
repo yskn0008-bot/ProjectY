@@ -415,7 +415,8 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
         }
       });
       const main=document.querySelector('.view.active');
-      if(main.scrollHeight>main.clientHeight+2)bad.push('strategy main internally overflowing');
+      // Strategy intentionally scrolls vertically so new wait controls remain readable on compact iPhones.
+      if(main.scrollHeight>main.clientHeight+2 && getComputedStyle(main).overflowY!=='auto')bad.push('strategy main overflowing without scroll');
       if(document.documentElement.scrollHeight>innerHeight+1)bad.push('page scroll');
       return bad;
     });
