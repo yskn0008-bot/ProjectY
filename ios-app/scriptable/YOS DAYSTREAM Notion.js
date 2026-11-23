@@ -308,7 +308,7 @@ function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCale
  if(out.split(focusAnchor).length!==2)throw Error('DAYSTREAM詳細形式が変わりました');
  out=out.replace(focusAnchor," if(item.source==='YOS Tasks')fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+' · Notion YOS Tasksから同期。時刻はDAYSTREAM内で移動できます（この端末のみ・Notion原本は変更しません）。';\n"+focusAnchor);
  // Notion cards are moveable locally, but the source records remain immutable.
- // The standard gesture/move sheet is reused; no competing drag UI is installed.
+ // Drag-drop saves immediately; explicit keyboard/time editing still uses the existing sheet.
  const nativePatches=[
   ["const fixed=!!item.f,canHide=fixed&&item.source==='Apple Calendar';",
    "const fixed=!!item.f||item.source==='YOS Tasks',canHide=!!item.f&&item.source==='Apple Calendar';"],
@@ -316,10 +316,6 @@ function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCale
    "document.getElementById('editSelected').hidden=!!item.f&&item.source!=='YOS Tasks';document.getElementById('editSelected').textContent=item.source==='YOS Tasks'?'時刻を移動':'編集';"],
   ["document.getElementById('editSelected').onclick=()=>beginLocalEdit(items.find(x=>x.id===selectedId));",
    "document.getElementById('editSelected').onclick=()=>{const item=items.find(x=>x.id===selectedId);if(item?.source==='YOS Tasks')openMoveDialog(item,item.s,null);else beginLocalEdit(item)};"],
-  ["finish(true);beginLocalEdit(item);",
-   "finish(true);if(item.source==='YOS Tasks')openMoveDialog(item,item.s,null);else beginLocalEdit(item);"],
-  ["if(item.kind==='task'&&dx<0&&ax>ay*1.4&&event.cancelable)",
-   "if(item.kind==='task'&&item.source!=='YOS Tasks'&&dx<0&&ax>ay*1.4&&event.cancelable)"],
   ["pendingMove={item,day:selectedDay,previousRect,plan:localStorage.getItem(yosPlanKey)};",
    "pendingMove={item,day:selectedDay,previousRect,plan:item.source==='YOS Tasks'?null:localStorage.getItem(yosPlanKey)};"],
   ["if(localStorage.getItem(yosPlanKey)!==plan){\n  moveDialog.close();",
