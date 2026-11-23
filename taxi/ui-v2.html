@@ -433,7 +433,8 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
  const time=(s,seconds=false)=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',...(seconds?{second:'2-digit'}:{}),hour12:false}).format(new Date(s));
  const dateKey=(d=new Date())=>{const x=new Date(d.getTime()-CUTOVER*3600000);return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(x)};
  const empty=()=>({businessDate:dateKey(),shiftStart:null,shiftEnd:null,events:[],photos:[],version:1});
- const parse=()=>{try{const s=JSON.parse(localStorage.getItem(STORE)||'null');return s?.version===1&&Array.isArray(s.events)&&Array.isArray(s.photos)?s:empty()}catch{return empty()}};
+ let shiftLedgerError=false;
+ const parse=()=>{try{const raw=localStorage.getItem(STORE);if(raw===null)return empty();const s=JSON.parse(raw);if(s?.version===1&&Array.isArray(s.events)&&Array.isArray(s.photos))return s;shiftLedgerError=true;return empty()}catch{shiftLedgerError=true;return empty()}};
  let state=parse(),selectedFile=null,toastHandle=null;
 
  // Only explicitly tapped wait time is known. Separate schema protects the existing shift/photo/event ledger.
@@ -663,7 +664,20 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 
  const money=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
  const number=n=>typeof n==='number'&&Number.isFinite(n)?n:null;
- const save=s=>{try{localStorage.setItem(STORE,JSON.stringify(s));state=s;return true}catch{notify('保存失敗：端末内記録は更新されませんでした');return false}};
+ const save=s=>{
+   if(shiftLedgerError){notify('既存の乗務記録が読めません。上書きせず停止しました。JSONバックアップを保存してください。');return false}
+   try{
+     const raw=localStorage.getItem(STORE);
+     if(raw!==null){
+       let existing;
+       try{existing=JSON.parse(raw)}catch{shiftLedgerError=true}
+       if(!existing||existing.version!==1||!Array.isArray(existing.events)||!Array.isArray(existing.photos))
+         shiftLedgerError=true;
+       if(shiftLedgerError){notify('乗務記録の異常を検知しました。上書きせず停止しました。');return false}
+     }
+     localStorage.setItem(STORE,JSON.stringify(s));state=s;return true;
+   }catch{notify('保存失敗：端末内記録は更新されませんでした');return false}
+ }
  function toast(msg){const box=$('toast');box.textContent=msg;box.classList.add('show');clearTimeout(toastHandle);toastHandle=setTimeout(()=>box.classList.remove('show'),3000)}
  function notify(msg){toast(msg)}
  function dayEvents(){return state.events.filter(e=>e.businessDate===dateKey())}
@@ -702,7 +716,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
    showDropoffResult('error','端末内に保存できませんでした。記録を追加していない可能性があります。安全な場所で営業履歴を確認してください。');
    return false;
  }
-  function changeShift(){const now=instant(),today=dateKey(new Date(now));if(state.businessDate!==today&&state.shiftStart&&!state.shiftEnd){toast('前回の営業が未終了です。履歴でご確認ください');return}
+  function changeShift(){if(shiftLedgerError){toast('乗務記録を読めません。上書きせず停止しました。履歴からJSONバックアップを保存してください。');return}const now=instant(),today=dateKey(new Date(now));if(state.businessDate!==today&&state.shiftStart&&!state.shiftEnd){toast('前回の営業が未終了です。履歴でご確認ください');return}
  const base=state.businessDate===today?structuredClone(state):{...structuredClone(state),businessDate:today,shiftStart:null,shiftEnd:null};
  if(!base.shiftStart){openSheet('営業を開始',`営業開始の時刻を端末に記録します。`,[{text:'開始する',primary:true,run:()=>{const s=structuredClone(base);s.shiftStart=instant();if(commitShift(s,'shift_start')){render();toast('営業開始を記録しました')}}}]);return}
  if(!base.shiftEnd){openSheet('営業終了',`営業終了時刻を記録します。降車ボタンの未照合件数：${drops().filter(x=>!x.matched).length}件。`,[{text:'終了する',primary:true,run:()=>{const s=structuredClone(base);s.shiftEnd=instant();if(commitShift(s,'shift_end')){render();toast('営業終了を記録しました')}}}]);return}toast('この営業日は終了済みです')}
@@ -711,7 +725,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
  const advice=[['久茂地・牧志で回転','次客までの時間を重視'],['松山・久茂地の需要','同じ待ち方は15分で見直す'],['降車先の次客を確認','帰庫までの効率も比較']];
  const strategyDetail=['退勤・ホテル／GO・無線が中心','飲食移動は回転と次客の早さ','深夜割増。待機過多は避ける','帰宅需要を検証。供給過多に注意','降車後の再乗車と帰庫を比較'];
  function updatePlan(){const band=activeBand(),item=advice[band]||['次の営業に向けて需要を確認','時間帯による初期仮説・現地需要は未確認'];$('decision-text').textContent=item[0];$('decision-sub').textContent=item[1];document.querySelectorAll('[data-band]').forEach(x=>{const slot=Number(x.dataset.band);x.classList.toggle('selected',slot===band);x.classList.toggle('current',slot===(band<0?0:band))});const localHour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(new Date()));const stratSlot=localHour>=17&&localHour<20?0:localHour>=20&&localHour<22?1:localHour>=22?2:localHour<2?3:localHour>=2&&localHour<5?4:-1;document.querySelectorAll('[data-strat]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.strat)===stratSlot));}
- function render(){const now=new Date();$('current-clock').textContent=time(now);const active=isActive(),ended=isEnded();$('status-label').textContent=active?'営業中':ended?'営業終了':'営業前';$('status-dot').className='status-dot '+(active?'':ended?'end':'off');const d=drops();$('ride-count').textContent=d.length+'件';$('pending-count').textContent=d.filter(e=>!e.matched).length+'件';$('analysis-drops').textContent=d.length+'件';$('report-clock').textContent='日報未反映';$('last-reflected').textContent='最終反映：なし（日報）';$('sync-status').textContent='Notion未接続';// Pending Notion integration: never infer a fare from a tap or metadata from a photograph.
+ function render(){const now=new Date();$('current-clock').textContent=time(now);const active=isActive(),ended=isEnded();$('status-label').textContent=shiftLedgerError?'乗務記録読込エラー':active?'営業中':ended?'営業終了':'営業前';$('status-dot').className='status-dot '+(active?'':ended?'end':'off');const d=drops();$('ride-count').textContent=d.length+'件';$('pending-count').textContent=d.filter(e=>!e.matched).length+'件';$('analysis-drops').textContent=d.length+'件';$('report-clock').textContent='日報未反映';$('last-reflected').textContent='最終反映：なし（日報）';$('sync-status').textContent='Notion未接続';// Pending Notion integration: never infer a fare from a tap or metadata from a photograph.
  $('remaining-shift').textContent='未確認';$('remaining-target').textContent='未確認';$('required-hourly').textContent='算出不可';$('confirmed-hourly').textContent='算出不可';$('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';renderConfirmedRevenue();updatePlan();renderWait();renderField();renderHistory()}
  function renderHistory(){const list=$('history-list');list.replaceChildren();const events=dayEvents().slice().reverse();if(!events.length){const el=document.createElement('div');el.className='log';el.textContent='この営業日の記録はまだありません。';list.append(el)}events.forEach(e=>{const row=document.createElement(e.type==='dropoff'?'button':'div');if(e.type==='dropoff')row.type='button';row.className='log'+(e.voidedAt?' voided':'');const a=document.createElement('div');const title=document.createElement('b');title.textContent=e.type==='dropoff'?(e.voidedAt?'降車記録・取消済':'降車時刻'):e.type==='shift_start'?'営業開始':'営業終了';const caption=document.createElement('small');caption.textContent=' '+time(e.at,true)+' ・ '+(e.type==='dropoff'?(e.voidedAt?'取消履歴':'日報未照合'):'端末内記録');a.append(title,document.createElement('br'),caption);const b=document.createElement('span');b.className='badge';b.textContent=e.type==='dropoff'?'訂正':'端末内';row.append(a,b);if(e.type==='dropoff')row.addEventListener('click',()=>{openSheet(e.voidedAt?'降車記録を復帰':'降車記録を取り消す',`記録時刻 ${time(e.at,true)}。取り消しても履歴は削除しません。`,[{text:e.voidedAt?'取消を戻す':'記録を取消',primary:true,run:()=>{const s=structuredClone(state);const target=s.events.find(x=>x.id===e.id);if(!target)return;if(target.voidedAt)delete target.voidedAt;else target.voidedAt=instant();if(save(s)){render();toast('降車記録の状態を更新しました')}}}])});list.append(row)})}
  function renderMonthly(){
