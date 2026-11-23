@@ -95,3 +95,13 @@ test('wrong tax basis, corrupt hashes and unsafe amounts are rejected',()=>{
  assert.equal(e.api.confirm(receipt({photoSha256:'not-a-sha'}),e.store).status,'invalid');
  assert.equal(e.store.getItem(e.api.KEY),null);
 });
+
+
+test('OCR text that identifies an individual ride-history screen cannot be treated as a daily total',()=>{
+ const e=env();
+ for(const text of ['営業履歴 (15) ¥750 ¥2250','営業履歴（15） 総収入 21,950']){
+   const result=e.api.detectText(text);
+   assert.equal(result.kind,'ride-history');
+   assert.equal(result.grossYen,null);
+ }
+});
