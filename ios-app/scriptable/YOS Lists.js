@@ -359,6 +359,29 @@ const needsAttention=x=>x.type==='Task'&&(x.state==='本人操作'||x.state==='�
 const overdue=x=>x.due&&x.due.slice(0,10)<new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date());
 const labels=t=>[t.priority||'',t.state||'',t.due?'期限 '+day(t.due):''].filter(Boolean);
 const order=(a,b)=>Number(overdue(b))-Number(overdue(a))||(['P0','P1','P2','P3'].indexOf(a.priority)<0?4:['P0','P1','P2','P3'].indexOf(a.priority))-(['P0','P1','P2','P3'].indexOf(b.priority)<0?4:['P0','P1','P2','P3'].indexOf(b.priority))||String(a.due||'9999').localeCompare(String(b.due||'9999'));
+// Manual ordering is stored in the existing YOS Tasks 実行順 number property.
+// Legacy numbers below 2,000,000 remain untouched. Unranked tasks retain the previous
+// overdue/priority/date sequence; moving one task only writes that task's property.
+const RANK_BASE=2000000,RANK_LIMIT=4000000,RANK_GAP=1024;
+function defaultRanks(){
+ const rows=state.tasks.filter(isOpen).slice().sort((a,b)=>order(a,b)||a.id.localeCompare(b.id));
+ return new Map(rows.map((t,i)=>[t.id,RANK_BASE+i*RANK_GAP]));
+}
+function effectiveRank(t,defaults){
+ const n=t.manualRank;
+ return Number.isFinite(n)&&n>=RANK_BASE&&n<=RANK_LIMIT?n:defaults.get(t.id);
+}
+function calcReorderRank(before,after,defaults){
+ const a=before?effectiveRank(before,defaults):null;
+ const b=after?effectiveRank(after,defaults):null;
+ let value;
+ if(a!==null&&b!==null){if(!(b-a>0.00001))throw Error('順番の数値に空きがありません。再配置を中止しました');value=(a+b)/2;}
+ else if(a!==null)value=a+RANK_GAP/2;
+ else if(b!==null)value=b-RANK_GAP/2;
+ else throw Error('並び替え先が見つかりません');
+ if(!Number.isFinite(value)||value<RANK_BASE||value>RANK_LIMIT)throw Error('並び順の範囲外です。元の位置を保持しました');
+ return value;
+}
 function notice(message,hide=false,undo=false){
  const n=$('message');if(hide){n.hidden=true;return;}
  $('messageText').textContent=message;
@@ -375,9 +398,10 @@ function render(){
  $('nTasks').textContent=ready.task?state.tasks.filter(isOpen).length:'—';
  $('nShopping').textContent=ready.shopping?state.shopping.filter(isShopping).length:'—';
  $('nAttention').textContent=ready.task?state.tasks.filter(needsAttention).length:'—';
+ $('nProjects').textContent=ready.task?state.tasks.filter(x=>x.type==='Project'&&x.state!=='完了').length:'—';
  const readAt=state.readAt?new Date(state.readAt):null;
  const stamp=readAt?readAt.toLocaleString('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'未確認';
- $('stamp').textContent=(issues.length?'Notion未取得あり ':'Notion取得 ')+stamp+' · '+(issues.length?'失敗した項目は保存不可':'タスク行タップで完了・詳細は右端⌄');
+ $('stamp').textContent=(issues.length?'Notion取得エラー · ':'同期 ')+stamp;
  $('stamp').classList.toggle('is-ready',issues.length===0&&Boolean(state.readAt));
  document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===state.tab)));
  $('search').placeholder=state.tab==='tasks'?'タスクを検索':state.tab==='shopping'?'買い物を検索':state.tab==='attention'?'要対応を検索':'案件を検索';
@@ -390,7 +414,12 @@ function render(){
  const activeKind=state.tab==='shopping'?'shopping':'task';
  const failed=ready[activeKind]===false;
  if(term)items=items.filter(x=>(x.name+' '+(x.next||'')+' '+x.priority+' '+x.category).toLocaleLowerCase('ja-JP').includes(term));
- items.sort((a,b)=>a.kind==='task'&&b.kind==='task'?order(a,b):String(b.updatedAt).localeCompare(String(a.updatedAt)));
+ const defaults=defaultRanks();
+ items.sort((a,b)=>a.kind==='task'&&b.kind==='task'&&a.type==='Task'&&b.type==='Task'?
+  effectiveRank(a,defaults)-effectiveRank(b,defaults)||a.id.localeCompare(b.id):
+  a.kind==='task'&&b.kind==='task'?order(a,b):String(b.updatedAt).localeCompare(String(a.updatedAt)));
+ const sortable=state.tab==='tasks'&&!term&&ready.task!==false&&!state.busy&&items.length>1;
+ $('dragHelp').hidden=!sortable;
  $('section').textContent=(failed?'未取得 · ':'')+title+(term?' · 検索結果 '+items.length+'件':'');
  $('list').innerHTML=items.length?items.map(item=>{
   const task=item.kind==='task',done=task?item.state==='完了':item.purchased;
@@ -399,10 +428,10 @@ function render(){
   const meta='<span class="meta">'+tags.map(t=>'<span class="tag'+(t==='P0'?' urgent':t==='P1'?' high':'')+'">'+safe(t)+'</span>').join('')+'</span>';
   if(task&&item.type==='Task'){
    const disabled=state.busy||ready.task===false?'disabled':'';
-   return '<article class="item item--task'+(done?' done':'')+'" data-id="'+safe(item.id)+'"><div class="item-body">'+
+   return '<article class="item item--task'+(done?' done':'')+(sortable?' is-sortable':'')+'" data-id="'+safe(item.id)+'"><div class="item-body">'+
     '<button type="button" class="item-complete" data-action="complete" data-kind="task" data-id="'+safe(item.id)+'" aria-label="「'+safe(item.name)+'」を完了にする" '+disabled+'>'+
     '<span class="item-name">'+safe(item.name)+'</span>'+meta+'</button></div>'+
-    '<details class="item-details"><summary aria-label="詳細を表示：'+safe(item.name)+'"></summary>'+
+    '<details class="item-details"><summary aria-label="'+(sortable?'タップで詳細、押さえて並び替え：':'詳細を表示：')+safe(item.name)+'"></summary>'+
     '<p><b>'+safe(item.name)+'</b>'+(detail?'\n'+safe(detail):'')+'</p></details></article>';
   }
   const action=!task&&!done?'<button class="action" data-action="purchase" data-kind="shopping" data-id="'+safe(item.id)+'" '+(state.busy?'disabled':'')+'>購入済</button>':'';
