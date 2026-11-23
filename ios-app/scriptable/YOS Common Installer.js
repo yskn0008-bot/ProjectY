@@ -351,9 +351,31 @@ async function install(entry){
     throw Error(restored?'更新に失敗したため、元のコードを復元しました':'更新に失敗し、復旧確認ができません。バックアップを保護しました');
   }
 }
+// Read-only bootstrap inventory: never select, rewrite, or delete either installer.
+async function diagnoseInstallerCopies(){
+  const names=[SELF,SELF+' 最新版'],found=[],locations=stores();
+  for(const loc of locations){
+    for(const name of names){
+      const path=loc.fm.joinPath(loc.fm.documentsDirectory(),name+'.js');
+      if(!loc.fm.fileExists(path))continue;
+      try{
+        const code=await readable(loc.fm,path);
+        const sha=digest(code);
+        const normalized=code.replace(/^\/\/ Variables used by Scriptable\.\r?\n\/\/ These must be at the very top of the file\. Do not edit\.\r?\n\/\/ icon-color: [a-z0-9-]+; icon-glyph: [a-z0-9-]+;\r?\n/,'');
+        found.push({name,kind:loc.kind,sha,normalizedSha:digest(normalized),bytes:code.length});
+      }catch(error){throw Error('インストーラーを読み取れません：'+name+' / '+loc.kind+'。変更していません');}
+    }
+  }
+  const summary=found.length?found.map(x=>x.name+' / '+x.kind+' / SHA256 '+x.sha.slice(0,16)+' / 本文 '+x.normalizedSha.slice(0,16)).join('\n'):'対象スクリプトが見つかりません';
+  await inform('インストーラーの読み取り診断',summary+'\n診断のみ。更新・削除・改名・受領証変更はしていません。',null);
+  return found;
+}
 try{
-  const targets=validateCatalog(JSON.parse(await get(CATALOG)));
   const chosenId=typeof args==='undefined'?'':String(args.shortcutParameter||args.queryParameters?.script||'');
+  if(chosenId==='installer-diagnose'){
+    await diagnoseInstallerCopies();
+  }else{
+  const targets=validateCatalog(JSON.parse(await get(CATALOG)));
   let entry;
   if(chosenId){
     entry=targets.find(x=>x.id===chosenId);
@@ -366,5 +388,6 @@ try{
     if(index>=0)entry=targets[index];
   }
   if(entry)await install(entry);
+  }
 }catch(error){await inform('YOS導入・更新は未完了',String(error.message||error)+'\n元のコードを確認してから再試行してください。',null)}
 finally{Script.complete()}
