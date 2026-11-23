@@ -232,59 +232,22 @@ try{
   assert.deepEqual(offline.plan,pack.plan,'offline launch preserves restored plan');
   assert.equal(offline.calendar['2026-11-13'][0].start,570,'offline launch retains imported calendar');
  }
- // The Web page only starts sign-in after an explicit request on its production origin.
+ // The public DAYSTREAM never initiates Google identity to read private Notion tasks.
+ // Its single sync action opens the existing iPhone Scriptable route instead.
  const liveContext=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Asia/Tokyo',serviceWorkers:'block'});
  const live=await liveContext.newPage();
  const remote=[];
  live.on('request',request=>{if(/accounts\.google\.com|project-y-yos-ai\.vercel\.app/.test(request.url()))remote.push(request.url())});
- const captureDay=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  await live.goto('http://127.0.0.1:4173/yos/daystream/',{waitUntil:'domcontentloaded'});
- await live.locator('#yosTimelineSync').click();
- assert.match(await live.locator('#yosTimelineSyncStatus').innerText(),/正規サイト以外/);
- assert.deepEqual(remote,[]);
-
- const site='https://yskn0008-bot.github.io';
- await liveContext.route(site+'/ProjectY/**',async route=>{
-  const {pathname}=new URL(route.request().url());
-  const relative=pathname.slice('/ProjectY/'.length);
-  const path=relative.endsWith('/')?relative+'index.html':relative;
-  await route.fulfill({path});
- });
- let reads=0;
- await liveContext.route('https://project-y-yos-ai.vercel.app/api/yos/**',route=>{
-  const request=route.request(),url=request.url();
-  if(url.endsWith('/public-config'))return route.fulfill({json:{googleClientId:'valid-id.apps.googleusercontent.com'}});
-  assert.equal(request.method(),'GET');
-  assert.equal(request.headers().authorization,'Bearer test-id-token');
-  reads++;
-  return route.fulfill({json:{source:'notion',complete:true,tasks:[{
-   id:'22222222333344445555666666666666',title:'CLARITY TIMED '+reads,state:'次にやる',sourceKind:'task',
-   evidence:'YOS Inbox clarity:test-window-0001',due:captureDay+'T19:00:00+09:00',dueEnd:captureDay+'T19:30:00+09:00'
-  }]}});
- });
- await live.addInitScript(()=>{
-  let callback;
-  window.google={accounts:{id:{
-   initialize(settings){callback=settings.callback;},
-   renderButton(host){
-    const button=document.createElement('button');button.textContent='Google test sign-in';
-    button.onclick=()=>callback({credential:'test-id-token'});host.append(button);
-   }
-  }}};
- });
- await live.goto(site+'/ProjectY/yos/daystream/',{waitUntil:'domcontentloaded'});
- assert.deepEqual(remote,[],'opening the timeline never starts a remote request');
- await live.locator('#yosTimelineSync').click();
- await live.getByRole('button',{name:'Google test sign-in'}).click();
- await live.locator('#tl .card').filter({hasText:'CLARITY TIMED 1'}).waitFor();
- assert.match(await live.locator('#yosTimelineSyncStatus').innerText(),/正本を更新/);
- assert.equal(await live.locator('#yosTimelineGoogle').isVisible(),false);
- await live.locator('#yosTimelineSync').click();
- await live.locator('#tl .card').filter({hasText:'CLARITY TIMED 2'}).waitFor();
- assert.equal(reads,2,'second sync updates from Notion without asking for sign-in again');
- await live.reload({waitUntil:'domcontentloaded'});
- assert.equal(await live.locator('#tl .card').filter({hasText:'CLARITY TIMED 2'}).count(),1);
- assert.equal(reads,2,'opening again displays the last snapshot without starting sign-in');
+ const link=live.locator('#yosTimelineSync');
+ assert.equal(await link.isVisible(),true);
+ assert.equal(await link.getAttribute('href'),'scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion');
+ assert.equal(await live.locator('#yosTimelineGoogle').count(),0);
+ assert.equal(await live.locator('script[src="./yos-tasks-auth.js"]').count(),0);
+ await live.evaluate(()=>{window.__syncHandoff=null;const el=document.getElementById('yosTimelineSync');el.addEventListener('click',event=>{event.preventDefault();window.__syncHandoff=el.href},{once:true})});
+ await link.click();
+ assert.equal(await live.evaluate(()=>window.__syncHandoff),'scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion');
+ assert.deepEqual(remote,[],'no Google sign-in or server request for a one-tap handoff');
  await liveContext.close();
 
  // A private JSON import merges into THIS original PWA's existing plan.

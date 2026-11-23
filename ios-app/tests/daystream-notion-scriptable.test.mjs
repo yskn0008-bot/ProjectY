@@ -94,6 +94,36 @@ test('web output uses native DAYSTREAM cards without introducing Notion overlays
  assert.doesNotMatch(h,/<script[^>]+src=|accounts\.google\.com\/gsi/);
  for(const m of h.matchAll(/<script>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
 });
+test('native DAYSTREAM displays fetched Notion tasks with a stable WebView base URL',async()=>{
+ const opened=[];
+ const assets=new Map([
+  ['yos/daystream/index.html',text('yos/daystream/index.html')],
+  ['yos/daystream/source-adapters.js',text('yos/daystream/source-adapters.js')],
+  ['life/calendar/native-bridge.js',text('life/calendar/native-bridge.js')],
+  ['yos/daystream/task-wizard.js',text('yos/daystream/task-wizard.js')]
+ ]);
+ const a=api({
+  Keychain:{contains:()=>true,get:()=> 'notion-test-token'},
+  Request:class{
+   constructor(url){this.url=url;this.response={statusCode:200}}
+   async loadJSON(){return {results:[row()],has_more:false}}
+   async loadString(){
+    const p=this.url.replace(/^https:\/\/raw\.githubusercontent\.com\/yskn0008-bot\/ProjectY\/[a-f0-9]+\//,'');
+    if(!assets.has(p))throw Error('Unexpected native asset '+p);
+    return assets.get(p);
+   }
+  },
+  WebView:{loadHTML:async(...args)=>opened.push(args)}
+ });
+ await a.main();
+ assert.equal(opened.length,1);
+ const [html,base,size,full]=opened[0];
+ assert.equal(base,'https://yskn0008-bot.github.io/ProjectY/yos/daystream/');
+ assert.ok(html.includes('<base href="'+base+'">'));
+ assert.equal(size,null);
+ assert.equal(full,true);
+ assert.doesNotMatch(html,/notion-test-token|accounts\.google\.com\/gsi/);
+});
 test('missing iPhone Keychain does not edit any source data',async()=>{
  const labels=[];class Alert{addAction(){}async presentAlert(){labels.push(this.title)}}
  const a=api({Keychain:{contains:()=>false},Alert,Request:class{constructor(){throw Error('unexpected Request')}}});
