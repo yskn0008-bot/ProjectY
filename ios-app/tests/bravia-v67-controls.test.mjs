@@ -99,6 +99,6 @@ test('secrets stay out of UI and startup never changes picture or VPN',()=>{
 test('embedded remote screen JavaScript parses (not merely Scriptable outer script)',()=>{
  const begin=src.indexOf('<script>\nconst REMOTES='),end=src.indexOf('</script></body></html>',begin);
  assert.ok(begin>=0&&end>begin,'remote script was found');
- const htmlJS=src.slice(begin+8,end).replace(/\$\{JSON\.stringify\([^)]*\)\}/g,'[]');
+ const htmlJS=src.slice(begin+8,end).replace(/\$\{[^}]+\}/g,'0');
  assert.doesNotThrow(()=>new vm.Script(htmlJS));
 });
