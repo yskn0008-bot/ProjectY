@@ -358,7 +358,7 @@ function yosXlImage(snapshot){
  if(snapshot.rows.length>list.length)text('ほか '+(snapshot.rows.length-list.length)+'件',48,938,240,28,18,'#668099');
  box(48,975,544,2,'#DCE6EF');
  const d=new Date(snapshot.checkedAt),hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
- text('取得 '+hm+' · YOS Tasks取得済 · Apple予定'+(snapshot.calendarConfirmed?'取得済':'未取得'),48,989,540,28,15,'#668099');
+ text('取得 '+hm+' · Notion基準時刻 · 移動未反映 · Apple予定'+(snapshot.calendarConfirmed?'取得済':'未取得'),48,989,540,28,15,'#668099');
  return c.getImage();
 }
 function yosXlExport(templates,calendar){
