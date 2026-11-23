@@ -13,6 +13,8 @@ const SOURCES={
  shopping:'d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc'
 };
 let lastUndo=null; // Only the most recent completion in this Scriptable session can be reversed.
+// Existing YOS Tasks property 実行順: preserve legacy (<2m) values; new compact-list ranks occupy a separate range.
+const MANUAL_BASE=2000000,MANUAL_LIMIT=4000000,MANUAL_GAP=1024;
 const tidy=(x,n=220)=>typeof x==='string'?x.replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,n):'';
 const id32=x=>tidy(x,45).replace(/-/g,'').toLowerCase();
 const validId=x=>/^[0-9a-f]{32}$/.test(id32(x));
@@ -29,7 +31,8 @@ function itemFromRow(row,kind){
  return kind==='task'?{
   id:id32(row.id),kind,name,state:select(p['状態']),priority:select(p['優先度']),
   type:select(p['種類']),owner:select(p['担当']),due:date(p['期限']),
-  next:rich(p['次の一手'],'rich_text'),updatedAt:tidy(row.last_edited_time,65)
+  next:rich(p['次の一手'],'rich_text'),manualRank:Number.isFinite(p['実行順']?.number)?p['実行順'].number:null,
+  updatedAt:tidy(row.last_edited_time,65)
  }:{
   id:id32(row.id),kind,name,type:select(p['区分']),state:select(p['買い物状態']),
   category:select(p['分類']),priority:select(p['優先度']),purchased:p['購入済']?.checkbox===true||select(p['買い物状態'])==='購入済',
@@ -161,6 +164,34 @@ function dayInTokyo(){
 async function perform(request){
  if(!request||typeof request!=='object')throw Error('操作の形式が不正です');
  if(request.action==='refresh')return {action:'refresh',data:await readAll()};
+ if(request.action==='reorder-task'){
+  const id=id32(request.id),expected=tidy(request.expected,65);
+  const oldRank=request.oldRank===null?null:Number(request.oldRank),newRank=Number(request.rank);
+  if(!validId(id)||!expected||!Number.isFinite(newRank)||newRank<MANUAL_BASE||newRank>MANUAL_LIMIT||
+     !(oldRank===null||Number.isFinite(oldRank)))throw Error('並び順の指定が不正です。書込を中止しました');
+  const path='pages/'+id;
+  const first=assertPage(await notion(path),'task',id);
+  if(first.type!=='Task'||first.state==='完了'||first.updatedAt!==expected||first.manualRank!==oldRank)
+   throw Error('タスクが他の場所で変更されたため、並び替えを中止しました。更新してください');
+  const neighbors=[request.before,request.after].filter(Boolean);
+  const idsSeen=new Set([id]);
+  for(const nb of neighbors){
+   const neighborId=id32(nb.id),edited=tidy(nb.updatedAt,65);
+   if(!validId(neighborId)||!edited||idsSeen.has(neighborId))throw Error('並び替え先が不正です');
+   idsSeen.add(neighborId);
+   const page=assertPage(await notion('pages/'+neighborId),'task',neighborId);
+   if(page.type!=='Task'||page.state==='完了'||page.updatedAt!==edited)
+    throw Error('並び替え先が変更されました。更新してください');
+  }
+  const fresh=assertPage(await notion(path),'task',id);
+  if(fresh.updatedAt!==expected||fresh.manualRank!==oldRank||fresh.state==='完了')
+   throw Error('保存直前に変更を検知しました。並び替えを中止しました');
+  await notion(path,'PATCH',{properties:{'実行順':{number:newRank}}});
+  const verified=assertPage(await notion(path),'task',id);
+  if(verified.manualRank!==newRank||verified.state==='完了')
+   throw Error('並び順の保存確認に失敗しました。再送せず更新してください');
+  return {action:'reorder-task',kind:'task',item:verified};
+ }
  if(request.action==='undo-complete'){
   const id=id32(request.id),expected=tidy(request.expected,65),previous=lastUndo;
   if(!validId(id)||!previous||previous.id!==id||previous.updatedAt!==expected)
