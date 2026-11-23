@@ -41,6 +41,25 @@
     const hits=r.records.filter(x=>x.businessDate===businessDate);
     return hits.length?{...hits[hits.length-1]}:null;
   };
+  // A monthly number is a snapshot of independently confirmed days, NOT finalized payroll.
+  // Never add multiple photos from the same day or combine tax-included and excluded figures.
+  function monthSummary(month,storage=root.localStorage){
+    if(typeof month!=='string'||!(/^\d{4}-(0[1-9]|1[0-2])$/).test(month))
+      return {status:'invalid-month',dayCount:0,totalYen:null,taxBasis:null};
+    const state=load(storage);
+    if(state.error)return {status:'corrupt-preserved',dayCount:0,totalYen:null,taxBasis:null};
+    const byDay=new Map();
+    for(const record of state.records)if(record.businessDate.startsWith(month+'-'))
+      byDay.set(record.businessDate,record); // latest confirmed snapshot replaces an earlier snapshot
+    const days=[...byDay.values()],dayCount=days.length;
+    if(!dayCount)return {status:'no-data',dayCount:0,totalYen:null,taxBasis:null};
+    const bases=new Set(days.map(record=>record.taxBasis));
+    if(bases.size!==1)return {status:'mixed-basis',dayCount,totalYen:null,taxBasis:null};
+    const taxBasis=days[0].taxBasis;
+    if(taxBasis==='unconfirmed')return {status:'basis-unconfirmed',dayCount,totalYen:null,taxBasis};
+    return {status:'partial',dayCount,taxBasis,
+      totalYen:days.reduce((sum,record)=>sum+record.amountYen,0)};
+  }
   // Intentionally refuses whole-day totals from individual ride-history screens.
   const detectText=text=>{
     const s=String(text||'').replace(/\u00a0/g,' ');
@@ -73,5 +92,5 @@
     catch{return {status:'storage-error'}}
     return {status:'saved',record:{...entry}};
   }
-  root.YosTaxiConfirmedRevenueV1=Object.freeze({KEY,toYen,detectText,load,list,latest,confirm});
+  root.YosTaxiConfirmedRevenueV1=Object.freeze({KEY,toYen,detectText,load,list,latest,monthSummary,confirm});
 })(window);
