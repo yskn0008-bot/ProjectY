@@ -396,7 +396,7 @@ async function updateSelf(){
   }else writeChecked(fm,backup,original);
   if(digest(await readable(fm,target))!==oldHash)throw Error('更新直前に本体が変更されました');
   for(const loc of locations){
-    if(loc!==selected&&loc.fm.fileExists(loc.fm.joinPath(loc.fm.documentsDirectory(),SELF+'.js')))
+    if(loc.kind!==selected.kind&&loc.fm.fileExists(loc.fm.joinPath(loc.fm.documentsDirectory(),SELF+'.js')))
       throw Error('別の保存先に同名本体が見つかりました');
   }
   try{
