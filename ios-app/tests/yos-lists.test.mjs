@@ -398,3 +398,96 @@ test('dragging to the very first or last row stays inside the dedicated numeric 
  const moved={...rows[2],manualRank:top};
  assert.equal([rows[0],rows[1],moved].sort((a,b)=>h.effectiveRank(a,ranks)-h.effectiveRank(b,ranks))[0].id,'c');
 });
+
+
+test('multiple completed Task rows retain separate undo receipts until the WebView closes',async()=>{
+ const extra=row('task');extra.id='c'.repeat(32);
+ extra.properties['やること']={title:[{plain_text:'別の確認タスク'}]};
+ const h=await harness({},[extra]);
+ const initial=await h.app.readAll();
+ const first=initial.tasks.find(x=>x.id===ids.task);
+ const second=initial.tasks.find(x=>x.id===extra.id);
+ const doneFirst=await h.app.perform({action:'complete',kind:'task',id:first.id,expected:first.updatedAt});
+ const doneSecond=await h.app.perform({action:'complete',kind:'task',id:second.id,expected:second.updatedAt});
+ assert.equal(doneFirst.canUndo,true);
+ assert.equal(doneSecond.canUndo,true);
+ assert.equal(h.writes,2);
+ const undoFirst=await h.app.perform({action:'undo-complete',kind:'task',id:first.id,expected:doneFirst.item.updatedAt});
+ assert.equal(undoFirst.item.state,'次にやる');
+ assert.equal(h.records[extra.id].properties['状態'].select.name,'完了','the other completion remains intact');
+ const undoSecond=await h.app.perform({action:'undo-complete',kind:'task',id:second.id,expected:doneSecond.item.updatedAt});
+ assert.equal(undoSecond.item.state,'次にやる');
+ assert.equal(h.writes,4);
+ await assert.rejects(()=>h.app.perform({action:'undo-complete',kind:'task',id:first.id,expected:doneFirst.item.updatedAt}),/元に戻せる/);
+ assert.equal(h.writes,4);
+});
+
+function sessionView(html){
+ const elements=new Map();
+ function element(id){
+  if(!elements.has(id))elements.set(id,{
+   id,innerHTML:'',textContent:'',value:'',hidden:false,disabled:false,
+   classList:{toggle(){},add(){},remove(){}},
+   addEventListener(){},setAttribute(){},
+  });
+  return elements.get(id);
+ }
+ const document={
+  getElementById:element,
+  addEventListener(){},
+  querySelectorAll(){return [];}
+ };
+ const window={
+  addEventListener(){},
+  confirm(){return true}
+ };
+ const js=html.split('<script>')[1].split('</script>')[0];
+ const ui=new Function('document','window',js+'\nreturn {state,sessionCompleted,render};')(document,window);
+ return {ui,window,elements,element};
+}
+test('completion remains in the same Task list until the view closes; row tap reverses it',async()=>{
+ const h=await harness();
+ const boot=await h.app.readAll();
+ const original=boot.tasks.find(x=>x.id===ids.task);
+ const view=sessionView(h.app.htmlWithData(boot));
+ const list=view.element('list');
+ assert.match(list.innerHTML,/確認タスク/);
+ assert.doesNotMatch(list.innerHTML,/class="item item--task done"/);
+ const completed=await h.app.perform({action:'complete',kind:'task',id:original.id,expected:original.updatedAt});
+ view.window.YOS_LISTS_REPLY({ok:true,...completed});
+ assert.equal(view.ui.sessionCompleted.has(original.id),true,'the session remembers the completed page ID');
+ assert.match(list.innerHTML,/class="item item--task done"/,'completed row stays on screen');
+ assert.match(list.innerHTML,/data-action="undo-complete"/,'tapping the same row now reverses it');
+ assert.match(list.innerHTML,/✓ 完了/,'completed status is visible');
+ assert.match(list.innerHTML,/確認タスク/);
+ assert.equal(view.element('nTasks').textContent,0,'tab count still reports only unfinished Tasks');
+ assert.match(view.element('section').textContent,/今回完了 1件/);
+ view.window.YOS_LISTS_REPLY({ok:true,action:'refresh',data:await h.app.readAll()});
+ assert.match(list.innerHTML,/data-action="undo-complete"/,'refresh does not hide a completion made in this WebView');
+ const restored=await h.app.perform({action:'undo-complete',kind:'task',id:original.id,expected:completed.item.updatedAt});
+ view.window.YOS_LISTS_REPLY({ok:true,...restored});
+ assert.equal(view.ui.sessionCompleted.has(original.id),false);
+ assert.match(list.innerHTML,/data-action="complete"/);
+ assert.doesNotMatch(list.innerHTML,/class="item item--task done"/);
+ const reopened=sessionView(h.app.htmlWithData(await h.app.readAll()));
+ assert.equal(reopened.ui.sessionCompleted.size,0,'closing and reopening does not persist completion highlights');
+ assert.doesNotMatch(reopened.element('list').innerHTML,/今回完了/);
+});
+test('completion from attention tab stays there until closing, even after tab changes',async()=>{
+ const h=await harness();
+ h.records[ids.task].properties['状態']={select:{name:'待ち'}};
+ const boot=await h.app.readAll();
+ const view=sessionView(h.app.htmlWithData(boot));
+ view.ui.state.tab='attention';view.ui.render();
+ const original=boot.tasks[0];
+ const completed=await h.app.perform({action:'complete',kind:'task',id:original.id,expected:original.updatedAt});
+ view.window.YOS_LISTS_REPLY({ok:true,...completed});
+ assert.match(view.element('list').innerHTML,/確認タスク/);
+ assert.match(view.element('list').innerHTML,/data-action="undo-complete"/);
+ view.ui.state.tab='shopping';view.ui.render();
+ view.ui.state.tab='attention';view.ui.render();
+ assert.match(view.element('list').innerHTML,/確認タスク/);
+ const reopened=sessionView(h.app.htmlWithData(await h.app.readAll()));
+ reopened.ui.state.tab='attention';reopened.ui.render();
+ assert.doesNotMatch(reopened.element('list').innerHTML,/確認タスク/,'completed task must not appear in the next session');
+});
