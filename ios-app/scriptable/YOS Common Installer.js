@@ -406,16 +406,22 @@ async function updateSelf(){
   }
   try{
     writeChecked(fm,target,next);
-    await inform('共通インストーラー更新完了','バックアップ保存済み。次回起動時に新しいコードが使われます。',null);
   }catch(error){
+    // A failed write can leave a partial file, not just the exact new hash.
+    // Restore any changed bytes only if the same path is still present.
     try{
-      if(digest(await readable(fm,target))===release.sha256)writeChecked(fm,target,original);
-      if(digest(await readable(fm,target))===oldHash)throw Error('更新に失敗したため元の本体に復旧しました');
+      if(!fm.fileExists(target))throw Error('更新対象が消失しました');
+      const damaged=await readable(fm,target);
+      if(digest(damaged)!==oldHash)writeChecked(fm,target,original);
+      if(digest(await readable(fm,target))===oldHash)
+        throw Error('更新に失敗したため元の本体に復旧しました');
     }catch(recovery){
       if(String(recovery.message||'').includes('復旧しました'))throw recovery;
     }
     throw Error('更新失敗。復旧確認できません。バックアップは保護しました');
   }
+  // UI failure must never trigger a rollback of an already verified update.
+  await inform('共通インストーラー更新完了','バックアップ保存済み。次回起動時に新しいコードが使われます。',null);
 }
 // Read-only bootstrap inventory: never select, rewrite, or delete either installer.
 async function diagnoseInstallerCopies(){
