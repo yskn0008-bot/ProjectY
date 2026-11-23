@@ -360,3 +360,37 @@ test('JOURNAL rejects absent edition ID and non-editorial input before any write
  assert.equal(m.counts.writes,0);
  assert.equal(m.files.size,0,'rejected JOURNAL input must not mutate local Clarity receipts');
 });
+
+
+test('JOURNAL Shortcuts Dictionary and JSON-string handoff share one stable private receipt',async()=>{
+  const m=mocked();
+  const draft='【YOS_EDITORIAL_DRAFT_V1】\n【資料と照合状況】\n公開不可・要審査\n'+('編集済みの研究原稿'.repeat(25));
+  const payload={source:'journal',rawText:draft,captureId:'journal:edition-20261124-002',routeMode:'raw-only'};
+  assert.match(await m.run(JSON.stringify(payload)),/Notion Inbox保存確認済み/);
+  assert.match(m.blocks[0].paragraph.rich_text[0].text.content,/YOS JOURNAL Draft · journal:edition-20261124-002/);
+  assert.equal(m.blocks[1].paragraph.rich_text[0].text.content,draft);
+  assert.match(await m.run(payload),/保存確認済み/);
+  assert.equal(m.counts.writes,1,'JSON and Dictionary retry must never create two receipts');
+  assert.equal(m.counts.routed,0,'JOURNAL must never be auto-routed to Tasks');
+});
+
+test('malformed JOURNAL JSON string is held without writing to Clarity or Notion',async()=>{
+  const m=mocked();
+  const invalid='{"source":"journal","captureId":"journal:edition-20261124-002","rawText":';
+  assert.match(await m.run(invalid),/Notion未保存/);
+  assert.equal(m.counts.writes,0);
+  assert.equal(m.files.size,0,'malformed JOURNAL input must not be stored as a Clarity voice');
+});
+
+test('JOURNAL emoji at Notion chunk boundary remains intact after splitting',async()=>{
+  const m=mocked();
+  const header='【YOS_EDITORIAL_DRAFT_V1】\n【資料と照合状況】\n公開不可・要審査\n';
+  const draft=header+'a'.repeat(1499-header.length)+'😀'+'b'.repeat(180);
+  assert.equal(draft.charCodeAt(1499)>=0xD800,true,'test places high surrogate at original 1500-char cut');
+  assert.match(await m.run({source:'journal',rawText:draft,captureId:'journal:edition-20261124-emoji'}),/Notion Inbox保存確認済み/);
+  const chunks=m.blocks.slice(1,-1).map(x=>x.paragraph.rich_text[0].text.content);
+  assert.equal(chunks.join(''),draft);
+  assert.equal(chunks[0].length,1499);
+  assert.equal(chunks[1].startsWith('😀'),true);
+  assert.equal(m.counts.routed,0);
+});
