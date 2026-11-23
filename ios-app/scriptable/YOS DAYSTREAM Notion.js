@@ -538,6 +538,11 @@ async function main(){
   try{yosXlExport(directRows,deviceCalendar,moves)}
   catch(err){console.warn('DAYSTREAM XL画像作成未確認：'+clean(err?.message||err,100))}
   await view.present(true);
+  // If the user moved a task while the page was open, refresh after dismissal.
+  // A released WebView can refuse evaluation; keep the previous PNG in that case.
+  const finalMoves=await yosXlReadMoves(view);
+  if(finalMoves!==null)try{yosXlExport(directRows,deviceCalendar,finalMoves)}
+  catch(err){console.warn('DAYSTREAM XL画像再作成未確認：'+clean(err?.message||err,100))}
  }else{
   try{yosXlExport(directRows,deviceCalendar)}
   catch(err){console.warn('DAYSTREAM XL画像作成未確認：'+clean(err?.message||err,100))}
