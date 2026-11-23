@@ -310,6 +310,19 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 .view.strategy{overflow-y:auto;overscroll-behavior:contain}.view.strategy .strategy-action{background:linear-gradient(120deg,#d6f7fc,#e4edff);border:1px solid #a8dff3;box-shadow:0 5px 15px #5986c01c;color:#163e70}.view.strategy .decision-kicker{color:#197ca0}.view.strategy .strategy-action strong{color:#174777}.view.strategy .strategy-action p{color:#4b6c91}.view.strategy .wait-card{background:linear-gradient(140deg,#fff,#eaf5ff);color:#153b6b}.wait-card #wait-toggle{background:linear-gradient(100deg,#15b9c1,#4c99eb);border:0;color:white}.view.strategy .strategy-evidence{background:#fff;border-color:#d7e5f7}.view.strategy .strat-row{background:#fff;border-color:#d6e5f6;color:#1b3e6b}.view.strategy .strat-row time{color:#4d78a4}.view.strategy .strat-row small{color:#687e9a}.view.strategy .strat-row.selected{background:#e6f5ff;border-color:#76bde7}.view.strategy .strat-row.selected time,.view.strategy .strat-row.selected b{color:#1264b0}.view.strategy .strategy-foot{background:linear-gradient(110deg,#dff8ff,#e5edff);border-color:#b4d9f4}.view.strategy .strategy-foot span{color:#377e9c}.view.strategy .strategy-foot strong{color:#1b568e}
 .view.monthly{overflow-y:auto;gap:12px}.monthly-head{flex:0 0 auto;text-align:center;padding:13px}.monthly-head h2{margin:0;font-size:20px}.monthly-head span{display:block;font-size:11px;color:#7487a2;margin-top:5px}.monthly-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;padding:10px;flex:0 0 auto}.month-weekday{text-align:center;font-size:11px;font-weight:900;color:#6780a2}.month-weekday:first-child{color:#d65e75}.month-weekday:nth-child(7){color:#287dd2}.month-day{min-height:49px;border:1px solid #e0eafa;background:#f9fbff;border-radius:9px;text-align:center;padding:7px 1px}.month-day b{display:block;font-size:13px}.month-day small{display:block;font-size:11px;color:#a5b4c9;margin-top:3px}.monthly-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:15px 5px;gap:0}.monthly-summary>div{text-align:center;min-width:0}.monthly-summary>div+div{border-left:1px solid #d8e4f4}.monthly-summary small{display:block;font-size:10px;color:#667c9d}.monthly-summary strong{display:block;margin-top:7px;font-size:15px;color:#174c87}.monthly-notice{padding:16px;font-size:12px;line-height:1.7;color:#5d7393}.view.history .history-sub,.view.analysis .analysis-note,.view.analysis .analysis-memo{color:#476483}.log{background:#fff;color:#21456d;border-color:#d5e3f6}.log small{color:#69809f}.log .badge{color:#4d729e}.secondary-btn{background:#e9f4ff;color:#246aa6;border-color:#b5d5f4}
 @media(max-width:350px){.sales-card .metrics .main-value{font-size:26px}.pace-grid strong{font-size:15px}.branding h1{font-size:20px}.quick #drop-btn .copy b{font-size:12px}.quick .copy small{display:none}}
+
+/* Local, manually verified report totals. A photograph is never automatically trusted or uploaded. */
+.confirmed-revenue-form[hidden]{display:none!important}
+.confirmed-revenue-form{display:grid;gap:9px;max-height:50dvh;overflow:auto;padding:9px 2px 2px;color:#254368}
+.confirmed-revenue-form img{width:100%;max-height:160px;object-fit:contain;background:#eef3fb;border-radius:12px}
+.confirmed-revenue-form label{display:grid;gap:4px;font-size:13px;line-height:1.4;font-weight:750}
+.confirmed-revenue-form input:not([type="checkbox"]),.confirmed-revenue-form select,.confirmed-revenue-form textarea{width:100%;box-sizing:border-box;padding:10px 11px;min-height:44px;background:#fff;border:1px solid #aac6e8;border-radius:10px;color:#1c385c;font:inherit;font-size:16px}
+.confirmed-revenue-form textarea{min-height:60px}
+.confirmed-revenue-form .revenue-check{display:flex;align-items:center;gap:9px;font-size:13px}
+.confirmed-revenue-form .revenue-check input{width:20px;height:20px;flex:none}
+.confirmed-revenue-form button{min-height:46px;border:0;border-radius:11px;background:#217dc6;color:white;font-size:15px;font-weight:900}
+.confirmed-revenue-form .revenue-note{font-size:12px;color:#516c8e;line-height:1.45}
+.confirmed-revenue-form #revenue-status{font-size:12px;color:#8e4d23;white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -371,7 +384,22 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 <main class="view monthly" id="monthly-view" aria-label="月次売上画面"><section class="panel monthly-head"><h2 id="monthly-title">2026年11月</h2><span>確認済み日報のみを集計</span></section><section class="panel monthly-calendar" id="monthly-calendar" aria-label="月間カレンダー"></section><section class="panel monthly-summary"><div><small>今月の売上</small><strong>未同期</strong></div><div><small>月間目標</small><strong>未設定</strong></div><div><small>達成率</small><strong>—</strong></div></section><section class="panel monthly-notice">日報の累積金額・営業日・勤務時間を照合するまでは、日別実績や給与予測を表示しません。過去の端末記録は変更しません。</section></main><main class="view history" id="history-view" aria-label="記録履歴画面"><div class="section-head">端末内｜降車・乗務記録</div><div class="panel history-sub">本画面は端末内の降車時刻を保存します。日報との自動照合・Notion保存は未接続。旧UIの記録は保持しています。</div><div id="history-list" class="history-list"></div><div class="history-controls"><button class="secondary-btn" id="export-btn">JSONバックアップを保存</button><button class="secondary-btn" id="history-info-btn">旧UIの記録を開く</button></div><div class="footer-card"><svg><use href="#icon-info"/></svg>保存先：この端末内のみ。Notion未連携</div></main>
 <main class="view analysis" id="analysis-view" aria-label="営業分析画面"><div class="section-head">確認できる数値だけを表示</div><div class="statgrid"><div class="stat"><small>降車ボタン記録</small><strong id="analysis-drops">0件</strong></div><div class="stat"><small>日報の売上</small><strong>未接続</strong></div><div class="stat"><small>実車時間率</small><strong>未計測</strong></div><div class="stat"><small>空車時間</small><strong>未計測</strong></div></div><div class="panel analysis-note">過去の紙日報に降車時刻がない場合、正確な空車時間は算出できません。新しい降車タップと、日報から得る乗車時刻・乗車番号を照合できたものだけ分析に利用します。</div><div class="panel analysis-memo">計画中：<br>① 日報写真と前回写真の差分読取<br>② 降車時刻との一意な照合<br>③ Notion正本へ認証付きの安全な登録<br>④ 30乗務の実績で那覇戦略の再校正</div><div class="footer-card"><svg><use href="#icon-info"/></svg>未確認情報を実績・確定売上として扱わない</div></main>
 <nav class="nav" aria-label="画面切替"><button type="button" class="active" data-page="sales"><svg><use href="#icon-car"/></svg>営業</button><button type="button" data-page="strategy"><svg><use href="#icon-pin"/></svg>戦略</button><button type="button" data-page="history"><svg><use href="#icon-note"/></svg>履歴</button><button type="button" data-page="analysis"><svg><use href="#icon-bars"/></svg>分析</button></nav>
-<div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="操作確認"><div class="sheet"><button class="close" type="button" id="close-modal" aria-label="閉じる">×</button><h2 id="modal-title">確認</h2><div id="dropoff-outcome" class="dropoff-outcome" hidden><span id="dropoff-outcome-badge"></span><strong id="dropoff-outcome-time"></strong><span id="dropoff-outcome-count"></span></div><p id="modal-body"></p><div id="modal-actions" class="buttonrow"></div></div></div>
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="操作確認"><div class="sheet"><button class="close" type="button" id="close-modal" aria-label="閉じる">×</button><h2 id="modal-title">確認</h2><div id="dropoff-outcome" class="dropoff-outcome" hidden><span id="dropoff-outcome-badge"></span><strong id="dropoff-outcome-time"></strong><span id="dropoff-outcome-count"></span></div><div id="modal-body"></div>
+<form id="revenue-form" class="confirmed-revenue-form" hidden>
+<img id="revenue-preview" alt="選択した日報写真。必ず総収入欄を見比べてください。">
+<label>営業日<input id="revenue-day" type="date" required></label>
+<label>日報の総収入（円）<input id="revenue-amount" type="text" inputmode="numeric" placeholder="例：21950" required></label>
+<label>金額の区分<select id="revenue-basis"><option value="unconfirmed">税込・税抜は未確認</option><option value="tax-included">税込と確認</option><option value="tax-excluded">税抜と確認</option></select></label>
+<label>日報に記載された時刻（あれば）<input id="revenue-clock" type="time"></label>
+<label>写真からコピーした文字（任意・自動確定しません）<textarea id="revenue-text" placeholder="iPhoneのテキスト認識結果を貼り付けると、総収入候補を表示します"></textarea></label>
+<span id="revenue-extract" class="revenue-note">写真の文字は自動読取していません。</span>
+<label class="revenue-check"><input id="revenue-is-total" type="checkbox" required>これは個別乗車履歴ではなく、総収入欄のある日報です</label>
+<label class="revenue-check"><input id="revenue-checked" type="checkbox" required>写真を見比べ、営業日と金額を確認しました</label>
+<label class="revenue-check"><input id="revenue-correction" type="checkbox">この営業日の過去記録を訂正する（履歴は残す）</label>
+<p class="revenue-note">この端末内だけに金額と写真の識別情報を保存。写真本体・認証情報は保存・送信せず、Notionには自動同期しません。</p>
+<p id="revenue-status" role="status" aria-live="polite"></p>
+<button type="submit" id="revenue-save-btn">確認済み累積売上を記録</button>
+</form><div id="modal-actions" class="buttonrow"></div></div></div>
 <section class="field-layer" id="field-layer" role="dialog" aria-modal="true" aria-labelledby="field-title" hidden>
 <div class="field-sheet"><div class="field-top"><h2 id="field-title">現状を報告</h2><button id="field-close" class="field-close" type="button" aria-label="閉じる">×</button></div>
 <p class="field-hint">安全に停車中、確認できた事実をタップするだけ。入力や会話は不要です。</p>
@@ -394,6 +422,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 </div>
 <script src="../yos/hj/yos-ai-client.js"></script>
 <script src="../yos/hj/yos-auth.js"></script>
+<script src="./verified-revenue-v1.js"></script>
 <script>
 'use strict';
 (()=>{
@@ -683,13 +712,88 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
  const strategyDetail=['退勤・ホテル／GO・無線が中心','飲食移動は回転と次客の早さ','深夜割増。待機過多は避ける','帰宅需要を検証。供給過多に注意','降車後の再乗車と帰庫を比較'];
  function updatePlan(){const band=activeBand(),item=advice[band]||['次の営業に向けて需要を確認','時間帯による初期仮説・現地需要は未確認'];$('decision-text').textContent=item[0];$('decision-sub').textContent=item[1];document.querySelectorAll('[data-band]').forEach(x=>{const slot=Number(x.dataset.band);x.classList.toggle('selected',slot===band);x.classList.toggle('current',slot===(band<0?0:band))});const localHour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(new Date()));const stratSlot=localHour>=17&&localHour<20?0:localHour>=20&&localHour<22?1:localHour>=22?2:localHour<2?3:localHour>=2&&localHour<5?4:-1;document.querySelectorAll('[data-strat]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.strat)===stratSlot));}
  function render(){const now=new Date();$('current-clock').textContent=time(now);const active=isActive(),ended=isEnded();$('status-label').textContent=active?'営業中':ended?'営業終了':'営業前';$('status-dot').className='status-dot '+(active?'':ended?'end':'off');const d=drops();$('ride-count').textContent=d.length+'件';$('pending-count').textContent=d.filter(e=>!e.matched).length+'件';$('analysis-drops').textContent=d.length+'件';$('report-clock').textContent='日報未反映';$('last-reflected').textContent='最終反映：なし（日報）';$('sync-status').textContent='Notion未接続';// Pending Notion integration: never infer a fare from a tap or metadata from a photograph.
- $('remaining-shift').textContent='未確認';$('remaining-target').textContent='未確認';$('required-hourly').textContent='算出不可';$('confirmed-hourly').textContent='算出不可';$('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';updatePlan();renderWait();renderField();renderHistory()}
+ $('remaining-shift').textContent='未確認';$('remaining-target').textContent='未確認';$('required-hourly').textContent='算出不可';$('confirmed-hourly').textContent='算出不可';$('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';renderConfirmedRevenue();updatePlan();renderWait();renderField();renderHistory()}
  function renderHistory(){const list=$('history-list');list.replaceChildren();const events=dayEvents().slice().reverse();if(!events.length){const el=document.createElement('div');el.className='log';el.textContent='この営業日の記録はまだありません。';list.append(el)}events.forEach(e=>{const row=document.createElement(e.type==='dropoff'?'button':'div');if(e.type==='dropoff')row.type='button';row.className='log'+(e.voidedAt?' voided':'');const a=document.createElement('div');const title=document.createElement('b');title.textContent=e.type==='dropoff'?(e.voidedAt?'降車記録・取消済':'降車時刻'):e.type==='shift_start'?'営業開始':'営業終了';const caption=document.createElement('small');caption.textContent=' '+time(e.at,true)+' ・ '+(e.type==='dropoff'?(e.voidedAt?'取消履歴':'日報未照合'):'端末内記録');a.append(title,document.createElement('br'),caption);const b=document.createElement('span');b.className='badge';b.textContent=e.type==='dropoff'?'訂正':'端末内';row.append(a,b);if(e.type==='dropoff')row.addEventListener('click',()=>{openSheet(e.voidedAt?'降車記録を復帰':'降車記録を取り消す',`記録時刻 ${time(e.at,true)}。取り消しても履歴は削除しません。`,[{text:e.voidedAt?'取消を戻す':'記録を取消',primary:true,run:()=>{const s=structuredClone(state);const target=s.events.find(x=>x.id===e.id);if(!target)return;if(target.voidedAt)delete target.voidedAt;else target.voidedAt=instant();if(save(s)){render();toast('降車記録の状態を更新しました')}}}])});list.append(row)})}
- function renderMonthly(){const now=new Date(),fmt=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'numeric'}).format(now);$('monthly-title').textContent=fmt;const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit'}).formatToParts(now),year=Number(parts.find(x=>x.type==='year').value),month=Number(parts.find(x=>x.type==='month').value),days=new Date(year,month,0).getDate(),offset=new Date(year,month-1,1).getDay(),cal=$('monthly-calendar');cal.replaceChildren();for(const name of ['日','月','火','水','木','金','土']){const el=document.createElement('span');el.className='month-weekday';el.textContent=name;cal.append(el)}for(let i=0;i<offset;i++){const el=document.createElement('span');el.className='month-blank';cal.append(el)}for(let d=1;d<=days;d++){const el=document.createElement('div');el.className='month-day';const date=document.createElement('b');date.textContent=String(d);const val=document.createElement('small');val.textContent='—';el.append(date,val);cal.append(el)}}
+ function renderMonthly(){const now=new Date(),fmt=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'numeric'}).format(now);$('monthly-title').textContent=fmt;const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit'}).formatToParts(now),year=Number(parts.find(x=>x.type==='year').value),month=Number(parts.find(x=>x.type==='month').value),days=new Date(year,month,0).getDate(),offset=new Date(year,month-1,1).getDay(),cal=$('monthly-calendar');cal.replaceChildren();for(const name of ['日','月','火','水','木','金','土']){const el=document.createElement('span');el.className='month-weekday';el.textContent=name;cal.append(el)}for(let i=0;i<offset;i++){const el=document.createElement('span');el.className='month-blank';cal.append(el)}for(let d=1;d<=days;d++){const el=document.createElement('div');el.className='month-day';const date=document.createElement('b');date.textContent=String(d);const val=document.createElement('small');const api=window.YosTaxiConfirmedRevenueV1;const record=api?.latest(`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`);val.textContent=record?'¥'+record.amountYen.toLocaleString('ja-JP'):'—';el.append(date,val);cal.append(el)}}
  function navigate(page){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===page+'-view'));document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page))}
- function openSheet(title,body,actions=[]){$('modal').classList.remove('dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true;$('modal-title').textContent=title;$('modal-body').textContent=body;const area=$('modal-actions');area.replaceChildren();const cancel=document.createElement('button');cancel.textContent='閉じる';cancel.addEventListener('click',closeSheet);area.append(cancel);actions.forEach(a=>{const btn=document.createElement('button');btn.textContent=a.text;btn.classList.toggle('primary',a.primary===true);btn.addEventListener('click',()=>{closeSheet();a.run()});area.append(btn)});$('modal').classList.add('open')}
- function closeSheet(){$('modal').classList.remove('open','m100-open','dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true}
- function handleFile(file){if(!file)return;if(!file.type.startsWith('image/')){toast('画像ファイルを選んでください');return}selectedFile=file;openSheet('日報写真を選択しました',`${file.name}\n画像は現在未送信・未保存です。共有シートが使える場合は共有先のアプリを選んでください。Notionへの自動照合は未実装です。`,[{text:'共有シートを開く',primary:true,run:sharePhoto}])}
+ function openSheet(title,body,actions=[]){$('revenue-form').hidden=true;releaseRevenuePreview();$('modal').classList.remove('dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true;$('modal-title').textContent=title;$('modal-body').textContent=body;const area=$('modal-actions');area.replaceChildren();const cancel=document.createElement('button');cancel.textContent='閉じる';cancel.addEventListener('click',closeSheet);area.append(cancel);actions.forEach(a=>{const btn=document.createElement('button');btn.textContent=a.text;btn.classList.toggle('primary',a.primary===true);btn.addEventListener('click',()=>{closeSheet();a.run()});area.append(btn)});$('modal').classList.add('open')}
+ function closeSheet(){releaseRevenuePreview();$('revenue-form').hidden=true;$('modal').classList.remove('open','m100-open','dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true}
+
+ let revenuePreviewUrl=null;
+ function renderConfirmedRevenue(){
+   const api=window.YosTaxiConfirmedRevenueV1;if(!api)return;
+   const r=api.load();if(r.error){$('report-clock').textContent='日報記録を読めません';return}
+   const confirmed=api.latest(state.businessDate);
+   if(!confirmed)return;
+   $('sales-value').textContent=money(confirmed.amountYen);
+   $('report-clock').textContent='総収入を端末で確認・'+(confirmed.taxBasis==='unconfirmed'?'税込／税抜未確認':confirmed.taxBasis==='tax-included'?'税込':'税抜');
+   $('last-reflected').textContent='営業日 '+confirmed.businessDate+' の写真確認額・Notion未同期';
+ }
+ function releaseRevenuePreview(){
+   if(revenuePreviewUrl){URL.revokeObjectURL(revenuePreviewUrl);revenuePreviewUrl=null}
+   $('revenue-preview').removeAttribute('src');
+ }
+ function openRevenueConfirm(){
+   if(!selectedFile){toast('写真を選択してください');return}
+   const api=window.YosTaxiConfirmedRevenueV1;
+   if(!api){openSheet('記録できません','安全な保存機能を読み込めませんでした。既存データは変更していません。');return}
+   openSheet('紙日報の累積額を確認','この画面では写真から数字を自動認識しません。写真の総収入欄だけを確認して記録します。');
+   const form=$('revenue-form');form.reset();form.hidden=false;
+   $('revenue-day').value=state.businessDate;
+   $('revenue-extract').textContent='写真の文字は自動読取していません。';
+   $('revenue-status').textContent='';
+   releaseRevenuePreview();
+   revenuePreviewUrl=URL.createObjectURL(selectedFile);
+   $('revenue-preview').src=revenuePreviewUrl;
+ }
+ async function saveRevenueForm(ev){
+   ev.preventDefault();
+   const api=window.YosTaxiConfirmedRevenueV1,file=selectedFile;
+   if(!api||!file||!/^image\//.test(file.type)||file.size>16*1024*1024){
+     $('revenue-status').textContent='画像を確認できません。保存していません。';return;
+   }
+   if(!$('revenue-is-total').checked||!$('revenue-checked').checked){
+     $('revenue-status').textContent='日報と営業日・金額の確認が必要です。';return;
+   }
+   if(!crypto.subtle?.digest){$('revenue-status').textContent='写真の重複検知が使えません。保存しません。';return}
+   let hash;
+   try{
+     const bytes=await file.arrayBuffer();
+     const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
+     hash='sha256:'+Array.from(digest,b=>b.toString(16).padStart(2,'0')).join('');
+   }catch{$('revenue-status').textContent='写真を読み取れず保存できませんでした。';return}
+   const day=$('revenue-day').value,previous=api.latest(day);
+   const input={businessDate:day,amountYen:$('revenue-amount').value,reportClock:$('revenue-clock').value||null,
+     taxBasis:$('revenue-basis').value,photoSha256:hash,photoKind:'paper-total'};
+   if($('revenue-correction').checked&&previous)input.correctionOf=previous.id;
+   const result=api.confirm(input);
+   const reasons={
+     'invalid':'営業日・総収入・区分の形式を確認してください。',
+     'duplicate-photo':'同じ写真は記録済みです。二重加算しません。',
+     'duplicate-total':'同一の累積額です。追加していません。',
+     'needs-correction-confirmation':'同じ営業日の記録があります。時刻の確認か、訂正チェックが必要です。',
+     'stale-report':'前回より古い時刻の写真です。訂正する場合のみ明示してください。',
+     'decrease-needs-review':'前回より金額が少ないため、自動更新しません。訂正ならチェックしてください。',
+     'corrupt-preserved':'既存の記録が読めません。上書きせず停止しました。',
+     'storage-error':'端末の保存に失敗しました。既存データは保持しています。',
+     'stale-correction':'訂正先の記録が変わっています。再確認してください。'
+   };
+   if(result.status!=='saved'){$('revenue-status').textContent=reasons[result.status]||'保存できませんでした。';return}
+   selectedFile=null;
+   closeSheet();render();renderMonthly();
+   toast('累積総収入を確認額で更新しました（端末内・Notion未同期）');
+ }
+ function onRevenueText(){
+   const api=window.YosTaxiConfirmedRevenueV1;if(!api)return;
+   const found=api.detectText($('revenue-text').value);
+   if(found.kind==='ride-history'){$('revenue-extract').textContent='個別の営業履歴です。日報の累積売上には使えません。';return}
+   if(found.kind==='paper-total'&&found.grossYen!==null){
+     $('revenue-extract').textContent='総収入候補 '+money(found.grossYen)+'。必ず写真と照合してください。';
+     $('revenue-amount').value=String(found.grossYen);
+   }else{$('revenue-extract').textContent='総収入の候補を特定できません。写真を直接確認してください。'}
+ }
+
+ function handleFile(file){if(!file)return;if(!file.type.startsWith('image/')){toast('画像ファイルを選んでください');return}selectedFile=file;openSheet('日報写真を選択しました',`${file.name}\n画像は現在未送信・未保存です。金額の確認後に端末内へ記録できます。Notionへの自動照合は未実装です。`,[{text:'総収入を確認して記録',primary:true,run:openRevenueConfirm},{text:'共有シートを開く',run:sharePhoto}])}
  async function sharePhoto(){const file=selectedFile;if(!file){toast('写真を先に選択してください');return}try{if(navigator.canShare?.({files:[file]})&&navigator.share){await navigator.share({files:[file],title:'YOS Taxi｜手書き日報',text:'YOS Taxiの日報写真です。既存の乗務記録と差分を照合してください。'});toast('共有先での取り込み結果を確認してください（Notion連携なし）')}else{openSheet('写真の共有は未対応','この環境では写真共有シートを利用できません。写真をChatGPT等へ直接共有してください。')}}catch(e){if(e?.name!=='AbortError')toast('写真を共有できませんでした')}}
  function exportJson(){const data={disclaimer:'このファイルは新UIの端末内時刻記録です。Notion正本・紙日報の代替ではありません',state};const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`yos-taxi-local-${state.businessDate}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000)}
  // M100 is a safe-stop checklist, not an automatic revenue predictor.
@@ -712,6 +816,8 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
  $('field-undo').addEventListener('click',undoField);
  $('field-yos-send').addEventListener('click',sendFieldToYos);
  $('m100-rule-btn').addEventListener('click',showM100);
+ $('revenue-form').addEventListener('submit',saveRevenueForm);
+ $('revenue-text').addEventListener('input',onRevenueText);
  $('wait-toggle').addEventListener('click',()=>{if(confirmedWait())finishWait();else startWait()});
  // Shortcut widget deep-link: the action runs ONLY in the storage container that opens this URL.
  // iOS standalone PWA storage is separate from Safari; never create a new shift silently.
