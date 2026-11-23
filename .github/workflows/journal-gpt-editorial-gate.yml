@@ -9,6 +9,8 @@ on:
       - 'journal/private-to-public-review-bridge.mjs'
       - 'journal/tests/private-notion-to-reader.e2e.test.mjs'
       - 'journal/tests/private-to-public-review-bridge.test.mjs'
+      - 'ios-app/scriptable/YOS Clarity Inbox Bridge.js'
+      - 'ios-app/tests/clarity-inbox-bridge.test.mjs'
       - 'journal/notion-private-draft-readback.mjs'
       - 'journal/tests/notion-private-draft-readback.test.mjs'
       - 'journal/gpt-editorial-gate.mjs'
@@ -86,6 +88,10 @@ jobs:
           path: /tmp/yos-journal-reader-preview/YOS-JOURNAL-PREVIEW.html
           if-no-files-found: error
           retention-days: 7
+      - name: Test existing Clarity Inbox transport with private JOURNAL draft inputs (mocked API)
+        run: |
+          node --check 'ios-app/scriptable/YOS Clarity Inbox Bridge.js'
+          node --test ios-app/tests/clarity-inbox-bridge.test.mjs
       - name: Test private Notion draft receipt readback (mocked API, zero content logs)
         run: |
           node --check journal/notion-private-draft-readback.mjs
