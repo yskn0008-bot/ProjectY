@@ -306,8 +306,8 @@ body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
 .flow-editing :is(.flow-date-row,.calendar-modes,.flow-tools,#gestureHelp,.dock,.flow-add,.native-tools){display:none}
 .flow-editing .timeline{margin-top:23px}
 .move-sheet:open{
- position:fixed;inset:auto 0 0;width:min(460px,100%);max-width:100%;
- max-height:min(560px,68svh);margin:0 auto;padding:0 12px max(16px,env(safe-area-inset-bottom));
+ position:fixed;inset:max(32dvh,calc(100dvh - 560px)) 0 auto;width:min(460px,100%);max-width:100%;
+ height:min(560px,68dvh);max-height:none;margin:0 auto;padding:0 12px max(16px,env(safe-area-inset-bottom));
  border:1px solid #d0daea;border-radius:23px 23px 0 0;
  background:radial-gradient(ellipse at 100% 0,#d5edff,transparent 68%),linear-gradient(170deg,#e2e7fb,#f0ebf8 60%,#f3f8e8);
  overflow:auto;overscroll-behavior:contain;scroll-padding-top:60px;
