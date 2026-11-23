@@ -13,6 +13,8 @@ const date='2026-12-01',rows=[
  row('2026-11-30T21:10:00Z','2026-12-01T05:20:00Z',
   '睡眠','d'.repeat(32),'yos-daystream-routine-202612-sleep')
 ];
+// The next-day override assertion requires a recurring Notion fixture.
+for(const record of rows)record.properties['習慣周期']={select:{name:'毎日'}};
 const html=htmlFor(rows),browser=await (process.env.LIFE_BROWSER==='webkit'?webkit:chromium).launch({headless:true});
 const store='YOS_DAYSTREAM_WEB_PLAN_V1';
 try{
