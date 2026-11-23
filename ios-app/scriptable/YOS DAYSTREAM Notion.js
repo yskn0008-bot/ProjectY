@@ -139,8 +139,8 @@ const BROWSER_DIRECT_IMPORT=String.raw`
  const next={...days},covered={...seen};
  let count=0;
  for(const v of seeds){
-  const {id,day,title,s,d,done}=v||{},ref='yos-direct:'+id;
-  if(!/^[a-f0-9]{32}$/.test(id)||!/^\d{4}-\d{2}-\d{2}$/.test(day)||
+  const {id,day,title,s,d,done,part}=v||{},ref='yos-direct:'+id+(part==='next'?':next':'');
+  if((part!==undefined&&part!=='next')||!/^[a-f0-9]{32}$/.test(id)||!/^\d{4}-\d{2}-\d{2}$/.test(day)||
     typeof title!=='string'||!title||title.length>120||
     !Number.isInteger(s)||!Number.isInteger(d)||s<0||d<1||s+d>1440||typeof done!=='boolean')return;
   if(covered[ref])continue;
@@ -171,22 +171,31 @@ function nativeDirectRows(tasks){
   const d=new Date(ms+540*60000);
   return {day:d.toISOString().slice(0,10),minute:d.getUTCHours()*60+d.getUTCMinutes()};
  };
+ const approved=key=>/^yos-daystream-routine-202612-(?:night(?:-[a-z]+)?|wake(?:-[a-z]+)?|care(?:-[a-z]+)?|sleep)$/.test(key)||
+  /^yos-daystream-ideal-20261123-(?:meal|journal|free)$/.test(key);
  const rows=[],used=new Set();
  for(const t of tasks){
-  if(!t||!/^yos-daystream-routine-202612-(?:night(?:-[a-z]+)?|wake(?:-[a-z]+)?|care(?:-[a-z]+)?|sleep)$/.test(t.syncKey||''))continue;
+  if(!t||!approved(t.syncKey||''))continue;
   if(t.sourceKind!=='task'||!/^[a-f0-9]{32}$/.test(t.id||'')||!STATES.includes(t.state)||
     !validAt(t.due)||!validAt(t.dueEnd)||!t.due.includes('T')||!t.dueEnd.includes('T')||
     used.has(t.id))throw Error('生活タスクの元データを確認できません');
-  const a=tokyo(t.due),b=tokyo(t.dueEnd),duration=(Date.parse(t.dueEnd)-Date.parse(t.due))/60000;
-  if(!a||!b||a.day!==b.day||!Number.isInteger(duration)||duration<1||a.minute+duration>1440||
+  const a=tokyo(t.due),duration=(Date.parse(t.dueEnd)-Date.parse(t.due))/60000;
+  if(!a||!Number.isInteger(duration)||duration<1||duration>1440||
     !t.title||typeof t.title!=='string')throw Error('生活タスクの時間を確認できません');
   used.add(t.id);
-  rows.push({id:t.id,day:a.day,title:clean(t.title,120),s:a.minute,d:duration,done:t.state==='完了'});
+  const title=clean(t.title,120),done=t.state==='完了';
+  const first=Math.min(duration,1440-a.minute),remainder=duration-first;
+  rows.push({id:t.id,day:a.day,title,s:a.minute,d:first,done});
+  if(remainder>0){
+   // Keep the original source ID; only the next-day segment gets an explicit
+   // suffix, so existing same-day imports and user-adjusted rows stay intact.
+   const next=new Date(Date.parse(a.day+'T00:00:00Z')+86400000).toISOString().slice(0,10);
+   rows.push({id:t.id,day:next,title,s:0,d:remainder,done,part:'next'});
+  }
  }
  if(rows.length>40)throw Error('生活タスクの登録上限を超えました');
  return rows.sort((a,b)=>a.day.localeCompare(b.day)||a.s-b.s||a.id.localeCompare(b.id));
 }
-
 /**
  * iPhone Calendar is already the destination of some Clarity calendar actions.
  * Mirror it read-only when the existing Scriptable DAYSTREAM opens, without

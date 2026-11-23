@@ -47,7 +47,7 @@ test('Notion direct seeds preserve independent morning and night task titles',()
  ]);
  assert.ok(out.every(x=>x.day==='2026-12-01'&&!x.done));
 });
-test('only explicitly approved routine sources are direct-imported',()=>{
+test('only approved routines and 2026-11-23 ideal-day entries are direct-imported',()=>{
  const a=api();
  const approved=row('2026-12-01T05:30:00Z','2026-12-01T05:35:00Z',
   '歯磨き','a'.repeat(32),'yos-daystream-routine-202612-night-brush');
@@ -55,14 +55,45 @@ test('only explicitly approved routine sources are direct-imported',()=>{
   '夜勤','b'.repeat(32),'yos-shift-2026-12-01');
  calendar.properties['状態']={select:null};
  const ordinary=row('2026-12-01T09:00:00Z',null,'未登録タスク','c'.repeat(32));
- assert.deepEqual([...a.nativeDirectRows([approved,calendar,ordinary].map(r=>a.project(r)))].map(x=>x.title),['歯磨き']);
+ const meal=row('2026-11-23T06:10:00Z','2026-11-23T06:30:00Z','起床後の食事・Clarity記録','d'.repeat(32),'yos-daystream-ideal-20261123-meal');
+ const journal=row('2026-11-23T06:30:00Z','2026-11-23T06:40:00Z','YOS JOURNAL｜3記事を読む','e'.repeat(32),'yos-daystream-ideal-20261123-journal');
+ const free=row('2026-11-23T06:40:00Z','2026-11-23T06:55:00Z','自由時間｜休息・好きなこと','f'.repeat(32),'yos-daystream-ideal-20261123-free');
+ const excluded=row('2026-11-23T06:55:00Z','2026-11-23T07:10:00Z','未承認の理想タスク','9'.repeat(32),'yos-daystream-ideal-20261123-unapproved');
+ const projected=[approved,calendar,ordinary,meal,journal,free,excluded].map(r=>a.project(r));
+ assert.deepEqual([...a.nativeDirectRows(projected)].map(x=>[x.title,x.s,x.d]),[
+  ['起床後の食事・Clarity記録',910,20],
+  ['YOS JOURNAL｜3記事を読む',930,10],
+  ['自由時間｜休息・好きなこと',940,15],
+  ['歯磨き',870,5]
+ ]);
+ assert.equal(projected.length,7,'nonapproved sources remain in the full Notion snapshot');
 });
 test('invalid or ambiguous direct time source fails safely',()=>{
  const a=api(),wrong=row('2026-12-01',null,'起床','a'.repeat(32),'yos-daystream-routine-202612-wake');
  assert.throws(()=>a.nativeDirectRows([a.project(wrong)]));
  const cross=row('2026-12-01T22:00:00+09:00','2026-12-02T02:00:00+09:00',
   '起床','b'.repeat(32),'yos-daystream-routine-202612-wake');
- assert.throws(()=>a.nativeDirectRows([a.project(cross)]));
+ const parts=a.nativeDirectRows([a.project(cross)]);
+ assert.deepEqual([...parts].map(x=>[x.day,x.s,x.d,x.part||'']),[
+  ['2026-12-01',1320,120,''],['2026-12-02',0,120,'next']
+ ]);
+ assert.equal(parts[0].id,parts[1].id,'both segments retain one Notion source identity');
+});
+test('11/24 06:10–14:20 sleep is correctly treated as the same Tokyo date',()=>{
+ const a=api();
+ const r=row('2026-11-23T21:10:00Z','2026-11-24T05:20:00Z',
+  'Health｜睡眠時間を確保（14:20起床目標）','8'.repeat(32),'yos-daystream-routine-202612-sleep');
+ const projected=a.nativeDirectRows([a.project(r)]);
+ assert.deepEqual([...projected].map(x=>[x.day,x.s,x.d,x.part||'']),[['2026-11-24',370,490,'']]);
+});
+test('overnight segments use distinct local sourceRefs without modifying existing manual cards',()=>{
+ const a=api();
+ const r=row('2026-12-01T22:00:00+09:00','2026-12-02T02:00:00+09:00',
+  '夜間の休息','7'.repeat(32),'yos-daystream-routine-202612-sleep');
+ const rendered=htmlFor([r]);
+ assert.match(rendered,/"part":"next"/);
+ assert.match(rendered,/part==='next'\?':next':''/);
+ assert.doesNotMatch(rendered,/<script[^>]+src=/);
 });
 test('invalid state or date or id stops complete-source read',()=>{
  const a=api();assert.throws(()=>a.project(row('2026-02-30')));
