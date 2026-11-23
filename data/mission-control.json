@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-23T19:00:22+09:00",
+  "updated_at": "2026-11-23T19:01:26+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,6 +31,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-23T05:39:00Z"
+    },
+    {
+      "id": "github-pr-870",
+      "title": "PR #870 BRAVIA｜4台リモコン保護・画質ワンタップ／音声／アプリ／HDMI3クイック操作 TEST",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/870",
+      "updated_at": "2026-11-19T16:53:18Z"
     },
     {
       "id": "github-pr-878",
@@ -93,16 +103,6 @@
       "updated_at": "2026-11-23T09:33:03Z"
     },
     {
-      "id": "github-pr-896",
-      "title": "PR #896 feat(journal): Widgy特大縦用の3記事見出しページ（既存Web UI準拠）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/896",
-      "updated_at": "2026-11-23T09:59:40Z"
-    },
-    {
       "id": "github-pr-897",
       "title": "PR #897 YOS Health: selectable sleep scene with one-use Focus handoff",
       "type": "GitHub PR",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T09:59:41Z"
+      "updated_at": "2026-11-23T10:00:42Z"
     },
     {
       "id": "github-issue-234",
@@ -205,6 +205,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-7db8364373fe",
+      "title": "feat(journal): publish Widgy three-headline reader matching existing typography",
+      "completed_at": "2026-11-23T10:00:38Z",
+      "result": "GitHub mainへ反映（7db8364）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7db8364373fe1e219586b0fca1f739a56379991d"
+    },
+    {
       "id": "github-commit-9de5989c83ca",
       "title": "DAYSTREAM｜Google認証不要のiPhone Notion同期入口へ修正 (#889)",
       "completed_at": "2026-11-23T06:05:25Z",
@@ -231,13 +238,6 @@
       "completed_at": "2026-11-23T05:28:47Z",
       "result": "GitHub mainへ反映（700d7c4）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/700d7c4241b0dcc95b18fe9e602707bc90574d39"
-    },
-    {
-      "id": "github-commit-10f99c0488b0",
-      "title": "Pin Scriptable to the compatible dialog layout",
-      "completed_at": "2026-11-23T05:28:44Z",
-      "result": "GitHub mainへ反映（10f99c0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/10f99c0488b09f26b4c1fca1413a94823451825b"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-23T19:00:22+09:00",
+      "last_update": "2026-11-23T19:01:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 73件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 72件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-23T19:00:22+09:00",
+      "last_update": "2026-11-23T19:01:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-23T19:00:22+09:00",
+      "last_update": "2026-11-23T19:01:26+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "811a5ef819fbda910ae780db352478155ea4329435ba69f60f378854db8f9269"
+  "github_snapshot_hash": "5e893e31f6397be82531dcf348ad3b5c71edae555b431d135d44bebd1cec0544"
 }
