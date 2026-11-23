@@ -52,6 +52,13 @@
       "sha256": "ee8959104a4d239b8b277fa368824a8810a03e682183a18d95b90dd99fd64d9b"
     },
     {
+      "id": "remote-power-toggle",
+      "name": "YOS Remote Power Toggle",
+      "path": "ios-app/scriptable/remote-widgets/YOS Remote Power Toggle.js",
+      "commit": "3aa2865dbb1c32c178477e8c8032f0d692f8b7ca",
+      "sha256": "88896201c7204b61f614ef47c6d3f50c6b6155676547b8f8bfbb23809b4547b3"
+    },
+    {
       "id": "tapo-h110-core",
       "name": "YOS Tapo H110 Core",
       "path": "ios-app/scriptable/remote-widgets/YOS Tapo H110 Core.js",
@@ -104,8 +111,8 @@
       "id": "daystream-notion",
       "name": "YOS DAYSTREAM Notion",
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
-      "commit": "7d7458c2b721488f92be01fec70962cd018cd936",
-      "sha256": "ff1a57aa6d4da87630956512952f1e9527df7648e843361df32781c065b529e4"
+      "commit": "cc6fd13c74c1d4dde180d6478f5a26bf7c468f28",
+      "sha256": "a267a24b9787ccf935cbf1abd61d7daa15c475b8c9f4dad89131f76dd9a12ced"
     },
     {
       "id": "ikemen-magazine",

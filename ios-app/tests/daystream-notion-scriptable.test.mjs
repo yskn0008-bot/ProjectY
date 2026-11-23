@@ -94,6 +94,9 @@ test('web output uses native DAYSTREAM cards without introducing Notion overlays
  assert.match(h,/YOS_ONE_TAP_FOR_DAY/);
  assert.match(h,/className='card '/);
  assert.doesNotMatch(h,/yos-notion-projection|yosNotionMoveBar|Scriptableの日時変更|method='PATCH'/);
+ assert.match(h,/YOS_NOTION_LOCAL_MOVE/);
+ assert.match(h,/YOS_DAYSTREAM_NOTION_MOVES_V1/);
+ assert.match(h,/document.getElementById\('editSelected'\).textContent=item.source==='YOS Tasks'/);
  assert.doesNotMatch(h,/<script[^>]+src=|accounts\.google\.com\/gsi/);
  for(const m of h.matchAll(/<script>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
 });
