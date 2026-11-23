@@ -240,7 +240,7 @@ async function perform(request){
   throw Error('Notion保存結果を読み戻せませんでした。再送せず、更新から確認してください');
  if(kind==='task'){
   if(['次にやる','実行中','待ち','本人操作','保留'].includes(previousState))
-   completionUndoReceipts.set(id,{updatedAt:verified.updatedAt,state:previousState});
+   completionUndoReceipts.set(id,{id,updatedAt:verified.updatedAt,state:previousState});
   else completionUndoReceipts.delete(id);
  }
  return {action:operation,kind,item:verified,canUndo:kind==='task'&&completionUndoReceipts.has(id)};
