@@ -651,3 +651,16 @@ test('installer-diagnose leaves absent copies untouched',async()=>{
  assert.equal(r.requests.length,0);
  assert.match(r.alerts.at(-1).message,/見つかりません/);
 });
+
+test('installer inventory is accessible from existing catalog menu and never writes',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const scriptPath='/icloud/YOS Common Installer.js',old='// YOS Common Installer existing code';
+ cloud.files.set(scriptPath,old);
+ const r=await run({cloud,local,choices:[shipped.targets.length,-1]});
+ assert.equal(cloud.files.get(scriptPath),old);
+ assert.equal(cloud.files.size,1);
+ assert.equal(local.files.size,0);
+ assert.match(r.alerts.at(-1).title,/読み取り診断/);
+ assert.match(r.alerts.at(-1).message,/iCloud/);
+ assert.equal(r.opened.length,0);
+});
