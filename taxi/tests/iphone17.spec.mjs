@@ -1172,3 +1172,19 @@ test('manual backup retains exact corrupted shift, wait, field and photo-ledger 
   const after=await page.evaluate(keys=>Object.fromEntries(keys.map(k=>[k,localStorage.getItem(k)])),Object.keys(expected));
   expect(after).toEqual(expected);
 });
+
+
+test('corrupted legacy shift data is never overwritten by a new shift, even if corrupted after load',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T20:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const key='yos-taxi-ui-v2-live-20261117';
+  await page.evaluate(k=>localStorage.setItem(k,'{legacy-corrupt'),key);
+  await page.locator('#status-btn').click();
+  await page.locator('#modal-actions button.primary').click();
+  expect(await page.evaluate(k=>localStorage.getItem(k),key)).toBe('{legacy-corrupt');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#status-label')).toContainText('読込エラー');
+  await page.locator('#status-btn').click();
+  await expect(page.locator('#toast')).toContainText('上書きせず停止');
+  expect(await page.evaluate(k=>localStorage.getItem(k),key)).toBe('{legacy-corrupt');
+});
