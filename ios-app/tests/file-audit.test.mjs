@@ -35,7 +35,7 @@ test('read-only recursive scan reports file metadata and duplicate candidates',a
  assert.match(x.outputs[0],/\[フォルダ\] Shortcuts/);
  assert.match(x.outputs[0],/Archive\/note.pdf｜100KB/);
  assert.match(x.outputs[0],/Archive\/note.pdf \/ Documents\/note.pdf/);
- assert.equal(x.calls.filter(a=>a[0]==='list').length,4);
+ assert.equal(x.calls.filter(a=>a[0]==='list').length,5); // permission probe + root and three subfolders
  assert.equal(x.calls.filter(a=>a[0]==='pick').length,0);
 });
 test('Siri without bookmark fails closed and shows setup',async()=>{
