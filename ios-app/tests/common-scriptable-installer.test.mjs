@@ -596,7 +596,11 @@ test('Scriptable metadata never exempts even a single real source edit',async()=
   await run({cloud,local,id:'sleep-scene',choices:[-1]});
   const path='/icloud/YOS Sleep Scene.js',initial=cloud.files.get(path);
   const banner='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: deep-green; icon-glyph: magic;\n';
-  const altered=banner+initial.replace('YOS Sleep Scene v1.0','YOS Sleep Scene manually edited');
+  // Simulate a real code edit regardless of the source's current version label.
+  const versionLine=/^\/\/ YOS Sleep Scene v[^\n]+$/m;
+  assert.match(initial,versionLine,'the installed source must contain a version marker');
+  const altered=banner+initial.replace(versionLine,'// YOS Sleep Scene manually edited');
+  assert.notEqual(altered,banner+initial,'a genuine source edit must occur');
   cloud.files.set(path,altered);
   const next=initial+'\n// future version\n',cat=clone(shipped),entry=cat.targets.find(x=>x.id==='sleep-scene');
   entry.commit='f'.repeat(40);entry.sha256=hash(next);
