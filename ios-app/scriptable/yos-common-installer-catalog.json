@@ -169,6 +169,13 @@
       "path": "ios-app/scriptable/YOS Lists.js",
       "commit": "01dc08afec397eb483fac608b665371179c7d5fb",
       "sha256": "1dd4699e56545f56e0fa3969e383cc5bb66830d472693dccb15e81596fd903f0"
+    },
+    {
+      "id": "home-scenes",
+      "name": "YOS Home Scenes",
+      "path": "ios-app/scriptable/remote-widgets/YOS Home Scenes.js",
+      "commit": "3db65cf9ea91f8ff82ac9f5cbb1447aa36984a91",
+      "sha256": "8bdbdd9c7388d63c11cb12b249df7c30a869b5cb1a23944041c29deea9eadd4d"
     }
   ]
 }
