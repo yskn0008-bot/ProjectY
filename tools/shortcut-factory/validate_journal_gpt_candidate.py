@@ -71,7 +71,8 @@ def validate(path: Path) -> dict:
     assert isinstance(script,str), 'Notion inline script missing'
     for required in ('api.notion.com/v1','YOS_NOTION_INTEGRATION_TOKEN',
                      'YOS_JOURNAL_DRAFT_V1','LOCAL_RECEIPT_READBACK_FAILED',
-                     'PREVIOUS_RESULT_UNKNOWN','NOTION_API_ACK_PENDING_READBACK',
+                     'PREVIOUS_RESULT_UNKNOWN','NOTION_INDEPENDENT_READBACK_MATCH',
+                     'NOTION_READBACK_PENDING','req.method=\'GET\'',
                      'Keychain.contains','Script.complete()'):
         assert required in script, f'private handoff safety missing: {required}'
     assert 'raw.githubusercontent.com' not in script and 'api.github.com' not in script, 'public upload forbidden'
