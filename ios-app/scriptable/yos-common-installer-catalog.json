@@ -69,8 +69,8 @@
       "id": "sleep-scene",
       "name": "YOS Sleep Scene",
       "path": "ios-app/scriptable/remote-widgets/YOS Sleep Scene.js",
-      "commit": "bf8dfa7c291eb97e45e7c7b34964b6c28616e74c",
-      "sha256": "5db5b1e0278e9ab0da3c25f2a74a0a5d8682962ad9ac2de3cfd29c8dc98ac47f"
+      "commit": "23b09502ea5b4fd854d4e055c393aaca804938a0",
+      "sha256": "7daf038a551ff9d01f2344a60509bcfd4640238b4f4942e4d0320bb204445357"
     },
     {
       "id": "journal-book",
