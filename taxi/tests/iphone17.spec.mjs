@@ -1026,15 +1026,17 @@ test('strategy research displays only fresh official-source evidence, never taxi
       ]})});
   });
   await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  expect(requests).toBe(0); // no network call until strategy is opened
   await page.locator('[data-page="strategy"]').click();
-  expect(requests).toBe(0); // no unrequested network call
-  await expect(page.locator('#strategy-main')).toContainText('未判定');
-  await page.locator('#strategy-research-load').click();
   await expect(page.locator('#strategy-research-status')).toContainText('公式情報 2件取得');
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
   await expect(page.locator('#strategy-research-sources')).toContainText('くもり、時々雨');
   await expect(page.locator('#strategy-research-sources')).toContainText('未取得');
   await expect(page.locator('#strategy-main')).toContainText('未判定');
   expect(requests).toBe(1);
+  await page.locator('#strategy-research-load').click();
+  await expect(page.locator('#strategy-research-status')).toContainText('公式情報 2件取得');
+  expect(requests).toBe(2); // explicit refresh is still available
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
   await page.clock.setFixedTime(new Date('2026-11-24T15:30:00+09:00'));
@@ -1051,6 +1053,24 @@ test('strategy research fails closed on malformed or unavailable official feed',
   await page.locator('#strategy-research-load').click();
   await expect(page.locator('#strategy-research-status')).toContainText('取得失敗');
   await expect(page.locator('#strategy-main')).toContainText('未判定');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+test('daily-report OCR handoff uses on-device clipboard only and requires photo confirmation',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-21T20:50:00+09:00'));
+  await page.addInitScript(()=>{
+    Object.defineProperty(navigator,'clipboard',{configurable:true,value:{readText:async()=> '令和8年11月21日 総収入 21,950 現金 10,400'}});
+  });
+  await page.goto('./ui-v2.html?yos_action=report&yos_ocr=clipboard',{waitUntil:'domcontentloaded'});
+  await expect(page).not.toHaveURL(/yos_ocr|yos_action/);
+  const mockImage=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8\/x8AAwMCAO8Zr1cAAAAASUVORK5CYII=','base64');
+  await page.locator('#photo-input').setInputFiles({name:'paper-ocr.png',mimeType:'image/png',buffer:mockImage});
+  await page.locator('#modal-actions button.primary').click();
+  await page.locator('#revenue-paste-ocr').click();
+  await expect(page.locator('#revenue-amount')).toHaveValue('21950');
+  await expect(page.locator('#revenue-extract')).toContainText('総収入候補');
+  await expect(page.locator('#revenue-status')).toContainText('まだ保存していません');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
 });
 
