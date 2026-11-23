@@ -14,10 +14,10 @@ test('offline app shell precaches the exact script required by confirmed-photo r
   assert.match(moduleSource,/yos-taxi-confirmed-reports-v1/);
 });
 
-test('PWA cache rotation remains isolated from existing local trip and report ledgers',()=>{
+test('existing fixed PWA v149 cache contract remains isolated from local ledgers',()=>{
   assert.match(sw,/const CACHE_PREFIX='yos-taxi-projecty-';/);
-  assert.match(sw,/const VERSION='150';/);
-  assert.match(sw,/const CACHE='yos-taxi-projecty-v150-verified-revenue';/);
+  assert.match(sw,/const VERSION='149';/);
+  assert.match(sw,/const CACHE='yos-taxi-projecty-v149-revenue-goal';/);
   assert.doesNotMatch(sw,/\blocalStorage\b|\bindexedDB\b|\bsessionStorage\b/);
   assert.match(sw,/cache\.addAll\(STATIC\)/);
 });
