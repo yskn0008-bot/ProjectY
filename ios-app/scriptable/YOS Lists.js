@@ -306,6 +306,14 @@ main{padding:0 12px}
 .item.done .item-complete{color:#3C5F4C}
 .tag.done-tag{background:#CDE6D5;color:#285A3D;border:1px solid #9CC9AC}
 .item.done .item-complete:active{background:#D7E8DD}
+/* Touch feedback changes one row immediately; Notion confirmation remains asynchronous. */
+.item--task.is-pending{background:#DCEFE4;border-color:#7BAE91;box-shadow:0 1px 3px rgba(30,70,49,.09)}
+.item--task.is-pending .item-name{text-decoration:none;color:#315742}
+.item--task.is-pending-undo{background:#EAF1F6;border-color:#91A9BB}
+.item--task.is-pending-undo .item-name{text-decoration:none;color:#294054}
+.tag.pending-tag{background:#C5E3D0;color:#285A3D;border:1px solid #8DBDA1}
+.tag.pending-undo-tag{background:#D9E7F0;color:#355D79;border:1px solid #B5C9D8}
+.tag.unverified-tag{background:#FFF0D8;color:#91601C;border:1px solid #E5C593}
 .item-body{min-width:0;flex:1}
 .item-details{min-width:0}
 .item-details summary{position:relative;display:block;list-style:none;cursor:pointer;padding-right:12px}
@@ -355,6 +363,8 @@ const state={...boot,tab:'tasks',query:'',busy:false};
 let lastCompletion=null;
 // UI-only memory, cleared when the WebView is closed; Notion remains the source of truth.
 const sessionCompleted=new Map(); // id -> {attention,undoable}
+let pendingMutation=null; // UI only: never pass an optimistic state as a Notion write receipt.
+const unverifiedTasks=new Set(); // A failed/unknown write requires a Notion refresh before a retry.
 const $=id=>document.getElementById(id);
 const q=[];
 let pendingCallback=null;
@@ -445,11 +455,12 @@ function render(){
   const task=item.kind==='task',done=task?item.state==='完了':item.purchased;
   const detail=task?item.next:(item.type==='日用品'?'日用品・在庫 '+(item.stock??'未登録'):'');
   const tags=task?labels(item):[item.category,item.type,item.priority].filter(Boolean);
-  const meta='<span class="meta">'+tags.map(t=>'<span class="tag'+(t==='P0'?' urgent':t==='P1'?' high':t==='完了'?' done-tag':'')+'">'+safe(t==='完了'?'✓ 完了':t)+'</span>').join('')+'</span>';
+   const showTags=task&&unverifiedTasks.has(item.id)?tags.concat('保存未確認'):tags;
+  const meta='<span class="meta">'+showTags.map(t=>'<span class="tag'+(t==='P0'?' urgent':t==='P1'?' high':t==='完了'?' done-tag':t==='保存未確認'?' unverified-tag':'')+'">'+safe(t==='完了'?'✓ 完了':t)+'</span>').join('')+'</span>';
   if(task&&item.type==='Task'){
    const undoable=done&&sessionCompleted.get(item.id)?.undoable===true;
    const actionName=done?'undo-complete':'complete';
-   const disabled=state.busy||ready.task===false||(done&&!undoable)?'disabled':'';
+   const disabled=state.busy||ready.task===false||unverifiedTasks.has(item.id)||(done&&!undoable)?'disabled':'';
    const label=done?(undoable?'「'+item.name+'」の完了を取り消す':'完了済み：'+item.name):'「'+item.name+'」を完了にする';
    return '<article class="item item--task'+(done?' done':'')+(sortable&&!done?' is-sortable':'')+'" data-id="'+safe(item.id)+'"><div class="item-body">'+
     '<button type="button" class="item-complete" data-action="'+actionName+'" data-kind="task" data-id="'+safe(item.id)+'" aria-label="'+safe(label)+'" '+disabled+'>'+
@@ -461,6 +472,27 @@ function render(){
   return '<article class="item'+(done?' done':'')+'"><div class="item-body"><details class="item-details"><summary aria-label="詳細を開く・閉じる：'+safe(item.name)+'"><span class="item-name">'+safe(item.name)+'</span>'+meta+'</summary>'+
    (detail?'<p>'+safe(detail)+'</p>':'')+'</details></div>'+action+'</article>';
  }).join(''):'<div class="empty">'+(failed?'この項目はNotionから取得できませんでした。右上の更新で再試行してください。':'表示する項目がありません。')+'</div>';
+ if(pendingMutation)paintPendingTask(pendingMutation);
+}
+// Paint a single row synchronously on tap. The original Notion model is untouched
+// until PATCH/GET readback succeeds. This avoids rebuilding 200+ rows before network I/O.
+function paintPendingTask(mutation){
+ if(!mutation)return;
+ const row=Array.from($('list').querySelectorAll('.item--task')).find(x=>x.dataset.id===mutation.id);
+ if(!row)return;
+ const button=row.querySelector('.item-complete');
+ const meta=row.querySelector('.item-complete .meta');
+ if(!button||!meta)return;
+ const completing=mutation.action==='complete';
+ row.classList.toggle('is-pending',completing);
+ row.classList.toggle('is-pending-undo',!completing);
+ row.setAttribute('aria-busy','true');
+ const item=mutation.item;
+ const tags=[item.priority||'',completing?'✓ 完了 · 保存中':'↶ 取り消し中',item.due?'期限 '+day(item.due):''].filter(Boolean);
+ meta.innerHTML=tags.map(t=>'<span class="tag'+
+  (t==='P0'?' urgent':t==='P1'?' high':t.includes('保存中')?' pending-tag':t.includes('取り消し中')?' pending-undo-tag':'')+
+  '">'+safe(t)+'</span>').join('');
+ button.disabled=true;
 }
 // The right-side 50px summary is intentionally dual-purpose:
 // tap opens details; drag on it reorders. The body still completes tasks on tap.
@@ -556,7 +588,12 @@ $('list').addEventListener('click',e=>{
  const item=(kind==='task'?state.tasks:state.shopping).find(x=>x.id===b.dataset.id);
  if(!item||state.loaded?.[kind]===false)return;
  if(kind==='shopping'&&!window.confirm('「'+item.name+'」を購入済みとして記録しますか？\\n購入・決済は行いません。'))return;
- state.busy=true;lastCompletion=null;notice(action==='undo-complete'?'Notionで元の状態へ戻して確認中…':'Notionに保存して確認中…');render();
+ state.busy=true;lastCompletion=null;
+ if(kind==='task'&&(action==='complete'||action==='undo-complete')){
+  pendingMutation={id:item.id,item,action};
+  paintPendingTask(pendingMutation); // Immediate touch response, before the Notion request.
+ }else render();
+ notice(action==='undo-complete'?'Notionで元の状態へ戻して確認中…':'Notionに保存して確認中…');
  emit({action,kind,id:item.id,expected:item.updatedAt});
 });
 $('undo').addEventListener('click',()=>{
@@ -567,12 +604,16 @@ $('undo').addEventListener('click',()=>{
  emit({action:'undo-complete',kind:'task',id:lastCompletion.id,expected:lastCompletion.expected});
 });
 window.YOS_LISTS_REPLY=function(result){
+ const previousPending=pendingMutation;
+ pendingMutation=null;
  state.busy=false;
  if(result?.ok){
+  if(previousPending)unverifiedTasks.delete(previousPending.id);
   if(result.action==='refresh'&&result.data){
    const data=result.data,loaded=data.loaded||{task:true,shopping:true};
    if(loaded.task){
     state.tasks=data.tasks;
+    unverifiedTasks.clear(); // A successful fresh read resolves unknown write outcomes.
     // Keep only completions still confirmed by Notion, including after refresh.
     for(const id of sessionCompleted.keys()){
      const task=state.tasks.find(t=>t.id===id);
@@ -610,8 +651,12 @@ window.YOS_LISTS_REPLY=function(result){
    notice('Notionで完了を元に戻しました。');
   else notice(result.action==='refresh'&&Object.values(state.loaded||{}).some(v=>v===false)?
    '一部のNotion項目は未取得です。上部のエラーを確認してください。':'Notionを読み戻して更新を確認しました');
- }else notice('保存・更新は未確認：'+String(result?.error||'不明')+'。再操作前に更新してください');
- render();
+ }else{
+  if(previousPending)unverifiedTasks.add(previousPending.id);
+  notice('保存・更新は未確認：'+String(result?.error||'不明')+'。誤操作を防ぐため、右上の更新で確認してください');
+ }
+ render(); // Confirmed state, or safe rollback to the original model.
+
 };
 render();
 </script>
