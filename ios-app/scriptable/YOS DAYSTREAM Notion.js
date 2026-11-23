@@ -339,7 +339,7 @@ function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCale
   out=out.replace(marker," const nativeCalendar="+deviceJSON+";");
  }
  out=out.replace('<head>','<head><base href="https://yskn0008-bot.github.io/ProjectY/yos/daystream/">'+
-  '<style>.timeline .card[data-notion="1"]{cursor:grab}.timeline .card[data-notion="1"] .task-drag-grip{touch-action:none;display:grid;place-items:center;min-width:34px;color:var(--flow-ink);background:#ffffff70;border-radius:9px}.timeline .card[data-notion="1"] .fixed-label{font-size:10px;opacity:.72}.timeline .card[data-notion="1"] .task-copy{min-width:0}</style>')
+  '<style>.timeline .card[data-notion="1"]{cursor:grab}.timeline .card[data-notion="1"] .task-drag-grip{touch-action:none;display:grid;place-items:center;min-width:34px;color:var(--flow-ink);background:#ffffff70;border-radius:9px}.timeline .card[data-notion="1"] .fixed-label{font-size:10px;opacity:.72}.timeline .card[data-notion="1"] .task-copy{min-width:0}.timeline .card[data-notion="1"].yos-backdrop{background-color:var(--flow-light)!important;border-color:var(--flow-edge)}</style>')
  .replace('<body class="yos-daystream-web">','<body class="yos-daystream-web"><div id="yosNativeBoot" role="status" style="position:fixed;inset:0;z-index:99999;background:#f4f8fd;color:#1d2d44;padding:80px 20px;font-family:-apple-system,sans-serif">DAYSTREAMを読み込んでいます…</div>');
  // Never start a service worker from the native HTML presentation.
  out=out.replace("if('serviceWorker' in navigator)","if(false)");
