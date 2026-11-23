@@ -1011,3 +1011,40 @@ test('YOS field consultation requires explicit tap and keeps the recommendation 
   await expect(page.locator('#field-yos-send')).toBeVisible();
   await expect(page.locator('#field-yos-answer')).toBeHidden();
 });
+
+
+test('photo-linked confirmed revenue: keeps the paper total, refuses duplicate image and preserves old storage',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-21T20:50:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#sales-value')).toHaveText('—');
+  const mockImage=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8Zr1cAAAAASUVORK5CYII=','base64');
+  await page.locator('#photo-input').setInputFiles({name:'paper-report-20261121.png',mimeType:'image/png',buffer:mockImage});
+  await expect(page.locator('#modal-title')).toHaveText('日報写真を選択しました');
+  await page.locator('#modal-actions button.primary').click();
+  await expect(page.locator('#revenue-form')).toBeVisible();
+  await page.locator('#revenue-text').fill('令和8年11月21日 総収入 21,950 現金 10,400');
+  await expect(page.locator('#revenue-amount')).toHaveValue('21950');
+  await page.locator('#revenue-is-total').check();
+  await page.locator('#revenue-checked').check();
+  await page.locator('#revenue-save-btn').click();
+  await expect(page.locator('#modal')).not.toHaveClass(/open/);
+  await expect(page.locator('#sales-value')).toContainText('21,950');
+  await expect(page.locator('#report-clock')).toContainText('税込／税抜未確認');
+  let records=await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-taxi-confirmed-reports-v1')));
+  expect(records.records).toHaveLength(1);
+  expect(records.records[0].businessDate).toBe('2026-11-21');
+  expect(records.records[0].amountYen).toBe(21950);
+  expect(records.records[0].photoSha256).toMatch(/^sha256:[a-f0-9]{64}$/);
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ops-v1'))).toBeNull();
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#sales-value')).toContainText('21,950');
+  await page.locator('#photo-input').setInputFiles({name:'same-photo.png',mimeType:'image/png',buffer:mockImage});
+  await page.locator('#modal-actions button.primary').click();
+  await page.locator('#revenue-amount').fill('24000');
+  await page.locator('#revenue-is-total').check();
+  await page.locator('#revenue-checked').check();
+  await page.locator('#revenue-save-btn').click();
+  await expect(page.locator('#revenue-status')).toContainText('同じ写真は記録済み');
+  records=await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-taxi-confirmed-reports-v1')));
+  expect(records.records).toHaveLength(1);
+});
