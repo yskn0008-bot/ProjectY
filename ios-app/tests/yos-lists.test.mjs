@@ -429,7 +429,7 @@ function sessionView(html){
   if(!elements.has(id))elements.set(id,{
    id,innerHTML:'',textContent:'',value:'',hidden:false,disabled:false,
    classList:{toggle(){},add(){},remove(){}},
-   addEventListener(){},setAttribute(){},
+   addEventListener(){},setAttribute(){},querySelectorAll(){return []},
   });
   return elements.get(id);
  }
@@ -443,7 +443,7 @@ function sessionView(html){
   confirm(){return true}
  };
  const js=html.split('<script>')[1].split('</script>')[0];
- const ui=new Function('document','window',js+'\nreturn {state,sessionCompleted,render};')(document,window);
+ const ui=new Function('document','window',js+'\nreturn {state,sessionCompleted,render,unverifiedTasks,setPending:(item,action)=>{pendingMutation={id:item.id,item,action};}};')(document,window);
  return {ui,window,elements,element};
 }
 test('completion remains in the same Task list until the view closes; row tap reverses it',async()=>{
@@ -491,4 +491,66 @@ test('completion from attention tab stays there until closing, even after tab ch
  const reopened=sessionView(h.app.htmlWithData(await h.app.readAll()));
  reopened.ui.state.tab='attention';reopened.ui.render();
  assert.doesNotMatch(reopened.element('list').innerHTML,/確認タスク/,'completed task must not appear in the next session');
+});
+
+test('tapped task gets an immediate local checked appearance before any Notion write',async()=>{
+ const h=await harness();
+ const task=(await h.app.readAll()).tasks[0];
+ const web=source.split('<script>')[1].split('</script>')[0];
+ const start=web.indexOf('function paintPendingTask('),end=web.indexOf('// The right-side 50px',start);
+ assert.ok(start>0&&end>start,'single-row instant painter exists');
+ const classes=new Set();
+ let busyValue='',buttonDisabled=false,metaHTML='';
+ const meta={get innerHTML(){return metaHTML},set innerHTML(v){metaHTML=v}};
+ const button={querySelector(s){return s==='.item-complete .meta'?meta:null},
+   get disabled(){return buttonDisabled},set disabled(v){buttonDisabled=v}};
+ const row={dataset:{id:task.id},classList:{toggle(name,on){if(on)classes.add(name);else classes.delete(name)}},
+   setAttribute(name,value){if(name==='aria-busy')busyValue=value},
+   querySelector(sel){if(sel==='.item-complete')return button;if(sel==='.item-complete .meta')return meta;return null}};
+ const list={querySelectorAll(){return [row]}};
+ const paint=new Function('$','safe','day',web.slice(start,end)+'return paintPendingTask;')(
+  id=>id==='list'?list:null,x=>String(x??'').replaceAll('&','&amp;').replaceAll('<','&lt;'),x=>x);
+ paint({id:task.id,item:task,action:'complete'});
+ assert.ok(classes.has('is-pending'),'Task changes appearance before network');
+ assert.match(metaHTML,/✓ 完了 · 保存中/);
+ assert.equal(buttonDisabled,true,'prevents a second tap while pending');
+ assert.equal(busyValue,'true');
+ assert.equal(h.writes,0,'UI feedback itself never performs a Notion mutation');
+ paint({id:task.id,item:{...task,state:'完了'},action:'undo-complete'});
+ assert.ok(classes.has('is-pending-undo'));
+ assert.ok(!classes.has('is-pending'));
+ assert.match(metaHTML,/取り消し中/);
+ assert.equal(h.writes,0);
+});
+test('tap handler paints the row before emitting and avoids a 200-row redraw',()=>{
+ const js=source.split('<script>')[1].split('</script>')[0];
+ const start=js.indexOf(" $('list').addEventListener('click'");
+ const actual=js.indexOf("$('list').addEventListener('click'");
+ const end=js.indexOf("$('undo').addEventListener('click'",actual);
+ assert.ok(actual>=0&&end>actual);
+ const handler=js.slice(actual,end);
+ const paint=handler.indexOf('paintPendingTask(pendingMutation)');
+ const request=handler.indexOf('emit({action,kind,id:item.id,expected:item.updatedAt})');
+ assert.ok(paint>0&&request>paint,'paint is synchronous before Notion request');
+ assert.match(handler,/if\(kind==='task'&&\(action==='complete'\|\|action==='undo-complete'\)\)/);
+ assert.match(handler,/}else render\(\);/,'full list render is reserved for non-Task actions');
+ assert.match(js,/if\(pendingMutation\)paintPendingTask\(pendingMutation\)/,'re-render preserves pending feedback');
+ assert.match(source,/\.item--task\.is-pending \.item-name\{text-decoration:line-through/);
+});
+test('unverified Notion write rolls back immediate color and locks the row until refresh',async()=>{
+ const h=await harness();
+ const boot=await h.app.readAll();
+ const task=boot.tasks[0];
+ const view=sessionView(h.app.htmlWithData(boot));
+ view.ui.setPending(task,'complete');
+ view.window.YOS_LISTS_REPLY({ok:false,error:'Notion通信が途切れました'});
+ assert.equal(view.ui.unverifiedTasks.has(task.id),true,'uncertain writes cannot be blindly retried');
+ assert.equal(view.ui.state.tasks[0].state,'次にやる','optimistic UI must not alter the source data');
+ assert.match(view.element('list').innerHTML,/保存未確認/);
+ assert.match(view.element('list').innerHTML,/data-action="complete"/);
+ assert.doesNotMatch(view.element('list').innerHTML,/class="item item--task done"/);
+ assert.equal(h.writes,0,'error path cannot send another PATCH');
+ view.window.YOS_LISTS_REPLY({ok:true,action:'refresh',data:await h.app.readAll()});
+ assert.equal(view.ui.unverifiedTasks.size,0,'successfully rereading Notion lifts lock');
+ assert.doesNotMatch(view.element('list').innerHTML,/保存未確認/);
 });
