@@ -34,9 +34,28 @@ try{
   assert.equal(await page.locator('#tl .card.task').count(),4,JSON.stringify(detail));
   const projected=await page.locator('#tl .card.task').evaluateAll(x=>x.map(el=>el.innerText));
   assert.deepEqual(projected.map(x=>['睡眠','起床','水を飲む','歯磨き'].find(y=>x.includes(y))),['睡眠','起床','水を飲む','歯磨き']);
-  assert.equal(await page.locator('#tl .card.task .task-copy').count(),0,'read-only Notion cards have no edit controls');
+  assert.equal(await page.locator('#tl .card.task .task-copy').count(),4,'synced cards reuse the existing movable task layout');
   assert.equal(await page.locator('#tl .card.task .fixed-label').count(),4);
+  assert.equal(await page.locator('#tl .card.task .task-drag-grip').count(),4,'all synced tasks have move handles');
+  const tones=await page.locator('#tl .card.task[data-notion="1"]').evaluateAll(nodes=>nodes.map(el=>el.dataset.flowTone));
+  assert.ok(new Set(tones).size>=3,'synced cards must not be green-only: '+tones);
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),null,'preview never writes a plan');
+  const startCard=page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'起床'});
+  await startCard.locator('.task-drag-grip').click();
+  assert.equal(await page.locator('#moveDialog').isVisible(),true,'tap move grip opens existing placement advisor');
+  await page.locator('#moveTime').fill('16:20');
+  await page.locator('#moveSave').click();
+  assert.match(await page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'起床'}).innerText(),/16:20/);
+  const moveKey='YOS_DAYSTREAM_NOTION_MOVES_V1';
+  assert.ok(await page.evaluate(key=>localStorage.getItem(key),moveKey));
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),null,'moving Notion card never writes the original plan');
+  await page.reload();await page.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
+  await page.evaluate(()=>showDay('2026-12-01'));
+  assert.match(await page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'起床'}).innerText(),/16:20/,
+   'local time override survives reload');
+  await page.evaluate(()=>showDay('2026-12-02'));
+  assert.match(await page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'起床'}).innerText(),/14:20/,
+   'other days keep Notion schedule');
   assert.equal(await page.evaluate(()=>localStorage.getItem('YOS_DAYSTREAM_DIRECT_IMPORTED_V1')),null);
   assert.equal(await page.locator('#weekStrip').isVisible(),false);
   assert.equal(await page.locator('.flow-tools').getAttribute('open'),null);
