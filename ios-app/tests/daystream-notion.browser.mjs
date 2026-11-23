@@ -193,5 +193,27 @@ try{
  assert.equal(await pg.evaluate(key=>localStorage.getItem(key),store),'{corrupt','corrupt plan remains untouched');
  assert.deepEqual(errs,[]);
  await ctx.close();
+ // Regression for the actual iPhone screenshot: localStorage throws SecurityError.
+ // The Notion preview must still render, and no write may be attempted.
+ const blocked=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Asia/Tokyo'});
+ await blocked.addInitScript(()=>{
+  const denied=()=>{throw new DOMException('Storage unavailable','SecurityError')};
+  Storage.prototype.getItem=denied;
+  Storage.prototype.setItem=denied;
+  Storage.prototype.removeItem=denied;
+ });
+ const blockedPage=await blocked.newPage(),blockedErrors=[];
+ blockedPage.on('pageerror',e=>blockedErrors.push(e.message));
+ await blockedPage.route('**/*',route=>route.request().url()==='http://yos.local/'
+  ?route.fulfill({status:200,contentType:'text/html',body:previewHtml}):route.abort());
+ await blockedPage.goto('http://yos.local/');
+ await blockedPage.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
+ await blockedPage.evaluate(()=>showDay('2026-12-01'));
+ assert.equal(await blockedPage.locator('#tl .card.task').count(),4,
+  'Notion projection remains visible when iPhone WebView storage is unavailable');
+ assert.match(await blockedPage.locator('#yosWebSourceState').innerText(),/Notion 4件取得/);
+ assert.ok(!blockedErrors.some(e=>/Uncaught|SecurityError/.test(e)),
+  'the read-only preview should not crash on a denied storage API');
+ await blocked.close();
 }finally{await browser.close()}
 console.log('DAYSTREAM native tasks: 320/390/402px PASS');
