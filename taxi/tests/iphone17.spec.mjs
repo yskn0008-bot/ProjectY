@@ -1022,20 +1022,22 @@ test('strategy research displays only fresh official-source evidence, never taxi
       schema:1,generatedAt:'2026-11-24T11:30:00+09:00',sources:[
         {id:'jma',name:'気象庁｜沖縄本島中南部',status:'ok',summary:'くもり、時々雨'},
         {id:'naha_rss',name:'那覇市｜公式更新',status:'ok',summary:'対象見出し0件'},
-        {id:'cruise_catalog',name:'沖縄県｜クルーズ',status:'error',summary:'取得失敗'}
+        {id:'cruise_catalog',name:'沖縄県｜クルーズ',status:'ok',summary:'寄港予約1件',items:[{title:'那覇港寄港予約｜テスト船',eventAt:'2026-11-24T18:00:00+09:00'}]}
       ]})});
   });
   await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
   expect(requests).toBe(0); // no network call until strategy is opened
   await page.locator('[data-page="strategy"]').click();
-  await expect(page.locator('#strategy-research-status')).toContainText('公式情報 2件取得');
+  await expect(page.locator('#strategy-research-status')).toContainText('公式情報源 3/3件取得');
   await expect(page.locator('#strategy-main')).toContainText('未判定');
   await expect(page.locator('#strategy-research-sources')).toContainText('くもり、時々雨');
-  await expect(page.locator('#strategy-research-sources')).toContainText('未取得');
+  await expect(page.locator('#strategy-research-sources')).toContainText('寄港予約1件');
+  await expect(page.locator('#strategy-research-sources')).toContainText('テスト船');
+  await expect(page.locator('#strategy-research-sources')).toContainText('実際の需要は未確認');
   await expect(page.locator('#strategy-main')).toContainText('未判定');
   expect(requests).toBe(1);
   await page.locator('#strategy-research-load').click();
-  await expect(page.locator('#strategy-research-status')).toContainText('公式情報 2件取得');
+  await expect(page.locator('#strategy-research-status')).toContainText('公式情報源 3/3件取得');
   expect(requests).toBe(2); // explicit refresh is still available
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
