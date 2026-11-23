@@ -200,21 +200,23 @@ test('high-contrast YOS Lists visual system preserves readable Japanese task UI'
   return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
  };
  for(const [name,fg,bg] of [
-  ['body','#18293B','#EFF1F1'],
-  ['header','#FFFFFF','#2B3B4D'],
-  ['header description','#E0EDFF','#2B3B4D'],
-  ['active tab','#FFFFFF','#214B74'],
-  ['task count card','#FFFFFF','#254E79'],
-  ['shopping count card','#FFFFFF','#256C5B'],
-  ['attention count card','#FFFFFF','#94532E'],
-  ['count caption','#FFFFFF','#254E79'],
+  ['body','#18293B','#F1F4F5'],
+  ['header','#FFFFFF','#536F84'],
+  ['header description','#F3F8FF','#536F84'],
+  ['active tab','#FFFFFF','#416785'],
+  ['task count card','#223A51','#D6E5F2'],
+  ['shopping count card','#223A51','#D5E9E0'],
+  ['attention count card','#223A51','#F1DFC9'],
+  ['task count caption','#455B6A','#D6E5F2'],
+  ['shopping count caption','#455B6A','#D5E9E0'],
+  ['attention count caption','#455B6A','#F1DFC9'],
   ['task title','#172A3B','#FFFEFC'],
   ['task detail','#475E77','#FFFEFC'],
-  ['confirm action','#FFFFFF','#215786'],
+  ['confirm action','#FFFFFF','#3E688B'],
   ['footer','#4A5F6F','#EFF1F1'],
   ['urgent priority','#A72A22','#FCE7E3']
  ]) assert.ok(ratio(fg,bg)>=4.5,name+' needs contrast ratio >= 4.5');
- assert.match(css,/\.tab\[aria-selected=true\]\{background:#214B74;color:#FFFFFF/);
+ assert.match(css,/\.tab\[aria-selected=true\]\{background:#416785;color:#FFFFFF/);
  assert.match(css,/\.action\{[^}]*min-height:44px/);
  assert.match(css,/\.refresh\{[^}]*min-height:44px/);
  assert.match(css,/\.tools input\{[^}]*min-height:48px/);
@@ -224,7 +226,8 @@ test('high-contrast YOS Lists visual system preserves readable Japanese task UI'
  assert.doesNotMatch(css,/border-left:4px/);
  assert.doesNotMatch(css,/\.item\.priority-(?:zero|one)/);
  assert.doesNotMatch(source,/const emphasis=/);
- assert.match(css,/\.stat:nth-child\(2\)\{background:#256C5B/);
- assert.match(css,/\.stat:nth-child\(3\)\{background:#94532E/);
+ assert.match(css,/\.stat\{background:#D6E5F2;color:#223A51/);
+ assert.match(css,/\.stat:nth-child\(2\)\{background:#D5E9E0/);
+ assert.match(css,/\.stat:nth-child\(3\)\{background:#F1DFC9/);
  assert.match(source,/'P1'\?' high'/);
 });
