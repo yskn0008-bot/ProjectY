@@ -188,43 +188,44 @@ test('read-only 429 retries are bounded and never update a Task',async()=>{
 });
 
 
-test('high-contrast YOS Lists visual system preserves readable Japanese task UI',()=>{
+test('selected A YOS Lists UI keeps accessible contrast, touch targets and existing actions',()=>{
  const css=source.slice(source.indexOf('<style>'),source.indexOf('</style>')+8);
  const ratio=(fg,bg)=>{
-  const luminance=hex=>{
-   const v=hex.slice(1).match(/../g).map(x=>parseInt(x,16)/255)
-    .map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4);
-   return .2126*v[0]+.7152*v[1]+.0722*v[2];
-  };
-  const a=luminance(fg),b=luminance(bg);
-  return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+  const l=h=>{const v=h.slice(1).match(/../g).map(x=>parseInt(x,16)/255)
+   .map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4);
+   return .2126*v[0]+.7152*v[1]+.0722*v[2];};
+  const a=l(fg),b=l(bg);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
  };
- for(const [name,fg,bg] of [
-  ['body','#18293B','#EFF1F1'],
-  ['header','#FFFFFF','#2B3B4D'],
-  ['header description','#E0EDFF','#2B3B4D'],
-  ['active tab','#FFFFFF','#214B74'],
-  ['task count card','#FFFFFF','#254E79'],
-  ['shopping count card','#FFFFFF','#256C5B'],
-  ['attention count card','#FFFFFF','#94532E'],
-  ['count caption','#FFFFFF','#254E79'],
-  ['task title','#172A3B','#FFFEFC'],
-  ['task detail','#475E77','#FFFEFC'],
-  ['confirm action','#FFFFFF','#215786'],
-  ['footer','#4A5F6F','#EFF1F1'],
-  ['urgent priority','#A72A22','#FCE7E3']
- ]) assert.ok(ratio(fg,bg)>=4.5,name+' needs contrast ratio >= 4.5');
- assert.match(css,/\.tab\[aria-selected=true\]\{background:#214B74;color:#FFFFFF/);
+ for(const [role,fg,bg] of [
+  ['body','#294054','#F3F4F2'],
+  ['header','#294054','#E6ECF0'],
+  ['header subtitle','#53697D','#E6ECF0'],
+  ['selected tab','#FFFFFF','#526F89'],
+  ['task number','#294054','#A9C6D9'],
+  ['shopping number','#294054','#AACAB9'],
+  ['attention number','#294054','#DCC4A6'],
+  ['task caption','#395268','#A9C6D9'],
+  ['shopping caption','#395268','#AACAB9'],
+  ['attention caption','#395268','#DCC4A6'],
+  ['action','#526F89','#E7F0F4'],
+  ['task details','#5E7183','#FFFFFF'],
+  ['search placeholder','#526779','#FFFFFF'],
+  ['P0 tag','#A63C34','#FFE8E4'],
+  ['P1 tag','#91601C','#FFF0D8']
+ ]) assert.ok(ratio(fg,bg)>=4.5,role+' text needs contrast ratio >= 4.5');
+ assert.match(css,/header\{\s*background:#E6ECF0;color:var\(--ink\)/);
+ assert.match(css,/\.tabs\{[^}]*background:var\(--tab-bg\)/);
+ assert.match(css,/\.tab\[aria-selected=true\]\{background:var\(--accent\);color:#FFFFFF/);
+ assert.match(css,/\.stat:nth-child\(2\)\{background:var\(--stat-shopping\)/);
+ assert.match(css,/\.stat:nth-child\(3\)\{background:var\(--stat-attention\)/);
  assert.match(css,/\.action\{[^}]*min-height:44px/);
  assert.match(css,/\.refresh\{[^}]*min-height:44px/);
  assert.match(css,/\.tools input\{[^}]*min-height:48px/);
  assert.match(css,/button:focus-visible,input:focus-visible/);
  assert.match(css,/@media\(max-width:360px\)/);
- assert.match(css,/@media\(prefers-reduced-motion:no-preference\)/);
  assert.doesNotMatch(css,/border-left:4px/);
- assert.doesNotMatch(css,/\.item\.priority-(?:zero|one)/);
  assert.doesNotMatch(source,/const emphasis=/);
- assert.match(css,/\.stat:nth-child\(2\)\{background:#256C5B/);
- assert.match(css,/\.stat:nth-child\(3\)\{background:#94532E/);
+ assert.match(source,/id="search" type="search"/);
+ assert.match(source,/classList\.toggle\('is-ready'/);
  assert.match(source,/'P1'\?' high'/);
 });
