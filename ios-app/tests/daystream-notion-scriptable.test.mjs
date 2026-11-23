@@ -156,7 +156,9 @@ test('device-local Notion read displays an explicit Clarity time window without 
 
 
 test('existing Scriptable DAYSTREAM reads a new iPhone calendar event without a task write',async()=>{
- const now=new Date(),when=new Date(now.getTime()+86400000),to=new Date(when.getTime()+30*60000);
+ const now=new Date(),when=new Date(now.getTime()+86400000);
+ when.setUTCHours(3,0,0,0); // noon JST, never splits across midnight
+ const to=new Date(when.getTime()+30*60000);
  const a=api({CalendarEvent:{between:async()=>[{
   identifier:'clarity-calendar-001',title:'Clarity連携テスト',startDate:when,endDate:to,isAllDay:false
  }]}});
@@ -263,4 +265,38 @@ test('other Notion calendar mirrors remain visible through the iCloud source',as
  assert.equal(projected?.status,'ok');
  assert.equal(projected.calendarDays['2026-11-20'].length,1);
  assert.equal(projected.calendarDays['2026-11-20'][0].title,'固定予定');
+});
+
+test('Scriptable shows verified Notion tasks read-only when WebView storage is blocked',()=>{
+ const body=script.match(/const BROWSER_DIRECT_IMPORT=String.raw`([\s\S]*?)`;/)?.[1];
+ assert.ok(body,'native direct browser script exists');
+ const id='a'.repeat(32);
+ const seed=[{id,day:'2026-11-23',title:'食事・Clarity記録',s:910,d:20,done:false}];
+ const run=(mode)=>{
+  const writes=[];
+  const host={
+   addEventListener(){},
+   YOS_CHARCOAL_BOOT:{days:{},hiddenCalendar:{},taskSource:{items:[{id,title:'食事・Clarity記録'}]}},
+   YOS_DAYSTREAM_WEB:{write:p=>{writes.push(p);return mode!=='write-failure'}}
+  };
+  if(mode==='blocked')host.YOS_WEB_DATA_ERROR='保存データを読み込めません。上書きしません。';
+  const storage={
+   getItem:()=>{if(mode==='blocked')throw Error('blocked');return mode==='corrupt'?'{broken':null},
+   setItem(){}
+  };
+  vm.runInNewContext(body.replace('__DIRECT_ROWS__',JSON.stringify(seed)),{
+   window:host,localStorage:storage,document:{getElementById:()=>({remove(){}})}
+  });
+  return {host,writes};
+ };
+ for(const mode of ['blocked','corrupt','write-failure']){
+  const {host,writes}=run(mode);
+  assert.equal(host.YOS_CHARCOAL_BOOT.days['2026-11-23'].length,1);
+  assert.equal(host.YOS_DAYSTREAM_NATIVE_READONLY,true);
+  assert.equal(writes.length,mode==='write-failure'?1:0);
+ }
+ const {host,writes}=run('saved');
+ assert.equal(host.YOS_CHARCOAL_BOOT.days['2026-11-23'].length,1);
+ assert.equal(host.YOS_DAYSTREAM_NATIVE_READONLY,undefined);
+ assert.equal(writes.length,1);
 });

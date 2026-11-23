@@ -120,13 +120,18 @@ const BROWSER_DIRECT_IMPORT=String.raw`
  // The original DAYSTREAM renders its own native task cards; no overlay renderer.
  window.addEventListener('DOMContentLoaded',()=>document.getElementById('yosNativeBoot')?.remove());
  const seeds=__DIRECT_ROWS__,boot=window.YOS_CHARCOAL_BOOT,web=window.YOS_DAYSTREAM_WEB;
- if(!boot?.days||!web?.write||window.YOS_WEB_DATA_ERROR||!Array.isArray(seeds)||seeds.length>40)return;
+ if(!boot?.days||!web?.write||!Array.isArray(seeds)||seeds.length>40)return;
  const key='YOS_DAYSTREAM_DIRECT_IMPORTED_V1';
- let seen;
- try{const raw=localStorage.getItem(key);seen=raw?JSON.parse(raw):{};
-  if(!seen||typeof seen!=='object'||Array.isArray(seen)||Object.keys(seen).length>80||
-    Object.values(seen).some(v=>v!==true))return;
- }catch{return}
+ let seen={},storeReady=!window.YOS_WEB_DATA_ERROR;
+ if(storeReady){
+  try{
+   const raw=localStorage.getItem(key);seen=raw?JSON.parse(raw):{};
+   if(!seen||typeof seen!=='object'||Array.isArray(seen)||Object.keys(seen).length>80||
+     Object.values(seen).some(v=>v!==true))storeReady=false;
+  }catch{storeReady=false;}
+ }
+ // Preserve unreadable browser data untouched. Still render verified Notion tasks.
+ if(!storeReady)seen={};
  const days=boot.days,refs=new Set(),ids=new Set();
  let nextId=310000000;
  for(const rows of Object.values(days)){
@@ -143,7 +148,7 @@ const BROWSER_DIRECT_IMPORT=String.raw`
   if((part!==undefined&&part!=='next')||!/^[a-f0-9]{32}$/.test(id)||!/^\d{4}-\d{2}-\d{2}$/.test(day)||
     typeof title!=='string'||!title||title.length>120||
     !Number.isInteger(s)||!Number.isInteger(d)||s<0||d<1||s+d>1440||typeof done!=='boolean')return;
-  if(covered[ref])continue;
+  if(storeReady&&covered[ref])continue;
   const rows=next[day]||[];
   if(refs.has(ref)||rows.some(r=>r?.t===title&&r.s===s&&r.d===d&&r.kind==='task')){
    covered[ref]=true;continue;
@@ -154,13 +159,32 @@ const BROWSER_DIRECT_IMPORT=String.raw`
  }
  if(Object.keys(covered).length>80||Object.keys(next).length>120||
     Object.values(next).some(rows=>!Array.isArray(rows)||rows.length>150))return;
- if(count&&!web.write({version:1,days:next,hiddenCalendar:boot.hiddenCalendar||{}}))return;
+ const saved=count===0||(storeReady&&web.write({version:1,days:next,hiddenCalendar:boot.hiddenCalendar||{}}));
  if(count)boot.days=next;
- try{localStorage.setItem(key,JSON.stringify(covered))}catch{}
+ const readOnly=!storeReady||!saved;
+ if(readOnly){
+  window.YOS_DAYSTREAM_NATIVE_READONLY=true;
+  window.addEventListener('DOMContentLoaded',()=>{
+   const status=document.createElement('p');status.id='yosNativeReadonlyNotice';
+   status.setAttribute('role','status');
+   status.style.cssText='padding:10px 14px;border-radius:12px;background:#fff3d6;color:#674800;font-size:13px;line-height:1.5';
+   status.textContent='Notionタスクは表示専用です。端末内の保存を確認できないため、編集や移動はできません。元のデータは上書きしていません。';
+   document.getElementById('yosWebHistoryPanel')?.before(status);
+   const css=document.createElement('style');
+   css.textContent='#tl .card{pointer-events:none!important}#tl .task-drag-grip{display:none!important}';
+   document.head.append(css);
+   for(const id of ['addBtn','editSelected','deleteSelected','doneBtn','startActualBtn','moveSave','saveBtn','hideFixed','yosUndoBtn','yosRedoBtn']){
+    const button=document.getElementById(id);
+    if(button){button.disabled=true;button.setAttribute('aria-disabled','true');}
+   }
+  });
+ }else{
+  try{localStorage.setItem(key,JSON.stringify(covered))}catch{}
+ }
  const imported=new Set(Object.keys(covered).filter(k=>covered[k]).map(k=>k.slice('yos-direct:'.length)));
  if(Array.isArray(boot.taskSource?.items))
   boot.taskSource={...boot.taskSource,items:boot.taskSource.items.filter(t=>!imported.has(t.id))};
- window.YOS_DIRECT_IMPORT={created:count,count:imported.size};
+ window.YOS_DIRECT_IMPORT={created:count,count:imported.size,readonly:readOnly};
 })();
 `;
 function nativeDirectRows(tasks){
