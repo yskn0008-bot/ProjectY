@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T01:48:47+09:00",
+  "updated_at": "2026-11-24T01:52:54+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -93,16 +93,6 @@
       "updated_at": "2026-11-23T14:59:27Z"
     },
     {
-      "id": "github-pr-908",
-      "title": "PR #908 YOS Lists｜Notionの無効カーソルを回避しYOS Tasks全件取得",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/908",
-      "updated_at": "2026-11-23T16:40:51Z"
-    },
-    {
       "id": "github-pr-909",
       "title": "PR #909 YOS Home Scenes｜設定画面をミニマルなiOSデザインへ変更",
       "type": "GitHub PR",
@@ -110,7 +100,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/909",
-      "updated_at": "2026-11-23T16:48:04Z"
+      "updated_at": "2026-11-23T16:49:51Z"
+    },
+    {
+      "id": "github-pr-910",
+      "title": "PR #910 YOS Sleep｜家電を動かさず睡眠集中モードとSleep Cycleを開始する準備",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/910",
+      "updated_at": "2026-11-23T16:50:50Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T16:47:56Z"
+      "updated_at": "2026-11-23T16:52:02Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f5508b1468ef",
+      "title": "Merge PR #908: YOS Lists cursor-free Notion Tasks loading",
+      "completed_at": "2026-11-23T16:52:01Z",
+      "result": "GitHub mainへ反映（f5508b1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f5508b1468efacfd52953eee89136674e2292b96"
+    },
+    {
+      "id": "github-commit-053221d8a029",
+      "title": "Merge latest main into PR #908, retaining all existing installer targets and applying only YOS Lists cursor fix",
+      "completed_at": "2026-11-23T16:49:39Z",
+      "result": "GitHub mainへ反映（053221d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/053221d8a029c6386061a7b5f170180f2d5bde0a"
+    },
+    {
       "id": "github-commit-412befe0399c",
       "title": "feat(remote): add safe one-button light and AC toggle (#907)",
       "completed_at": "2026-11-23T16:47:56Z",
@@ -229,25 +243,11 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e3281fcc0f4c2bb1907530df7acf441fae1efb26"
     },
     {
-      "id": "github-commit-7963aeccac7b",
-      "title": "merge(main): retain latest installer targets while fixing DAYSTREAM move/color",
-      "completed_at": "2026-11-23T16:38:26Z",
-      "result": "GitHub mainへ反映（7963aec）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7963aeccac7b0093cbd1ff424c53f880f3743167"
-    },
-    {
-      "id": "github-commit-5b6e2957eb27",
-      "title": "test(daystream): make next-day override fixture explicitly recurring",
-      "completed_at": "2026-11-23T16:36:56Z",
-      "result": "GitHub mainへ反映（5b6e295）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5b6e2957eb2728e1fe4338e0b45af4a179ecaf21"
-    },
-    {
-      "id": "github-commit-3f097802ab36",
-      "title": "chore(installer): update DAYSTREAM pin for long-interval category colors",
-      "completed_at": "2026-11-23T16:35:35Z",
-      "result": "GitHub mainへ反映（3f09780）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3f097802ab36c1efcc79a792720e878ad99f5328"
+      "id": "github-commit-d4f38263fc0d",
+      "title": "chore(yos-lists): pin cursor-free task query source to existing shared installer",
+      "completed_at": "2026-11-23T16:40:14Z",
+      "result": "GitHub mainへ反映（d4f3826）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d4f38263fc0d387d1e30c5f2afb9fb092b4dc286"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T01:48:47+09:00",
+      "last_update": "2026-11-24T01:52:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -365,7 +365,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T01:48:47+09:00",
+      "last_update": "2026-11-24T01:52:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T01:48:47+09:00",
+      "last_update": "2026-11-24T01:52:54+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "45e68818c240aed86ac3dae98aa8d89c08f7798f9073aab43dad5013aba17a1f"
+  "github_snapshot_hash": "bd7cfa7a9a7ba59ef70ae06e6874f356cd84c317cb43a833cb361445e7995cc8"
 }
