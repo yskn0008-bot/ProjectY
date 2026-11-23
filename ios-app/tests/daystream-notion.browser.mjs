@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {chromium,webkit} from 'playwright';
 import {htmlFor,row} from './daystream-notion-scriptable.test.mjs';
 
+// Native Scriptable URL is a one-tap read-only projection over the existing day.
 const date='2026-12-01',rows=[
  row('2026-12-01T05:20:00Z','2026-12-01T05:22:00Z',
   '起床','a'.repeat(32),'yos-daystream-routine-202612-wake'),
@@ -13,7 +14,7 @@ const date='2026-12-01',rows=[
   '睡眠','d'.repeat(32),'yos-daystream-routine-202612-sleep')
 ];
 const html=htmlFor(rows),browser=await (process.env.LIFE_BROWSER==='webkit'?webkit:chromium).launch({headless:true});
-const store='YOS_DAYSTREAM_WEB_PLAN_V1',importKey='YOS_DAYSTREAM_DIRECT_IMPORTED_V1';
+const store='YOS_DAYSTREAM_WEB_PLAN_V1';
 try{
  for(const width of [320,390,402]){
   const context=await browser.newContext({viewport:{width,height:844},timezoneId:'Asia/Tokyo'});
@@ -26,14 +27,13 @@ try{
   await page.goto('http://yos.local/');
   await page.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
   await page.evaluate(()=>showDay('2026-12-01'));
-  let state=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),store);
-  const direct=state.days[date].filter(x=>x.sourceRef?.startsWith('yos-direct:'));
-  assert.equal(direct.length,4);
-  assert.deepEqual(direct.map(x=>x.t),['睡眠','起床','水を飲む','歯磨き']);
-  assert.deepEqual(direct.map(x=>[x.s,x.d]),[[370,490],[860,2],[862,3],[865,5]]);
-  assert.equal(await page.locator('#tl .yos-notion-projection').count(),0);
   assert.equal(await page.locator('#tl .card.task').count(),4);
+  const projected=await page.locator('#tl .card.task').evaluateAll(x=>x.map(el=>el.innerText));
+  assert.deepEqual(projected.map(x=>['睡眠','起床','水を飲む','歯磨き'].find(y=>x.includes(y))),['睡眠','起床','水を飲む','歯磨き']);
   assert.equal(await page.locator('#tl .card.task .task-copy').count(),4);
+  assert.equal(await page.locator('#tl .card.task .fixed-label').count(),4);
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),null,'preview never writes a plan');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('YOS_DAYSTREAM_DIRECT_IMPORTED_V1')),null);
   assert.equal(await page.locator('#weekStrip').isVisible(),false);
   assert.equal(await page.locator('.flow-tools').getAttribute('open'),null);
   await page.locator('#flowEdit').click();
@@ -44,36 +44,33 @@ try{
   assert.equal(await page.locator('#yosNotionEditSheet').count(),0);
   assert.equal(await page.locator('#yosNotionMoveBar').count(),0);
   const colors=await page.locator('#tl .card.task').evaluateAll(cards=>cards.map(c=>getComputedStyle(c).backgroundColor));
-  // Sleep and ordinary tasks retain distinct visual categories.
-  assert.ok(colors.length===4);
+  assert.equal(colors.length,4);
   assert.ok(colors.every(c=>c!=='rgba(0, 0, 0, 0)'));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-  assert.equal(await page.evaluate(key=>Object.keys(JSON.parse(localStorage.getItem(key))).length,importKey),4);
-  // Editing the existing native record is authoritative; reimport cannot reset its time.
+  // Preserve a local manual edit and continue to show synced cards without duplication.
   await page.evaluate(key=>{
-   const p=JSON.parse(localStorage.getItem(key));
-   const task=p.days['2026-12-01'].find(x=>x.t==='水を飲む');task.s=910;
-   p.days['2026-12-01'].push({id:90001,t:'既存テスト',s:990,d:30,kind:'task',done:false});
-   if(!window.YOS_DAYSTREAM_WEB.write(p))throw Error('Native plan store failed');
+   const p={version:1,days:{'2026-12-01':[
+    {id:90001,t:'手動で登録した予定',s:990,d:30,kind:'task',done:false},
+    {id:90002,t:'水を飲む',s:910,d:3,kind:'task',
+     sourceRef:'yos-direct:'+'b'.repeat(32),done:false}
+   ]},hiddenCalendar:{}};
+   if(!window.YOS_DAYSTREAM_WEB.write(p))throw Error('Native plan write failed');
   },store);
   await page.reload();
   await page.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
-  state=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),store);
-  const after=state.days[date];
-  assert.equal(after.filter(x=>x.sourceRef?.startsWith('yos-direct:')).length,4);
-  assert.equal(after.find(x=>x.t==='水を飲む').s,910);
-  assert.equal(after.find(x=>x.t==='既存テスト').s,990);
-  // An intentional native deletion stays deleted (no resurrection on reopen).
-  await page.evaluate(key=>{
-   const p=JSON.parse(localStorage.getItem(key));
-   p.days['2026-12-01']=p.days['2026-12-01'].filter(x=>x.t!=='歯磨き');
-   if(!window.YOS_DAYSTREAM_WEB.write(p))throw Error('Delete verification failed');
-  },store);
+  await page.evaluate(()=>showDay('2026-12-01'));
+  assert.equal(await page.locator('#tl .card.task').count(),5,'two local rows and three nonduplicated previews');
+  let state=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),store);
+  assert.equal(state.days[date].length,2);
+  assert.equal(state.days[date].find(x=>x.t==='水を飲む').s,910);
+  assert.equal(state.days[date].find(x=>x.t==='手動で登録した予定').s,990);
+  // A corrupt pre-existing plan cannot be rewritten by the projection.
+  await page.evaluate(key=>localStorage.setItem(key,'{invalid-json'),store);
   await page.reload();
   await page.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
-  state=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),store);
-  assert.equal(state.days[date].some(x=>x.t==='歯磨き'),false);
-  assert.equal(state.days[date].some(x=>x.t==='既存テスト'),true);
+  await page.evaluate(()=>showDay('2026-12-01'));
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),'{invalid-json');
+  assert.equal(await page.locator('#tl .card.task').count(),4);
   assert.deepEqual(errors,[]);
   await context.close();
  }
