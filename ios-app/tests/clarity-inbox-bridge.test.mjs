@@ -314,3 +314,38 @@ test('Raw-only calendar capture with missing Notion credentials is held locally 
   assert.equal(m.counts.routed,0);
   assert.match(m.files.get('/docs/YOS Clarity Inbox Bridge Receipts.json'),/calendar-offline-001/);
 });
+
+
+test('JOURNAL private draft reuses verified Inbox transport without Clarity routing',async()=>{
+  const m=mocked();
+  const x={rawText:'## 【YOS_EDITORIAL_DRAFT_V1】\n### 【資料と照合状況】\n- DOI:10.1038/s41598-017-00526-9\n### 【公開不可・要審査】',
+    source:'journal',captureId:'journal:edition-20261124-001'};
+  const result=await m.run(x);
+  assert.match(result,/Notion Inbox保存確認済み/);
+  assert.match(m.blocks[0].paragraph.rich_text[0].text.content,/YOS JOURNAL Draft · journal:edition-20261124-001/);
+  assert.equal(m.blocks[1].paragraph.rich_text[0].text.content,x.rawText);
+  assert.equal(m.counts.writes,1);
+  assert.equal(m.counts.readback,3);
+  assert.equal(m.counts.routed,0,'private draft never becomes a Task, Shopping or public issue');
+  assert.match(await m.run(x),/保存確認済み/);
+  assert.equal(m.counts.writes,1,'same edition ID never appends twice');
+  assert.equal(m.counts.routed,0);
+  assert.match(await m.run({...x,rawText:'改変された別の原稿'}),/Notion未保存/);
+  assert.equal(m.counts.writes,1,'same ID with different content fails closed');
+});
+
+test('JOURNAL long drafts are chunked and read back while Clarity length limit stays unchanged',async()=>{
+  const m=mocked();
+  const draft='【YOS_EDITORIAL_DRAFT_V1】\n'+'研究原稿'.repeat(3800);
+  const x={rawText:draft,source:'journal',captureId:'journal:long-draft-0001'};
+  assert.ok(draft.length>12000&&draft.length<36000);
+  assert.match(await m.run(x),/Notion Inbox保存確認済み/);
+  assert.equal(m.counts.writes,1);
+  assert.equal(m.counts.routed,0);
+  assert.equal(m.blocks.slice(1,-1).map(b=>b.paragraph.rich_text[0].text.content).join(''),draft);
+  const over='あ'.repeat(36001);
+  assert.match(await m.run({rawText:over,source:'journal',captureId:'journal:too-long-0001'}),/Notion未保存/);
+  assert.equal(m.counts.writes,1);
+  assert.match(await m.run({rawText:draft,source:'text',captureId:'clarity:too-long-0001'}),/Notion未保存/);
+  assert.equal(m.counts.writes,1);
+});
