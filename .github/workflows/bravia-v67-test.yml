@@ -1,0 +1,20 @@
+name: BRAVIA v67 controlled TEST
+on:
+  pull_request:
+    paths:
+      - 'ios-app/scriptable/remote-widgets/picture-v67/**'
+      - 'ios-app/tests/bravia-v67-controls.test.mjs'
+      - '.github/workflows/bravia-v67-test.yml'
+permissions:
+  contents: read
+jobs:
+  remote-v67:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: New TV extras and preserved v66 picture controls
+        run: node --test ios-app/tests/bravia-v67-controls.test.mjs ios-app/tests/remote-v66-picture.test.mjs
