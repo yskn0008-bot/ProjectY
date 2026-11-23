@@ -34,7 +34,7 @@ test('Direct drop saves immediately, keeps explicit time edit and undo/redo',()=
   assert.match(html,new RegExp(`\\.card\\[data-flow-tone=${tone}\\]\\{--flow-stroke:#[0-9a-f]{6};--flow-type:#[0-9a-f]{6}\\}`));
  }
  assert.match(html,/font-family:ui-rounded,"Hiragino Maru Gothic ProN"/);
- assert.match(html,/border:1\.5px solid var\(--flow-stroke\)/);
+ assert.match(html,/border:2px solid var\(--flow-stroke\)/);
  assert.doesNotMatch(html,/addEventListener\('scroll',restoreScroll/);
 });
 
