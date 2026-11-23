@@ -122,7 +122,8 @@ test('approved light dashboard preserves records and does not invent earnings',(
   assert.match(html,/id="confirmed-hourly"/);
   assert.match(html,/経過日報を送る/);
   assert.match(html,/確認済み日報のみを集計/);
-  assert.match(html,/日報の累積金額・営業日・勤務時間を照合するまでは/);
+  assert.match(html,/id="monthly-sum-value"/);
+   assert.match(html,/日報の確認額は未登録です。勤務時間・給与予測・Notion同期は未接続です。/);
   const e=env();
   assert.equal(e.el('sales-value').textContent,'—');
   assert.equal(e.el('required-hourly').textContent,'算出不可');
