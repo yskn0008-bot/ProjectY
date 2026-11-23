@@ -306,7 +306,7 @@ function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCale
  out=out.replace(persistAnchor,"x=>x.source!=='Apple Calendar'&&x.source!=='Clarity'&&x.source!=='YOS Tasks'");
  const focusAnchor=' const reasons=latestCompatibility.get(item.id)?.reasons;';
  if(out.split(focusAnchor).length!==2)throw Error('DAYSTREAM詳細形式が変わりました');
- out=out.replace(focusAnchor," if(item.source==='YOS Tasks')fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+' · Notion YOS Tasksの読み取り専用表示。変更は原本で行ってください。';\n"+focusAnchor);
+ out=out.replace(focusAnchor," if(item.source==='YOS Tasks')fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+' · Notion YOS Tasksから同期。時刻はDAYSTREAM内で移動できます（この端末のみ・Notion原本は変更しません）。';\n"+focusAnchor);
  // Notion cards are moveable locally, but the source records remain immutable.
  // The standard gesture/move sheet is reused; no competing drag UI is installed.
  const nativePatches=[
