@@ -47,19 +47,25 @@ export function auditProvenance(privateDrafts,publicCandidate,independentDossier
    const src=independentDossier.sources.find(x=>doiFor(x.url)===doi||x.url===a.link);
    if(!src||src.status!=='examined')refuse('NO_INDEPENDENT_SOURCE');
  }
- const matching=privateDrafts.filter(d=>{
+ const privateSources=privateDrafts.filter(d=>{
    if(!d||d.state!=='private_unverified_never_publish'||typeof d.content!=='string')return false;
    const found=claimedDois(d.content);
-   return [...claimed].every(id=>found.has(id));
- });
- if(matching.length!==1)refuse('SOURCE_PROVENANCE_AMBIGUOUS');
+   return [...claimed].some(id=>found.has(id));
+ }).map(d=>({draft:d,dois:claimedDois(d.content)}));
+ // Existing one-feature draft and a single whole-issue draft remain valid.
+ // Three independent Shortcut drafts may also contribute one source each.
+ const whole=privateSources.filter(x=>[...claimed].every(id=>x.dois.has(id)));
+ const separate=claimed.size===3 && privateSources.length===3 &&
+   [...claimed].every(id=>privateSources.filter(x=>x.dois.has(id)).length===1) &&
+   privateSources.every(x=>[...claimed].filter(id=>x.dois.has(id)).length===1);
+ if(!(whole.length===1&&privateSources.length===1) && !separate)refuse('SOURCE_PROVENANCE_AMBIGUOUS');
  if(publicCandidate.verification.some(v=>!Array.isArray(v.reviewClaimIds)||!v.reviewClaimIds.length))
    refuse('REVIEW_CLAIM_IDS_MISSING');
  // Do not assume the candidate's full prose has been checked because it
  // overlaps with Notion's source bibliography. Always require separate gate.
  return {
    status:'private_draft_sources_match_independently_reviewed_public_candidate',
-   matchedPrivateDraftCount:1,
+   matchedPrivateDraftCount:privateSources.length,
    confirmedPublicSourceCount:claimed.size,
    reviewedClaimCount:review.claims.supported,
    sourceBodyReused:false,

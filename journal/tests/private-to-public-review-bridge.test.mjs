@@ -56,3 +56,23 @@ test('uses existing Notion Inbox read-only transport without serializing private
  assert.equal(result.sourceBodyReused,false);
  assert.ok(!JSON.stringify(result).includes('第一印象はほんとうに'));
 });
+test('three distinct private drafts can trace three reviewed public articles without copying prose',()=>{
+ const c=structuredClone(publicCandidate),e=structuredClone(dossier);
+ c.issue.issuedOn='2026-11-24';c.issue.date='2026.11.24 / TUE';
+ e.reviewedOn='2026-11-24';
+ const dois=['10.1177/03010066241284956','10.1177/03010066241284957','10.1177/03010066241284958'];
+ c.issue.articles=dois.map((doi,i)=>({...c.issue.articles[0],
+  title:`独立した研究${i+1}について出典を読む。`,
+  summary:`独立した記事${i+1}として原典を確認し、適用条件を比べる。${c.issue.articles[0].summary}`,
+  link:`https://journals.sagepub.com/doi/${doi}`}));
+ c.verification=c.issue.articles.map((a,i)=>({...c.verification[0],link:a.link,checkedOn:'2026-11-24',reviewClaimIds:[`C${i+1}`]}));
+ e.sources=c.issue.articles.map((a,i)=>({...e.sources[0],id:`S${i+1}`,url:a.link}));
+ e.claims=c.issue.articles.map((_,i)=>({...e.claims[0],id:`C${i+1}`,sourceId:`S${i+1}`}));
+ const drafts=dois.map((doi,i)=>({state:'private_unverified_never_publish',content:`非公開の独立原稿${i+1}。原典 DOI ${doi}。公開不可・要審査。`}));
+ const result=auditProvenance(drafts,c,e,{now:new Date('2026-11-24T00:50:00Z')});
+ assert.equal(result.matchedPrivateDraftCount,3);
+ assert.equal(result.confirmedPublicSourceCount,3);
+ assert.equal(result.canPublishAutomatically,false);
+ assert.ok(!JSON.stringify(result).includes('非公開の独立原稿'));
+ assert.throws(()=>auditProvenance([drafts[0],drafts[0],drafts[2]],c,e,{now:new Date('2026-11-24T00:50:00Z')}),/SOURCE_PROVENANCE_AMBIGUOUS/);
+});
