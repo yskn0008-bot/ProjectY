@@ -277,3 +277,32 @@ test('YOS send is not available for stale observations',async()=>{
   assert.equal(await f.sendToYos(),false);
   assert.equal(networkCalls,0);
 });
+
+test('YOS answer is invalidated after a report is undone',async()=>{
+  const e=env(),f=e.window.YOSTaxiPreview.fieldReport;
+  f.record('go_none');
+  e.window.YOS_AI_BASE_URL='https://project-y-yos-ai.vercel.app';
+  e.window.YOS_AUTH={getGoogleIdToken:async()=>'token'};
+  e.window.YosAiClient=class{async chat(){return {answer:'前の情報だけに基づく回答'}}};
+  assert.equal(await f.sendToYos(),true);
+  assert.equal(e.el('field-yos-answer').hidden,false);
+  assert.equal(f.undo(),true);
+  assert.equal(e.el('field-yos-answer').hidden,true);
+  assert.equal(e.el('field-yos-answer').textContent,'');
+  assert.match(e.el('field-yos-status').textContent,/前の回答は現在の判断ではありません/);
+});
+test('YOS answer expires after thirty minutes and is hidden on refresh',async()=>{
+  const e=env(),f=e.window.YOSTaxiPreview.fieldReport;
+  f.record('radio_none');
+  e.window.YOS_AI_BASE_URL='https://project-y-yos-ai.vercel.app';
+  e.window.YOS_AUTH={getGoogleIdToken:async()=>'token'};
+  e.window.YosAiClient=class{async chat(){return {answer:'過去の参考回答'}}};
+  assert.equal(await f.sendToYos(),true);
+  assert.equal(e.el('field-yos-answer').hidden,false);
+  e.clock.now+=31*60000;
+  f.refresh();
+  assert.equal(e.el('field-yos-send').hidden,true);
+  assert.equal(e.el('field-yos-answer').hidden,true);
+  assert.equal(e.el('field-yos-answer').textContent,'');
+  assert.match(e.el('field-yos-status').textContent,/古くなった/);
+});
