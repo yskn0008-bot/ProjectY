@@ -27,7 +27,11 @@ try{
   await page.goto('http://yos.local/');
   await page.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
   await page.evaluate(()=>showDay('2026-12-01'));
-  assert.equal(await page.locator('#tl .card.task').count(),4);
+  const detail=await page.evaluate(()=>({day:typeof selectedDay==='string'?selectedDay:'unknown',
+   projected:window.YOS_ONE_TAP_FOR_DAY?.('2026-12-01',[]).map(x=>({t:x.t,kind:x.kind,s:x.s,d:x.d})),
+   cards:[...document.querySelectorAll('#tl .card')].map(x=>({kind:x.className,text:x.innerText.slice(0,50)})),
+   storageError:window.YOS_WEB_DATA_ERROR||null}));
+  assert.equal(await page.locator('#tl .card.task').count(),4,JSON.stringify(detail));
   const projected=await page.locator('#tl .card.task').evaluateAll(x=>x.map(el=>el.innerText));
   assert.deepEqual(projected.map(x=>['睡眠','起床','水を飲む','歯磨き'].find(y=>x.includes(y))),['睡眠','起床','水を飲む','歯磨き']);
   assert.equal(await page.locator('#tl .card.task .task-copy').count(),4);
