@@ -110,3 +110,23 @@ test('timer from prior shift is not displayed as today wait',()=>{
   assert.equal(e.window.YOSTaxiPreview.waitClock.start(),true);
   assert.equal(JSON.parse(e.store.get(WAIT)).businessDate,'2026-11-23');
 });
+
+
+test('approved light dashboard preserves records and does not invent earnings',()=>{
+  assert.match(html,/color-scheme:light/);
+  assert.match(html,/id="monthly-view"/);
+  assert.match(html,/id="monthly-calendar"/);
+  assert.match(html,/id="remaining-shift"/);
+  assert.match(html,/id="remaining-target"/);
+  assert.match(html,/id="required-hourly"/);
+  assert.match(html,/id="confirmed-hourly"/);
+  assert.match(html,/経過日報を送る/);
+  assert.match(html,/確認済み日報のみを集計/);
+  assert.match(html,/日報の累積金額・営業日・勤務時間を照合するまでは/);
+  const e=env();
+  assert.equal(e.el('sales-value').textContent,'—');
+  assert.equal(e.el('required-hourly').textContent,'算出不可');
+  assert.equal(e.el('remaining-shift').textContent,'未確認');
+  assert.equal(e.store.get(OLD),JSON.stringify(initial()));
+  assert.equal(e.store.get('yos-taxi-ops-v1'),'keep-legacy');
+});
