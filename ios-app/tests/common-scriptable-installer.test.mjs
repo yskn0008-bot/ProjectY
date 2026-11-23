@@ -570,3 +570,59 @@ test('both source routes mismatching stop without touching scripts and explain f
  assert.match(r.alerts.at(-1).message,/RAW:/);
  assert.match(r.alerts.at(-1).message,/API:/);
 });
+
+
+test('Scriptable-generated icon header only is an accepted managed update with raw backup',async()=>{
+  const cloud=fm('/icloud'),local=fm('/local');
+  await run({cloud,local,id:'sleep-scene',choices:[-1]});
+  const name='YOS Sleep Scene',path='/icloud/'+name+'.js';
+  const rec='/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.receipt.json';
+  const before=cloud.files.get(path);
+  const banner='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: deep-green; icon-glyph: magic;\n';
+  const phoneCode=banner+before;
+  cloud.files.set(path,phoneCode);
+  const next=before+'\n// safe test upgrade\n';
+  const cat=clone(shipped),entry=cat.targets.find(x=>x.id==='sleep-scene');
+  entry.commit='f'.repeat(40);entry.sha256=hash(next);
+  let r=await run({cloud,local,id:'sleep-scene',catalog:cat,sources:{...fixtures,'sleep-scene':next},choices:[0,-1]});
+  assert.equal(cloud.files.get(path),next);
+  assert.equal(JSON.parse(cloud.files.get(rec)).sha256,hash(next));
+  assert.ok(r.alerts.some(x=>x.title==='更新の確認'));
+  assert.equal(cloud.files.get('/icloud/YOS Common Installer Data/backups/'+encodeURIComponent(name)+'-'+hash(phoneCode)+'.txt'),phoneCode);
+});
+
+test('Scriptable metadata never exempts even a single real source edit',async()=>{
+  const cloud=fm('/icloud'),local=fm('/local');
+  await run({cloud,local,id:'sleep-scene',choices:[-1]});
+  const path='/icloud/YOS Sleep Scene.js',initial=cloud.files.get(path);
+  const banner='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: deep-green; icon-glyph: magic;\n';
+  const altered=banner+initial.replace('YOS Sleep Scene v1.0','YOS Sleep Scene manually edited');
+  cloud.files.set(path,altered);
+  const next=initial+'\n// future version\n',cat=clone(shipped),entry=cat.targets.find(x=>x.id==='sleep-scene');
+  entry.commit='f'.repeat(40);entry.sha256=hash(next);
+  const r=await run({cloud,local,id:'sleep-scene',catalog:cat,sources:{...fixtures,'sleep-scene':next},choices:[0,-1]});
+  assert.equal(cloud.files.get(path),altered);
+  assert.match(r.alerts.at(-1).message,/変更されたコード/);
+});
+
+test('Scriptable icon header managed update interrupted is fully restorable',async()=>{
+  const cloud=fm('/icloud'),local=fm('/local');
+  await run({cloud,local,id:'sleep-scene',choices:[-1]});
+  const name='YOS Sleep Scene',path='/icloud/'+name+'.js',base='/icloud/YOS Common Installer Data';
+  const rec=base+'/'+encodeURIComponent(name)+'.receipt.json',marker=base+'/'+encodeURIComponent(name)+'.pending.json';
+  const old=cloud.files.get(path),oldReceipt=cloud.files.get(rec);
+  const banner='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: deep-green; icon-glyph: magic;\n';
+  const annotated=banner+old,newCode=old+'\n// new\n';
+  const catalog=clone(shipped),e=catalog.targets.find(x=>x.id==='sleep-scene');
+  e.commit='f'.repeat(40);e.sha256=hash(newCode);
+  const backup=base+'/backups/'+encodeURIComponent(name)+'-'+hash(annotated)+'.txt';
+  cloud.createDirectory(base+'/backups');
+  cloud.files.set(backup,annotated);cloud.files.set(path,newCode);
+  cloud.files.set(rec,JSON.stringify({...JSON.parse(oldReceipt),sha256:hash(newCode),commit:e.commit}));
+  cloud.files.set(marker,JSON.stringify({schema:1,name,oldHash:hash(annotated),newHash:hash(newCode),backup,receiptFile:rec,oldReceipt}));
+  const r=await run({cloud,local,id:'sleep-scene',catalog,sources:{...fixtures,'sleep-scene':newCode}});
+  assert.equal(cloud.files.get(path),annotated);
+  assert.equal(cloud.files.get(rec),oldReceipt);
+  assert.equal(cloud.files.has(marker),false);
+  assert.match(r.alerts.at(-1).message,/復旧しました/);
+});

@@ -142,6 +142,17 @@ function writeChecked(fm,path,content){
   fm.writeString(path,content);
   if(fm.readString(path)!==content)throw Error('保存後の読戻しに失敗しました');
 }
+
+// Scriptable adds an icon metadata banner on editing/opening scripts.
+// Permit an update ONLY when removing this exact generated header restores
+// a byte-for-byte match to the recorded, previously trusted script SHA-256.
+// Never strip arbitrary edits, and always back up the original raw file.
+function hasOnlyScriptableIconHeader(source,expectedHash){
+  if(typeof source!=='string'||typeof expectedHash!=='string')return false;
+  const header=/^\/\/ Variables used by Scriptable\.\n\/\/ These must be at the very top of the file\. Do not edit\.\n\/\/ icon-color: [a-z0-9-]+; icon-glyph: [a-z0-9-]+;\n(?=\/\/ Variables used by Scriptable\.)/;
+  const match=source.match(header);
+  return !!match&&digest(source.slice(match[0].length))===expectedHash;
+}
 function receiptFor(entry,hash,kind){return {schema:1,name:entry.name,id:entry.id,path:entry.path,sha256:hash,storage:kind,commit:entry.commit}}
 function receiptMatches(receipt,entry,kind){
   return !!receipt&&receipt.schema===1&&receipt.name===entry.name&&receipt.id===entry.id&&receipt.path===entry.path&&receipt.storage===kind&&typeof receipt.sha256==='string'&&/^[0-9a-f]{64}$/.test(receipt.sha256);
@@ -177,12 +188,13 @@ async function recoverPending(fm,target,markerFile,receiptFile,name){
     const originalUnmanaged=name===REMOTE_NAME&&p.oldReceipt===null&&REMOTE_PRIOR_HASHES.has(p.oldHash);
     if(!/^[0-9a-f]{64}$/.test(p.oldHash)||typeof p.backup!=='string'||p.backup!==fm.joinPath(fm.joinPath(basePath(fm),'backups'),encodeURIComponent(name)+'-'+p.oldHash+'.txt')||!fm.fileExists(p.backup)||(!originalUnmanaged&&typeof p.oldReceipt!=='string'))throw Error('復旧用バックアップを特定できません');
     const before=await readable(fm,p.backup),previous=originalUnmanaged?null:JSON.parse(p.oldReceipt);
-    const allowedReceiptHashes=originalUnmanaged?[null,p.newHash]:[p.oldHash,p.newHash];
-    if(digest(before)!==p.oldHash||(previous&&(previous.sha256!==p.oldHash||previous.name!==name))||![p.oldHash,p.newHash].includes(liveHash)||!allowedReceiptHashes.includes(receiptHash))throw Error('復旧記録とファイルに矛盾があります。変更しません');
+    const oldReceiptHash=originalUnmanaged?p.oldHash:previous.sha256;
+    const allowedReceiptHashes=originalUnmanaged?[null,p.newHash]:[oldReceiptHash,p.newHash];
+    if(digest(before)!==p.oldHash||(previous&&(!((previous.sha256===p.oldHash)||hasOnlyScriptableIconHeader(before,previous.sha256))||previous.name!==name))||![p.oldHash,p.newHash].includes(liveHash)||!allowedReceiptHashes.includes(receiptHash))throw Error('復旧記録とファイルに矛盾があります。変更しません');
     if(liveHash!==p.oldHash)writeChecked(fm,target,before);
     if(originalUnmanaged){if(receiptHash===p.newHash)fm.remove(receiptFile);}
     else if(receiptHash!==p.oldHash)writeChecked(fm,receiptFile,p.oldReceipt);
-    if(digest(await readable(fm,target))!==p.oldHash||(originalUnmanaged?fm.fileExists(receiptFile):JSON.parse(await readable(fm,receiptFile)).sha256!==p.oldHash))throw Error('復旧の確認に失敗しました');
+    if(digest(await readable(fm,target))!==p.oldHash||(originalUnmanaged?fm.fileExists(receiptFile):JSON.parse(await readable(fm,receiptFile)).sha256!==oldReceiptHash))throw Error('復旧の確認に失敗しました');
   }else{
     if(p.oldHash!==null||p.backup!==null||p.oldReceipt!==null||![null,p.newHash].includes(liveHash)||![null,p.newHash].includes(receiptHash))throw Error('初回登録の中断状態が不明です。変更しません');
     if(liveHash===p.newHash)fm.remove(target);
@@ -249,7 +261,7 @@ async function install(entry){
   const current=existing.length?await readable(fm,target):null;
   const currentHash=current===null?null:digest(current);
   const previous=await readJSON(fm,receiptFile);
-  if(currentHash===desiredHash){
+  if(currentHash===desiredHash||(current!==null&&hasOnlyScriptableIconHeader(current,desiredHash))){
     if(previous&&!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous,desiredHash);return;}
     // Identical existing code is never overwritten or automatically adopted.
     await inform('登録済み','「'+name+'」は既に同じコードです。既存ファイルは変更していません。',name);
@@ -258,7 +270,7 @@ async function install(entry){
   if(current!==null){
     const trustedPrior=isRemoteEntry(entry)&&previous===null&&REMOTE_PRIOR_HASHES.has(currentHash);
     if(!trustedPrior&&!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous,desiredHash);return;}
-    if(!trustedPrior&&previous.sha256!==currentHash)throw Error('Scriptable内で変更されたコードです。上書きしません');
+    if(!trustedPrior&&previous.sha256!==currentHash&&!hasOnlyScriptableIconHeader(current,previous.sha256))throw Error('Scriptable内で変更されたコードです。上書きしません');
     const approved=await confirm(trustedPrior?'既存リモコンの安全更新':'更新の確認',
       trustedPrior?'既知の旧版「リモコン」と完全一致しました。現在の本体をバックアップし、テレビ・照明・エアコンを保持した新しい画質機能付きリモコンに更新しますか？':
       '「'+name+'」をGitHub検証済みの版へ更新します。現在のコードをバックアップしてから変更します。','バックアップして更新');
