@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T05:57:10+09:00",
+  "updated_at": "2026-11-24T06:05:24+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -103,14 +103,14 @@
       "updated_at": "2026-11-23T17:46:13Z"
     },
     {
-      "id": "github-pr-924",
-      "title": "PR #924 YOS Lists｜タップ直後に1行だけ即時切替、Notion確定後に反映",
+      "id": "github-pr-925",
+      "title": "PR #925 feat(bravia): 既存4台リモコンに2本画質バー・横スクロールアプリ・キーボード・VPN入口",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/924",
-      "updated_at": "2026-11-23T20:55:41Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/925",
+      "updated_at": "2026-11-23T21:04:39Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T20:56:22Z"
+      "updated_at": "2026-11-23T21:04:30Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-46f615537fc8",
+      "title": "Merge PR #924: instant YOS Lists tap feedback with verified Notion save",
+      "completed_at": "2026-11-23T21:04:32Z",
+      "result": "GitHub mainへ反映（46f6155）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/46f615537fc874057786f1c47d698959fa0226da"
+    },
+    {
+      "id": "github-commit-bc6eaa1bd087",
+      "title": "Sync PR #924 with latest main preserving DAYSTREAM and all other installer targets",
+      "completed_at": "2026-11-23T21:02:57Z",
+      "result": "GitHub mainへ反映（bc6eaa1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bc6eaa1bd087aaf3c7756ed043d63046524067e0"
+    },
+    {
       "id": "github-commit-d18aca87b031",
       "title": "Merge pull request #920 from yskn0008-bot/fix/daystream-direct-spring-drag-20261124",
       "completed_at": "2026-11-23T20:56:14Z",
@@ -229,25 +243,11 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8385e2b4e0d22cc31afe0cfd877ecef28106f0fd"
     },
     {
-      "id": "github-commit-ed1335fb61ef",
-      "title": "design(home-scenes): release approved navy glass Scriptable UI",
-      "completed_at": "2026-11-23T20:54:46Z",
-      "result": "GitHub mainへ反映（ed1335f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ed1335fb61efde94a80da3d7834824d96cd2089d"
-    },
-    {
-      "id": "github-commit-3211da0dcef7",
-      "title": "fix(daystream): keep all task drag grips finger-reachable, not just short rows",
-      "completed_at": "2026-11-23T20:48:27Z",
-      "result": "GitHub mainへ反映（3211da0）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3211da0dcef7b413801c4c581d0660411c9f5bff"
-    },
-    {
-      "id": "github-commit-6b53ec32abd7",
-      "title": "Keep full-size touch target for compact task dragging",
-      "completed_at": "2026-11-23T20:47:55Z",
-      "result": "GitHub mainへ反映（6b53ec3）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6b53ec32abd7ed615770424e46bfd7f52e598fcd"
+      "id": "github-commit-85cb27674205",
+      "title": "Sync PR #924 with latest main while retaining Home Scenes and other installer targets",
+      "completed_at": "2026-11-23T20:55:24Z",
+      "result": "GitHub mainへ反映（85cb276）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/85cb276742058b3bb4a5325c06b2f5ce4cdacbba"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T05:57:10+09:00",
+      "last_update": "2026-11-24T06:05:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -365,7 +365,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T05:57:10+09:00",
+      "last_update": "2026-11-24T06:05:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T05:57:10+09:00",
+      "last_update": "2026-11-24T06:05:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "88f8c601ece7f20411070965f7df2bc730f77b46d5f818070ebfc63a54108eb9"
+  "github_snapshot_hash": "cfa9c5e804cf10edc43bd913277dc71500781ddc0bc60be4122a8597ccd0504b"
 }
