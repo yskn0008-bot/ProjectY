@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
+// The iPhone user is in Japan; CI runners default to UTC.
+process.env.TZ='Asia/Tokyo';
 const script=readFileSync(new URL('../scriptable/YOS DAYSTREAM Notion.js',import.meta.url),'utf8');
 const begin=script.indexOf('// PRIVATE DAYSTREAM XL:');
 const end=script.indexOf('\nconst safeScript=',begin);
