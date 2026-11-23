@@ -1947,7 +1947,13 @@ function wireTaskGestures(el,item){
  el.addEventListener('pointerdown',e=>{
   if(e.pointerType==='touch'||e.button!==0)return;
   begin(e.clientX,e.clientY,e.pointerId,grip.contains(e.target));
+  try{el.setPointerCapture?.(e.pointerId)}catch{}
  });
+ // WebKit may deliver captured events to the card rather than document.
+ // Duplicate events are safe: paint is coalesced to one animation frame.
+ el.addEventListener('pointermove',e=>{if(gesture?.id===e.pointerId)move(e.clientX,e.clientY,e)});
+ el.addEventListener('pointerup',e=>{if(gesture?.id===e.pointerId)finish(false,e.clientY)});
+ el.addEventListener('pointercancel',e=>{if(gesture?.id===e.pointerId)finish(true)});
  grip.addEventListener('click',e=>{if(e.detail===0)openMoveDialog(item,item.s,null)});
 }
 function smoothRender(activeId,oldActiveRect){
