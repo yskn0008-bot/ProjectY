@@ -493,6 +493,39 @@
    fieldData={entries,error:false};renderField();toast('直前の報告を取り消しました。履歴は保持しています');return true;
  }
 
+
+ // Prepare an authenticated YOS /api/yos/chat input. Never send automatically or synthesize a location.
+ function prepareYosFieldRequest(now=Date.now()){
+   const records=readField();
+   if(records.error)return {status:'storage-error',request:null,reason:'現場報告の保存内容が不正'};
+   if(!isActive())return {status:'shift-unconfirmed',request:null,reason:'営業中の本人記録がない'};
+   const shiftTime=Date.parse(state.shiftStart);
+   if(!Number.isFinite(shiftTime)||!Number.isFinite(now))return {status:'invalid-time',request:null,reason:'勤務時刻を確認できない'};
+   const maxAgeMs=30*60000;
+   const fresh=records.entries.filter(e=>{
+     const at=Date.parse(e.at);
+     return e.businessDate===state.businessDate&&e.shiftStart===state.shiftStart
+       &&!e.voidedAt&&e.source==='manual-tap'&&Object.hasOwn(fieldLabels,e.kind)
+       &&Number.isFinite(at)&&at>=shiftTime&&at<=now+30000&&now-at<=maxAgeMs;
+   }).sort((a,b)=>Date.parse(a.at)-Date.parse(b.at)).slice(-10);
+   if(!fresh.length)return {status:'no-fresh-facts',request:null,reason:'過去30分の有効な現場報告がない'};
+   const lines=fresh.map(e=>'・'+new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit'}).format(new Date(e.at))+'　'+fieldLabels[e.kind]);
+   const wait=confirmedWait(now);
+   const waitMinutes=wait?Math.floor(Math.max(0,now-Date.parse(wait.startedAt))/60000):null;
+   const prompt=[
+     '【YOS TAXI｜本人の定型タップ報告】',
+     '営業日：'+state.businessDate,
+     '報告元：本人による手動タップ（GO・無線の公式データではない）',
+     '現在地：未確認。エリア、需要、空車台数、配車結果を推測しない。',
+     '観測（過去30分の本人申告、最大10件）：',
+     ...lines,
+     waitMinutes===null?'正確な待機開始時刻：未確認':'端末で開始を記録した待機時間：'+waitMinutes+'分',
+     '依頼：事実・推測・未確認を区別。確認済み情報が足りなければ「未判定」と明示し、移動先や最適待機時間を断定しない。安全に停車中に確認できる、短い返答と次の確認項目だけ示す。'
+   ].join('\n');
+   // The existing YOS chat API accepts userText; transport and Google ID token are not configured here.
+   return {status:'prepared-not-sent',request:{userText:prompt},eventsUsed:fresh.map(e=>e.id),source:'manual-tap',sent:false};
+ }
+
  const money=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
  const number=n=>typeof n==='number'&&Number.isFinite(n)?n:null;
  const save=s=>{try{localStorage.setItem(STORE,JSON.stringify(s));state=s;return true}catch{notify('保存失敗：端末内記録は更新されませんでした');return false}};
@@ -615,7 +648,7 @@
  render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait()},15000);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')renderWait()});
  addEventListener('pageshow',renderWait);
- window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand,waitClock:{get:()=>waitView(),start:startWait,stop:finishWait,refresh:renderWait},fieldReport:{list:()=>structuredClone(currentFields()),record:reportField,undo:undoField,refresh:renderField}};
+ window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand,waitClock:{get:()=>waitView(),start:startWait,stop:finishWait,refresh:renderWait},fieldReport:{list:()=>structuredClone(currentFields()),record:reportField,undo:undoField,refresh:renderField,prepareYosRequest:prepareYosFieldRequest}};
  if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 })();
 </script>
