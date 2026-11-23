@@ -125,7 +125,7 @@ async function acPower(core,wanted){
     if(!Number.isFinite(s[key])&&info[field]!=null)s[key]=Number(info[field]);
   }
   if(!Number.isFinite(s.P)||!Number.isFinite(s.M))throw Error('エアコンの電源・運転モードが不明なため送信しません');
-  if(Boolean(s.P)===wanted)return '既に指定状態';
+  // Tapo's cached IR status is not a physical power sensor: always send the requested AC state.
   function clamp(n,min,max,fallback){return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback}
   const payload={power:wanted,on:wanted,mode:s.M,temp:clamp(s.T,18,30,26),wind_speed:clamp(s.S,0,4,0),wind_direct:clamp(s.D,0,6,6)};
   await client.controlAc(remote.device_id,payload);
