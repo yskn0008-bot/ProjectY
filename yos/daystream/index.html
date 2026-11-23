@@ -306,8 +306,12 @@ body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
 .flow-editing :is(.flow-date-row,.calendar-modes,.flow-tools,#gestureHelp,.dock,.flow-add,.native-tools){display:none}
 .flow-editing .timeline{margin-top:23px}
 .move-sheet:open{
- position:fixed;inset:max(32dvh,calc(100dvh - 560px)) 0 auto;width:min(460px,100%);max-width:100%;
- height:min(560px,68dvh);max-height:none;margin:0 auto;padding:0 12px max(16px,env(safe-area-inset-bottom));
+ position:fixed;inset:0;display:grid;align-items:end;justify-items:center;
+ width:100%;height:100%;max-width:none;max-height:none;
+ margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:hidden;
+}
+.move-sheet-content{
+ width:min(460px,100%);max-height:min(560px,68dvh);padding:0 12px max(16px,env(safe-area-inset-bottom));
  border:1px solid #d0daea;border-radius:23px 23px 0 0;
  background:radial-gradient(ellipse at 100% 0,#d5edff,transparent 68%),linear-gradient(170deg,#e2e7fb,#f0ebf8 60%,#f3f8e8);
  overflow:auto;overscroll-behavior:contain;scroll-padding-top:60px;
@@ -440,6 +444,7 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
   <section class="tabbox" id="aiPanel"><h3>AIプラン</h3><p>AIとの連携は未実装です。実行状況を確認せずに予定の自動変更はしません。</p><p class="muted">追加や時間変更はタイムラインで手動操作できます。</p></section>
   <div class="gesture-delete" id="gestureDelete" hidden aria-live="polite"><span id="gestureDeleteTitle"></span><button id="gestureDeleteConfirm" type="button">削除</button><button id="gestureDeleteCancel" class="cancel" type="button">戻す</button></div>
   <dialog id="moveDialog" class="move-sheet" aria-labelledby="moveHeading">
+   <div class="move-sheet-content">
     <div class="flow-advice-bar"><button id="moveCancel" type="button" autofocus>キャンセル</button><strong>時刻の変更</strong><button id="moveSave" type="button">保存</button></div>
     <section class="flow-advice-card flow-verdict">
       <h2 id="moveHeading"><span aria-hidden="true">💡</span> 配置アドバイス</h2>
@@ -451,6 +456,7 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
     <section class="flow-advice-card" id="moveEvidence"><h3><span aria-hidden="true">▥</span> 根拠・詳細</h3><p class="move-scope" id="moveBasis"></p><a id="moveSource" hidden href="https://sleepeducation.org/healthy-sleep/healthy-sleep-habits/" target="_blank" rel="noopener noreferrer">米国睡眠医学会の睡眠習慣ガイド ↗</a></section>
     <section class="flow-advice-card" id="flowNextAction"><h3><span aria-hidden="true">☆</span> 配置候補</h3><button id="flowCandidates" type="button">空き時間を探す</button><div id="moveOptions" aria-live="polite"></div></section>
 
+   </div>
   </dialog>
   <div class="focus" id="focus"><b id="focusTitle"></b><p id="focusInfo" aria-live="polite"></p><div class="actions-row"><button id="startActualBtn" class="secondary" hidden>開始を記録</button><button id="doneBtn">完了にする</button><button id="editSelected" class="secondary">編集</button><button id="deleteSelected" class="danger">削除</button><button id="hideFixed" class="secondary" hidden>この画面で隠す</button><button id="closeFocus" class="secondary">閉じる</button></div></div>
 </div>
@@ -1724,7 +1730,7 @@ function openMoveDialog(item,start,previousRect){
  moveTime.value=fmt(start);
  renderMoveAdvice();
  moveDialog.showModal();
- moveDialog.scrollTop=0;
+ moveDialog.firstElementChild.scrollTop=0;
 }
 moveTime.addEventListener('input',renderMoveAdvice);
 moveDialog.addEventListener('close',()=>{if(!moveDialog.open)pendingMove=null});
