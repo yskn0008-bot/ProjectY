@@ -618,6 +618,23 @@ test('Taxi research: official forecast displays separate publication, retrieval 
   expect(errors).toEqual([]);
 });
 
+test('Taxi research: JMA date-only periods switch at midnight Japan time, not 09:00',async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-20T01:30:00+09:00'));
+  await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{
+      publishingOffice:'沖縄気象台',reportDatetime:'2026-11-19T17:00:00+09:00',
+      timeSeries:[{timeDefines:['2026-11-19','2026-11-20'],
+      areas:[{area:{code:'471010'},weathers:['くもり','雨']}]}]
+    }])});
+  });
+  await page.goto('./research.html?phase=during',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#weather-status')).toHaveText('公式予報を取得');
+  await expect(page.locator('#weather-report')).toContainText('雨');
+  await expect(page.locator('#weather-report')).not.toContainText('くもり');
+  await expect(page.locator('#weather-meta')).toContainText('00:00');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
 test('Taxi research: outdated official publication is explicitly expired even after a successful HTTP fetch',async ({page})=>{
   await page.clock.setFixedTime(new Date('2026-11-19T21:00:00+09:00'));
   await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{

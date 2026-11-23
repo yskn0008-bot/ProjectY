@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T01:41:48+09:00",
+  "updated_at": "2026-11-24T05:52:31+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
-      "updated_at": "2026-11-23T05:39:00Z"
+      "updated_at": "2026-11-23T20:46:43Z"
     },
     {
       "id": "github-pr-890",
@@ -60,7 +60,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/894",
-      "updated_at": "2026-11-23T16:40:47Z"
+      "updated_at": "2026-11-23T20:51:00Z"
     },
     {
       "id": "github-pr-901",
@@ -70,7 +70,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/901",
-      "updated_at": "2026-11-23T16:06:11Z"
+      "updated_at": "2026-11-23T20:09:46Z"
     },
     {
       "id": "github-pr-902",
@@ -83,34 +83,34 @@
       "updated_at": "2026-11-23T14:59:27Z"
     },
     {
-      "id": "github-pr-906",
-      "title": "PR #906 fix(daystream): restore movable Notion tasks and category-colored timeline",
+      "id": "github-pr-909",
+      "title": "PR #909 YOS Home Scenes｜設定画面をミニマルなiOSデザインへ変更",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/906",
-      "updated_at": "2026-11-23T16:39:18Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/909",
+      "updated_at": "2026-11-23T20:51:50Z"
     },
     {
-      "id": "github-pr-907",
-      "title": "PR #907 YOS Remote｜照明・エアコンの1ボタン切り替え（状態は推定）",
+      "id": "github-pr-914",
+      "title": "PR #914 YOS Lists｜淡すぎないパステル配色へ微調整",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/907",
-      "updated_at": "2026-11-23T16:41:14Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/914",
+      "updated_at": "2026-11-23T17:46:13Z"
     },
     {
-      "id": "github-pr-908",
-      "title": "PR #908 YOS Lists｜Notionの無効カーソルを回避しYOS Tasks全件取得",
+      "id": "github-pr-920",
+      "title": "PR #920 fix(daystream): fluid direct-drop drag with reactive neighboring bars",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/908",
-      "updated_at": "2026-11-23T16:40:51Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/920",
+      "updated_at": "2026-11-23T20:48:28Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T16:41:08Z"
+      "updated_at": "2026-11-23T20:51:39Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-53785a7f8952",
-      "title": "feat(remote): configurable departure/arrival Home Scenes via YOS Remote",
-      "completed_at": "2026-11-23T16:32:49Z",
-      "result": "GitHub mainへ反映（53785a7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/53785a7f8952055a614ad3fe0677188080e12716"
+      "id": "github-commit-aef3c529d978",
+      "title": "Merge PR #923: retain completed YOS Lists rows in-session with safe per-task undo",
+      "completed_at": "2026-11-23T20:39:43Z",
+      "result": "GitHub mainへ反映（aef3c52）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aef3c529d978f7ef18b232b5066e562763089862"
     },
     {
-      "id": "github-commit-358019c3632b",
-      "title": "Merge PR #905: YOS Lists Notion HTTP 400 safe display and diagnostics",
-      "completed_at": "2026-11-23T16:28:36Z",
-      "result": "GitHub mainへ反映（358019c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/358019c3632bd90bf621c5650f4505814d6416a7"
+      "id": "github-commit-1d66958cc4a2",
+      "title": "Sync PR #923 with updated mission-control main retaining completed-row fixes and other installer targets",
+      "completed_at": "2026-11-23T20:39:12Z",
+      "result": "GitHub mainへ反映（1d66958）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1d66958cc4a2b7bc2fbe61af8d0a78bd23b64c2e"
     },
     {
-      "id": "github-commit-41c50d4af964",
-      "title": "chore(yos-lists): pin diagnostic safe UI source in existing installer",
-      "completed_at": "2026-11-23T16:07:25Z",
-      "result": "GitHub mainへ反映（41c50d4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/41c50d4af964fc9a4923505f11dbcf8a40350e2b"
+      "id": "github-commit-e7f79dce7f53",
+      "title": "Sync PR #923 with latest main preserving mission-control updates and all installer targets",
+      "completed_at": "2026-11-23T20:37:19Z",
+      "result": "GitHub mainへ反映（e7f79dc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e7f79dce7f53d14b473851e08c91e110720557e4"
     },
     {
-      "id": "github-commit-58740a438acb",
-      "title": "test(yos-lists): assert real Notion 400 is attributed and UI still opens on partial/full outage",
-      "completed_at": "2026-11-23T16:06:57Z",
-      "result": "GitHub mainへ反映（58740a4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/58740a438acbd73e8e12317fbab33688339404da"
+      "id": "github-commit-d1acf6a831d8",
+      "title": "chore(yos-lists): repin verified per-task undo receipt source in common installer",
+      "completed_at": "2026-11-23T20:31:44Z",
+      "result": "GitHub mainへ反映（d1acf6a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d1acf6a831d8b542d42827deed33b6f8235b81e1"
     },
     {
-      "id": "github-commit-9fdc7b9db08e",
-      "title": "fix(yos-lists): surface Notion 400 response details and keep UI open when either source fails",
-      "completed_at": "2026-11-23T16:06:05Z",
-      "result": "GitHub mainへ反映（9fdc7b9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9fdc7b9db08e0a3ea9263eee2732614f932b6d18"
+      "id": "github-commit-47e5c58cb418",
+      "title": "fix(yos-lists): include task ID in per-row undo receipt for safe consistency check",
+      "completed_at": "2026-11-23T20:31:32Z",
+      "result": "GitHub mainへ反映（47e5c58）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/47e5c58cb41827892110cdfc57964c375c0d5588"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T01:41:48+09:00",
+      "last_update": "2026-11-24T05:52:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -365,7 +365,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T01:41:48+09:00",
+      "last_update": "2026-11-24T05:52:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T01:41:48+09:00",
+      "last_update": "2026-11-24T05:52:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e69eba7e0cf85a081256942bcbedc1fdef5991364007d23b8bce5fce485b869d"
+  "github_snapshot_hash": "99c05d96516f5f39032edd83e7023f6595cafb5e15060a438f32111807888c0f"
 }
