@@ -244,7 +244,7 @@ function decodeForecast(data,receivedAt){
  const series=issue.timeSeries?.[0],times=series?.timeDefines,area=series?.areas?.find(a=>a?.area?.code==='471010');
  if(!Array.isArray(times)||!Array.isArray(area?.weathers)||times.length!==area.weathers.length)throw Error('中南部の予報が未確認');
  // Date-only JMA slots represent midnight in Japan, not midnight UTC.
- const periodStart=t=>typeof t==='string'&&/^\\d{4}-\\d{2}-\\d{2}$/.test(t)
+ const periodStart=t=>typeof t==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t)
   ?new Date(t+'T00:00:00+09:00'):new Date(t);
  const candidates=times.map((t,i)=>({at:periodStart(t),forecast:area.weathers[i]}))
   .filter(x=>Number.isFinite(x.at.getTime())&&typeof x.forecast==='string'&&x.forecast.trim());
