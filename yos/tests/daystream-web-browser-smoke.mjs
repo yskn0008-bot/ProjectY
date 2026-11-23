@@ -9,6 +9,11 @@ try{
  const res=await page.goto('http://127.0.0.1:4173/yos/daystream/',{waitUntil:'domcontentloaded'});
  assert.equal(res.status(),200);
  await page.locator('#timelinePanel').waitFor();
+ const dateTop=await page.locator('.flow-date-row').boundingBox();
+ const connectionTop=await page.locator('.native-tools summary').boundingBox();
+ assert.ok(dateTop && dateTop.y <= 12,'date starts at the top on a normal mobile viewport');
+ assert.ok(connectionTop && dateTop.y+dateTop.height<=connectionTop.y,'connection controls are below the date');
+
  await page.locator('.native-tools summary').click();
  await page.locator('#yosWebImport').waitFor();
  assert.equal(await page.locator('#yosWebHistory').isVisible(),true);

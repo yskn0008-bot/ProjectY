@@ -153,8 +153,6 @@ body.yos-daystream-web .yos-web-port,.yos-daystream-web .dock{background:#ffffff
 .yos-history-button{background:#edf5fc;border-color:#d5e1ee;color:#385d7d}
 .top{padding-inline:16px}
 .headrow{align-items:flex-end}
-.daystream-brand{color:#205e6f;font-weight:800;font-size:13px;letter-spacing:.07em}
-.daystream-brand span{font-size:10px;color:#52657e;letter-spacing:.12em;font-weight:680}
 .headrow h1{font-size:clamp(19px,5.5vw,25px);line-height:1.16;margin:5px 0 4px;letter-spacing:-.04em}
 .daystream-date{font-size:13px;color:#405a78;font-weight:650}
 .actions{gap:5px}.iconbtn{border-radius:12px;color:#245477;background:#ffffffab;border:1px solid #fff}
@@ -264,10 +262,6 @@ html body.yos-daystream-web{
 }
 .top{padding-inline:16px}
 .yos-daystream-web .app{padding-top:14px}
-.flow-title{margin:3px 0 12px}
-.flow-title .daystream-brand{font-size:19px;font-weight:700;line-height:1.2;color:#22465a}
-.flow-title .daystream-brand span{font-size:14px;font-weight:550;letter-spacing:.075em}
-.flow-title h1{font-size:clamp(25px,7vw,35px);letter-spacing:-.06em;line-height:1.23;margin:4px 0;color:#131c33}
 .flow-date-row,.flow-date-pill{display:flex;align-items:center;gap:7px}
 .flow-date-pill{flex:1;justify-content:space-between;border:1px solid #ffffffbe;border-radius:26px;min-width:0;background:linear-gradient(100deg,#fff9,#e8f5ffc9);box-shadow:0 4px 12px #aac5e82b}
 .flow-date-pill button,.flow-edit-bar button,.flow-advice-bar button{border:0;background:transparent;color:#142640;min-width:37px;min-height:43px;font-size:25px;line-height:1}
@@ -310,7 +304,7 @@ body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
 #flowDragHint[data-level=danger]{background:#fff0f4;border-color:#db93a8;color:#853650}
 .flow-edit-bar{display:none}
 .flow-editing .flow-edit-bar,.flow-advice-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f9fbffe8;border-bottom:1px solid #dbe6ef;padding:3px 2px}
-.flow-editing :is(.flow-title,.flow-date-row,.calendar-modes,.flow-tools,#gestureHelp,.dock,.flow-add,.native-tools){display:none}
+.flow-editing :is(.flow-date-row,.calendar-modes,.flow-tools,#gestureHelp,.dock,.flow-add,.native-tools){display:none}
 .flow-editing .timeline{margin-top:23px}
 .move-sheet:open{width:min(460px,100%);max-width:100%;max-height:100dvh;height:100dvh;margin:0 auto;padding:0 12px 24px;border:0;border-radius:0;background:radial-gradient(ellipse at 100% 0,#d5edff,transparent 68%),linear-gradient(170deg,#e2e7fb,#f0ebf8 60%,#f3f8e8);overflow:auto}
 .flow-advice-bar{position:sticky;top:0;z-index:2;margin:0 -12px 9px;padding:4px 12px}
@@ -329,9 +323,9 @@ body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
 .move-impact li:before{content:'•';color:#158861;margin-right:7px}
 .move-impact li:last-child{border-bottom:0}
 /* Glass surfaces and status accents on the existing day view. */
-.yos-daystream-web .app{padding-top:26px}
-.flow-title{margin-bottom:15px}
-.flow-title h1{margin-top:6px;font-weight:850}
+body.yos-daystream-web .app{padding-top:calc(6px + env(safe-area-inset-top))}
+.yos-daystream-web .top{padding-top:0}
+body.yos-daystream-web.flow-editing .app{padding-top:26px}
 .timeline-legend{margin-top:10px;gap:8px}
 .timeline-legend span{font-size:12px;font-weight:700;padding:5px 10px}
 .timeline-legend span:before{width:9px;height:9px}
@@ -379,18 +373,11 @@ body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
 #moveOptions button,#flowCandidates{border:1px solid #b8d8ce;background:#eff8f6;color:#1c5e4a;border-radius:12px;padding:9px 12px;min-height:42px;text-align:left}
 #flowCandidates{margin-top:10px}
 #moveEvidence a{display:inline-block;color:#305a91;margin-top:8px;font-size:12px}
-</style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script></head><body class="yos-daystream-web"><details class="native-tools"><summary>接続・データ</summary><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
-<a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
-<button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
-<button id="yosWebHistory" type="button">行動学習</button>
-<span class="yos-web-port-note" id="yosWebSourceState">端末内だけに保存 · Notion/Appleカレンダー自動同期は未接続 · Scriptableのデータは変更しません</span>
-<input id="yosWebFile" type="file" accept=".json,.txt,.ics,application/json,text/plain,text/calendar" hidden>
-</div></details><section id="yosWebHistoryPanel" class="yos-web-port-dialog" hidden aria-label="行動学習の候補"><div id="yosWebHistoryRows"></div></section>
+</style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script></head><body class="yos-daystream-web">
 <div class="app">
   <div class="top">
     <div class="flow-edit-bar"><button id="flowBack" type="button" aria-label="編集を閉じる">‹</button><strong>タイムラインを編集</strong><button id="flowDone" type="button">完了</button></div>
-    <div class="flow-title"><div class="daystream-brand">YOS <span>/ LIFE FLOW</span></div><h1>1日のタイムライン</h1></div>
-    <div class="flow-date-row"><div class="flow-date-pill"><button id="flowPrev" type="button" aria-label="前の日">‹</button><strong id="dateTitle">今日</strong><button id="flowNext" type="button" aria-label="次の日">›</button><span id="dayCaption" hidden></span></div>
+    <div class="flow-date-row" role="group" aria-label="タイムラインの日付"><div class="flow-date-pill"><button id="flowPrev" type="button" aria-label="前の日">‹</button><strong id="dateTitle">今日</strong><button id="flowNext" type="button" aria-label="次の日">›</button><span id="dayCaption" hidden></span></div>
         <button class="iconbtn" type="button" id="dateBtn" aria-label="月カレンダーを開く" aria-controls="monthPicker" aria-expanded="false"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></button>
     <button id="flowEdit" type="button">編集</button></div>
     <div class="week" id="weekStrip" aria-label="日付切り替え"></div>
@@ -402,6 +389,13 @@ body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
     </section>
   </div>
   <div class="calendar-modes" id="calendarModes" role="group" aria-label="DAYSTREAM表示切替"><button type="button" data-view="day" aria-pressed="true">24時間</button><button type="button" data-view="week" aria-pressed="false">週</button><button type="button" data-view="month" aria-pressed="false">月</button></div>
+  <details class="native-tools"><summary>接続・データ</summary><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
+<a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
+<button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
+<button id="yosWebHistory" type="button">行動学習</button>
+<span class="yos-web-port-note" id="yosWebSourceState">端末内だけに保存 · Notion/Appleカレンダー自動同期は未接続 · Scriptableのデータは変更しません</span>
+<input id="yosWebFile" type="file" accept=".json,.txt,.ics,application/json,text/plain,text/calendar" hidden>
+</div></details><section id="yosWebHistoryPanel" class="yos-web-port-dialog" hidden aria-label="行動学習の候補"><div id="yosWebHistoryRows"></div></section>
   <details class="flow-tools"><summary>表示・操作</summary>      <div class="actions">
         <button class="iconbtn" id="searchBtn" aria-label="検索"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></button>
 

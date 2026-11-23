@@ -38,9 +38,9 @@ try{
   assert.equal(await page.locator('.flow-tools').getAttribute('open'),null);
   await page.locator('#flowEdit').click();
   assert.equal(await page.getByText('タイムラインを編集',{exact:true}).first().isVisible(),true);
-  assert.equal(await page.locator('.flow-title').isVisible(),false);
+  assert.equal(await page.locator('.flow-date-row').isVisible(),false);
   await page.locator('#flowDone').click();
-  assert.equal(await page.locator('.flow-title').isVisible(),true);
+  assert.equal(await page.locator('.flow-date-row').isVisible(),true);
   assert.equal(await page.locator('#yosNotionEditSheet').count(),0);
   assert.equal(await page.locator('#yosNotionMoveBar').count(),0);
   const colors=await page.locator('#tl .card.task').evaluateAll(cards=>cards.map(c=>getComputedStyle(c).backgroundColor));
