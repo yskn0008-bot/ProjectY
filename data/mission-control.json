@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T06:12:34+09:00",
+  "updated_at": "2026-11-24T06:46:47+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,6 +13,16 @@
   },
   "inbox": [
     {
+      "id": "github-pr-830",
+      "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
+      "updated_at": "2026-11-23T21:40:07Z"
+    },
+    {
       "id": "github-pr-857",
       "title": "PR #857 YOS JOURNAL｜一次資料照合の非公開プロトタイプと安全テスト",
       "type": "GitHub PR",
@@ -20,7 +30,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
-      "updated_at": "2026-11-23T20:46:43Z"
+      "updated_at": "2026-11-23T21:18:52Z"
     },
     {
       "id": "github-pr-890",
@@ -30,27 +40,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/890",
-      "updated_at": "2026-11-23T13:38:48Z"
-    },
-    {
-      "id": "github-pr-891",
-      "title": "PR #891 feat(morning): show DAYSTREAM next step in existing Today Note (draft)",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/891",
-      "updated_at": "2026-11-23T06:20:18Z"
-    },
-    {
-      "id": "github-pr-892",
-      "title": "PR #892 Clarity｜入力専用ショートカット（履歴・写真OCR・音声）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/892",
-      "updated_at": "2026-11-23T06:27:05Z"
+      "updated_at": "2026-11-23T21:45:48Z"
     },
     {
       "id": "github-pr-894",
@@ -60,7 +50,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/894",
-      "updated_at": "2026-11-23T20:51:00Z"
+      "updated_at": "2026-11-23T21:45:58Z"
     },
     {
       "id": "github-pr-901",
@@ -110,7 +100,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/927",
-      "updated_at": "2026-11-23T21:11:16Z"
+      "updated_at": "2026-11-23T21:16:20Z"
+    },
+    {
+      "id": "github-pr-930",
+      "title": "PR #930 YOS ファイル調査｜Siri対応・iCloud Drive読み取り専用棚卸し",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/930",
+      "updated_at": "2026-11-23T21:43:21Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T21:11:28Z"
+      "updated_at": "2026-11-23T21:46:11Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-5c5fbb47734a",
-      "title": "fix(home-scenes): compact departure, four appliances and save to one screen",
-      "completed_at": "2026-11-23T21:11:36Z",
-      "result": "GitHub mainへ反映（5c5fbb4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5c5fbb47734a88b0a74b83b38ee861143e2df145"
+      "id": "github-commit-cb2f30ada311",
+      "title": "chore(yos-ai): retry deferred approved release (1/4)",
+      "completed_at": "2026-11-23T21:42:13Z",
+      "result": "GitHub mainへ反映（cb2f30a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cb2f30ada311eac99a93d7e7407538bb3f845857"
     },
     {
-      "id": "github-commit-46f615537fc8",
-      "title": "Merge PR #924: instant YOS Lists tap feedback with verified Notion save",
-      "completed_at": "2026-11-23T21:04:32Z",
-      "result": "GitHub mainへ反映（46f6155）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/46f615537fc874057786f1c47d698959fa0226da"
+      "id": "github-commit-0a67ac4fe2b4",
+      "title": "Merge PR #929: avoid Scriptable Close and Share toolbar overlap",
+      "completed_at": "2026-11-23T21:38:00Z",
+      "result": "GitHub mainへ反映（0a67ac4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0a67ac4fe2b48d69a4c615febd63eb3981749a89"
     },
     {
-      "id": "github-commit-bc6eaa1bd087",
-      "title": "Sync PR #924 with latest main preserving DAYSTREAM and all other installer targets",
-      "completed_at": "2026-11-23T21:02:57Z",
-      "result": "GitHub mainへ反映（bc6eaa1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bc6eaa1bd087aaf3c7756ed043d63046524067e0"
+      "id": "github-commit-4c30e856131b",
+      "title": "chore(installer): pin toolbar-safe Home Scenes",
+      "completed_at": "2026-11-23T21:30:16Z",
+      "result": "GitHub mainへ反映（4c30e85）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4c30e856131b8e5e19190f1e1499f919f6fc4028"
     },
     {
-      "id": "github-commit-d18aca87b031",
-      "title": "Merge pull request #920 from yskn0008-bot/fix/daystream-direct-spring-drag-20261124",
-      "completed_at": "2026-11-23T20:56:14Z",
-      "result": "GitHub mainへ反映（d18aca8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d18aca87b031521084dc77bb026e986813d33031"
+      "id": "github-commit-9b1a0209998f",
+      "title": "test(home-scenes): preserve toolbar clearance on compact screens",
+      "completed_at": "2026-11-23T21:30:13Z",
+      "result": "GitHub mainへ反映（9b1a020）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9b1a0209998fbbd40d7982aa6e102120a3ae6dce"
     },
     {
-      "id": "github-commit-8385e2b4e0d2",
-      "title": "chore(daystream): preserve latest YOS Home Scenes installer pin before release",
-      "completed_at": "2026-11-23T20:55:37Z",
-      "result": "GitHub mainへ反映（8385e2b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8385e2b4e0d22cc31afe0cfd877ecef28106f0fd"
+      "id": "github-commit-6d857f498e14",
+      "title": "fix(home-scenes): clear native Scriptable Close and Share overlay",
+      "completed_at": "2026-11-23T21:30:11Z",
+      "result": "GitHub mainへ反映（6d857f4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6d857f498e1476413147591332b8830ade6065cb"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T06:12:34+09:00",
+      "last_update": "2026-11-24T06:46:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 75件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T06:12:34+09:00",
+      "last_update": "2026-11-24T06:46:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T06:12:34+09:00",
+      "last_update": "2026-11-24T06:46:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "000f01298c694a79e58553a3c22ba942944ea7fbcecf26afd0f9d71732bc9b9b"
+  "github_snapshot_hash": "615b5dad7e0ca62e326ac6ad7f5c8526d9e7007d19ec5c711d5fc4b9d591f58a"
 }

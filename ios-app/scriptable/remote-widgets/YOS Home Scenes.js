@@ -1,21 +1,25 @@
 // Variables used by Scriptable.
 // YOS_SCRIPT_NAME: YOS Home Scenes
-// YOS Home Scenes v1.0 — configurable 外出 / 帰宅 power presets.
-// Run without a parameter to edit. Shortcut parameter: "外出" / "帰宅".
+// YOS Home Scenes v1.1 — five independent power presets: 外出 / 帰宅 / 就寝 / 起床 / 夜.
+// Run without a parameter to edit. Shortcut parameter: one of the five scene names.
 // Uses existing YOS Remote credentials and Tapo core; no existing script is changed.
 const PREF_KEY='yos.home-scenes.presets.v1';
-const MODES=['departure','arrival'];
+const MODES=['departure','arrival','sleep','wake','night'];
+const LEGACY_MODES=['departure','arrival'];
 const DEVICES=['tv','light','ac','floor'];
 const CHOICES=['on','off','keep'];
 
 function blank(){
   const row=()=>({tv:'keep',light:'keep',ac:'keep',floor:'keep'});
-  return {schema:1,departure:row(),arrival:row()};
+  return {schema:1,departure:row(),arrival:row(),sleep:row(),wake:row(),night:row()};
 }
 function validated(value){
   if(!value||value.schema!==1||typeof value!=='object')throw Error('保存形式が不正です');
   const next=blank();
   for(const mode of MODES){
+    // Existing v1 settings contain only departure/arrival. Missing *new* scenes stay all-keep.
+    // Do not rewrite Keychain until the user explicitly chooses Save.
+    if(value[mode]===undefined&&!LEGACY_MODES.includes(mode))continue;
     if(!value[mode]||typeof value[mode]!=='object')throw Error('設定が不足しています');
     for(const device of DEVICES){
       if(!CHOICES.includes(value[mode][device]))throw Error('ON・OFF・維持以外の値は使えません');
@@ -43,8 +47,11 @@ function modeFromInput(){
   const raw=String(args.shortcutParameter||((args.queryParameters||{}).mode)||'').trim().toLowerCase();
   if(raw==='外出'||raw==='departure')return 'departure';
   if(raw==='帰宅'||raw==='arrival'||raw==='return')return 'arrival';
+  if(raw==='就寝'||raw==='sleep'||raw==='bedtime')return 'sleep';
+  if(raw==='起床'||raw==='wake'||raw==='morning')return 'wake';
+  if(raw==='夜'||raw==='night')return 'night';
   if(raw===''||raw==='edit'||raw==='設定')return null;
-  throw Error('指定は 外出 / 帰宅 / edit のいずれかです');
+  throw Error('指定は 外出 / 帰宅 / 就寝 / 起床 / 夜 / edit のいずれかです');
 }
 function tapoCore(){
   let last=null;
@@ -167,10 +174,12 @@ async function edit(prefs){
 *{box-sizing:border-box}
 html,body{width:100%;height:100%;margin:0;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;-webkit-font-smoothing:antialiased}
 body{background:radial-gradient(ellipse 90% 50% at 12% -7%,rgba(60,117,202,.5),transparent 78%),radial-gradient(ellipse 95% 85% at 95% 113%,rgba(109,77,161,.35),transparent 78%),linear-gradient(145deg,#192943,#141e35 70%,#202841);color:var(--ink)}
-.screen{height:100vh;height:100dvh;width:100%;max-width:530px;margin:auto;padding:11px 13px max(13px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:11px;overflow:hidden}
+/* Scriptable WebView overlays native Close/Share buttons in the upper corners. */
+/* Keep all five tabs below that toolbar, including when a safe-area inset is reported. */
+.screen{height:100vh;height:100dvh;width:100%;max-width:530px;margin:auto;padding:max(72px,env(safe-area-inset-top)) 13px max(13px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:11px;overflow:hidden}
 button{font:inherit;-webkit-tap-highlight-color:transparent;cursor:pointer}
-.tabs{display:flex;flex:0 0 54px;gap:4px;padding:4px;border:1px solid var(--edge);border-radius:18px;background:rgba(208,221,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.09);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
-.tab{flex:1;min-width:0;border:0;border-radius:14px;color:#d5def0;background:transparent;font-size:15px;font-weight:700;transition:background .16s,color .16s}
+.tabs{display:flex;flex:0 0 54px;gap:3px;padding:3px;border:1px solid var(--edge);border-radius:18px;background:rgba(208,221,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.09);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.tab{flex:1;min-width:0;border:0;border-radius:14px;color:#d5def0;background:transparent;font-size:clamp(11px,3.4vw,15px);font-weight:700;transition:background .16s,color .16s}
 .tab.active{background:linear-gradient(145deg,#f7f9ff,#d5e4ff);color:#293e65;box-shadow:0 3px 11px rgba(7,18,45,.22),inset 0 1px 0 #fff}
 .panel{display:grid;grid-template-rows:repeat(4,minmax(0,1fr));flex:1 1 auto;min-height:0;max-height:510px;border:1px solid var(--edge);border-radius:22px;background:linear-gradient(145deg,rgba(206,220,252,.18),rgba(121,143,197,.1) 60%,rgba(188,196,249,.15));box-shadow:0 16px 28px rgba(3,11,32,.2),inset 0 1px 0 rgba(255,255,255,.12);-webkit-backdrop-filter:blur(21px);backdrop-filter:blur(21px);overflow:hidden}
 .device{display:grid;grid-template-columns:minmax(100px,35%) minmax(0,1fr);align-items:center;gap:8px;min-height:0;padding:9px 12px}
@@ -192,12 +201,12 @@ button{font:inherit;-webkit-tap-highlight-color:transparent;cursor:pointer}
 .notice:empty{display:none}
 .tab:focus-visible,.option:focus-visible,.save:focus-visible{outline:2px solid white;outline-offset:2px}
 @media(max-width:359px){.screen{padding-left:9px;padding-right:9px;gap:9px}.device{grid-template-columns:minmax(91px,35%) minmax(0,1fr);gap:4px;padding:6px 8px}.identity{gap:5px}.glyph{width:27px;height:27px;flex-basis:27px}.name{font-size:12px}.kind{font-size:9px}.option{font-size:12px;min-height:39px}}
-@media(max-height:550px){.screen{gap:7px;padding-top:7px;padding-bottom:7px}.tabs{flex-basis:47px}.save{flex-basis:47px}.device{padding-top:4px;padding-bottom:4px}.option{min-height:35px}}
+@media(max-height:550px){.screen{gap:7px;padding-bottom:7px}.tabs{flex-basis:47px}.save{flex-basis:47px}.device{padding-top:4px;padding-bottom:4px}.option{min-height:35px}}
 @media(max-height:380px){html,body{overflow:auto}.screen{height:auto;min-height:380px;overflow:visible}.panel{min-height:260px}}
 @media(prefers-reduced-motion:reduce){.tab,.option{transition:none}}
 </style></head><body>
 <div class="screen">
-<nav class="tabs" role="tablist" aria-label="シーンの切り替え"><button type="button" class="tab active" role="tab" data-mode="departure" aria-selected="true">外出</button><button type="button" class="tab" role="tab" data-mode="arrival" aria-selected="false">帰宅</button></nav>
+<nav class="tabs" role="tablist" aria-label="シーンの切り替え"><button type="button" class="tab active" role="tab" data-mode="departure" aria-selected="true">外出</button><button type="button" class="tab" role="tab" data-mode="arrival" aria-selected="false">帰宅</button><button type="button" class="tab" role="tab" data-mode="sleep" aria-selected="false">就寝</button><button type="button" class="tab" role="tab" data-mode="wake" aria-selected="false">起床</button><button type="button" class="tab" role="tab" data-mode="night" aria-selected="false">夜</button></nav>
 <main class="panel" id="devices" aria-label="家電4台の動作設定"></main>
 <button id="save" class="save" type="button">設定を保存</button>
 <div id="notice" class="notice" role="status" aria-live="polite"></div>
@@ -232,7 +241,7 @@ document.getElementById("save").onclick=function(){this.disabled=true;document.g
   web.shouldAllowRequest=req=>{
     const url=String(req.url||'');
     if(!url.startsWith('https://yos-scenes.local/__save?'))return true;
-    let ok=true,message='外出・帰宅の設定を保存しました';
+    let ok=true,message='5シーンの設定を保存しました';
     try{
       const match=url.match(/[?&]value=([^&]+)/);
       if(!match)throw Error('保存する設定がありません');
