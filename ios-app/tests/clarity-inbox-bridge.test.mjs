@@ -336,7 +336,7 @@ test('JOURNAL private draft reuses verified Inbox transport without Clarity rout
 
 test('JOURNAL long drafts are chunked and read back while Clarity length limit stays unchanged',async()=>{
   const m=mocked();
-  const draft='【YOS_EDITORIAL_DRAFT_V1】\n'+'研究原稿'.repeat(3800);
+  const draft='【YOS_EDITORIAL_DRAFT_V1】\n【資料と照合状況】\n公開不可・要審査\n'+'研究原稿'.repeat(3800);
   const x={rawText:draft,source:'journal',captureId:'journal:long-draft-0001'};
   assert.ok(draft.length>12000&&draft.length<36000);
   assert.match(await m.run(x),/Notion Inbox保存確認済み/);
@@ -348,4 +348,15 @@ test('JOURNAL long drafts are chunked and read back while Clarity length limit s
   assert.equal(m.counts.writes,1);
   assert.match(await m.run({rawText:draft,source:'text',captureId:'clarity:too-long-0001'}),/Notion未保存/);
   assert.equal(m.counts.writes,1);
+});
+
+
+test('JOURNAL rejects absent edition ID and non-editorial input before any writes',async()=>{
+ const m=mocked();
+ const valid='【YOS_EDITORIAL_DRAFT_V1】\n【資料と照合状況】\n公開不可・要審査\n研究記事の下書き';
+ assert.match(await m.run({rawText:valid,source:'journal'}),/Notion未保存/);
+ assert.match(await m.run({rawText:valid,source:'journal',captureId:'clarity:wrong-namespace-001'}),/Notion未保存/);
+ assert.match(await m.run({rawText:'通常のClarityメモ',source:'journal',captureId:'journal:invalid-draft-001'}),/Notion未保存/);
+ assert.equal(m.counts.writes,0);
+ assert.equal(m.files.size,0,'rejected JOURNAL input must not mutate local Clarity receipts');
 });
