@@ -1145,3 +1145,30 @@ test('monthly calendar keeps the prior business month at 02:00 after local midni
   await expect(page.locator('#monthly-sum-value')).toHaveText('¥21,950');
   await expect(page.locator('#monthly-calendar .month-day small').filter({hasText:'21,950'})).toHaveCount(1);
 });
+
+
+test('manual backup retains exact corrupted shift, wait, field and photo-ledger bytes without changing them',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T02:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const expected={
+    'yos-taxi-ui-v2-live-20261117':'{broken-shift',
+    'yos-taxi-wait-clock-v1':'{broken-wait',
+    'yos-taxi-field-reports-v1':'{broken-field',
+    'yos-taxi-confirmed-reports-v1':'{broken-photo'
+  };
+  await page.evaluate(values=>{
+    for(const [key,value] of Object.entries(values))localStorage.setItem(key,value);
+  },expected);
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="history"]').click();
+  const downloadPromise=page.waitForEvent('download');
+  await page.locator('#export-btn').click();
+  const download=await downloadPromise;
+  const backup=JSON.parse(await readFile(await download.path(),'utf8'));
+  expect(backup.formatVersion).toBe(2);
+  expect(backup.rawLedgers).toEqual(expected);
+  expect(backup.confirmedRevenue.status).toBe('corrupt-preserved');
+  expect(backup.confirmedRevenue.raw).toBe(expected['yos-taxi-confirmed-reports-v1']);
+  const after=await page.evaluate(keys=>Object.fromEntries(keys.map(k=>[k,localStorage.getItem(k)])),Object.keys(expected));
+  expect(after).toEqual(expected);
+});
