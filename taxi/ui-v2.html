@@ -281,6 +281,19 @@
 .field-undo:disabled{opacity:.45}.field-disclaimer{font-size:12px;line-height:1.5;color:#627589;margin:12px 0 0}
 @media(max-width:350px){.field-sheet{padding-left:12px;padding-right:12px}.field-choice{padding:9px 7px}.field-open{padding:9px 10px}}
 
+
+/* YOS consent-based handoff; the action card stays neutral until a separately verified decision engine exists. */
+.field-yos-send[hidden],.field-yos-response[hidden],#googleSignIn[hidden]{display:none!important}
+.field-yos-send{flex:0 0 auto;min-height:48px;width:100%;border:1px solid #567ca0;border-radius:13px;background:#102c44;color:#e5f3ff;font-weight:800;font-size:clamp(13px,3.6vw,16px);text-align:center;padding:9px 12px}
+.field-yos-send:disabled{opacity:.58}
+.field-yos-response{flex:0 0 auto;min-width:0;border:1px solid #69899f;border-radius:14px;padding:12px 14px;background:#142b3b;line-height:1.5}
+.field-yos-response strong{display:block;font-size:14px;color:#c9e4f5}
+.field-yos-response p{margin:7px 0 0;font-size:clamp(13px,3.5vw,15px);white-space:pre-wrap;overflow-wrap:anywhere;max-height:28dvh;overflow-y:auto}
+.field-yos-response small{display:block;margin-top:7px;color:#adbdcb;line-height:1.45}
+#googleSignIn{flex:0 0 auto;padding:12px;border-radius:14px;background:#f1f3f6;color:#273b50}
+#googleSignIn p{margin:0 0 9px;font-size:13px;line-height:1.5}
+#googleSignInButton{min-height:44px}
+
 </style>
 </head>
 <body>
@@ -327,6 +340,10 @@
 <div class="wait-actions"><span id="wait-started">正確な待機開始：未記録</span><button type="button" id="wait-toggle">待機を開始</button></div>
 </section>
 <button type="button" class="field-open" id="field-open" aria-haspopup="dialog" aria-controls="field-layer"><strong>現状を報告</strong><span id="field-summary" aria-live="polite">報告なし ›</span></button>
+
+<button class="field-yos-send" id="field-yos-send" type="button" hidden>YOSに現状を送って相談</button>
+<div id="googleSignIn" hidden><p>YOSへ送る前に、Googleで本人確認します。認証情報は端末に保存しません。</p><div id="googleSignInButton"></div></div>
+<section id="field-yos-response" class="field-yos-response" aria-live="polite" hidden><strong id="field-yos-status">端末内の報告は未送信</strong><p id="field-yos-answer" hidden></p><small id="field-yos-note">YOSの回答は参考情報です。根拠不足なら「未判定」のままです。</small></section>
 <details class="strategy-evidence"><summary>根拠・取得時刻・信頼度を確認</summary><div class="evidence-body">
 <p>推薦の元データ：未取得（現在地・GO／無線・人流・競合）</p><p>データ取得時刻：なし ／ 判断の信頼度：判定不可</p>
 <p>時間帯別エリア案と5・10・15・20・30分の節目は未検証の仮説です。移動を強制する指示ではありません。待機開始はこの端末で明示記録した時刻だけを使用します。</p>
@@ -359,6 +376,8 @@
 </div></section>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div>
+<script src="../yos/hj/yos-ai-client.js"></script>
+<script src="../yos/hj/yos-auth.js"></script>
 <script>
 'use strict';
 (()=>{
@@ -461,6 +480,7 @@
    const label=latest?fieldLabels[latest.kind]+' · '+time(latest.at):'報告なし';
    $('field-summary').textContent=label+' ›';$('field-last').textContent=latest?label+'（端末内）':'報告なし';
    $('field-undo').disabled=fieldData.error||!isActive()||!mostRecent||Boolean(mostRecent.voidedAt);
+   renderYosSend();
  }
  function openField(){fieldData=readField();renderField();$('field-layer').hidden=false;$('field-close').focus()}
  function closeField(){$('field-layer').hidden=true;$('field-open').focus()}
@@ -524,6 +544,75 @@
    ].join('\n');
    // The existing YOS chat API accepts userText; transport and Google ID token are not configured here.
    return {status:'prepared-not-sent',request:{userText:prompt},eventsUsed:fresh.map(e=>e.id),source:'manual-tap',sent:false};
+ }
+
+
+ let yosPending=false,yosAnsweredEventIds=null;
+ function renderYosSend(){
+   const prepared=prepareYosFieldRequest();
+   $('field-yos-send').hidden=prepared.status!=='prepared-not-sent';
+   $('field-yos-send').disabled=yosPending;
+   $('field-yos-send').textContent=yosPending?'YOSに確認中…':'YOSに現状を送って相談';
+   if(yosAnsweredEventIds&&prepared.status==='prepared-not-sent'
+     &&prepared.eventsUsed.join('|')!==yosAnsweredEventIds.join('|')){
+     $('field-yos-status').textContent='新しい現場報告があります。前の回答は現在の判断ではありません。';
+     $('field-yos-answer').hidden=true;
+     yosAnsweredEventIds=null;
+   }
+ }
+ // Network call ONLY after direct user click; no automatic send and no token/AI answer in localStorage.
+ async function sendFieldToYos(){
+   if(yosPending)return false;
+   const prepared=prepareYosFieldRequest();
+   if(prepared.status!=='prepared-not-sent'){
+     $('field-yos-response').hidden=false;
+     $('field-yos-answer').hidden=true;
+     $('field-yos-status').textContent='送信できません：新しい現場報告と営業中の状態を確認してください。';
+     renderYosSend();return false;
+   }
+   $('field-yos-response').hidden=false;
+   $('field-yos-answer').hidden=true;
+   if(typeof window.YosAiClient!=='function'||typeof window.YOS_AUTH?.getGoogleIdToken!=='function'){
+     $('field-yos-status').textContent='接続機能が読み込まれていません。現場報告は端末に保存済みです。';
+     return false;
+   }
+   const baseUrl=String(window.YOS_AI_BASE_URL||'');
+   if(baseUrl!=='https://project-y-yos-ai.vercel.app'){
+     $('field-yos-status').textContent='YOSの公式接続先を確認できません。送信しません。';
+     return false;
+   }
+   yosPending=true;renderYosSend();
+   $('field-yos-status').textContent='Googleで本人確認し、YOSへ照会しています…';
+   try{
+     const client=new window.YosAiClient({baseUrl,getGoogleIdToken:window.YOS_AUTH.getGoogleIdToken});
+     const result=await client.chat(prepared.request);
+     const answer=typeof result?.answer==='string'?result.answer.trim():'';
+     if(!answer||answer.length>10000)throw Error('Unusable YOS response');
+     const nowPrepared=prepareYosFieldRequest();
+     if(nowPrepared.status!=='prepared-not-sent'
+       ||nowPrepared.eventsUsed.join('|')!==prepared.eventsUsed.join('|')){
+       $('field-yos-status').textContent='新しい報告があるため、返答を現在の判断としては表示しません。';
+       $('field-yos-answer').hidden=true;
+       yosAnsweredEventIds=null;
+       return false;
+     }
+     yosAnsweredEventIds=[...prepared.eventsUsed];
+     $('field-yos-status').textContent='YOSから参考回答を受信しました（確定指示ではありません）';
+     $('field-yos-answer').textContent=answer;
+     $('field-yos-answer').hidden=false;
+     return true;
+   }catch(error){
+     const code=Number(error?.status);
+     $('field-yos-status').textContent=code===401?'本人認証が完了しませんでした。端末内の報告は保持しています。'
+       :code===403?'この画面からのYOS接続許可が確認できません。送信は未完了です。'
+       :code===429?'YOSの利用回数制限中です。報告は端末内に保持しています。'
+       :'YOSへの照会は完了していません。端末内の報告は保持しています。';
+     $('field-yos-answer').hidden=true;
+     yosAnsweredEventIds=null;
+     return false;
+   }finally{
+     yosPending=false;renderYosSend();
+   }
  }
 
  const money=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
@@ -603,6 +692,7 @@
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('field-layer').hidden)closeField()});
  document.querySelectorAll('[data-observation]').forEach(b=>b.addEventListener('click',()=>reportField(b.dataset.observation)));
  $('field-undo').addEventListener('click',undoField);
+ $('field-yos-send').addEventListener('click',sendFieldToYos);
  $('m100-rule-btn').addEventListener('click',showM100);
  $('wait-toggle').addEventListener('click',()=>{if(confirmedWait())finishWait();else startWait()});
  // Shortcut widget deep-link: the action runs ONLY in the storage container that opens this URL.
@@ -648,7 +738,7 @@
  render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait()},15000);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')renderWait()});
  addEventListener('pageshow',renderWait);
- window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand,waitClock:{get:()=>waitView(),start:startWait,stop:finishWait,refresh:renderWait},fieldReport:{list:()=>structuredClone(currentFields()),record:reportField,undo:undoField,refresh:renderField,prepareYosRequest:prepareYosFieldRequest}};
+ window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand,waitClock:{get:()=>waitView(),start:startWait,stop:finishWait,refresh:renderWait},fieldReport:{list:()=>structuredClone(currentFields()),record:reportField,undo:undoField,refresh:renderField,prepareYosRequest:prepareYosFieldRequest,sendToYos:sendFieldToYos}};
  if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 })();
 </script>
