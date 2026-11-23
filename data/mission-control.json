@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T02:13:15+09:00",
+  "updated_at": "2026-11-24T02:14:31+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-23T05:39:00Z"
+    },
+    {
+      "id": "github-pr-870",
+      "title": "PR #870 BRAVIA｜4台リモコン保護・画質ワンタップ／音声／アプリ／HDMI3クイック操作 TEST",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/870",
+      "updated_at": "2026-11-19T16:53:18Z"
     },
     {
       "id": "github-pr-878",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-23T16:49:51Z"
     },
     {
-      "id": "github-pr-912",
-      "title": "PR #912 YOS Lists｜濃いネイビー・太字・強いボタンへ視認性改善",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/912",
-      "updated_at": "2026-11-23T17:12:43Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T17:12:44Z"
+      "updated_at": "2026-11-23T17:13:53Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-4d0c4d75b461",
+      "title": "Merge PR #912: stronger navy YOS Lists visual design",
+      "completed_at": "2026-11-23T17:13:51Z",
+      "result": "GitHub mainへ反映（4d0c4d7）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4d0c4d75b46167ca54aa2b3f6973fd3f79505aa0"
+    },
+    {
+      "id": "github-commit-89888ce1741d",
+      "title": "Merge latest main into PR #912; preserve all installer targets and apply navy YOS Lists style only",
+      "completed_at": "2026-11-23T17:12:25Z",
+      "result": "GitHub mainへ反映（89888ce）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/89888ce1741dca753685a0864570018505f1dd00"
+    },
+    {
       "id": "github-commit-ea7d93d0c141",
       "title": "Merge PR #910: safe focus-only sleep without appliance actions",
       "completed_at": "2026-11-23T17:08:31Z",
@@ -222,32 +236,18 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ea7d93d0c1419d74dd7f1f208031d2a6518b0efc"
     },
     {
-      "id": "github-commit-036efa42b1fc",
-      "title": "test(installer): enforce real manual edit guard for any Sleep Scene version",
-      "completed_at": "2026-11-23T17:06:18Z",
-      "result": "GitHub mainへ反映（036efa4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/036efa42b1fcfda7079e3aaf7bcc74f0e93bf549"
+      "id": "github-commit-24d46b1ee9a3",
+      "title": "chore(yos-lists): pin stronger navy UI in existing installer without touching other entries",
+      "completed_at": "2026-11-23T17:08:06Z",
+      "result": "GitHub mainへ反映（24d46b1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/24d46b1ee9a36de89710d32dfed3e1ae337ab4b6"
     },
     {
-      "id": "github-commit-c6f603e45f5a",
-      "title": "fix(journal): show five headlines before Widgy screenshot capture",
-      "completed_at": "2026-11-23T17:02:12Z",
-      "result": "GitHub mainへ反映（c6f603e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c6f603e45f5a6917d8b15eebdeaa494d7e4063fc"
-    },
-    {
-      "id": "github-commit-f9d47ad6510c",
-      "title": "test(sleep): preserve floor-mode coverage after focus-only guard refactor",
-      "completed_at": "2026-11-23T17:00:14Z",
-      "result": "GitHub mainへ反映（f9d47ad）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f9d47ad6510c6494876521bbb5b1abf00ee36c8f"
-    },
-    {
-      "id": "github-commit-c479616a558f",
-      "title": "merge(main): preserve current installer targets while integrating sleep Focus guard",
-      "completed_at": "2026-11-23T16:59:04Z",
-      "result": "GitHub mainへ反映（c479616）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c479616a558f3b19d799963dc01b7683d2a819c2"
+      "id": "github-commit-98035695909a",
+      "title": "test(yos-lists): guard visual contrast, priority accents and accessible touch targets",
+      "completed_at": "2026-11-23T17:07:51Z",
+      "result": "GitHub mainへ反映（9803569）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/98035695909ae296abad5a3864da97f8d07901be"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T02:13:15+09:00",
+      "last_update": "2026-11-24T02:14:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 72件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T02:13:15+09:00",
+      "last_update": "2026-11-24T02:14:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T02:13:15+09:00",
+      "last_update": "2026-11-24T02:14:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f6b060a8fea08bf2e20d1984a1e4111addccdebe2d2d8326341b4a6e2b85df97"
+  "github_snapshot_hash": "3158563f4a2ea814d419a15cd069fe42942d33b26ee0931f9875d46b30295815"
 }
