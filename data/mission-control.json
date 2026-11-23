@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T02:24:23+09:00",
+  "updated_at": "2026-11-24T02:41:04+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-23T05:39:00Z"
+    },
+    {
+      "id": "github-pr-870",
+      "title": "PR #870 BRAVIA｜4台リモコン保護・画質ワンタップ／音声／アプリ／HDMI3クイック操作 TEST",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/870",
+      "updated_at": "2026-11-19T16:53:18Z"
     },
     {
       "id": "github-pr-878",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-23T16:49:51Z"
     },
     {
-      "id": "github-pr-913",
-      "title": "PR #913 YOS Lists｜3項目の色分けと左端カラー線の撤去",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/913",
-      "updated_at": "2026-11-23T17:23:39Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T17:13:53Z"
+      "updated_at": "2026-11-23T17:40:09Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-593199bd0eaa",
+      "title": "Merge PR #913: distinct YOS Lists summary colors and remove priority edge stripes",
+      "completed_at": "2026-11-23T17:40:09Z",
+      "result": "GitHub mainへ反映（593199b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/593199bd0eaa7df0fa1a83a0232593fbaaaefa26"
+    },
+    {
+      "id": "github-commit-f3f16e43c695",
+      "title": "chore(yos-lists): pin distinct-color theme in existing common installer",
+      "completed_at": "2026-11-23T17:23:16Z",
+      "result": "GitHub mainへ反映（f3f16e4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f3f16e43c695e5fc7c4dca493a7c74ffe1677e73"
+    },
+    {
+      "id": "github-commit-bfe5b781ebe6",
+      "title": "test(yos-lists): distinguish three summary hues and prohibit colored left-edge stripes",
+      "completed_at": "2026-11-23T17:22:59Z",
+      "result": "GitHub mainへ反映（bfe5b78）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bfe5b781ebe6933cc3602955009a074f9c80e74e"
+    },
+    {
+      "id": "github-commit-4165d3d17d0e",
+      "title": "style(yos-lists): differentiate task/shopping/attention palettes and remove priority edge stripes",
+      "completed_at": "2026-11-23T17:22:39Z",
+      "result": "GitHub mainへ反映（4165d3d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4165d3d17d0e66f5ce6578cf2e3f30dacfa73dc2"
+    },
+    {
       "id": "github-commit-4d0c4d75b461",
       "title": "Merge PR #912: stronger navy YOS Lists visual design",
       "completed_at": "2026-11-23T17:13:51Z",
       "result": "GitHub mainへ反映（4d0c4d7）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4d0c4d75b46167ca54aa2b3f6973fd3f79505aa0"
-    },
-    {
-      "id": "github-commit-89888ce1741d",
-      "title": "Merge latest main into PR #912; preserve all installer targets and apply navy YOS Lists style only",
-      "completed_at": "2026-11-23T17:12:25Z",
-      "result": "GitHub mainへ反映（89888ce）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/89888ce1741dca753685a0864570018505f1dd00"
-    },
-    {
-      "id": "github-commit-ea7d93d0c141",
-      "title": "Merge PR #910: safe focus-only sleep without appliance actions",
-      "completed_at": "2026-11-23T17:08:31Z",
-      "result": "GitHub mainへ反映（ea7d93d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ea7d93d0c1419d74dd7f1f208031d2a6518b0efc"
-    },
-    {
-      "id": "github-commit-24d46b1ee9a3",
-      "title": "chore(yos-lists): pin stronger navy UI in existing installer without touching other entries",
-      "completed_at": "2026-11-23T17:08:06Z",
-      "result": "GitHub mainへ反映（24d46b1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/24d46b1ee9a36de89710d32dfed3e1ae337ab4b6"
-    },
-    {
-      "id": "github-commit-98035695909a",
-      "title": "test(yos-lists): guard visual contrast, priority accents and accessible touch targets",
-      "completed_at": "2026-11-23T17:07:51Z",
-      "result": "GitHub mainへ反映（9803569）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/98035695909ae296abad5a3864da97f8d07901be"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T02:24:23+09:00",
+      "last_update": "2026-11-24T02:41:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 72件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T02:24:23+09:00",
+      "last_update": "2026-11-24T02:41:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T02:24:23+09:00",
+      "last_update": "2026-11-24T02:41:04+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a7c2fed867882ff6f766ab3973789902867dea173db2c723e04b5951d5db46a9"
+  "github_snapshot_hash": "3c124e9d76f1f3481af79b18f88e30f33bae0d0f8e78e3586d8295ba272da75a"
 }
