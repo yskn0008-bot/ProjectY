@@ -55,7 +55,7 @@ async function notion(path,method='GET',body=null){
   const code=tidy(reply?.code,50);
   const reason=tidy(reply?.message,200)
    .replace(/The start_cursor provided is invalid:.*$/i,'The start_cursor provided is invalid')
-   .replace(/\\b(?:secret|ntn)_[\\w-]{8,}/gi,'[非表示]');
+   .replace(/\b(?:secret|ntn)_[\w-]{8,}/gi,'[非表示]');
   throw Error(scope+'｜HTTP '+(status||'不明')+(code?' '+code:'')+
     (reason?'｜'+reason:'｜Notionの応答理由を取得できません'));
  }
