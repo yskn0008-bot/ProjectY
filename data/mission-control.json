@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T05:18:40+09:00",
+  "updated_at": "2026-11-24T05:40:41+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
-      "updated_at": "2026-11-23T20:11:11Z"
+      "updated_at": "2026-11-23T20:32:16Z"
     },
     {
       "id": "github-pr-890",
@@ -60,7 +60,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/894",
-      "updated_at": "2026-11-23T19:38:24Z"
+      "updated_at": "2026-11-23T20:39:52Z"
     },
     {
       "id": "github-pr-901",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/920",
-      "updated_at": "2026-11-23T19:58:34Z"
+      "updated_at": "2026-11-23T20:40:06Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T20:18:02Z"
+      "updated_at": "2026-11-23T20:40:08Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-fab15c7bec6b",
-      "title": "fix(taxi): JMA date-only forecast periods in JST (#922)",
-      "completed_at": "2026-11-23T20:17:54Z",
-      "result": "GitHub mainへ反映（fab15c7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fab15c7bec6bd51e0967143107dcf65f37064569"
+      "id": "github-commit-aef3c529d978",
+      "title": "Merge PR #923: retain completed YOS Lists rows in-session with safe per-task undo",
+      "completed_at": "2026-11-23T20:39:43Z",
+      "result": "GitHub mainへ反映（aef3c52）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aef3c529d978f7ef18b232b5066e562763089862"
     },
     {
-      "id": "github-commit-3940323dc636",
-      "title": "Merge PR #921: compact YOS Lists UI and safe Notion-persisted task reordering",
-      "completed_at": "2026-11-23T20:13:44Z",
-      "result": "GitHub mainへ反映（3940323）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3940323dc636e8a64e9b69866c3f577dfecd31ff"
+      "id": "github-commit-1d66958cc4a2",
+      "title": "Sync PR #923 with updated mission-control main retaining completed-row fixes and other installer targets",
+      "completed_at": "2026-11-23T20:39:12Z",
+      "result": "GitHub mainへ反映（1d66958）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1d66958cc4a2b7bc2fbe61af8d0a78bd23b64c2e"
     },
     {
-      "id": "github-commit-548847fd5d9a",
-      "title": "Sync PR #921 with latest main and preserve all 26 common installer targets while upgrading YOS Lists",
-      "completed_at": "2026-11-23T20:12:27Z",
-      "result": "GitHub mainへ反映（548847f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/548847fd5d9a47d88d179e015f0835b6eb937149"
+      "id": "github-commit-e7f79dce7f53",
+      "title": "Sync PR #923 with latest main preserving mission-control updates and all installer targets",
+      "completed_at": "2026-11-23T20:37:19Z",
+      "result": "GitHub mainへ反映（e7f79dc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e7f79dce7f53d14b473851e08c91e110720557e4"
     },
     {
-      "id": "github-commit-65fd5009dff9",
-      "title": "feat(daystream): add protected private XL widget image",
-      "completed_at": "2026-11-23T20:11:40Z",
-      "result": "GitHub mainへ反映（65fd500）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/65fd5009dff986be2c3e84f3c37c7e28bf58ca58"
+      "id": "github-commit-d1acf6a831d8",
+      "title": "chore(yos-lists): repin verified per-task undo receipt source in common installer",
+      "completed_at": "2026-11-23T20:31:44Z",
+      "result": "GitHub mainへ反映（d1acf6a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d1acf6a831d8b542d42827deed33b6f8235b81e1"
     },
     {
-      "id": "github-commit-3ba30de8334b",
-      "title": "chore(yos-lists): pin optimized one-row drag layout in existing shared installer",
-      "completed_at": "2026-11-23T20:07:45Z",
-      "result": "GitHub mainへ反映（3ba30de）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3ba30de8334b11ae5fb54fbf0602bfc0763deafe"
+      "id": "github-commit-47e5c58cb418",
+      "title": "fix(yos-lists): include task ID in per-row undo receipt for safe consistency check",
+      "completed_at": "2026-11-23T20:31:32Z",
+      "result": "GitHub mainへ反映（47e5c58）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/47e5c58cb41827892110cdfc57964c375c0d5588"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T05:18:40+09:00",
+      "last_update": "2026-11-24T05:40:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -365,7 +365,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T05:18:40+09:00",
+      "last_update": "2026-11-24T05:40:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T05:18:40+09:00",
+      "last_update": "2026-11-24T05:40:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ca4388740831f31bd37f253bc6dfb16041dba577844e18306ec1772e58411542"
+  "github_snapshot_hash": "41e9de74c064b5f237dbaf3a8a0b6ed12566dd7d51c85a44ced21d491f92a668"
 }
