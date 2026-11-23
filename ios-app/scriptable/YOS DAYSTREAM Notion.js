@@ -124,14 +124,48 @@ const BROWSER_BOOT=String.raw`
 const BROWSER_DIRECT_IMPORT=String.raw`
 (()=>{
  'use strict';
- // Notion-only preview: no changes to saved user plans.
+ // Notion projection with per-day, time-only local overrides. Never mutate the saved plan or Notion source.
  const templates=__DIRECT_ROWS__,DAY=86400000;
  if(!Array.isArray(templates)||templates.length>40)return;
+ const MOVE_KEY='YOS_DAYSTREAM_NOTION_MOVES_V1';
+ const validDay=x=>/^\d{4}-\d{2}-\d{2}$/.test(x);
+ const slotKey=(day,ref)=>day+'|'+ref;
+ const readMoves=()=>{
+  try{
+   const raw=localStorage.getItem(MOVE_KEY);
+   if(raw===null)return {};
+   const parsed=JSON.parse(raw);
+   if(!parsed||Array.isArray(parsed)||typeof parsed!=='object')return null;
+   const pairs=Object.entries(parsed);
+   if(pairs.length>200||pairs.some(([k,v])=>!/^\d{4}-\d{2}-\d{2}\|notion:[a-f0-9]{32}$/.test(k)||
+    !Number.isInteger(v)||v<0||v>1439))return null;
+   return parsed;
+  }catch{return null;}
+ };
+ window.YOS_NOTION_LOCAL_MOVE=(day,ref,start,duration)=>{
+  if(!validDay(day)||!/^notion:[a-f0-9]{32}$/.test(ref)||
+    !Number.isInteger(start)||!Number.isInteger(duration)||
+    duration<=0||duration>1440||start<0||start+duration>1440)return false;
+  const moves=readMoves();
+  if(!moves)return false;
+  moves[slotKey(day,ref)]=start;
+  try{
+   const json=JSON.stringify(moves);
+   localStorage.setItem(MOVE_KEY,json);
+   return localStorage.getItem(MOVE_KEY)===json;
+  }catch{return false;}
+ };
+ const toneFor=title=>{
+  if(/睡眠|就寝|YOS Night|JOURNAL|自由時間|休息|読書|リラックス/i.test(title))return 'violet';
+  if(/食事|朝食|昼食|夕食|保湿|肌|イケメン|美容|基準写真/.test(title))return 'peach';
+  if(/歯磨き|歯間|筋トレ|運動|ウォーキング|水を飲む/.test(title))return 'mint';
+  return 'blue';
+ };
  window.YOS_ONE_TAP_FOR_DAY=(day,existing=[])=>{
   if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!Array.isArray(existing))return [];
   const from=Date.parse(day+'T00:00:00+09:00'),until=from+DAY;
   if(!Number.isFinite(from))return [];
-  const out=[];
+  const out=[],moves=readMoves()||{};
   for(let i=0;i<templates.length;i++){
    const x=templates[i],a=Date.parse(x.startAt),b=Date.parse(x.endAt);
    if(!Number.isFinite(a)||!Number.isFinite(b)||b<=a||b-a>DAY)continue;
@@ -143,8 +177,10 @@ const BROWSER_DIRECT_IMPORT=String.raw`
     const s=(s0-from)/60000,d=(e0-s0)/60000,ref='notion:'+x.id;
     if(existing.some(y=>y?.sourceRef===ref||y?.sourceRef==='yos-direct:'+x.id))continue;
     if(existing.some(y=>y?.t===x.title&&y?.s===s&&y?.d===d))continue;
-    out.push({id:880000000+i*3+k,t:x.title,s,d,f:1,
-     kind:x.repeat==='daily'?'habit':'task',source:'YOS Tasks',
+    const moved=moves[slotKey(day,ref)];
+    const at=Number.isInteger(moved)&&moved>=0&&moved+d<=1440?moved:s;
+    out.push({id:880000000+i*3+k,t:x.title,s:at,d,f:0,
+     kind:'task',source:'YOS Tasks',flowTone:toneFor(x.title),
      sourceRef:ref,done:x.repeat==='daily'?false:x.done});
    }
   }
@@ -153,7 +189,7 @@ const BROWSER_DIRECT_IMPORT=String.raw`
  window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('yosNativeBoot')?.remove();
   const status=document.getElementById('notice');
-  if(status)status.textContent='YOS Tasksの習慣を自動表示（読み取り専用・端末保存なし）';
+  if(status)status.textContent='YOS Tasks同期済み · 時刻移動はこの端末だけに保存（Notion原本は変更しません）';
  });
 })();
 `;
@@ -270,13 +306,40 @@ function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCale
  out=out.replace(persistAnchor,"x=>x.source!=='Apple Calendar'&&x.source!=='Clarity'&&x.source!=='YOS Tasks'");
  const focusAnchor=' const reasons=latestCompatibility.get(item.id)?.reasons;';
  if(out.split(focusAnchor).length!==2)throw Error('DAYSTREAM詳細形式が変わりました');
- out=out.replace(focusAnchor," if(item.source==='YOS Tasks')fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+' · Notion YOS Tasksの読み取り専用表示。変更は原本で行ってください。';\n"+focusAnchor);
+ out=out.replace(focusAnchor," if(item.source==='YOS Tasks')fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+' · Notion YOS Tasksから同期。時刻はDAYSTREAM内で移動できます（この端末のみ・Notion原本は変更しません）。';\n"+focusAnchor);
+ // Notion cards are moveable locally, but the source records remain immutable.
+ // The standard gesture/move sheet is reused; no competing drag UI is installed.
+ const nativePatches=[
+  ["const fixed=!!item.f,canHide=fixed&&item.source==='Apple Calendar';",
+   "const fixed=!!item.f||item.source==='YOS Tasks',canHide=!!item.f&&item.source==='Apple Calendar';"],
+  ["document.getElementById('editSelected').hidden=!!fixed;",
+   "document.getElementById('editSelected').hidden=!!item.f&&item.source!=='YOS Tasks';document.getElementById('editSelected').textContent=item.source==='YOS Tasks'?'時刻を移動':'編集';"],
+  ["document.getElementById('editSelected').onclick=()=>beginLocalEdit(items.find(x=>x.id===selectedId));",
+   "document.getElementById('editSelected').onclick=()=>{const item=items.find(x=>x.id===selectedId);if(item?.source==='YOS Tasks')openMoveDialog(item,item.s,null);else beginLocalEdit(item)};"],
+  ["finish(true);beginLocalEdit(item);",
+   "finish(true);if(item.source==='YOS Tasks')openMoveDialog(item,item.s,null);else beginLocalEdit(item);"],
+  ["if(item.kind==='task'&&dx<0&&ax>ay*1.4&&event.cancelable)",
+   "if(item.kind==='task'&&item.source!=='YOS Tasks'&&dx<0&&ax>ay*1.4&&event.cancelable)"],
+  ["pendingMove={item,day:selectedDay,previousRect,plan:localStorage.getItem(yosPlanKey)};",
+   "pendingMove={item,day:selectedDay,previousRect,plan:item.source==='YOS Tasks'?null:localStorage.getItem(yosPlanKey)};"],
+  ["if(localStorage.getItem(yosPlanKey)!==plan){\n  moveDialog.close();",
+   "if(item.source==='YOS Tasks'){const [hours,minutes]=moveTime.value.split(':').map(Number);const next=hours*60+minutes;if(!Number.isInteger(next)||next<0||next+item.d>1440||next===item.s)return;const saved=window.YOS_NOTION_LOCAL_MOVE?.(day,item.sourceRef,next,item.d)===true;if(saved)item.s=next;moveDialog.close();note.textContent=saved?'「'+item.t+'」を'+fmt(next)+'に移動しました（この端末だけ・Notion原本は不変）':'保存領域を利用できないため、移動を確定できません。元の予定は変更していません';smoothRender(item.id,saved?previousRect:null);updateReview();return;}\n if(localStorage.getItem(yosPlanKey)!==plan){\n   moveDialog.close();"],
+  ["const theme=/就寝準備|読書|リラックス|会議/.test(item.t)?'violet':",
+   "const theme=item.source==='YOS Tasks'&&item.flowTone?item.flowTone:/就寝準備|読書|リラックス|会議/.test(item.t)?'violet':"],
+  ["if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');",
+   "if(item.source==='YOS Tasks'){el.dataset.notion='1';const badge=document.createElement('span');badge.className='fixed-label';badge.textContent='同期';el.append(badge)}\n    if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');"]
+ ];
+ for(const [from,to] of nativePatches){
+  if(out.split(from).length!==2)throw Error('DAYSTREAMの時刻移動・描画箇所が一致しません');
+  out=out.replace(from,to);
+ }
  if(deviceJSON){
   const marker=" const nativeCalendar=(()=>{try{return window.YOS_CALENDAR_NATIVE?.asDaystream(localStorage)||null}catch{return null}})();";
   if(!out.includes(marker))throw Error('DAYSTREAMのカレンダー接続箇所が一致しません');
   out=out.replace(marker," const nativeCalendar="+deviceJSON+";");
  }
- out=out.replace('<head>','<head><base href="https://yskn0008-bot.github.io/ProjectY/yos/daystream/">')
+ out=out.replace('<head>','<head><base href="https://yskn0008-bot.github.io/ProjectY/yos/daystream/">'+
+  '<style>.timeline .card[data-notion="1"]{cursor:grab}.timeline .card[data-notion="1"] .task-drag-grip{touch-action:none;display:grid;place-items:center;min-width:34px;color:var(--flow-ink);background:#ffffff70;border-radius:9px}.timeline .card[data-notion="1"] .fixed-label{font-size:10px;opacity:.72}.timeline .card[data-notion="1"] .task-copy{min-width:0}.timeline .card[data-notion="1"].yos-backdrop{background-color:var(--flow-light)!important;border-color:var(--flow-edge)}</style>')
  .replace('<body class="yos-daystream-web">','<body class="yos-daystream-web"><div id="yosNativeBoot" role="status" style="position:fixed;inset:0;z-index:99999;background:#f4f8fd;color:#1d2d44;padding:80px 20px;font-family:-apple-system,sans-serif">DAYSTREAMを読み込んでいます…</div>');
  // Never start a service worker from the native HTML presentation.
  out=out.replace("if('serviceWorker' in navigator)","if(false)");
