@@ -73,6 +73,13 @@ test('departure off is idempotent for TV/floor and repeats SHARP stop',async()=>
   assert.equal(h.events.find(x=>x.name==='timer').seconds,1.2);
   assert.equal(h.events.filter(x=>x.name==='tapo'&&x.method==='set_device_info').length,0);
 });
+test('AC off sends commands even when the IR hub cached state says OFF',async()=>{
+  const p=blank();p.departure.ac='off';
+  const h=harness({prefs:p,acStatus:'P0_M1_T24_S0_D6'});
+  await h.execute('外出');
+  assert.equal(h.events.filter(x=>x.name==='ac').length,2);
+  assert.equal(h.events.filter(x=>x.name==='timer').length,1);
+});
 test('arrival ON preserves AC stored mode and does not toggle already-on TV',async()=>{
   const p=blank();for(const key of Object.keys(p.arrival))p.arrival[key]='on';
   const h=harness({prefs:p,tvStatus:'active',acStatus:'P0_M1_T24_S0_D6'});
