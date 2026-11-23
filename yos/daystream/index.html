@@ -1805,9 +1805,7 @@ function wireTaskGestures(el,item){
    const gap=Math.max(0,y-bottom,top-(y+height));
    const near=gap<65;
    if(!near){
-    if(other.classList.contains('drag-neighbor')){
-     other.style.transform='';other.classList.remove('drag-neighbor');
-    }
+    if(other.classList.contains('drag-neighbor'))other.style.transform='translate3d(0,0,0)';
     continue;
    }
    const strength=1-gap/65,side=(y+height/2)<center?-1:1;
@@ -1820,7 +1818,12 @@ function wireTaskGestures(el,item){
  };
  const clearNeighbors=()=>{
   for(const other of tl.querySelectorAll('.drag-neighbor')){
-   other.style.transform='';other.classList.remove('drag-neighbor');
+   if(reduceMotion){other.style.transform='';other.classList.remove('drag-neighbor');continue}
+   other.style.transform='translate3d(0,0,0)';
+   // Let the neighboring card spring back before dropping its transition class.
+   setTimeout(()=>{if(!gesture&&other.isConnected){
+    other.style.transform='';other.classList.remove('drag-neighbor');
+   }},230);
   }
  };
  const paint=()=>{
