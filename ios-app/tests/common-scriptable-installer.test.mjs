@@ -22,6 +22,8 @@ async function run(options={}){
  const sources=options.sources||fixtures,choices=[...(options.choices||[0,-1])],alerts=[],opened=[],requests=[];
  class Request{constructor(url){this.url=url;this.response=null;this.headers={};requests.push(url)}
  async loadString(){if(options.offline)throw Error('network offline');this.response={statusCode:options.status||200};if(this.url.includes('yos-common-installer-catalog.json'))return JSON.stringify(catalog);
+ if(this.url.includes('yos-common-installer-release.json'))return JSON.stringify(options.selfRelease||{});
+ if(options.selfRelease&&this.url.includes('/'+options.selfRelease.commit+'/')&&this.url.endsWith('YOS%20Common%20Installer.js'))return options.selfSource;
  for(const t of catalog.targets)if(this.url.includes('/'+t.commit+'/')&&this.url.endsWith(t.path.split('/').map(encodeURIComponent).join('/')))return options.corruptRaw?'// WRONG RAW CONTENT':sources[t.id];
  throw Error('unexpected '+this.url)}
  async loadJSON(){if(options.offline)throw Error('network offline');this.response={statusCode:200};
@@ -687,3 +689,41 @@ test('self-update network failure preserves existing code and makes no backup',a
  assert.match(r.alerts.at(-1).title,/未完了/);
 });
 
+
+test('self-update rejects unknown modified code before fetching payload or writing',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),target='/icloud/YOS Common Installer.js';
+ const old='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nCUSTOM';
+ cloud.files.set(target,old);
+ const selfSource='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nNEW';
+ const selfRelease={schema:1,name:'YOS Common Installer',path:'ios-app/scriptable/YOS Common Installer.js',commit:'a'.repeat(40),sha256:hash(selfSource),priorSha256:['b'.repeat(64)]};
+ const r=await run({cloud,local,id:'installer-self-update',selfRelease,selfSource});
+ assert.equal(cloud.files.get(target),old);
+ assert.equal(cloud.files.size,1);
+ assert.equal(r.requests.length,1,'must not fetch payload after unknown hash');
+ assert.match(r.alerts.at(-1).message,/既知の旧版と一致しません/);
+});
+test('self-update requires consent and keeps orange duplicate unchanged',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),target='/icloud/YOS Common Installer.js',orange='/local/YOS Common Installer 最新版.js';
+ const old='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nOLD';
+ const next='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nNEW';
+ cloud.files.set(target,old);local.files.set(orange,'ORANGE');
+ const selfRelease={schema:1,name:'YOS Common Installer',path:'ios-app/scriptable/YOS Common Installer.js',commit:'a'.repeat(40),sha256:hash(next),priorSha256:[hash(old)]};
+ let r=await run({cloud,local,id:'installer-self-update',selfRelease,selfSource:next,choices:[-1]});
+ assert.equal(cloud.files.get(target),old);assert.equal(cloud.files.size,1);
+ r=await run({cloud,local,id:'installer-self-update',selfRelease,selfSource:next,choices:[0,-1]});
+ assert.equal(cloud.files.get(target),next);
+ assert.equal(local.files.get(orange),'ORANGE');
+ assert.equal(cloud.files.get('/icloud/YOS Common Installer Data/backups/YOS%20Common%20Installer-'+hash(old)+'.txt'),old);
+});
+test('self-update recovers a partially written file',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local'),target='/icloud/YOS Common Installer.js';
+ const old='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nOLD';
+ const next='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nNEW';
+ cloud.files.set(target,old);
+ const selfRelease={schema:1,name:'YOS Common Installer',path:'ios-app/scriptable/YOS Common Installer.js',commit:'a'.repeat(40),sha256:hash(next),priorSha256:[hash(old)]};
+ const write=cloud.writeString.bind(cloud);let sabotage=true;
+ cloud.writeString=(p,v)=>{if(p===target&&sabotage){sabotage=false;write(p,'PARTIAL');throw Error('interrupted')}write(p,v)};
+ const r=await run({cloud,local,id:'installer-self-update',selfRelease,selfSource:next,choices:[0,-1]});
+ assert.equal(cloud.files.get(target),old);
+ assert.match(r.alerts.at(-1).message,/復旧しました/);
+});
