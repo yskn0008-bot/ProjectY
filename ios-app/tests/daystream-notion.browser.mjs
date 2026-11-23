@@ -183,8 +183,8 @@ try{
  await pg.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
  await pg.evaluate(()=>showDay('2026-12-01'));
  assert.equal(await pg.locator('#tl .card.task').count(),5,'manual task plus four read-only Notion cards');
- const saved=await pg.evaluate(key=>JSON.parse(localStorage.getItem(key)),store);
- assert.deepEqual(saved,manual,'Notion preview never mutates the saved plan');
+ const savedPlan=await pg.evaluate(key=>JSON.parse(localStorage.getItem(key)),store);
+ assert.deepEqual(savedPlan,manual,'Notion preview never mutates the saved plan');
  await pg.evaluate(key=>localStorage.setItem(key,'{corrupt'),store);
  await pg.reload();
  await pg.waitForFunction(()=>document.getElementById('yosNativeBoot')===null);
