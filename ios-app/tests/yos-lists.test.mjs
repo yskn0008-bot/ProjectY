@@ -186,3 +186,40 @@ test('read-only 429 retries are bounded and never update a Task',async()=>{
  assert.equal(h.writes,0);
  assert.equal(h.sleeps,2);
 });
+
+
+test('high-contrast YOS Lists visual system preserves readable Japanese task UI',()=>{
+ const css=source.slice(source.indexOf('<style>'),source.indexOf('</style>')+8);
+ const ratio=(fg,bg)=>{
+  const luminance=hex=>{
+   const v=hex.slice(1).match(/../g).map(x=>parseInt(x,16)/255)
+    .map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4);
+   return .2126*v[0]+.7152*v[1]+.0722*v[2];
+  };
+  const a=luminance(fg),b=luminance(bg);
+  return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+ };
+ for(const [name,fg,bg] of [
+  ['body','#172B46','#E9EFF7'],
+  ['header','#FFFFFF','#173D68'],
+  ['header description','#E0EDFF','#173D68'],
+  ['active tab','#FFFFFF','#164E88'],
+  ['count card','#FFFFFF','#214668'],
+  ['count caption','#E2EEFA','#214668'],
+  ['task title','#122941','#FAFCFF'],
+  ['task detail','#475E77','#FAFCFF'],
+  ['confirm action','#FFFFFF','#175BA7'],
+  ['footer','#52667D','#E9EFF7'],
+  ['urgent priority','#A72A22','#FCE7E3']
+ ]) assert.ok(ratio(fg,bg)>=4.5,name+' needs contrast ratio >= 4.5');
+ assert.match(css,/\.tab\[aria-selected=true\]\{background:#164E88;color:#FFFFFF/);
+ assert.match(css,/\.action\{[^}]*min-height:44px/);
+ assert.match(css,/\.refresh\{[^}]*min-height:44px/);
+ assert.match(css,/\.tools input\{[^}]*min-height:48px/);
+ assert.match(css,/button:focus-visible,input:focus-visible/);
+ assert.match(css,/@media\(max-width:360px\)/);
+ assert.match(css,/@media\(prefers-reduced-motion:no-preference\)/);
+ assert.match(source,/item\.priority==='P0'\?' priority-zero'/);
+ assert.match(source,/item\.priority==='P1'\?' priority-one'/);
+ assert.match(source,/'P1'\?' high'/);
+});
