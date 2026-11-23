@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T01:48:47+09:00",
+  "updated_at": "2026-11-24T01:50:51+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-23T05:39:00Z"
-    },
-    {
-      "id": "github-pr-878",
-      "title": "PR #878 YOS JOURNAL｜11月20日研究特集を既存誌面へ発行するレビュー（未公開）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/878",
-      "updated_at": "2026-11-19T16:59:27Z"
     },
     {
       "id": "github-pr-890",
@@ -100,7 +90,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/908",
-      "updated_at": "2026-11-23T16:40:51Z"
+      "updated_at": "2026-11-23T16:49:55Z"
     },
     {
       "id": "github-pr-909",
@@ -110,7 +100,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/909",
-      "updated_at": "2026-11-23T16:48:04Z"
+      "updated_at": "2026-11-23T16:49:51Z"
+    },
+    {
+      "id": "github-pr-910",
+      "title": "PR #910 YOS Sleep｜家電を動かさず睡眠集中モードとSleep Cycleを開始する準備",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/910",
+      "updated_at": "2026-11-23T16:49:42Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T16:47:56Z"
+      "updated_at": "2026-11-23T16:49:43Z"
     },
     {
       "id": "github-issue-234",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T01:48:47+09:00",
+      "last_update": "2026-11-24T01:50:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T01:48:47+09:00",
+      "last_update": "2026-11-24T01:50:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T01:48:47+09:00",
+      "last_update": "2026-11-24T01:50:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "45e68818c240aed86ac3dae98aa8d89c08f7798f9073aab43dad5013aba17a1f"
+  "github_snapshot_hash": "afc26cb0eb29fd6b87bbe62af9a407dc2a1f78a12dd567ff2185c01eeabdedf6"
 }
