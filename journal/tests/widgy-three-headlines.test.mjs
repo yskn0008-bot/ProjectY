@@ -46,7 +46,8 @@ test('journal UI and device local storage are protected',()=>{
  assert.match(html,/background:#fff/);
  assert.doesNotMatch(html,/localStorage|method\s*:\s*['"](?:POST|PATCH|DELETE)/);
  assert.match(html,/JOURNALを開く/);
- assert.match(html,/最新公開記事/);
+ assert.match(html,/<b id="count">5記事の見出し<\/b>/);
+ assert.doesNotMatch(html,/公開記事を読み込んでいます/);
 });
 
 test('five items retain original web typography, thumbnail size and no artificial J placeholders',()=>{
@@ -55,4 +56,16 @@ test('five items retain original web typography, thumbnail size and no artificia
  assert.match(html,/font-size:11px;color:#666/);
  assert.match(html,/shown<5/);
  assert.doesNotMatch(html,/el\('div','blank','J'\)/);
+});
+
+test('static first paint contains five dated headlines before JavaScript fetch',()=>{
+ const section=html.split('<section id="list" aria-live="polite">')[1]?.split('</section>')[0];
+ assert.ok(section,'initial no-JS article list exists');
+ assert.equal((section.match(/class="item"/g)||[]).length,5,'Widgy does not capture a loading-only frame');
+ for(const day of ['2026-11-20','2026-11-19','2026-11-18'])
+  assert.match(section,new RegExp(day));
+ assert.match(section,/写真の順番で魅力は変わる/);
+ assert.match(section,/宜野湾の産業まつりは/);
+ assert.doesNotMatch(section,/公開記事を読み込んでいます/);
+ assert.match(html,/保存済み記事／更新未確認/,'static content must not claim live freshness');
 });
