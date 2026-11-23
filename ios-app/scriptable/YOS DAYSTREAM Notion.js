@@ -322,7 +322,7 @@ function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCale
    "if(item.kind==='task'&&item.source!=='YOS Tasks'&&dx<0&&ax>ay*1.4&&event.cancelable)"],
   ["pendingMove={item,day:selectedDay,previousRect,plan:localStorage.getItem(yosPlanKey)};",
    "pendingMove={item,day:selectedDay,previousRect,plan:item.source==='YOS Tasks'?null:localStorage.getItem(yosPlanKey)};"],
-  ["if(localStorage.getItem(yosPlanKey)!==plan){\n   moveDialog.close();",
+  ["if(localStorage.getItem(yosPlanKey)!==plan){\n  moveDialog.close();",
    "if(item.source==='YOS Tasks'){const [hours,minutes]=moveTime.value.split(':').map(Number);const next=hours*60+minutes;if(!Number.isInteger(next)||next<0||next+item.d>1440||next===item.s)return;const saved=window.YOS_NOTION_LOCAL_MOVE?.(day,item.sourceRef,next,item.d)===true;if(saved)item.s=next;moveDialog.close();note.textContent=saved?'「'+item.t+'」を'+fmt(next)+'に移動しました（この端末だけ・Notion原本は不変）':'保存領域を利用できないため、移動を確定できません。元の予定は変更していません';smoothRender(item.id,saved?previousRect:null);updateReview();return;}\n if(localStorage.getItem(yosPlanKey)!==plan){\n   moveDialog.close();"],
   ["const theme=/就寝準備|読書|リラックス|会議/.test(item.t)?'violet':",
    "const theme=item.source==='YOS Tasks'&&item.flowTone?item.flowTone:/就寝準備|読書|リラックス|会議/.test(item.t)?'violet':"],
