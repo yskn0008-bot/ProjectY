@@ -4,7 +4,10 @@
 // Existing DAYSTREAM UI with read-only Notion/iCloud inputs and a local plan.
 'use strict';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
-const UI_REF='d6173496a9a21c1d2f67c9fba68bcb4462755d3e';
+const UI_REF='c0735bf7dc092f8c30753b1c0c73cfd1cd758416';
+// Stable, already-published HTTPS base for Scriptable's generated HTML.
+// Do not delete or migrate any existing DAYSTREAM localStorage keys.
+const UI_BASE_URL='https://yskn0008-bot.github.io/ProjectY/yos/daystream/';
 const ROOT='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/';
 const SOURCE='965c6086-32c1-463d-93b4-87a9cb69b3ad';
 const STATES=['次にやる','実行中','本人操作','待ち','保留','完了'];
@@ -105,6 +108,10 @@ const BROWSER_BOOT=String.raw`
   const button=document.getElementById('yosWebTaskRefresh');
   const refresh=()=>{location.href='scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion'};
   button.textContent='↻ Notionを更新';button.onclick=refresh;
+  // The Web-only sync link was absent from the previously pinned HTML.
+  // Keep one visible action in the existing timeline, not another settings page.
+  const sync=document.getElementById('yosTimelineSync');
+  if(sync){sync.textContent='↻ Notion同期';sync.title='Notionの最新タスクを取得してDAYSTREAMを開く';}
   const top=document.createElement('button');top.textContent='↻ Notionを更新';top.onclick=refresh;
   const port=document.querySelector('.yos-web-port');
   port.insertBefore(top,document.getElementById('yosWebImport'));
@@ -322,7 +329,7 @@ async function main(){
  const deviceCalendar=await readDeviceCalendar(native,data.tasks);
  const output=buildHTML(html,adapters,native,wizard,snapshot,directRows,deviceCalendar,deviceCalendarStatus);
  stage='画面表示';
- await WebView.loadHTML(output,null,null,true);
+ await WebView.loadHTML(output,UI_BASE_URL,null,true);
 }
 // SCRIPTABLE_ENTRY
 try{await main()}catch(error){
