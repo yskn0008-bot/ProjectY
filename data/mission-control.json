@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T01:47:39+09:00",
+  "updated_at": "2026-11-24T01:48:47+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -93,16 +93,6 @@
       "updated_at": "2026-11-23T14:59:27Z"
     },
     {
-      "id": "github-pr-907",
-      "title": "PR #907 YOS Remote｜照明・エアコンの1ボタン切り替え（状態は推定）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/907",
-      "updated_at": "2026-11-23T16:47:12Z"
-    },
-    {
       "id": "github-pr-908",
       "title": "PR #908 YOS Lists｜Notionの無効カーソルを回避しYOS Tasks全件取得",
       "type": "GitHub PR",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/908",
       "updated_at": "2026-11-23T16:40:51Z"
+    },
+    {
+      "id": "github-pr-909",
+      "title": "PR #909 YOS Home Scenes｜設定画面をミニマルなiOSデザインへ変更",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/909",
+      "updated_at": "2026-11-23T16:48:04Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T16:44:46Z"
+      "updated_at": "2026-11-23T16:47:56Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-412befe0399c",
+      "title": "feat(remote): add safe one-button light and AC toggle (#907)",
+      "completed_at": "2026-11-23T16:47:56Z",
+      "result": "GitHub mainへ反映（412befe）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/412befe0399ca57703c7fa81a1843b649849b41b"
+    },
+    {
       "id": "github-commit-e3281fcc0f4c",
       "title": "Merge PR #906: restore DAYSTREAM synced task moves and category colors",
       "completed_at": "2026-11-23T16:45:06Z",
@@ -241,13 +248,6 @@
       "completed_at": "2026-11-23T16:35:35Z",
       "result": "GitHub mainへ反映（3f09780）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3f097802ab36c1efcc79a792720e878ad99f5328"
-    },
-    {
-      "id": "github-commit-cc6fd13c74c1",
-      "title": "fix(daystream): color long Notion timeline blocks by category even when overlapping",
-      "completed_at": "2026-11-23T16:35:13Z",
-      "result": "GitHub mainへ反映（cc6fd13）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cc6fd13c74c1d4dde180d6478f5a26bf7c468f28"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T01:47:39+09:00",
+      "last_update": "2026-11-24T01:48:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -365,7 +365,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T01:47:39+09:00",
+      "last_update": "2026-11-24T01:48:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T01:47:39+09:00",
+      "last_update": "2026-11-24T01:48:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4d0b57a15891a1abee05a736c9aec9f71eab022af5c1f42644af7e966a47bd5f"
+  "github_snapshot_hash": "45e68818c240aed86ac3dae98aa8d89c08f7798f9073aab43dad5013aba17a1f"
 }
