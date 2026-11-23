@@ -383,9 +383,11 @@ try{
   }else{
     const a=new Alert();a.title='YOS 共通インストーラー';a.message='GitHubの検証済みコードを正式名称で導入します。既存の別コードは保護します。';
     for(const t of targets)a.addAction(t.name);
+    a.addAction('共通インストーラーの安全診断（読み取りのみ）');
     a.addCancelAction('中止');
     const index=await a.presentAlert();
-    if(index>=0)entry=targets[index];
+    if(index===targets.length)await diagnoseInstallerCopies();
+    else if(index>=0)entry=targets[index];
   }
   if(entry)await install(entry);
   }
