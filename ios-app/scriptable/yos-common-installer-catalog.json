@@ -162,6 +162,13 @@
       "path": "ios-app/scriptable/YOS BRAVIA 画質統合.js",
       "commit": "2b61b650314c3cd05b62287134971d3bfa12edfd",
       "sha256": "78056b332397e98d2351f093f7268593c471a9c0b01c14fbf838a2ba446f7ed2"
+    },
+    {
+      "id": "yos-lists",
+      "name": "YOS Lists",
+      "path": "ios-app/scriptable/YOS Lists.js",
+      "commit": "01dc08afec397eb483fac608b665371179c7d5fb",
+      "sha256": "1dd4699e56545f56e0fa3969e383cc5bb66830d472693dccb15e81596fd903f0"
     }
   ]
 }
