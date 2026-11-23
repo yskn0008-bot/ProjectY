@@ -127,6 +127,16 @@ async function run() {
   if (!isNonEmpty) return message('missing',null,'ショートカットから原文が渡されていません');
   if (!sourceLabel) return message('held',null,'不明なClarity入力元のため保存を保留');
   if (externalId && !legalId(externalId)) return message('held',null,'受付IDが不正なため保存を保留');
+  // JOURNAL is a private editorial draft, not an arbitrary Clarity input. Require
+  // a stable edition receipt before any local or remote write; never auto-create
+  // a fresh ID for a retry, and never route a non-editorial payload as a draft.
+  if (sourceKey==='journal') {
+    if (!externalId || !externalId.startsWith('journal:'))
+      return message('held',null,'JOURNAL号の固定受付IDがありません。重複防止のため保存しません');
+    if (!raw.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1') ||
+        !raw.includes('【資料と照合状況】') || !raw.includes('公開不可・要審査'))
+      return message('held',null,'JOURNAL原稿の非公開審査マーカーが揃っていません');
+  }
   if (raw.length>(sourceKey==='journal'?36000:CFG.maxLength)) return message('held',null,'長文のためNotion送信を保留（元ショートカットの記録を保持）');
   let rows;
   try{rows=load();}
