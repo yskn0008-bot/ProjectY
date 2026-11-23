@@ -308,7 +308,7 @@ main{padding:0 12px}
 .item.done .item-complete:active{background:#D7E8DD}
 /* Touch feedback changes one row immediately; Notion confirmation remains asynchronous. */
 .item--task.is-pending{background:#DCEFE4;border-color:#7BAE91;box-shadow:0 1px 3px rgba(30,70,49,.09)}
-.item--task.is-pending .item-name{text-decoration:none;color:#315742}
+.item--task.is-pending .item-name{text-decoration:line-through;text-decoration-color:#72A184;text-decoration-thickness:1px;color:#315742}
 .item--task.is-pending-undo{background:#EAF1F6;border-color:#91A9BB}
 .item--task.is-pending-undo .item-name{text-decoration:none;color:#294054}
 .tag.pending-tag{background:#C5E3D0;color:#285A3D;border:1px solid #8DBDA1}
