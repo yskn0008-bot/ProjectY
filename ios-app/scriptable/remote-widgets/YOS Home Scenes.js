@@ -174,7 +174,9 @@ async function edit(prefs){
 *{box-sizing:border-box}
 html,body{width:100%;height:100%;margin:0;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;-webkit-font-smoothing:antialiased}
 body{background:radial-gradient(ellipse 90% 50% at 12% -7%,rgba(60,117,202,.5),transparent 78%),radial-gradient(ellipse 95% 85% at 95% 113%,rgba(109,77,161,.35),transparent 78%),linear-gradient(145deg,#192943,#141e35 70%,#202841);color:var(--ink)}
-.screen{height:100vh;height:100dvh;width:100%;max-width:530px;margin:auto;padding:11px 13px max(13px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:11px;overflow:hidden}
+/* Scriptable WebView overlays native Close/Share buttons in the upper corners. */
+/* Keep all five tabs below that toolbar, including when a safe-area inset is reported. */
+.screen{height:100vh;height:100dvh;width:100%;max-width:530px;margin:auto;padding:max(72px,env(safe-area-inset-top)) 13px max(13px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:11px;overflow:hidden}
 button{font:inherit;-webkit-tap-highlight-color:transparent;cursor:pointer}
 .tabs{display:flex;flex:0 0 54px;gap:3px;padding:3px;border:1px solid var(--edge);border-radius:18px;background:rgba(208,221,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.09);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
 .tab{flex:1;min-width:0;border:0;border-radius:14px;color:#d5def0;background:transparent;font-size:clamp(11px,3.4vw,15px);font-weight:700;transition:background .16s,color .16s}
@@ -199,7 +201,7 @@ button{font:inherit;-webkit-tap-highlight-color:transparent;cursor:pointer}
 .notice:empty{display:none}
 .tab:focus-visible,.option:focus-visible,.save:focus-visible{outline:2px solid white;outline-offset:2px}
 @media(max-width:359px){.screen{padding-left:9px;padding-right:9px;gap:9px}.device{grid-template-columns:minmax(91px,35%) minmax(0,1fr);gap:4px;padding:6px 8px}.identity{gap:5px}.glyph{width:27px;height:27px;flex-basis:27px}.name{font-size:12px}.kind{font-size:9px}.option{font-size:12px;min-height:39px}}
-@media(max-height:550px){.screen{gap:7px;padding-top:7px;padding-bottom:7px}.tabs{flex-basis:47px}.save{flex-basis:47px}.device{padding-top:4px;padding-bottom:4px}.option{min-height:35px}}
+@media(max-height:550px){.screen{gap:7px;padding-bottom:7px}.tabs{flex-basis:47px}.save{flex-basis:47px}.device{padding-top:4px;padding-bottom:4px}.option{min-height:35px}}
 @media(max-height:380px){html,body{overflow:auto}.screen{height:auto;min-height:380px;overflow:visible}.panel{min-height:260px}}
 @media(prefers-reduced-motion:reduce){.tab,.option{transition:none}}
 </style></head><body>
