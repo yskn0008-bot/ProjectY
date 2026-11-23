@@ -65,9 +65,12 @@ async function harness(errors={},extras=[]){
    return JSON.parse(JSON.stringify(records[id]));
   }
  }
- const app=await new AsyncFunction('Keychain','Request',testSource)(
-  {contains:()=>true,get:()=>'mock-only-token-not-a-secret'},RequestMock);
- return {app,records,get writes(){return writes},get queries(){return queries},get cursorAttempts(){return cursorAttempts}};
+ let sleeps=0;
+ const TimerMock={schedule(_seconds,repeats,callback){assert.equal(repeats,false);sleeps++;callback();}};
+ const app=await new AsyncFunction('Keychain','Request','Timer',testSource)(
+  {contains:()=>true,get:()=>'mock-only-token-not-a-secret'},RequestMock,TimerMock);
+ return {app,records,get writes(){return writes},get queries(){return queries},
+   get cursorAttempts(){return cursorAttempts},get sleeps(){return sleeps}};
 }
 test('both Notion data sources load and token never enters HTML',async()=>{
  const h=await harness();
@@ -151,7 +154,8 @@ test('285 Tasks in many days load in full without any start_cursor despite inval
  assert.equal(data.tasks.length,285,'never return only the first 100 Tasks');
  assert.equal(new Set(data.tasks.map(x=>x.id)).size,285,'no overlapping date windows');
  assert.equal(base.cursorAttempts,0,'never submit Notion invalid cursor');
- assert.ok(base.queries>3,'partitioned dataset is queried across disjoint windows');
+ assert.ok(base.queries>3&&base.queries<35,'partitioned dataset is queried across disjoint windows');
+ assert.ok(base.sleeps>0,'reads are paced for Notion integration limits');
  assert.equal(base.writes,0,'read-only operations');
 });
 test('large same-timestamp Task batches fail closed instead of silently truncating',async()=>{
@@ -170,4 +174,15 @@ test('large same-timestamp Task batches fail closed instead of silently truncati
  assert.match(data.errors.task,/全件|上限|分割|表示/);
  assert.equal(h.cursorAttempts,0);
  assert.equal(h.writes,0);
+});
+
+test('read-only 429 retries are bounded and never update a Task',async()=>{
+ const h=await harness({task:{status:429,code:'rate_limited',message:'try later'}});
+ const data=await h.app.readAll();
+ assert.equal(data.loaded.task,false);
+ assert.equal(data.loaded.shopping,true);
+ assert.match(data.errors.task,/HTTP 429/);
+ assert.equal(h.cursorAttempts,0);
+ assert.equal(h.writes,0);
+ assert.equal(h.sleeps,2);
 });
