@@ -308,6 +308,8 @@ function yosXlRows(templates,calendar,now=new Date()){
   if(t.repeat==='daily'){
    for(const offset of [-1,0]){
     const d=new Date(begin.getFullYear(),begin.getMonth(),begin.getDate()+offset,a.getHours(),a.getMinutes(),a.getSeconds());
+    // The native DAYSTREAM never projects a routine before its first Notion day.
+    if(d<new Date(a.getFullYear(),a.getMonth(),a.getDate()))continue;
     push(t.title,d,new Date(+d+span),'habit',t.done);
    }
   }else if(t.repeat==='once')push(t.title,a,b,'task',t.done);
@@ -321,6 +323,7 @@ function yosXlRows(templates,calendar,now=new Date()){
  const all=calendar?.allDayDays?.[day];
  if(Array.isArray(all))for(const name of all.slice(0,12)){
   const t=String(name||'').trim().slice(0,70);
+  if(/^YOS-TEST(?:[-_]|$)/i.test(t)||t.includes('[架空]')||t.includes('【架空】'))continue;
   if(t&&!seen.has('allday|'+t)){seen.add('allday|'+t);rows.push({title:t,minute:-1,duration:1440,source:'calendar',done:false})}
  }
  const rank={calendar:0,habit:1,task:2};
@@ -367,9 +370,30 @@ function yosXlExport(templates,calendar){
  const fm=FileManager.iCloud(),dir=fm.joinPath(fm.documentsDirectory(),'YOS_Widgets');
  if(!fm.fileExists(dir))fm.createDirectory(dir,false);
  const dest=fm.joinPath(dir,'YOS_DAYSTREAM_XL.png');
- // Only this new generated filename is replaced. Existing data is untouched.
- fm.writeImage(dest,img);
- if(!fm.fileExists(dest))throw Error('画像の保存確認ができません');
+ const receipt=fm.joinPath(dir,'YOS_DAYSTREAM_XL.owner.txt');
+ const marker='YOS DAYSTREAM XL generated image v1';
+ // An unrecognized image or receipt belongs to the user. Never replace it.
+ if(fm.fileExists(dest)&&(!fm.fileExists(receipt)||fm.readString(receipt)!==marker))
+  throw Error('既存の同名画像を保護しました');
+ if(!fm.fileExists(dest)&&fm.fileExists(receipt))throw Error('画像と管理記録が一致しません');
+ // Keep the preceding generated image intact if writing the replacement fails.
+ const backup=fm.joinPath(dir,'YOS_DAYSTREAM_XL.previous.png');
+ if(fm.fileExists(backup))throw Error('前回の画像更新を確認できません');
+ const hadImage=fm.fileExists(dest);
+ if(hadImage)fm.copy(dest,backup);
+ let keepBackup=false;
+ try{
+  fm.writeImage(dest,img);
+  if(!fm.fileExists(dest))throw Error('画像の保存確認ができません');
+  if(!hadImage)fm.writeString(receipt,marker);
+  if(fm.readString(receipt)!==marker)throw Error('画像の管理記録を確認できません');
+ }catch(error){
+  if(hadImage&&fm.fileExists(backup)){
+   try{if(fm.fileExists(dest))fm.remove(dest);fm.copy(backup,dest)}
+   catch{keepBackup=true;throw Error('画像の復旧を確認できません')}
+  }else if(fm.fileExists(dest))fm.remove(dest);
+  throw error;
+ }finally{if(!keepBackup&&fm.fileExists(backup))fm.remove(backup)}
  return {ok:true,path:dest,count:snapshot.rows.length};
 }
 
