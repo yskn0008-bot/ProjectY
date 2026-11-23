@@ -69,7 +69,7 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
    Let native touch scrolling pass through them; only local tasks use drag grips. */
 .card.task{touch-action:pan-y}
 .card.fixed-scroll{touch-action:pan-y;overscroll-behavior-y:auto}
-.card.task .task-drag-grip{display:grid;place-items:center;flex:0 0 20px;align-self:stretch;min-height:25px;touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;font-size:24px;color:#f0def8;cursor:grab;line-height:1}
+.card.task .task-drag-grip{display:grid;place-items:center;flex:0 0 38px;min-width:38px;align-self:stretch;min-height:25px;touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;font-size:24px;color:#f0def8;cursor:grab;line-height:1}
 .card.task .task-drag-grip:active{cursor:grabbing}
 .card.task.press-armed{outline:2px solid #dce6ff;outline-offset:-2px;filter:brightness(1.1)}
 .editor #editorTitle,.editor .edit-end,.editor label{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
