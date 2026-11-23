@@ -453,13 +453,14 @@
      return {entries:value.entries,error:false};
    }catch{return {entries:[],error:true}}
  }
- let fieldData=readField(),lastUndone=null;
- const currentFields=()=>fieldData.entries.filter(e=>e.businessDate===state.businessDate&&e.shiftStart===state.shiftStart&&!e.voidedAt);
+ let fieldData=readField();
+ const shiftFieldEntries=entries=>entries.filter(e=>e.businessDate===state.businessDate&&e.shiftStart===state.shiftStart);
+ const currentFields=()=>shiftFieldEntries(fieldData.entries).filter(e=>!e.voidedAt);
  function renderField(){
-   const latest=currentFields().at(-1);
+   const latest=currentFields().at(-1),mostRecent=shiftFieldEntries(fieldData.entries).at(-1);
    const label=latest?fieldLabels[latest.kind]+' · '+time(latest.at):'報告なし';
    $('field-summary').textContent=label+' ›';$('field-last').textContent=latest?label+'（端末内）':'報告なし';
-   $('field-undo').disabled=fieldData.error||!isActive()||!latest||latest.id===lastUndone;
+   $('field-undo').disabled=fieldData.error||!isActive()||!mostRecent||Boolean(mostRecent.voidedAt);
  }
  function openField(){fieldData=readField();renderField();$('field-layer').hidden=false;$('field-close').focus()}
  function closeField(){$('field-layer').hidden=true;$('field-open').focus()}
@@ -477,19 +478,19 @@
    const entries=[...latest.entries,entry];
    try{localStorage.setItem(FIELD_STORE,JSON.stringify({version:1,entries}))}
    catch{toast('保存失敗。報告は追加していません');return false}
-   fieldData={entries,error:false};lastUndone=null;renderField();closeField();
+   fieldData={entries,error:false};renderField();closeField();
    toast('現場報告を保存しました。自動判断は未接続です');return true;
  }
  function undoField(){
    if(!isActive()){toast('営業中の報告のみ取り消せます');return false}
    const latest=readField();
    if(latest.error){fieldData=latest;renderField();toast('記録を読めないため取り消せません');return false}
-   const target=[...latest.entries].reverse().find(e=>e.businessDate===state.businessDate&&e.shiftStart===state.shiftStart&&!e.voidedAt);
-   if(!target||target.id===lastUndone){toast('取り消せる直前の報告がありません');return false}
+   const target=shiftFieldEntries(latest.entries).at(-1);
+   if(!target||target.voidedAt){toast('取り消せる直前の報告がありません');return false}
    const entries=latest.entries.map(e=>e.id===target.id?{...e,voidedAt:instant()}:e);
    try{localStorage.setItem(FIELD_STORE,JSON.stringify({version:1,entries}))}
    catch{toast('保存失敗。取消は未反映です');return false}
-   fieldData={entries,error:false};lastUndone=target.id;renderField();toast('直前の報告を取り消しました。履歴は保持しています');return true;
+   fieldData={entries,error:false};renderField();toast('直前の報告を取り消しました。履歴は保持しています');return true;
  }
 
  const money=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
