@@ -117,74 +117,57 @@ const BROWSER_BOOT=String.raw`
 const BROWSER_DIRECT_IMPORT=String.raw`
 (()=>{
  'use strict';
- // The original DAYSTREAM renders its own native task cards; no overlay renderer.
- window.addEventListener('DOMContentLoaded',()=>document.getElementById('yosNativeBoot')?.remove());
- const seeds=__DIRECT_ROWS__,boot=window.YOS_CHARCOAL_BOOT,web=window.YOS_DAYSTREAM_WEB;
- if(!boot?.days||!web?.write||window.YOS_WEB_DATA_ERROR||!Array.isArray(seeds)||seeds.length>40)return;
- const key='YOS_DAYSTREAM_DIRECT_IMPORTED_V1';
- let seen;
- try{const raw=localStorage.getItem(key);seen=raw?JSON.parse(raw):{};
-  if(!seen||typeof seen!=='object'||Array.isArray(seen)||Object.keys(seen).length>80||
-    Object.values(seen).some(v=>v!==true))return;
- }catch{return}
- const days=boot.days,refs=new Set(),ids=new Set();
- let nextId=310000000;
- for(const rows of Object.values(days)){
-  if(!Array.isArray(rows))return;
-  for(const r of rows){
-   if(typeof r?.sourceRef==='string')refs.add(r.sourceRef);
-   if(Number.isSafeInteger(Number(r?.id))){ids.add(Number(r.id));nextId=Math.max(nextId,Number(r.id)+1)}
+ // Notion-only preview: no changes to saved user plans.
+ const templates=__DIRECT_ROWS__,DAY=86400000;
+ if(!Array.isArray(templates)||templates.length>40)return;
+ window.YOS_ONE_TAP_FOR_DAY=(day,existing=[])=>{
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!Array.isArray(existing))return [];
+  const from=Date.parse(day+'T00:00:00+09:00'),until=from+DAY;
+  if(!Number.isFinite(from))return [];
+  const out=[];
+  for(let i=0;i<templates.length;i++){
+   const x=templates[i],a=Date.parse(x.startAt),b=Date.parse(x.endAt);
+   if(!Number.isFinite(a)||!Number.isFinite(b)||b<=a||b-a>DAY)continue;
+   const n=x.repeat==='daily'?Math.floor((from-a)/DAY):0;
+   for(const [k,shift] of (x.repeat==='daily'?[n,n+1]:[0]).entries()){
+    if(shift<0)continue;
+    const s0=Math.max(from,a+shift*DAY),e0=Math.min(until,b+shift*DAY);
+    if(s0>=e0)continue;
+    const s=(s0-from)/60000,d=(e0-s0)/60000,ref='notion:'+x.id;
+    if(existing.some(y=>y?.sourceRef===ref||y?.sourceRef==='yos-direct:'+x.id))continue;
+    if(existing.some(y=>y?.t===x.title&&y?.s===s&&y?.d===d))continue;
+    out.push({id:880000000+i*3+k,t:x.title,s,d,f:1,
+     kind:x.repeat==='daily'?'habit':'task',source:'YOS Tasks',
+     sourceRef:ref,done:x.repeat==='daily'?false:x.done});
+   }
   }
- }
- const next={...days},covered={...seen};
- let count=0;
- for(const v of seeds){
-  const {id,day,title,s,d,done}=v||{},ref='yos-direct:'+id;
-  if(!/^[a-f0-9]{32}$/.test(id)||!/^\d{4}-\d{2}-\d{2}$/.test(day)||
-    typeof title!=='string'||!title||title.length>120||
-    !Number.isInteger(s)||!Number.isInteger(d)||s<0||d<1||s+d>1440||typeof done!=='boolean')return;
-  if(covered[ref])continue;
-  const rows=next[day]||[];
-  if(refs.has(ref)||rows.some(r=>r?.t===title&&r.s===s&&r.d===d&&r.kind==='task')){
-   covered[ref]=true;continue;
-  }
-  while(ids.has(nextId))nextId++;
-  const row={id:nextId++,t:title,s,d,kind:'task',source:'YOS Direct',sourceRef:ref,done};
-  next[day]=[...rows,row];ids.add(row.id);refs.add(ref);covered[ref]=true;count++;
- }
- if(Object.keys(covered).length>80||Object.keys(next).length>120||
-    Object.values(next).some(rows=>!Array.isArray(rows)||rows.length>150))return;
- if(count&&!web.write({version:1,days:next,hiddenCalendar:boot.hiddenCalendar||{}}))return;
- if(count)boot.days=next;
- try{localStorage.setItem(key,JSON.stringify(covered))}catch{}
- const imported=new Set(Object.keys(covered).filter(k=>covered[k]).map(k=>k.slice('yos-direct:'.length)));
- if(Array.isArray(boot.taskSource?.items))
-  boot.taskSource={...boot.taskSource,items:boot.taskSource.items.filter(t=>!imported.has(t.id))};
- window.YOS_DIRECT_IMPORT={created:count,count:imported.size};
+  return out;
+ };
+ window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('yosNativeBoot')?.remove();
+  const status=document.getElementById('notice');
+  if(status)status.textContent='YOS Tasksの習慣を自動表示（読み取り専用・端末保存なし）';
+ });
 })();
 `;
 function nativeDirectRows(tasks){
  if(!Array.isArray(tasks)||tasks.length>400)throw Error('Notionのタスク件数が不正');
- const tokyo=s=>{
-  const ms=Date.parse(s);
-  if(!Number.isFinite(ms))return null;
-  const d=new Date(ms+540*60000);
-  return {day:d.toISOString().slice(0,10),minute:d.getUTCHours()*60+d.getUTCMinutes()};
- };
+ const enabled=/^yos-daystream-routine-202612-(?:night(?:-[a-z]+)?|wake(?:-[a-z]+)?|care(?:-[a-z]+)?|sleep)$|^yos-daystream-ideal-20261123-(?:meal|journal|free)$|^yos-ikemen90-task-0[12]$/;
  const rows=[],used=new Set();
  for(const t of tasks){
-  if(!t||!/^yos-daystream-routine-202612-(?:night(?:-[a-z]+)?|wake(?:-[a-z]+)?|care(?:-[a-z]+)?|sleep)$/.test(t.syncKey||''))continue;
+  if(!t||!enabled.test(t.syncKey||''))continue;
   if(t.sourceKind!=='task'||!/^[a-f0-9]{32}$/.test(t.id||'')||!STATES.includes(t.state)||
     !validAt(t.due)||!validAt(t.dueEnd)||!t.due.includes('T')||!t.dueEnd.includes('T')||
-    used.has(t.id))throw Error('生活タスクの元データを確認できません');
-  const a=tokyo(t.due),b=tokyo(t.dueEnd),duration=(Date.parse(t.dueEnd)-Date.parse(t.due))/60000;
-  if(!a||!b||a.day!==b.day||!Number.isInteger(duration)||duration<1||a.minute+duration>1440||
-    !t.title||typeof t.title!=='string')throw Error('生活タスクの時間を確認できません');
+    used.has(t.id)||!t.title||typeof t.title!=='string')throw Error('生活タスクの元データを確認できません');
+  const start=Date.parse(t.due),end=Date.parse(t.dueEnd);
+  if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start||end-start>86400000)
+    throw Error('生活タスクの時刻・所要時間を確認できません');
   used.add(t.id);
-  rows.push({id:t.id,day:a.day,title:clean(t.title,120),s:a.minute,d:duration,done:t.state==='完了'});
+  rows.push({id:t.id,title:clean(t.title,120),startAt:t.due,endAt:t.dueEnd,
+    repeat:t.habitCycle==='毎日'?'daily':'once',done:t.state==='完了'});
  }
  if(rows.length>40)throw Error('生活タスクの登録上限を超えました');
- return rows.sort((a,b)=>a.day.localeCompare(b.day)||a.s-b.s||a.id.localeCompare(b.id));
+ return rows.sort((a,b)=>Date.parse(a.startAt)-Date.parse(b.startAt)||a.id.localeCompare(b.id));
 }
 
 /**
@@ -269,6 +252,15 @@ function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCale
  .replace('<script src="./yos-tasks-auth.js"></script>','')
  .replace('</script><script>\nconst tl=','</script><script>'+safeScript(BROWSER_BOOT.replace('__SNAPSHOT__',json).replace('__CALENDAR_STATUS__',JSON.stringify(clean(calendarStatus,100))))+'</script><script>'+safeScript(BROWSER_DIRECT_IMPORT.replace('__DIRECT_ROWS__',directJSON))+'</script><script>\nconst tl=')
  .replace('<script src="./task-wizard.js"></script>','<script>'+safeScript(wizard)+'</script>');
+ const timelineAnchor='return [...calendarItems(day),...local,...clarity];';
+ if(out.split(timelineAnchor).length!==2)throw Error('DAYSTREAMの時間割が変わりました');
+ out=out.replace(timelineAnchor,'const calendar=calendarItems(day);const synced=window.YOS_ONE_TAP_FOR_DAY?.(day,[...calendar,...local,...clarity])||[];return [...calendar,...local,...clarity,...synced];');
+ const badgeAnchor="badge.textContent='固定'";
+ if(out.split(badgeAnchor).length!==2)throw Error('DAYSTREAMラベル形式が変わりました');
+ out=out.replace(badgeAnchor,"badge.textContent=item.source==='YOS Tasks'?'同期':'固定'");
+ const focusAnchor=' const reasons=latestCompatibility.get(item.id)?.reasons;';
+ if(out.split(focusAnchor).length!==2)throw Error('DAYSTREAM詳細形式が変わりました');
+ out=out.replace(focusAnchor," if(item.source==='YOS Tasks')fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+' · Notion YOS Tasksの読み取り専用表示。変更は原本で行ってください。';\n"+focusAnchor);
  if(deviceJSON){
   const marker=" const nativeCalendar=(()=>{try{return window.YOS_CALENDAR_NATIVE?.asDaystream(localStorage)||null}catch{return null}})();";
   if(!out.includes(marker))throw Error('DAYSTREAMのカレンダー接続箇所が一致しません');
