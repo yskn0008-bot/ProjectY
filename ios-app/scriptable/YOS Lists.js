@@ -251,7 +251,7 @@ main{padding:0 13px}
 .empty{text-align:center;color:#4B627B;padding:36px 12px;line-height:1.65;font-weight:600}
 #message{position:fixed;bottom:max(14px,env(safe-area-inset-bottom));left:13px;right:13px;border-radius:14px;padding:13px 15px;background:#193A5E;color:#FFFFFF;box-shadow:0 7px 24px rgba(14,43,75,.30);font-size:12px;font-weight:700;line-height:1.45;z-index:9;min-height:20px}
 #message[hidden]{display:none}
-.footer{text-align:center;color:#60748B;font-size:11px;font-weight:550;line-height:1.6;padding:24px 4px}
+.footer{text-align:center;color:#52667D;font-size:11px;font-weight:550;line-height:1.6;padding:24px 4px}
 @media(max-width:360px){.tab{font-size:12px}.stat{padding:12px 8px}.stat b{font-size:25px}.stat small{font-size:10px}.item{padding:12px 10px}.item.priority-zero,.item.priority-one{padding-left:8px}.action{min-width:62px}}
 @media(prefers-reduced-motion:no-preference){.tab,.refresh,.action{transition:background-color .15s,border-color .15s,box-shadow .15s}}
 </style>
