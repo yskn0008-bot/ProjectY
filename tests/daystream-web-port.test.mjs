@@ -27,6 +27,9 @@ test('Direct drop saves immediately, keeps explicit time edit and undo/redo',()=
  assert.match(html,/if\(!saved\)item.s=original/);
  assert.match(html,/const reactToNeighbors=\(\)=>/);
  assert.match(html,/\.card\.drag-neighbor/);
+ assert.doesNotMatch(html,/flow-ghost/,'drag must leave no outline at its former position');
+ assert.match(html,/item\.d<=15\)el\.classList\.add\('short-row'\)/);
+ assert.match(html,/\.card\.short-row \.task-copy b/);
  assert.doesNotMatch(html,/addEventListener\('scroll',restoreScroll/);
 });
 

@@ -57,6 +57,21 @@ def parse_time(s: str | None) -> dt.datetime | None:
     return value.astimezone(UTC) if value.tzinfo else None
 
 
+def forecast_period_time(s: str | None) -> dt.datetime | None:
+    """JMA daily weather slots may be YYYY-MM-DD (midnight JST), not timestamps.
+
+    This rule is ONLY for forecast target periods. Publication and feed timestamps
+    still require an explicit timezone and are never inferred from a date.
+    """
+    if isinstance(s, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", s):
+        try:
+            day = dt.date.fromisoformat(s)
+        except ValueError:
+            return None
+        return dt.datetime.combine(day, dt.time.min, tzinfo=JST).astimezone(UTC)
+    return parse_time(s)
+
+
 def safe_url(s: str, *, domains: tuple[str, ...]) -> bool:
     try:
         u = urllib.parse.urlsplit(s)
@@ -103,7 +118,7 @@ def forecast(raw: bytes, checked: dt.datetime) -> dict:
     target = next((a for a in areas if isinstance(a, dict) and a.get("area", {}).get("code") == "471010"), None)
     if not target or len(periods) != len(target.get("weathers") or []):
         raise ValueError("JMA target region/period mismatch")
-    values = [(parse_time(t), v) for t, v in zip(periods, target["weathers"])]
+    values = [(forecast_period_time(t), v) for t, v in zip(periods, target["weathers"])]
     values = [(t, v) for t, v in values if t and isinstance(v, str) and v.strip()]
     if not values:
         raise ValueError("JMA forecast not interpretable")
@@ -256,7 +271,10 @@ def build(get=fetch, checked: dt.datetime | None = None) -> dict:
                 sources.append(decoder(get(url), checked))
         except (ValueError, TypeError, KeyError, ET.ParseError, urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
             # No stale carry-over: failure must not be displayed as current data.
-            reason = type(exc).__name__
+            # Include fixed parser failure labels in diagnostics, not source payloads.
+            # Transport errors and JSON parser text remain type-only.
+            label = str(exc)[:96] if type(exc) is ValueError else ""
+            reason = type(exc).__name__ + (": " + label if label else "")
             print(f"research source unavailable: {source_id} ({reason})", file=sys.stderr)
             sources.append(source_error(source_id, name, url, checked, reason))
     snapshot = {"schema": 1, "generatedAt": iso(checked), "timezone": "Asia/Tokyo",

@@ -111,8 +111,8 @@
       "id": "daystream-notion",
       "name": "YOS DAYSTREAM Notion",
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
-      "commit": "9182c35426d780a564a01aaf2c2f24f21876845e",
-      "sha256": "e93a11a10ec1e90547623753fef62a456a9d7987bc7949f16ca666cdcae13dab"
+      "commit": "943a8f8db642058c77f18479ded3063a24b30710",
+      "sha256": "d2a9d9a7d3a7705c5400b431d607064574d1796693f19de772f84f56efe09bef"
     },
     {
       "id": "ikemen-magazine",
@@ -174,8 +174,8 @@
       "id": "yos-lists",
       "name": "YOS Lists",
       "path": "ios-app/scriptable/YOS Lists.js",
-      "commit": "2c6e848ad9a3d9dcd61c1a94c8a3fd13714baaaf",
-      "sha256": "54a5986d449afa40e577136f918bc91760d37a4b23ba4e1999c162a80f425286"
+      "commit": "40d8edaaf011e627c61b19fe5829b0c66dc91cd0",
+      "sha256": "117cf917653c878773a4e85b0124d17a82faab66419724ae0548cf0dab73edf2"
     },
     {
       "id": "home-scenes",
