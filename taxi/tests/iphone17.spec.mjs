@@ -1055,3 +1055,31 @@ test('photo-linked confirmed revenue: keeps the paper total, refuses duplicate i
   records=await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-taxi-confirmed-reports-v1')));
   expect(records.records).toHaveLength(1);
 });
+
+
+test('confirmed revenue: closing verification while photo digest is pending never writes a record',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-21T20:50:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const image=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8Zr1cAAAAASUVORK5CYII=','base64');
+  // Hold the selected image's bytes until the user has dismissed the sheet.
+  await page.evaluate(()=>{
+    const original=File.prototype.arrayBuffer;
+    File.prototype.arrayBuffer=function(){
+      return new Promise((resolve,reject)=>{
+        window.__releaseDelayedPhotoRead=()=>original.call(this).then(resolve,reject);
+      });
+    };
+  });
+  await page.locator('#photo-input').setInputFiles({name:'paper-report.png',mimeType:'image/png',buffer:image});
+  await page.locator('#modal-actions button.primary').click();
+  await page.locator('#revenue-amount').fill('21950');
+  await page.locator('#revenue-is-total').check();
+  await page.locator('#revenue-checked').check();
+  await page.locator('#revenue-save-btn').click();
+  await expect(page.locator('#revenue-save-btn')).toBeDisabled();
+  await page.locator('#close-modal').click();
+  await page.evaluate(()=>window.__releaseDelayedPhotoRead());
+  await page.waitForTimeout(80);
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
+  await expect(page.locator('#modal')).not.toHaveClass(/open/);
+});
