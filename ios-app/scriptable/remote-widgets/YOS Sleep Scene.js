@@ -171,13 +171,22 @@ async function show(title,message){
 
 /* Sleep Choice: ephemeral, one-use instructions. Do not change other saved scripts/keys. */
 const CHOICE_KEY="yos.sleep.scene.choice.v1";
+const CHOICE_USED_KEY="yos.sleep.scene.choice-used.v1";
 const CHOICE_TTL_MS=120000;
 const CHOICE_DEFAULT=Object.freeze({tv:"off",light:"off",floor:"on",ac:"keep"});
 function clearChoice(){if(Keychain.contains(CHOICE_KEY))Keychain.remove(CHOICE_KEY);}
 function consumeChoice(){
-  if(!Keychain.contains(CHOICE_KEY))return null; // Preserve manually toggled Sleep Focus.
+  if(!Keychain.contains(CHOICE_KEY)){
+    // A repeated Focus event must not replay the old fixed scene after choices were applied.
+    if(Keychain.contains(CHOICE_USED_KEY)){
+      const t=Number(Keychain.get(CHOICE_USED_KEY));
+      if(Number.isFinite(t)&&Date.now()>=t&&Date.now()-t<CHOICE_TTL_MS)return {skip:true};
+    }
+    return null; // Ordinary manual Focus ON still uses the original scene.
+  }
   const raw=Keychain.get(CHOICE_KEY);
   clearChoice(); // Consume before controlling anything, so duplicate Focus triggers cannot reuse choices.
+  Keychain.set(CHOICE_USED_KEY,String(Date.now()));
   let data;
   try{data=JSON.parse(raw);}catch(_){throw Error("就寝設定が破損しています。家電は操作しません");}
   if(!data||!Number.isFinite(data.ts)||Date.now()-data.ts<0||Date.now()-data.ts>CHOICE_TTL_MS)
@@ -269,7 +278,9 @@ try{
     // The existing Sleep Focus trigger still passes "sleep". Consume only a fresh, one-use choice.
     if(MODE==="sleep"){
       const selected=consumeChoice();
-      if(selected===null){
+      if(selected&&selected.skip){
+        results.push("直前の就寝操作を重複実行しません");
+      }else if(selected===null){
         // Existing direct Focus ON continues to use the original proven scene.
         results.push("ランプ："+await floorOn());
         results.push("BRAVIA："+await tvOff());
