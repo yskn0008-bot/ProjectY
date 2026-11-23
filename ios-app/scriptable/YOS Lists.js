@@ -348,7 +348,7 @@ function render(){
  $('nAttention').textContent=ready.task?state.tasks.filter(needsAttention).length:'—';
  const readAt=state.readAt?new Date(state.readAt):null;
  const stamp=readAt?readAt.toLocaleString('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'未確認';
- $('stamp').textContent=(issues.length?'Notion未取得あり ':'Notion取得 ')+stamp+' · '+(issues.length?'失敗した項目は保存不可':'行をタップで完了／詳細は右端');
+ $('stamp').textContent=(issues.length?'Notion未取得あり ':'Notion取得 ')+stamp+' · '+(issues.length?'失敗した項目は保存不可':'タスク行タップで完了・詳細は右端⌄');
  $('stamp').classList.toggle('is-ready',issues.length===0&&Boolean(state.readAt));
  document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===state.tab)));
  $('search').placeholder=state.tab==='tasks'?'タスクを検索':state.tab==='shopping'?'買い物を検索':state.tab==='attention'?'要対応を検索':'案件を検索';
@@ -385,7 +385,10 @@ $('tabs').addEventListener('click',e=>{const tab=e.target.closest('[data-tab]');
 $('search').addEventListener('input',e=>{state.query=e.target.value;render()});
 $('refresh').addEventListener('click',()=>{if(state.busy)return;state.busy=true;notice('Notionの最新情報を取得中…');render();emit({action:'refresh'})});
 $('list').addEventListener('click',e=>{
- const b=e.target.closest('button[data-action]');
+ const card=e.target.closest('.item--task');
+ const direct=e.target.closest('button[data-action]');
+ // Include the card's padding in the completion tap target, but never the details chevron.
+ const b=direct||(card&&!e.target.closest('.item-details')?card.querySelector('.item-complete'):null);
  if(!b||state.busy)return;
  const kind=b.dataset.kind,action=b.dataset.action;
  const item=(kind==='task'?state.tasks:state.shopping).find(x=>x.id===b.dataset.id);
