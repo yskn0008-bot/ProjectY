@@ -139,8 +139,8 @@
       "id": "bravia-picture-off",
       "name": "YOS BRAVIA Picture Off",
       "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Picture Off.js",
-      "commit": "cfae0db7be4e5d560242520ee9c99b04a8a08fd5",
-      "sha256": "402901e68dc2e21b6206dc0702d6d7cfdff0865b33fd0a49e589377140a6d2ce"
+      "commit": "4b1ede82c2e1282f8441119371a0802331838c1e",
+      "sha256": "a3fd9ef9193eb856ae3242626ae830d9020d8b4b2c2263cdc59d99fb8dc44a8d"
     },
     {
       "id": "remote-hub",
