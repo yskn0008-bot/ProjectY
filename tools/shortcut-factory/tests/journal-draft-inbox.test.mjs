@@ -87,7 +87,16 @@ test('GET content mismatch never reports verified',async()=>{
 });
 test('legacy submitted receipt without block IDs stays pending without retransmission',async()=>{
  const t=mock();
- const digest='[YOS_JOURNAL_DRAFT_V1:0000000000000000:123]';
- t.store.set('YOS JOURNAL Draft Receipt Cache.json',JSON.stringify([{id:digest,status:'submitted'}]));
- await t.execute();assert.equal(t.calls.filter(c=>c.method==='PATCH').length,1);
+ let a=2166136261,b=2246822519;
+ for(let i=0;i<raw.length;i++){
+   const c=raw.charCodeAt(i);
+   a=Math.imul(a^c,16777619)>>>0;
+   b=Math.imul(b^c,3266489917)>>>0;
+ }
+ const digest=[a,b].map(x=>x.toString(16).padStart(8,'0')).join('');
+ const id='[YOS_JOURNAL_DRAFT_V1:'+digest+':'+raw.length+']';
+ t.store.set('YOS JOURNAL Draft Receipt Cache.json',JSON.stringify([{id,status:'submitted'}]));
+ await t.execute();
+ assert.match(t.outputs[0],/NOTION_PENDING:SUBMITTED_READBACK_PENDING/);
+ assert.equal(t.calls.length,0);
 });
