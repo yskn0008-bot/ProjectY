@@ -33,7 +33,7 @@ export function htmlFor(tasks,deviceCalendar=null){
   text('life/calendar/native-bridge.js'),
   text('yos/daystream/task-wizard.js'),snapshot,a.nativeDirectRows(rows),deviceCalendar);
 }
-test('Notion direct seeds preserve independent morning and night task titles',()=>{
+test('Notion preview keeps independent morning and next-day sleep titles',()=>{
  const a=api();
  const p=[
   row('2026-12-01T05:20:00Z','2026-12-01T05:22:00Z','起床','a'.repeat(32),'yos-daystream-routine-202612-wake'),
@@ -41,11 +41,10 @@ test('Notion direct seeds preserve independent morning and night task titles',()
   row('2026-11-30T21:10:00Z','2026-12-01T05:20:00Z','睡眠','c'.repeat(32),'yos-daystream-routine-202612-sleep')
  ];
  const out=a.nativeDirectRows(p.map(r=>a.project(r)));
- assert.equal(out.length,3);
- assert.deepEqual([...out].map(x=>[x.title,x.s,x.d]),[
-  ['睡眠',370,490],['起床',860,2],['水を飲む',862,3]
- ]);
- assert.ok(out.every(x=>x.day==='2026-12-01'&&!x.done));
+ assert.deepEqual([...out].map(x=>x.title),['睡眠','起床','水を飲む']);
+ assert.deepEqual(out.map(x=>[x.repeat,x.done]),[['once',false],['once',false],['once',false]]);
+ assert.equal(out[0].startAt,'2026-11-30T21:10:00Z');
+ assert.equal(out[0].endAt,'2026-12-01T05:20:00Z');
 });
 test('only explicitly approved routine sources are direct-imported',()=>{
  const a=api();
@@ -57,12 +56,14 @@ test('only explicitly approved routine sources are direct-imported',()=>{
  const ordinary=row('2026-12-01T09:00:00Z',null,'未登録タスク','c'.repeat(32));
  assert.deepEqual([...a.nativeDirectRows([approved,calendar,ordinary].map(r=>a.project(r)))].map(x=>x.title),['歯磨き']);
 });
-test('invalid or ambiguous direct time source fails safely',()=>{
+test('invalid dates fail safely while a valid overnight interval is allowed',()=>{
  const a=api(),wrong=row('2026-12-01',null,'起床','a'.repeat(32),'yos-daystream-routine-202612-wake');
  assert.throws(()=>a.nativeDirectRows([a.project(wrong)]));
  const cross=row('2026-12-01T22:00:00+09:00','2026-12-02T02:00:00+09:00',
   '起床','b'.repeat(32),'yos-daystream-routine-202612-wake');
- assert.throws(()=>a.nativeDirectRows([a.project(cross)]));
+ const result=a.nativeDirectRows([a.project(cross)]);
+ assert.equal(result.length,1);
+ assert.equal(result[0].endAt,'2026-12-02T02:00:00+09:00');
 });
 test('invalid state or date or id stops complete-source read',()=>{
  const a=api();assert.throws(()=>a.project(row('2026-02-30')));
@@ -88,7 +89,7 @@ test('web output uses native DAYSTREAM cards without introducing Notion overlays
   row('2026-12-01T05:20:00Z','2026-12-01T05:22:00Z',
   '起床','a'.repeat(32),'yos-daystream-routine-202612-wake')
  ]);
- assert.match(h,/YOS_DAYSTREAM_DIRECT_IMPORTED_V1/);
+ assert.match(h,/YOS_ONE_TAP_FOR_DAY/);
  assert.match(h,/className='card '/);
  assert.doesNotMatch(h,/yos-notion-projection|yosNotionMoveBar|Scriptableの日時変更|method='PATCH'/);
  assert.doesNotMatch(h,/<script[^>]+src=|accounts\.google\.com\/gsi/);
@@ -141,7 +142,8 @@ test('existing Scriptable DAYSTREAM reads a new iPhone calendar event without a 
   status:'ok',items:[],checkedAt:new Date().toISOString(),source:'yos-auth-cache',origin:'notion',complete:true},[],mirror);
  assert.match(combined,/const nativeCalendar=\{"status":"ok","source":"scriptable-on-device"/);
  for(const m of combined.matchAll(/<script>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
- assert.ok(h.includes('YOS_DAYSTREAM_DIRECT_IMPORTED_V1'));
+ assert.ok(h.includes('YOS_ONE_TAP_FOR_DAY'));
+ assert.ok(!h.includes('YOS_DAYSTREAM_DIRECT_IMPORTED_V1'));
 });
 test('device calendar mirror skips an exact Notion Clarity task instead of showing two cards',async()=>{
  const now=new Date(),start=new Date(now.getTime()+86400000),end=new Date(start.getTime()+30*60000);
