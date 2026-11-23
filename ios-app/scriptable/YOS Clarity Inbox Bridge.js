@@ -1,7 +1,7 @@
 // Variables used by Scriptable.
 // icon-color: purple; icon-glyph: inbox;
 // YOS_SCRIPT_NAME: YOS Clarity Inbox Bridge
-// Clarity Voice / Text / Share -> existing Notion YOS Inbox (Raw First + verified readback).
+// Clarity Voice / Text / Share and opt-in YOS JOURNAL private drafts -> existing Notion YOS Inbox (Raw First + verified readback).
 // A Shortcut must pass the original dictated text as its Scriptable input.
 // No token is embedded or sent to GitHub; the existing Scriptable Keychain is reused.
 'use strict';
@@ -21,7 +21,7 @@ const payload = input && typeof input === 'object' && !Array.isArray(input) ? in
 const raw = typeof input === 'string' ? input :
   (typeof payload.rawText === 'string' ? payload.rawText : '');
 const sourceKey = String(payload.source || payload.inputMode || 'voice').toLowerCase().replace(/^clarity[. ]?/, '').trim();
-const sourceLabels = Object.freeze({voice:'Clarity Voice',text:'Clarity Text',share:'Clarity Share'});
+const sourceLabels = Object.freeze({voice:'Clarity Voice',text:'Clarity Text',share:'Clarity Share',journal:'YOS JOURNAL Draft'});
 const sourceLabel = sourceLabels[sourceKey] || null;
 const shareSource = sourceKey === 'share' && /^(text|url|webpage|richtext|image|pdf)$/.test(String(payload.shareSource || '').toLowerCase())
   ? String(payload.shareSource).toLowerCase() : '';
@@ -35,7 +35,7 @@ const calendarCreated = payload.executionTarget === 'calendar.create';
 const fm = FileManager.local();
 const receiptPath = fm.joinPath(fm.documentsDirectory(), CFG.receiptsFile);
 const isNonEmpty = typeof raw === 'string' && raw.trim().length > 0;
-const legalId = s => /^(?:clarity|share):[a-z0-9_-]{8,100}$/i.test(String(s || ''));
+const legalId = s => /^(?:clarity|share|journal):[a-z0-9_-]{8,100}$/i.test(String(s || ''));
 const textOf = b => (b?.paragraph?.rich_text || []).map(v => v.plain_text ?? v.text?.content ?? '').join('');
 const paragraph = value => ({object:'block',type:'paragraph',paragraph:{rich_text:[{type:'text',text:{content:value}}]}});
 const split = text => {const result=[];for(let n=0;n<text.length;n+=CFG.chunkLength)result.push(text.slice(n,n+CFG.chunkLength));return result;};
@@ -72,7 +72,7 @@ function persist(rows) {
 }
 function newId() {
   const nonce = Math.floor(Math.random()*1e15).toString(36).padStart(9,'0');
-  return 'clarity:'+Date.now().toString(36)+'-'+nonce;
+  return (sourceKey==='journal'?'journal:':'clarity:')+Date.now().toString(36)+'-'+nonce;
 }
 async function notion(method,path,token,body) {
   const req=new Request('https://api.notion.com/v1'+path);
@@ -127,7 +127,7 @@ async function run() {
   if (!isNonEmpty) return message('missing',null,'ショートカットから原文が渡されていません');
   if (!sourceLabel) return message('held',null,'不明なClarity入力元のため保存を保留');
   if (externalId && !legalId(externalId)) return message('held',null,'受付IDが不正なため保存を保留');
-  if (raw.length>CFG.maxLength) return message('held',null,'長文のためNotion送信を保留（元ショートカットの記録を保持）');
+  if (raw.length>(sourceKey==='journal'?36000:CFG.maxLength)) return message('held',null,'長文のためNotion送信を保留（元ショートカットの記録を保持）');
   let rows;
   try{rows=load();}
   catch(_){return message('held',null,'既存の保存記録が読めないため変更せず停止');}
@@ -383,7 +383,7 @@ async function routeToPage(v,receipt,token){
   return 'created';
 }
 async function routeAfterVerifiedRaw(outcome){
-  if(outcome.status!=='confirmed'||sourceKey==='share')return null;
+  if(outcome.status!=='confirmed'||sourceKey==='share'||sourceKey==='journal')return null;
   if(calendarCreated && routeMode!=='raw-only')return '振り分け保留（既存カレンダー登録の重複防止）';
   if(routeMode==='raw-only')return '原文のみ保存（別原本の予定を二重登録しません）';
   if(routeMode!=='auto')return '振り分け保留（未対応の振り分けモード）';
@@ -430,6 +430,6 @@ const line=outcome.status==='confirmed'?'Notion Inbox保存確認済み':
 Script.setShortcutOutput(line+'\n'+outcome.detail+'\n'+(outcome.captureId||'')+(routeStatus?'\n'+routeStatus:''));
 // Notify only on errors, without exposing the sensitive voice content.
 if(outcome.status!=='confirmed'){
-  try {const n=new Notification();n.title='Clarity｜Notion保存を確認できません';n.body=outcome.detail;n.sound='default';await n.schedule();}catch(_){}
+  try {const n=new Notification();n.title=sourceKey==='journal'?'JOURNAL｜Notion保存を確認できません':'Clarity｜Notion保存を確認できません';n.body=outcome.detail;n.sound='default';await n.schedule();}catch(_){}
 }
 Script.complete();
