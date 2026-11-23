@@ -210,11 +210,11 @@ header{
  border-bottom:1px solid #E1E6E9;position:sticky;top:0;z-index:3
 }
 .top{display:flex;justify-content:space-between;gap:12px;align-items:center}
-.eyebrow{font-size:10.5px;letter-spacing:.17em;color:#607488;font-weight:800}
+.eyebrow{font-size:10.5px;letter-spacing:.17em;color:#53697D;font-weight:800}
 h1{font-size:35px;margin:5px 0 0;font-weight:850;letter-spacing:-.05em;line-height:1.12;color:#294054}
 .refresh{border:1px solid #B4C4D0;background:#FFFFFF;color:#526F89;padding:10px 16px;min-height:44px;border-radius:13px;font-weight:800;box-shadow:0 1px 2px rgba(30,50,70,.04)}
 .refresh:active{background:#EDF3F7}
-.sub{color:#607488;margin:17px 0 0;font-size:12px;font-weight:600;line-height:1.55}
+.sub{color:#53697D;margin:17px 0 0;font-size:12px;font-weight:600;line-height:1.55}
 .sub.is-ready:before{content:"";display:inline-block;height:7px;width:7px;border-radius:50%;background:#6FC69F;margin-right:9px;vertical-align:middle}
 .tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;background:var(--tab-bg);border-radius:16px;padding:4px;margin:15px 13px 16px}
 .tab{background:transparent;color:#526779;border:0;border-radius:12px;padding:11px 2px;min-height:46px;font-size:13px;font-weight:750}
@@ -229,7 +229,7 @@ main{padding:0 13px}
 .tools{position:relative;display:flex;align-items:center;margin:0 0 19px}
 .tools svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:19px;height:19px;stroke:#8296A4;pointer-events:none}
 .tools input{width:100%;min-width:0;background:#FFFFFF;color:var(--ink);border:1px solid #D6DFE4;border-radius:14px;padding:12px 14px 12px 44px;min-height:48px;font-size:14px;font-weight:550;outline:none;box-shadow:0 1px 3px rgba(27,48,68,.02)}
-.tools input::placeholder{color:#697D8D;font-weight:550}
+.tools input::placeholder{color:#526779;font-weight:550}
 .tools input:focus{border-color:#7899B2;outline:3px solid #CFDEE8;outline-offset:1px}
 .section{color:#294054;font-size:16px;font-weight:800;margin:19px 2px 13px;letter-spacing:-.015em}
 .list{display:flex;flex-direction:column;gap:11px}
