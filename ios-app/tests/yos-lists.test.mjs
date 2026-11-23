@@ -297,3 +297,15 @@ test('priority/overdue/date order is deterministic and drag-and-drop is not pret
  assert.match(source,/items\.sort\(\(a,b\)=>a\.kind==='task'&&b\.kind==='task'\?order\(a,b\)/);
  assert.doesNotMatch(source,/draggable="true"|data-drag-handle|dragstart/);
 });
+
+test('undo restores a waiting Task to waiting, not an invented default state',async()=>{
+ const h=await harness();
+ h.records[ids.task].properties['状態']={select:{name:'待ち'}};
+ const original=(await h.app.readAll()).tasks[0];
+ assert.equal(original.state,'待ち');
+ const done=await h.app.perform({action:'complete',kind:'task',id:original.id,expected:original.updatedAt});
+ assert.equal(done.item.state,'完了');
+ const undone=await h.app.perform({action:'undo-complete',kind:'task',id:done.item.id,expected:done.item.updatedAt});
+ assert.equal(undone.item.state,'待ち');
+ assert.equal(h.writes,2);
+});
