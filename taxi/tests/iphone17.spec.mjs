@@ -1022,6 +1022,13 @@ test('photo-linked confirmed revenue: keeps the paper total, refuses duplicate i
   await expect(page.locator('#modal-title')).toHaveText('日報写真を選択しました');
   await page.locator('#modal-actions button.primary').click();
   await expect(page.locator('#revenue-form')).toBeVisible();
+  await page.locator('#revenue-text').fill('営業履歴（15） 総収入 21,950 ¥750');
+  await page.locator('#revenue-amount').fill('21950');
+  await page.locator('#revenue-is-total').check();
+  await page.locator('#revenue-checked').check();
+  await page.locator('#revenue-save-btn').click();
+  await expect(page.locator('#revenue-status')).toContainText('営業履歴の個別運賃');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
   await page.locator('#revenue-text').fill('令和8年11月21日 総収入 21,950 現金 10,400');
   await expect(page.locator('#revenue-amount')).toHaveValue('21950');
   await page.locator('#revenue-is-total').check();
