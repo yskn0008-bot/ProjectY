@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-23T19:34:20+09:00",
+  "updated_at": "2026-11-23T19:40:56+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,6 +21,16 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/895",
       "updated_at": "2026-11-23T10:33:22Z"
+    },
+    {
+      "id": "github-pr-830",
+      "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
+      "updated_at": "2026-11-19T16:21:23Z"
     },
     {
       "id": "github-pr-857",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-23T09:33:03Z"
     },
     {
-      "id": "github-pr-899",
-      "title": "PR #899 fix: Scriptableの自動ヘッダーで既存YOS更新が誤停止する問題",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/899",
-      "updated_at": "2026-11-23T10:30:14Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T10:33:28Z"
+      "updated_at": "2026-11-23T10:40:26Z"
     },
     {
       "id": "github-issue-234",
@@ -205,39 +205,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-cc2e3a812278",
+      "title": "Merge pull request #899 from yskn0008-bot/fix/scriptable-icon-header-managed-update-20261123",
+      "completed_at": "2026-11-23T10:40:19Z",
+      "result": "GitHub mainへ反映（cc2e3a8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/cc2e3a812278d64cefd05ea67bd8a23272c7c1c8"
+    },
+    {
+      "id": "github-commit-4562544ef385",
+      "title": "fix(installer): accept only exact Scriptable icon metadata and preserve rollback",
+      "completed_at": "2026-11-23T10:27:36Z",
+      "result": "GitHub mainへ反映（4562544）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4562544ef3856b86317810f0bc630622360e0178"
+    },
+    {
+      "id": "github-commit-5506ea56c702",
+      "title": "fix(installer): accept only exact Scriptable icon metadata and preserve rollback",
+      "completed_at": "2026-11-23T10:27:33Z",
+      "result": "GitHub mainへ反映（5506ea5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5506ea56c7024e82014577e5d2ff0bd0be79b543"
+    },
+    {
+      "id": "github-commit-4bebc707e978",
+      "title": "fix(installer): accept only exact Scriptable icon metadata and preserve rollback",
+      "completed_at": "2026-11-23T10:27:30Z",
+      "result": "GitHub mainへ反映（4bebc70）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4bebc707e9786dacf994099aa861256cfa2331a0"
+    },
+    {
       "id": "github-commit-460d7ba9daf8",
       "title": "refine(journal): make extra-large Widgy use 5 published headlines",
       "completed_at": "2026-11-23T10:23:01Z",
       "result": "GitHub mainへ反映（460d7ba）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/460d7ba9daf880c3087b69c0d72044a79fff1666"
-    },
-    {
-      "id": "github-commit-09bf891ebeb0",
-      "title": "YOS Health: selectable sleep scene with safe Focus handoff (#897)",
-      "completed_at": "2026-11-23T10:10:11Z",
-      "result": "GitHub mainへ反映（09bf891）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/09bf891ebeb0e27702e72a3864bf610ba9cdbc55"
-    },
-    {
-      "id": "github-commit-7db8364373fe",
-      "title": "feat(journal): publish Widgy three-headline reader matching existing typography",
-      "completed_at": "2026-11-23T10:00:38Z",
-      "result": "GitHub mainへ反映（7db8364）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7db8364373fe1e219586b0fca1f739a56379991d"
-    },
-    {
-      "id": "github-commit-9de5989c83ca",
-      "title": "DAYSTREAM｜Google認証不要のiPhone Notion同期入口へ修正 (#889)",
-      "completed_at": "2026-11-23T06:05:25Z",
-      "result": "GitHub mainへ反映（9de5989）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9de5989c83cae129ee5e70b6f1ef6ebcad83eb47"
-    },
-    {
-      "id": "github-commit-e154d053fe37",
-      "title": "Publish direct YOS Tasks sync in DAYSTREAM (#888)",
-      "completed_at": "2026-11-23T05:47:08Z",
-      "result": "GitHub mainへ反映（e154d05）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e154d053fe37ef011bdb6bc8c68d04a851c0e1f8"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-23T19:34:20+09:00",
+      "last_update": "2026-11-23T19:40:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 72件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 71件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-23T19:34:20+09:00",
+      "last_update": "2026-11-23T19:40:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-23T19:34:20+09:00",
+      "last_update": "2026-11-23T19:40:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "9fac2cbdccd057e2e87f479d9802c70ea5af5ed98b9840ba461ad589d8ee3406"
+  "github_snapshot_hash": "74d5deb0649fd35468e3b98a3a20ebc1cdf678828cd0402d70d97ba8e4dfe2b1"
 }
