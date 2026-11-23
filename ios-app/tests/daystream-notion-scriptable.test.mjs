@@ -128,8 +128,10 @@ test('device-local Notion read displays an explicit Clarity time window without 
 
 
 test('existing Scriptable DAYSTREAM reads a new iPhone calendar event without a task write',async()=>{
- // Fixed daytime fixture avoids a flaky cross-midnight split at 23:xx JST.
- const now=new Date('2026-11-19T10:00:00+09:00'),when=new Date(now.getTime()+86400000),to=new Date(when.getTime()+30*60000);
+ // Keep checkedAt fresh for the native bridge, but place the event at 12:00 JST.
+ const now=new Date(),when=new Date(now.getTime()+86400000);
+ when.setUTCHours(3,0,0,0);
+ const to=new Date(when.getTime()+30*60000);
  const a=api({CalendarEvent:{between:async()=>[{
   identifier:'clarity-calendar-001',title:'Clarity連携テスト',startDate:when,endDate:to,isAllDay:false
  }]}});
