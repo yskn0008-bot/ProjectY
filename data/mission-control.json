@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-23T18:14:59+09:00",
+  "updated_at": "2026-11-23T18:23:51+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,24 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-830",
-      "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
+      "id": "github-pr-895",
+      "title": "PR #895 DAYSTREAM｜理想の1日3件の直接同期と日付またぎの安全分割",
       "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
-      "updated_at": "2026-11-19T16:21:23Z"
-    },
-    {
-      "id": "github-pr-844",
-      "title": "PR #844 Clarity Next｜実行結果を理由付きで表示・未確認を成功と誤表示しない",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/844",
-      "updated_at": "2026-11-19T02:39:09Z"
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/895",
+      "updated_at": "2026-11-23T09:23:23Z"
     },
     {
       "id": "github-pr-857",
@@ -113,6 +103,16 @@
       "updated_at": "2026-11-23T09:14:27Z"
     },
     {
+      "id": "github-pr-896",
+      "title": "PR #896 feat(journal): Widgy特大縦用の3記事見出しページ（既存Web UI準拠）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/896",
+      "updated_at": "2026-11-23T09:22:57Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T09:13:50Z"
+      "updated_at": "2026-11-23T09:22:59Z"
     },
     {
       "id": "github-issue-234",
@@ -264,7 +264,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #895をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -274,7 +274,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-23T18:14:59+09:00",
+      "last_update": "2026-11-23T18:23:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -349,13 +349,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 9件・Open PR 70件を自動同期中",
+      "next_action": "Open Issue 9件・Open PR 72件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-23T18:14:59+09:00",
+      "last_update": "2026-11-23T18:23:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -369,7 +369,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #895をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -378,7 +378,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-23T18:14:59+09:00",
+      "last_update": "2026-11-23T18:23:51+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -460,5 +460,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ea44cdc9ab5cf2149a990ebc7b9bd1d474e78471e8005fcbab1c9c4cb78f54e1"
+  "github_snapshot_hash": "962657ec643bea623794df720e598f6ac7f4ad0ad987ddf7a5918500c3b284de"
 }
