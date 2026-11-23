@@ -18,9 +18,9 @@ async function render(shortcutParameter){
 }
 
 test('valid Morning input exposes one read-only DAYSTREAM next step',async()=>{
-  const html=await render('【予定】\\n17:00 仕事');
+  const html=await render('【予定】\n17:00 仕事');
   assert.equal((html.match(/id="morning-daystream-next"/g)||[]).length,1);
-  assert.match(html,/href="https:\/\/yskn0008-bot\\.github\\.io\/ProjectY\/yos\/daystream\/"/);
+  assert.match(html,/href="https:\/\/yskn0008-bot\.github\.io\/ProjectY\/yos\/daystream\/"/);
   assert.match(html,/target="_blank" rel="noopener noreferrer"/);
   assert.match(html,/今日の時間割を開く/);
   assert.match(html,/YOS DAILY NOTE/);
@@ -34,13 +34,13 @@ test('missing Morning input remains clearly missing and does not suggest complet
 });
 
 test('user input is escaped and cannot alter the next-step link destination',async()=>{
-  const html=await render('【予定】\\n<script>alert(1)</script>');
-  assert.doesNotMatch(html,/<script>alert\\(1\\)<\\/script>/);
-  assert.match(html,/&lt;script&gt;alert\\(1\\)&lt;\\/script&gt;/);
+  const html=await render('【予定】\n<script>alert(1)</script>');
+  assert.doesNotMatch(html,/<script>alert\(1\)<\/script>/);
+  assert.match(html,/&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
   assert.equal((html.match(/id="morning-daystream-next"/g)||[]).length,1);
 });
 
 test('the handoff does not change private sources, credentials or native shortcut',()=>{
-  assert.doesNotMatch(source,/(?:FileManager\\.local|FileManager\\.iCloud|Keychain\\.set|CalendarEvent\\.create|Reminder\\.create|Notion.*POST)/);
-  assert.match(source,/if\\(typeof Script\\.setShortcutOutput==='function'\\)Script\\.setShortcutOutput\\(rawInput\\)/);
+  assert.doesNotMatch(source,/(?:FileManager\.local|FileManager\.iCloud|Keychain\.set|CalendarEvent\.create|Reminder\.create|Notion.*POST)/);
+  assert.match(source,/if\(typeof Script\.setShortcutOutput==='function'\)Script\.setShortcutOutput\(rawInput\)/);
 });
