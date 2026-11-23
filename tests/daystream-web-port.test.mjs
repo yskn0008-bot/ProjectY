@@ -30,6 +30,11 @@ test('Direct drop saves immediately, keeps explicit time edit and undo/redo',()=
  assert.doesNotMatch(html,/flow-ghost/,'drag must leave no outline at its former position');
  assert.match(html,/item\.d<=15\)el\.classList\.add\('short-row'\)/);
  assert.match(html,/\.card\.short-row \.task-copy b/);
+ for(const tone of ['blue','mint','violet','peach']){
+  assert.match(html,new RegExp(`\\.card\\[data-flow-tone=${tone}\\]\\{--flow-stroke:#[0-9a-f]{6};--flow-type:#[0-9a-f]{6}\\}`));
+ }
+ assert.match(html,/font-family:ui-rounded,"Hiragino Maru Gothic ProN"/);
+ assert.match(html,/border:1\.5px solid var\(--flow-stroke\)/);
  assert.doesNotMatch(html,/addEventListener\('scroll',restoreScroll/);
 });
 
