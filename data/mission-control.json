@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-23T23:58:19+09:00",
+  "updated_at": "2026-11-24T00:01:43+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -21,16 +21,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-23T05:39:00Z"
-    },
-    {
-      "id": "github-pr-870",
-      "title": "PR #870 BRAVIA｜4台リモコン保護・画質ワンタップ／音声／アプリ／HDMI3クイック操作 TEST",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/870",
-      "updated_at": "2026-11-19T16:53:18Z"
     },
     {
       "id": "github-pr-878",
@@ -80,7 +70,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/893",
-      "updated_at": "2026-11-23T14:57:40Z"
+      "updated_at": "2026-11-23T15:01:02Z"
     },
     {
       "id": "github-pr-894",
@@ -110,7 +100,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/902",
-      "updated_at": "2026-11-23T14:56:42Z"
+      "updated_at": "2026-11-23T14:59:27Z"
+    },
+    {
+      "id": "github-pr-903",
+      "title": "PR #903 YOS Lists｜ショートカット起動・Notionタスク/買い物の即時反映UI",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/903",
+      "updated_at": "2026-11-23T15:01:07Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T14:57:42Z"
+      "updated_at": "2026-11-23T15:01:08Z"
     },
     {
       "id": "github-issue-234",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-23T23:58:19+09:00",
+      "last_update": "2026-11-24T00:01:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 72件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-23T23:58:19+09:00",
+      "last_update": "2026-11-24T00:01:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-23T23:58:19+09:00",
+      "last_update": "2026-11-24T00:01:43+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d180c2b741b19677c215e7b22c9b3695b1daa71db869f8391652bcc9e4f67b26"
+  "github_snapshot_hash": "c6c6eb5ea2b81a25f6271c4d46f5f51eebf770b4f641972370290169f73ce77f"
 }
