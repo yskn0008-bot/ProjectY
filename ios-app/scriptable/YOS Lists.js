@@ -252,7 +252,7 @@ const HTML=String.raw`<!doctype html>
 :root{
  color-scheme:light;
  --bg:#F3F4F2;--ink:#294054;--muted:#526779;
- --accent:#526F89;--line:#D8DFE2;--panel:#FFFFFF;--focus:#C77824;
+ --accent:#526F89;--line:#91A3B1;--panel:#FFFFFF;--focus:#C77824;
  --tab-bg:#E9ECEE;--stat-task:#A9C6D9;--stat-shopping:#AACAB9;--stat-attention:#DCC4A6;
 }
 *{box-sizing:border-box}
@@ -261,42 +261,42 @@ button,input{font:inherit}
 button{cursor:pointer;touch-action:manipulation}
 button:disabled{opacity:.58;cursor:default}
 button:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-header{
- background:#E6ECF0;color:var(--ink);
- padding:max(22px,env(safe-area-inset-top)) 17px 20px;
- border-bottom:1px solid #E1E6E9;position:sticky;top:0;z-index:3
-}
-.top{display:flex;justify-content:space-between;gap:12px;align-items:center}
-.eyebrow{font-size:10.5px;letter-spacing:.17em;color:#53697D;font-weight:800}
-h1{font-size:35px;margin:5px 0 0;font-weight:850;letter-spacing:-.05em;line-height:1.12;color:#294054}
-.refresh{border:1px solid #B4C4D0;background:#FFFFFF;color:#526F89;padding:10px 16px;min-height:44px;border-radius:13px;font-weight:800;box-shadow:0 1px 2px rgba(30,50,70,.04)}
+header{background:#E8EDF0;color:var(--ink);padding:9px 14px 8px;border-bottom:1px solid #C6D0D7;position:sticky;top:0;z-index:3;box-shadow:0 2px 6px rgba(35,54,67,.06)}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+h1{font-size:23px;margin:0;font-weight:820;letter-spacing:-.05em;line-height:1.1;color:#294054}
+.refresh{border:1px solid #A9BBC9;background:#FFFFFF;color:#365B79;padding:7px;min-height:44px;min-width:44px;border-radius:12px;font-weight:800;font-size:21px;box-shadow:0 1px 2px rgba(30,50,70,.04)}
 .refresh:active{background:#EDF3F7}
-.sub{color:#53697D;margin:17px 0 0;font-size:12px;font-weight:600;line-height:1.55}
+.sub{color:#53697D;margin:3px 0 0;font-size:10.5px;font-weight:650;line-height:1.2}
 .sub.is-ready:before{content:"";display:inline-block;height:7px;width:7px;border-radius:50%;background:#6FC69F;margin-right:9px;vertical-align:middle}
-.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;background:var(--tab-bg);border-radius:16px;padding:4px;margin:15px 13px 16px}
-.tab{background:transparent;color:#526779;border:0;border-radius:12px;padding:11px 2px;min-height:46px;font-size:13px;font-weight:750}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;background:var(--tab-bg);border-radius:13px;padding:3px;margin:10px 12px 10px}
+.tab{background:transparent;color:#445C70;border:0;border-radius:10px;padding:8px 1px;min-height:44px;font-size:12px;font-weight:760;white-space:nowrap}
 .tab[aria-selected=true]{background:var(--accent);color:#FFFFFF;box-shadow:0 2px 7px rgba(25,55,83,.13)}
-main{padding:0 13px}
-.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0 0 19px}
-.stat{background:var(--stat-task);color:#294054;border:1px solid rgba(19,40,56,.10);border-radius:17px;padding:13px 10px;min-height:100px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 3px 1px rgba(31,52,70,.09)}
-.stat:nth-child(2){background:var(--stat-shopping)}
-.stat:nth-child(3){background:var(--stat-attention)}
-.stat b{display:block;font-size:32px;font-weight:850;letter-spacing:-.05em;line-height:1.2;font-variant-numeric:tabular-nums}
-.stat small{display:block;margin-top:8px;color:#395268;font-size:10.5px;font-weight:750;line-height:1.3}
-.tools{position:relative;display:flex;align-items:center;margin:0 0 19px}
+main{padding:0 12px}
+.tab-count{font-size:10px;font-weight:850;margin-left:2px;opacity:.86;font-variant-numeric:tabular-nums}
+.tools{position:relative;display:flex;align-items:center;margin:0 0 8px}
 .tools svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:19px;height:19px;stroke:#8296A4;pointer-events:none}
-.tools input{width:100%;min-width:0;background:#FFFFFF;color:var(--ink);border:1px solid #D6DFE4;border-radius:14px;padding:12px 14px 12px 44px;min-height:48px;font-size:14px;font-weight:550;outline:none;box-shadow:0 1px 3px rgba(27,48,68,.02)}
+.tools input{width:100%;min-width:0;background:#FFFFFF;color:var(--ink);border:1.5px solid #BCCAD3;border-radius:11px;padding:9px 13px 9px 43px;min-height:44px;font-size:13px;font-weight:550;outline:none}
 .tools input::placeholder{color:#526779;font-weight:550}
 .tools input:focus{border-color:#7899B2;outline:3px solid #CFDEE8;outline-offset:1px}
-.section{color:#294054;font-size:16px;font-weight:800;margin:19px 2px 13px;letter-spacing:-.015em}
+.section{color:#294054;font-size:14px;font-weight:800;margin:6px 2px 9px;letter-spacing:-.015em}
+.list-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.drag-help{font-size:10px;font-weight:700;color:#667C90;white-space:nowrap}
+.drag-help[hidden]{display:none}
 .list{display:flex;flex-direction:column;gap:6px}
-.item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px 10px;display:flex;gap:9px;align-items:center;box-shadow:0 2px 0 rgba(31,52,70,.045)}
+.item{background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;gap:9px;align-items:center;box-shadow:0 1px 2px rgba(30,56,76,.08)}
 .item--task{display:block;position:relative}
-.item-complete{display:block;width:100%;min-height:44px;text-align:left;appearance:none;-webkit-appearance:none;color:inherit;border:0;background:transparent;border-radius:6px;padding:0 37px 0 0;cursor:pointer}
+.item--task.is-dragging{z-index:2;background:#E5EEF3;border-color:#526F89;box-shadow:0 8px 17px rgba(36,69,95,.22);opacity:.97}
+.item--task.drag-disabled{opacity:.72}
+.item--task.is-sorting{border-color:#6689A4;background:#EDF5FA}
+@media(prefers-reduced-motion:no-preference){.item--task:not(.is-dragging){transition:transform .13s ease,box-shadow .13s ease}}
+
+.item-complete{display:block;width:100%;min-height:44px;text-align:left;appearance:none;-webkit-appearance:none;color:inherit;border:0;background:transparent;border-radius:6px;padding:0 55px 0 0;cursor:pointer}
 .item-complete:active{background:#E8F0F3}
 .item-complete:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.item--task .item-details summary{position:absolute;top:7px;right:7px;min-width:33px;min-height:44px;padding:0;display:flex;align-items:center;justify-content:center;z-index:1;cursor:pointer}
-.item--task .item-details summary::after{position:static;font-size:17px}
+.item--task .item-details summary{position:absolute;top:6px;right:2px;width:50px;min-height:44px;padding:0;display:flex;align-items:center;justify-content:center;z-index:1;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;gap:2px}
+.item--task.is-sortable .item-details summary::before{content:"⠿";font-size:18px;font-weight:650;color:#56738C}
+.item--task .item-details summary::after{position:static;font-size:16px}
+.item--task .item-details summary:active{cursor:grabbing;background:#E4EDF4;border-radius:8px}
 .item--task .item-details p{margin:8px 0 0}
 .item.done{background:#F0F3F3;box-shadow:none}
 .item-body{min-width:0;flex:1}
@@ -326,20 +326,18 @@ main{padding:0 13px}
 #messageText{flex:1;min-width:0}
 #undo{flex-shrink:0;border:1px solid #D9E5EE;background:#EDF4FA;color:#244865;border-radius:9px;min-height:44px;padding:8px 10px;font-weight:800;font-size:12px}
 #undo[hidden]{display:none}
-.footer{text-align:center;color:#526779;font-size:11px;font-weight:550;line-height:1.6;padding:24px 4px}
-@media(max-width:360px){.tab{font-size:12px}.stat{padding:12px 8px}.stat b{font-size:28px}.stat small{font-size:10px}.item{padding:6px 8px}.item-name{font-size:13px}.action{min-width:59px}}
+.footer{text-align:center;color:#526779;font-size:10px;font-weight:550;line-height:1.5;padding:16px 4px}
+@media(max-width:360px){.tab{font-size:11px}.tab-count{font-size:9px}.item{padding:6px 8px}.item-name{font-size:13px}.action{min-width:59px}.drag-help{font-size:9px}}
 @media(prefers-reduced-motion:no-preference){.tab,.refresh,.action{transition:background-color .15s,border-color .15s}}
 </style>
 </head>
 <body>
-<header><div class="top"><div><div class="eyebrow">YOS · LIFE CONTROL</div><h1>Lists</h1></div><button class="refresh" id="refresh">↻ 更新</button></div>
-<p class="sub" id="stamp">Notionから取得中…</p></header>
-<nav class="tabs" id="tabs" aria-label="リスト"><button class="tab" data-tab="tasks">タスク</button><button class="tab" data-tab="shopping">買い物</button><button class="tab" data-tab="attention">要対応</button><button class="tab" data-tab="projects">案件</button></nav>
+<header><div class="top"><div><h1>Lists</h1><p class="sub" id="stamp">Notionを確認中…</p></div><button class="refresh" id="refresh" aria-label="Notionの最新情報を取得">↻</button></div></header>
+<nav class="tabs" id="tabs" aria-label="リスト"><button class="tab" data-tab="tasks">タスク<span class="tab-count" id="nTasks">—</span></button><button class="tab" data-tab="shopping">買い物<span class="tab-count" id="nShopping">—</span></button><button class="tab" data-tab="attention">要対応<span class="tab-count" id="nAttention">—</span></button><button class="tab" data-tab="projects">案件<span class="tab-count" id="nProjects">—</span></button></nav>
 <main>
 <div class="notice" id="readErrors" role="alert" hidden></div>
-<div class="summary"><div class="stat"><b id="nTasks">—</b><small>未完了タスク</small></div><div class="stat"><b id="nShopping">—</b><small>未購入候補</small></div><div class="stat"><b id="nAttention">—</b><small>本人対応</small></div></div>
 <div class="tools"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input id="search" type="search" aria-label="リスト内検索" placeholder="タスクを検索"></div>
-<div class="section" id="section"></div><div class="list" id="list"></div>
+<div class="list-heading"><div class="section" id="section"></div><div class="drag-help" id="dragHelp">⠿ 右端で移動</div></div><div class="list" id="list"></div>
 <div class="footer">Notion保存は読戻し後に確定表示。Appleリマインダーとは別管理です。</div>
 </main>
 <div id="message" role="status" aria-live="polite" hidden><span id="messageText"></span><button id="undo" type="button" hidden>元に戻す</button></div>
