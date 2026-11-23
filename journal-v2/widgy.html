@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#fff"><title>YOS JOURNAL｜Widgy見出し5記事</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#fff"><title>YOS JOURNAL｜5記事を即時表示</title>
 <style>
 /* The font family, weights, type sizes and 107x85 photo sizes match the existing JOURNAL web reader. */
 *{box-sizing:border-box}
@@ -28,7 +28,13 @@ footer a{color:#202020;text-decoration:none;font-size:12px;font-weight:400}
  .item img,.blank{width:94px;height:80px}
  .item strong{font-size:16px}
 }
-</style></head><body><main><header><b>YOS JOURNAL</b></header><div class="info"><b id="count">最新公開記事</b><span id="status">確認中</span></div><section id="list" aria-live="polite"><p id="empty">公開記事を読み込んでいます…</p></section><footer><a href="./" rel="noopener noreferrer">JOURNALを開く ↗</a></footer></main>
+</style></head><body><main><header><b>YOS JOURNAL</b></header><div class="info"><b id="count">5記事の見出し</b><span id="status">保存済み記事／更新未確認</span></div><section id="list" aria-live="polite">
+<a class="item" href="https://yskn0008-bot.github.io/ProjectY/journal-v2/#archive-2026-11-20-0" rel="noopener noreferrer"><div class="blank">SELF</div><span><small class="meta">2026-11-20  ｜  SELF / 魅力の科学</small><strong>写真の順番で魅力は変わる？　301人と307人の実験が示した意外な結論。</strong></span></a>
+<a class="item" href="https://yskn0008-bot.github.io/ProjectY/journal-v2/#archive-2026-11-19-0" rel="noopener noreferrer"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Man_grooming_in_a_modern_bathroom_mirror_during_evening_hours_while_checking_reflection.jpg?width=800" alt="" loading="eager" referrerpolicy="no-referrer"><span><small class="meta">2026-11-19  ｜  SELF / 身だしなみ</small><strong>午後のテカリ。洗面台へ戻る前に、鏡の前で数秒。</strong></span></a>
+<a class="item" href="https://yskn0008-bot.github.io/ProjectY/journal-v2/#archive-2026-11-19-1" rel="noopener noreferrer"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Coffee%2C_conversation_and_collaboration_-_ATTT_2025.jpg?width=800" alt="" loading="eager" referrerpolicy="no-referrer"><span><small class="meta">2026-11-19  ｜  PRESENCE / 会話</small><strong>会話は、相手のひと言を拾うと深くなる。</strong></span></a>
+<a class="item" href="https://yskn0008-bot.github.io/ProjectY/journal-v2/#archive-2026-11-19-2" rel="noopener noreferrer"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Okinawa_Prefectural_Museum_%26_Art_Museum_(Okinawa).jpg?width=800" alt="" loading="eager" referrerpolicy="no-referrer"><span><small class="meta">2026-11-19  ｜  EXPERIENCE / 沖縄</small><strong>那覇で30分。いつもの沖縄を、違う目で見る。</strong></span></a>
+<a class="item" href="https://yskn0008-bot.github.io/ProjectY/journal-v2/#archive-2026-11-18-0" rel="noopener noreferrer"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Food%20in%20okinawa%20festival.jpg?width=960" alt="" loading="eager" referrerpolicy="no-referrer"><span><small class="meta">2026-11-18  ｜  LIFE / LOCAL</small><strong>宜野湾の産業まつりは、近場の楽しみを広げる2日間。</strong></span></a>
+</section><footer><a href="./" rel="noopener noreferrer">JOURNALを開く ↗</a></footer></main>
 <script>
 (()=>{'use strict';
 const root='https://yskn0008-bot.github.io/ProjectY/journal-v2/';
@@ -45,8 +51,8 @@ const fallback=[{issuedOn:'2026-11-19',articles:[
 ]}];
 const el=(type,cls,txt)=>{const node=document.createElement(type);if(cls)node.className=cls;if(txt!=null)node.textContent=txt;return node};
 function draw(issues,verified){
- const container=document.getElementById('list');container.replaceChildren();
- let shown=0;
+ const container=document.getElementById('list');
+ let shown=0,fragment=document.createDocumentFragment();
  for(const edition of issues.filter(valid).sort((a,b)=>b.issuedOn.localeCompare(a.issuedOn))){
   for(let i=0;i<edition.articles.length&&shown<5;i++){
    const a=edition.articles[i];if(!a||typeof a.title!=='string'||!a.title.trim())continue;
@@ -54,13 +60,14 @@ function draw(issues,verified){
    if(typeof a.image==='string'&&a.image.length<1400&&/^https:\/\//i.test(a.image)){
     const img=el('img');img.src=a.image;img.alt='';img.loading='eager';img.referrerPolicy='no-referrer';img.onerror=()=>img.replaceWith(el('div','blank',String(a.category||'JOURNAL').split('/')[0].trim().slice(0,12)));row.append(img);
    }else row.append(el('div','blank',String(a.category||'JOURNAL').split('/')[0].trim().slice(0,12)));
-   const side=el('span');side.append(el('small','meta',edition.issuedOn+'  ｜  '+String(a.category||'JOURNAL').slice(0,55)),el('strong','',a.title));row.append(side);container.append(row);shown++;
+   const side=el('span');side.append(el('small','meta',edition.issuedOn+'  ｜  '+String(a.category||'JOURNAL').slice(0,55)),el('strong','',a.title));row.append(side);fragment.append(row);shown++;
   }
   if(shown>=5)break;
  }
- if(!shown)container.append(el('p','', '公開記事を確認できません。'));
- document.getElementById('count').textContent=shown+'記事の見出し';
- document.getElementById('status').textContent=verified?'公開データ取得済み':'保存済み見本／更新未確認';
+ if(shown)container.replaceChildren(fragment);
+ else if(!container.children.length)container.append(el('p','', '公開記事を確認できません。'));
+ document.getElementById('count').textContent=(shown||container.children.length)+'記事の見出し';
+ document.getElementById('status').textContent=shown?(verified?'公開データ取得済み':'保存済み見本／更新未確認'):'保存済み記事／更新未確認';
 }
 async function get(url){
  const ac=new AbortController(),timeout=setTimeout(()=>ac.abort(),6500);
