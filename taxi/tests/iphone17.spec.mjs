@@ -975,3 +975,38 @@ test('field report: narrow viewports keep text and every tap target accessible',
     }
   }
 });
+
+
+test('YOS field consultation requires explicit tap and keeps the recommendation neutral',async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-23T20:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await page.locator('#status-btn').click();
+  await page.locator('#modal-actions button.primary').click();
+  await page.locator('[data-page="strategy"]').click();
+  await expect(page.locator('#field-yos-send')).toBeHidden();
+  await page.evaluate(()=>{
+    window.__yosMockCalls=[];
+    window.YOS_AI_BASE_URL='https://project-y-yos-ai.vercel.app';
+    window.YOS_AUTH={getGoogleIdToken:async()=>'short-lived-only'};
+    window.YosAiClient=class{
+      async chat(input){window.__yosMockCalls.push(input);return {answer:'地域情報が未確認のため移動を確定できません'};}
+    };
+  });
+  await page.locator('#field-open').click();
+  await page.locator('[data-observation="go_none"]').click();
+  await expect(page.locator('#field-yos-send')).toBeVisible();
+  await expect(page.locator('#field-yos-send')).toHaveText('YOSに現状を送って相談');
+  expect(await page.evaluate(()=>window.__yosMockCalls.length)).toBe(0);
+  await page.locator('#field-yos-send').click();
+  await expect(page.locator('#field-yos-status')).toContainText('参考回答を受信しました');
+  await expect(page.locator('#field-yos-answer')).toContainText('地域情報が未確認');
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
+  expect(await page.evaluate(()=>window.__yosMockCalls.length)).toBe(1);
+  const storage=await page.evaluate(()=>JSON.stringify({...localStorage}));
+  expect(storage).not.toContain('short-lived-only');
+  expect(storage).not.toContain('地域情報が未確認');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="strategy"]').click();
+  await expect(page.locator('#field-yos-send')).toBeVisible();
+  await expect(page.locator('#field-yos-answer')).toBeHidden();
+});
