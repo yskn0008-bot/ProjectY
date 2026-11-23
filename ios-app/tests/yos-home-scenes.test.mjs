@@ -97,7 +97,7 @@ test('malformed settings fail closed without touching devices',async()=>{
 test('editor displays both modes and saves without dispatching device commands',async()=>{
   const h=harness();await h.execute('');
   assert.equal(h.webs.length,1);
-  assert.match(h.webs[0].html,/外出・帰宅の家電設定/);
+  assert.match(h.webs[0].html,/Home Scenes/);
   assert.match(h.webs[0].html,/フロアランプ/);
   const p=blank();p.departure.tv='off';p.arrival.ac='on';
   const accepted=h.webs[0].shouldAllowRequest({url:'https://yos-scenes.local/__save?value='+encodeURIComponent(JSON.stringify(p))});
@@ -106,19 +106,27 @@ test('editor displays both modes and saves without dispatching device commands',
   assert.equal(JSON.parse(h.data.get(key)).arrival.ac,'on');
   assert.deepEqual(h.events,[]);
 });
-test('quiet iOS redesign keeps grouped devices, accessible selections and original save behavior',async()=>{
+test('approved dark glass editor preserves safe controls and valid embedded JavaScript',async()=>{
   const h=harness();await h.execute('');
   const html=h.webs[0].html;
-  assert.match(html,/YOS HOME/);
-  assert.match(html,/class="group"/);
+  assert.match(html,/Home Scenes/);
+  assert.match(html,/外出シーン/);
+  assert.match(html,/帰宅シーン/);
+  assert.match(html,/class="glass"/);
+  assert.match(html,/class="list"/);
   assert.match(html,/role="tablist"/);
   assert.match(html,/aria-pressed/);
   assert.match(html,/data-value="off"/);
   assert.match(html,/prefers-reduced-motion/);
   assert.match(html,/設定を保存/);
   assert.match(html,/維持/);
-  assert.match(html,/--blue:#e0eafd/);
-  assert.match(html,/--lavender:#eee9fa/);
-  assert.doesNotMatch(html,/#c5e9e0|#d9f0e9|#225c66/i,'old green-dominant palette must be gone');
+  assert.match(html,/--bg:#151e32/);
+  assert.match(html,/--blue:#a2d4ff/);
+  assert.match(html,/--violet:#c3adff/);
+  assert.match(html,/backdrop-filter:blur/);
+  assert.doesNotMatch(html,/#c5e9e0|#d9f0e9|#225c66/i,'previous green palette must be removed');
+  const embedded=html.match(/<script>([\s\S]*?)<\/script>/);
+  assert.ok(embedded,'browser logic should exist');
+  assert.doesNotThrow(()=>new Function(embedded[1]),'browser logic should compile');
   assert.deepEqual(h.events,[],'opening editor must not send a device command');
 });
