@@ -715,11 +715,9 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
  $('remaining-shift').textContent='未確認';$('remaining-target').textContent='未確認';$('required-hourly').textContent='算出不可';$('confirmed-hourly').textContent='算出不可';$('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';renderConfirmedRevenue();updatePlan();renderWait();renderField();renderHistory()}
  function renderHistory(){const list=$('history-list');list.replaceChildren();const events=dayEvents().slice().reverse();if(!events.length){const el=document.createElement('div');el.className='log';el.textContent='この営業日の記録はまだありません。';list.append(el)}events.forEach(e=>{const row=document.createElement(e.type==='dropoff'?'button':'div');if(e.type==='dropoff')row.type='button';row.className='log'+(e.voidedAt?' voided':'');const a=document.createElement('div');const title=document.createElement('b');title.textContent=e.type==='dropoff'?(e.voidedAt?'降車記録・取消済':'降車時刻'):e.type==='shift_start'?'営業開始':'営業終了';const caption=document.createElement('small');caption.textContent=' '+time(e.at,true)+' ・ '+(e.type==='dropoff'?(e.voidedAt?'取消履歴':'日報未照合'):'端末内記録');a.append(title,document.createElement('br'),caption);const b=document.createElement('span');b.className='badge';b.textContent=e.type==='dropoff'?'訂正':'端末内';row.append(a,b);if(e.type==='dropoff')row.addEventListener('click',()=>{openSheet(e.voidedAt?'降車記録を復帰':'降車記録を取り消す',`記録時刻 ${time(e.at,true)}。取り消しても履歴は削除しません。`,[{text:e.voidedAt?'取消を戻す':'記録を取消',primary:true,run:()=>{const s=structuredClone(state);const target=s.events.find(x=>x.id===e.id);if(!target)return;if(target.voidedAt)delete target.voidedAt;else target.voidedAt=instant();if(save(s)){render();toast('降車記録の状態を更新しました')}}}])});list.append(row)})}
  function renderMonthly(){
-   const now=new Date(),fmt=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'numeric'}).format(now);
-   $('monthly-title').textContent=fmt;
-   const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit'}).formatToParts(now);
-   const year=Number(parts.find(x=>x.type==='year').value),month=Number(parts.find(x=>x.type==='month').value);
-   const monthKey=year+'-'+String(month).padStart(2,'0');
+   // A shift that crosses midnight belongs to its starting business day (08:00 JST cutover).
+   const monthKey=dateKey(new Date()).slice(0,7),year=Number(monthKey.slice(0,4)),month=Number(monthKey.slice(5,7));
+   $('monthly-title').textContent=year+'年'+month+'月';
    const days=new Date(year,month,0).getDate(),offset=new Date(year,month-1,1).getDay(),cal=$('monthly-calendar');
    const api=window.YosTaxiConfirmedRevenueV1;
    const monthly=api?.monthSummary(monthKey)||{status:'no-data',dayCount:0};
