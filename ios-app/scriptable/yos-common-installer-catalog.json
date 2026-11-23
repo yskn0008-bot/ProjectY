@@ -183,6 +183,13 @@
       "path": "ios-app/scriptable/remote-widgets/YOS Home Scenes.js",
       "commit": "05b8fc7cfa0f4f21964cc81ee8ffcb5fbaa930de",
       "sha256": "56193851993762ad435ad0623ca3d955fd7e866aecb4825e04b31aa8d56497ee"
+    },
+    {
+      "id": "file-audit",
+      "name": "YOS ファイル調査",
+      "path": "ios-app/scriptable/YOS ファイル調査.js",
+      "commit": "db71ebcef438dcd3fbfbb93eb8de4d8a2ccc011d",
+      "sha256": "a8bacd5dfa18957bd5d19574ed5bb4d8f5a24753e9abdb758ba8efa391f1fb9c"
     }
   ]
 }
