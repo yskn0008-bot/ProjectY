@@ -17,8 +17,23 @@ const CFG = Object.freeze({
   maxScanPages: 60
 });
 const input = typeof args === 'undefined' ? '' : args.shortcutParameter;
-const payload = input && typeof input === 'object' && !Array.isArray(input) ? input : {};
-const raw = typeof input === 'string' ? input :
+// Shortcuts can serialize a Dictionary as JSON text. Accept that alternate
+// representation ONLY for an explicitly marked private JOURNAL draft; leave
+// legacy Clarity free-text inputs completely unchanged. A malformed JOURNAL
+// envelope fails closed rather than being misfiled as a Clarity voice capture.
+function journalEnvelope(value) {
+  if (typeof value !== 'string' || !/^\\s*\\{/.test(value) ||
+      !/"source"\\s*:\\s*"journal"/.test(value)) return null;
+  try {
+    const parsed=JSON.parse(value);
+    if(parsed && typeof parsed==='object' && !Array.isArray(parsed) && parsed.source==='journal')
+      return parsed;
+  }catch(_){}
+  return {source:'journal',rawText:''};
+}
+const payload = input && typeof input === 'object' && !Array.isArray(input)
+  ? input : journalEnvelope(input) || {};
+const raw = typeof input === 'string' && payload.source !== 'journal' ? input :
   (typeof payload.rawText === 'string' ? payload.rawText : '');
 const sourceKey = String(payload.source || payload.inputMode || 'voice').toLowerCase().replace(/^clarity[. ]?/, '').trim();
 const sourceLabels = Object.freeze({voice:'Clarity Voice',text:'Clarity Text',share:'Clarity Share',journal:'YOS JOURNAL Draft'});
@@ -38,7 +53,21 @@ const isNonEmpty = typeof raw === 'string' && raw.trim().length > 0;
 const legalId = s => /^(?:clarity|share|journal):[a-z0-9_-]{8,100}$/i.test(String(s || ''));
 const textOf = b => (b?.paragraph?.rich_text || []).map(v => v.plain_text ?? v.text?.content ?? '').join('');
 const paragraph = value => ({object:'block',type:'paragraph',paragraph:{rich_text:[{type:'text',text:{content:value}}]}});
-const split = text => {const result=[];for(let n=0;n<text.length;n+=CFG.chunkLength)result.push(text.slice(n,n+CFG.chunkLength));return result;};
+const split = text => {
+  const result=[];
+  for(let n=0;n<text.length;){
+    let end=Math.min(n+CFG.chunkLength,text.length);
+    // Never split a UTF-16 surrogate pair between two Notion rich-text blocks.
+    if(end<text.length){
+      const c=text.charCodeAt(end-1);
+      if(c>=0xD800&&c<=0xDBFF)end--;
+    }
+    if(end<=n)throw Error('CHUNK_BOUNDARY_INVALID');
+    result.push(text.slice(n,end));
+    n=end;
+  }
+  return result;
+};
 const message = (status,receipt,detail='') => ({status,captureId:receipt?.captureId || null,detail,notionVerified:status==='confirmed'});
 function load() {
   if (!fm.fileExists(receiptPath)) return [];
