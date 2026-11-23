@@ -756,12 +756,24 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
    const sources=feed.sources.filter(s=>s&&typeof s.name==='string'&&['ok','stale','unknown','error'].includes(s.status)).slice(0,5);
    if(!sources.length){status.textContent='公式情報源を確認できません。営業判断に使用しないでください。';return}
    const ok=sources.filter(s=>s.status==='ok').length;
-   status.textContent=ok?'公式情報 '+ok+'件取得（需要・推奨エリアは未検証）':'公式情報は未取得・要確認（需要は未検証）';
+   status.textContent=ok?'公式情報源 '+ok+'/'+sources.length+'件取得（需要・推奨エリアは未検証）':'公式情報源は未取得・要確認（需要は未検証）';
    for(const source of sources){
      const row=document.createElement('div');
      const label=source.status==='ok'?'取得成功':source.status==='stale'?'原本が古い':source.status==='unknown'?'更新日不明':'未取得';
      row.textContent=source.name.slice(0,40)+'｜'+label+(source.status==='ok'&&typeof source.summary==='string'?'｜'+source.summary.slice(0,110):'');
      holder.append(row);
+     // A reservation or official headline is evidence to check, NOT a demand signal.
+     if(source.status==='ok'&&Array.isArray(source.items)){
+       for(const item of source.items.slice(0,2)){
+         if(!item||typeof item.title!=='string')continue;
+         const itemRow=document.createElement('div');
+         const when=typeof item.eventAt==='string'?Date.parse(item.eventAt):NaN;
+         const timeLabel=Number.isFinite(when)&&when>=now-24*3600000&&when<=now+48*3600000
+           ?new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(when))+'｜':'';
+         itemRow.textContent='参考候補｜'+timeLabel+item.title.slice(0,110)+'（実際の需要は未確認）';
+         holder.append(itemRow);
+       }
+     }
    }
  }
  async function loadStrategyResearch(){
