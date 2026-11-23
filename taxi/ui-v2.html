@@ -716,10 +716,10 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
  function renderHistory(){const list=$('history-list');list.replaceChildren();const events=dayEvents().slice().reverse();if(!events.length){const el=document.createElement('div');el.className='log';el.textContent='この営業日の記録はまだありません。';list.append(el)}events.forEach(e=>{const row=document.createElement(e.type==='dropoff'?'button':'div');if(e.type==='dropoff')row.type='button';row.className='log'+(e.voidedAt?' voided':'');const a=document.createElement('div');const title=document.createElement('b');title.textContent=e.type==='dropoff'?(e.voidedAt?'降車記録・取消済':'降車時刻'):e.type==='shift_start'?'営業開始':'営業終了';const caption=document.createElement('small');caption.textContent=' '+time(e.at,true)+' ・ '+(e.type==='dropoff'?(e.voidedAt?'取消履歴':'日報未照合'):'端末内記録');a.append(title,document.createElement('br'),caption);const b=document.createElement('span');b.className='badge';b.textContent=e.type==='dropoff'?'訂正':'端末内';row.append(a,b);if(e.type==='dropoff')row.addEventListener('click',()=>{openSheet(e.voidedAt?'降車記録を復帰':'降車記録を取り消す',`記録時刻 ${time(e.at,true)}。取り消しても履歴は削除しません。`,[{text:e.voidedAt?'取消を戻す':'記録を取消',primary:true,run:()=>{const s=structuredClone(state);const target=s.events.find(x=>x.id===e.id);if(!target)return;if(target.voidedAt)delete target.voidedAt;else target.voidedAt=instant();if(save(s)){render();toast('降車記録の状態を更新しました')}}}])});list.append(row)})}
  function renderMonthly(){const now=new Date(),fmt=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'numeric'}).format(now);$('monthly-title').textContent=fmt;const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit'}).formatToParts(now),year=Number(parts.find(x=>x.type==='year').value),month=Number(parts.find(x=>x.type==='month').value),days=new Date(year,month,0).getDate(),offset=new Date(year,month-1,1).getDay(),cal=$('monthly-calendar');cal.replaceChildren();for(const name of ['日','月','火','水','木','金','土']){const el=document.createElement('span');el.className='month-weekday';el.textContent=name;cal.append(el)}for(let i=0;i<offset;i++){const el=document.createElement('span');el.className='month-blank';cal.append(el)}for(let d=1;d<=days;d++){const el=document.createElement('div');el.className='month-day';const date=document.createElement('b');date.textContent=String(d);const val=document.createElement('small');const api=window.YosTaxiConfirmedRevenueV1;const record=api?.latest(`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`);val.textContent=record?'¥'+record.amountYen.toLocaleString('ja-JP'):'—';el.append(date,val);cal.append(el)}}
  function navigate(page){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===page+'-view'));document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page))}
- function openSheet(title,body,actions=[]){$('revenue-form').hidden=true;releaseRevenuePreview();$('modal').classList.remove('dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true;$('modal-title').textContent=title;$('modal-body').textContent=body;const area=$('modal-actions');area.replaceChildren();const cancel=document.createElement('button');cancel.textContent='閉じる';cancel.addEventListener('click',closeSheet);area.append(cancel);actions.forEach(a=>{const btn=document.createElement('button');btn.textContent=a.text;btn.classList.toggle('primary',a.primary===true);btn.addEventListener('click',()=>{closeSheet();a.run()});area.append(btn)});$('modal').classList.add('open')}
- function closeSheet(){releaseRevenuePreview();$('revenue-form').hidden=true;$('modal').classList.remove('open','m100-open','dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true}
+ function openSheet(title,body,actions=[]){revenueFormEpoch++;revenueSubmissionPending=false;$('revenue-save-btn').disabled=false;$('revenue-save-btn').textContent='確認済み累積売上を記録';$('revenue-form').hidden=true;releaseRevenuePreview();$('modal').classList.remove('dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true;$('modal-title').textContent=title;$('modal-body').textContent=body;const area=$('modal-actions');area.replaceChildren();const cancel=document.createElement('button');cancel.textContent='閉じる';cancel.addEventListener('click',closeSheet);area.append(cancel);actions.forEach(a=>{const btn=document.createElement('button');btn.textContent=a.text;btn.classList.toggle('primary',a.primary===true);btn.addEventListener('click',()=>{closeSheet();a.run()});area.append(btn)});$('modal').classList.add('open')}
+ function closeSheet(){revenueFormEpoch++;revenueSubmissionPending=false;$('revenue-save-btn').disabled=false;$('revenue-save-btn').textContent='確認済み累積売上を記録';releaseRevenuePreview();$('revenue-form').hidden=true;$('modal').classList.remove('open','m100-open','dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true}
 
- let revenuePreviewUrl=null;
+ let revenuePreviewUrl=null,revenueSubmissionPending=false,revenueFormEpoch=0;
  function renderConfirmedRevenue(){
    const api=window.YosTaxiConfirmedRevenueV1;if(!api)return;
    const r=api.load();if(r.error){$('report-clock').textContent='日報記録を読めません';return}
@@ -748,43 +748,64 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
  }
  async function saveRevenueForm(ev){
    ev.preventDefault();
-   const api=window.YosTaxiConfirmedRevenueV1,file=selectedFile;
+   if(revenueSubmissionPending)return; // In-flight SHA reads must never submit twice.
+   const api=window.YosTaxiConfirmedRevenueV1,file=selectedFile,form=$('revenue-form');
    if(!api||!file||!/^image\//.test(file.type)||file.size>16*1024*1024){
      $('revenue-status').textContent='画像を確認できません。保存していません。';return;
    }
-   if(!$('revenue-is-total').checked||!$('revenue-checked').checked){
+   function readForm(){
+     return {businessDate:$('revenue-day').value,amountYen:$('revenue-amount').value,
+       reportClock:$('revenue-clock').value||null,taxBasis:$('revenue-basis').value,
+       correction:$('revenue-correction').checked,photoText:$('revenue-text').value,
+       isTotal:$('revenue-is-total').checked,checked:$('revenue-checked').checked};
+   }
+   const snapshot=readForm(),fingerprint=JSON.stringify(snapshot);
+   if(!snapshot.isTotal||!snapshot.checked){
      $('revenue-status').textContent='日報と営業日・金額の確認が必要です。';return;
    }
-   if(api.detectText($('revenue-text').value).kind==='ride-history'){
+   if(api.detectText(snapshot.photoText).kind==='ride-history'){
      $('revenue-status').textContent='営業履歴の個別運賃は累積総収入として記録できません。紙日報を選んでください。';return;
    }
    if(!crypto.subtle?.digest){$('revenue-status').textContent='写真の重複検知が使えません。保存しません。';return}
-   let hash;
+   const epoch=revenueFormEpoch,button=$('revenue-save-btn');
+   revenueSubmissionPending=true;button.disabled=true;button.textContent='写真を照合中…';
    try{
      const bytes=await file.arrayBuffer();
      const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
-     hash='sha256:'+Array.from(digest,b=>b.toString(16).padStart(2,'0')).join('');
-   }catch{$('revenue-status').textContent='写真を読み取れず保存できませんでした。';return}
-   const day=$('revenue-day').value,previous=api.latest(day);
-   const input={businessDate:day,amountYen:$('revenue-amount').value,reportClock:$('revenue-clock').value||null,
-     taxBasis:$('revenue-basis').value,photoSha256:hash,photoKind:'paper-total'};
-   if($('revenue-correction').checked&&previous)input.correctionOf=previous.id;
-   const result=api.confirm(input);
-   const reasons={
-     'invalid':'営業日・総収入・区分の形式を確認してください。',
-     'duplicate-photo':'同じ写真は記録済みです。二重加算しません。',
-     'duplicate-total':'同一の累積額です。追加していません。',
-     'needs-correction-confirmation':'同じ営業日の記録があります。時刻の確認か、訂正チェックが必要です。',
-     'stale-report':'前回より古い時刻の写真です。訂正する場合のみ明示してください。',
-     'decrease-needs-review':'前回より金額が少ないため、自動更新しません。訂正ならチェックしてください。',
-     'corrupt-preserved':'既存の記録が読めません。上書きせず停止しました。',
-     'storage-error':'端末の保存に失敗しました。既存データは保持しています。',
-     'stale-correction':'訂正先の記録が変わっています。再確認してください。'
-   };
-   if(result.status!=='saved'){$('revenue-status').textContent=reasons[result.status]||'保存できませんでした。';return}
-   selectedFile=null;
-   closeSheet();render();renderMonthly();
-   toast('累積総収入を確認額で更新しました（端末内・Notion未同期）');
+     // Closing the sheet, changing the selected file or editing a checked field cancels the save.
+     if(epoch!==revenueFormEpoch||file!==selectedFile||form.hidden)return;
+     if(JSON.stringify(readForm())!==fingerprint){
+       $('revenue-status').textContent='確認後に入力が変更されました。もう一度確認して保存してください。';
+       return;
+     }
+     const hash='sha256:'+Array.from(digest,b=>b.toString(16).padStart(2,'0')).join('');
+     const previous=api.latest(snapshot.businessDate);
+     const input={businessDate:snapshot.businessDate,amountYen:snapshot.amountYen,
+       reportClock:snapshot.reportClock,taxBasis:snapshot.taxBasis,
+       photoSha256:hash,photoKind:'paper-total'};
+     if(snapshot.correction&&previous)input.correctionOf=previous.id;
+     const result=api.confirm(input);
+     const reasons={
+       'invalid':'営業日・総収入・区分の形式を確認してください。',
+       'duplicate-photo':'同じ写真は記録済みです。二重加算しません。',
+       'duplicate-total':'同一の累積額です。追加していません。',
+       'needs-correction-confirmation':'同じ営業日の記録があります。時刻の確認か、訂正チェックが必要です。',
+       'stale-report':'前回より古い時刻の写真です。訂正する場合のみ明示してください。',
+       'decrease-needs-review':'前回より金額が少ないため、自動更新しません。訂正ならチェックしてください。',
+       'corrupt-preserved':'既存の記録が読めません。上書きせず停止しました。',
+       'storage-error':'端末の保存に失敗しました。既存データは保持しています。',
+       'stale-correction':'訂正先の記録が変わっています。再確認してください。'
+     };
+     if(result.status!=='saved'){$('revenue-status').textContent=reasons[result.status]||'保存できませんでした。';return}
+     selectedFile=null;closeSheet();render();renderMonthly();
+     toast('累積総収入を確認額で更新しました（端末内・Notion未同期）');
+   }catch{
+     if(epoch===revenueFormEpoch)$('revenue-status').textContent='写真の照合に失敗しました。保存は実行していません。';
+   }finally{
+     if(epoch===revenueFormEpoch){
+       revenueSubmissionPending=false;button.disabled=false;button.textContent='確認済み累積売上を記録';
+     }
+   }
  }
  function onRevenueText(){
    const api=window.YosTaxiConfirmedRevenueV1;if(!api)return;
