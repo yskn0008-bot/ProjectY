@@ -1,7 +1,7 @@
 'use strict';
 const CACHE_PREFIX='yos-taxi-projecty-';
-const CACHE='yos-taxi-projecty-v150-verified-revenue';
-const VERSION='150';
+const CACHE='yos-taxi-projecty-v149-revenue-goal';
+const VERSION='149';
 const STATIC=[
   './','./index.html','./ui-v2.html','./verified-revenue-v1.js','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
   './final-app-v131.css','./final-fix-v133.css','./final-app-v131.js',
