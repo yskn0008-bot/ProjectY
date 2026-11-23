@@ -284,6 +284,95 @@ async function readDeviceCalendar(nativeSource,tasks,now=new Date()){
  }
 }
 
+
+// PRIVATE DAYSTREAM XL: DrawContext image saved only to Scriptable iCloud.
+// The image contains on-device task and calendar titles, never credentials.
+function yosXlRows(templates,calendar,now=new Date()){
+ const begin=new Date(now.getFullYear(),now.getMonth(),now.getDate()),end=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
+ const day=[begin.getFullYear(),String(begin.getMonth()+1).padStart(2,'0'),String(begin.getDate()).padStart(2,'0')].join('-');
+ if(!Array.isArray(templates)||templates.length>40)throw Error('生活タスクの形式が不正');
+ const rows=[],seen=new Set();
+ function push(title,start,finish,source,done=false){
+  const t=String(title||'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,70);
+  const a=Math.max(+begin,+start),b=Math.min(+end,+finish);
+  if(!t||!Number.isFinite(a)||!Number.isFinite(b)||a>=b)return;
+  const minute=Math.max(0,Math.min(1439,Math.floor((a-+begin)/60000)));
+  const duration=Math.max(1,Math.ceil((b-a)/60000));
+  const key=minute+'|'+duration+'|'+t;
+  if(seen.has(key))return;seen.add(key);rows.push({title:t,minute,duration,source,done:done===true});
+ }
+ for(const t of templates){
+  if(!t||typeof t.title!=='string')continue;
+  const a=new Date(t.startAt),b=new Date(t.endAt),span=+b-+a;
+  if(!Number.isFinite(+a)||!Number.isFinite(span)||span<=0||span>86400000)continue;
+  if(t.repeat==='daily'){
+   for(const offset of [-1,0]){
+    const d=new Date(begin.getFullYear(),begin.getMonth(),begin.getDate()+offset,a.getHours(),a.getMinutes(),a.getSeconds());
+    push(t.title,d,new Date(+d+span),'habit',t.done);
+   }
+  }else if(t.repeat==='once')push(t.title,a,b,'task',t.done);
+ }
+ const agenda=calendar?.calendarDays?.[day];
+ if(Array.isArray(agenda))for(const e of agenda.slice(0,80)){
+  const m=Number(e?.start),dur=Number(e?.duration);
+  if(!Number.isFinite(m)||!Number.isFinite(dur)||m<0||m>=1440||dur<=0||m+dur>1440)continue;
+  push(e.title||'予定',new Date(+begin+m*60000),new Date(+begin+(m+dur)*60000),'calendar');
+ }
+ const all=calendar?.allDayDays?.[day];
+ if(Array.isArray(all))for(const name of all.slice(0,12)){
+  const t=String(name||'').trim().slice(0,70);
+  if(t&&!seen.has('allday|'+t)){seen.add('allday|'+t);rows.push({title:t,minute:-1,duration:1440,source:'calendar',done:false})}
+ }
+ const rank={calendar:0,habit:1,task:2};
+ rows.sort((a,b)=>a.minute-b.minute||rank[a.source]-rank[b.source]||a.title.localeCompare(b.title,'ja'));
+ return {schema:'yos-xl-private-v1',day,checkedAt:now.toISOString(),rows,notionConfirmed:true,calendarConfirmed:calendar?.status==='ok'};
+}
+function yosXlImage(snapshot){
+ const c=new DrawContext();c.size=new Size(640,1040);c.respectScreenScale=false;c.opaque=true;
+ const box=(x,y,w,h,hex)=>{c.setFillColor(new Color(hex));c.fillRect(new Rect(x,y,w,h))};
+ const text=(s,x,y,w,h,size,hex,strong=false)=>{
+  c.setFont(strong?Font.semiboldSystemFont(size):Font.regularSystemFont(size));
+  c.setTextColor(new Color(hex));c.drawTextInRect(String(s),new Rect(x,y,w,h));
+ };
+ const clock=m=>m<0?'終日':String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+ box(0,0,640,1040,'#F1F6FB');box(18,18,604,1004,'#FFFFFF');
+ text('YOS / DAYSTREAM',48,40,520,38,23,'#51708C',true);
+ text('今日のタイムライン',48,93,540,62,36,'#203955',true);
+ text(snapshot.day.replace(/-/g,'/'),48,159,275,32,21,'#668099');
+ text(snapshot.rows.length+'件の時間枠',408,159,190,32,20,'#668099');
+ box(48,203,544,2,'#DCE6EF');
+ const list=snapshot.rows.slice(0,8);
+ if(!list.length){
+  text('時刻を確認できる予定はありません',60,300,550,55,26,'#203955',true);
+  text('DAYSTREAMの同期を確認してください',60,360,550,44,20,'#668099');
+ }else{
+  box(110,245,2,Math.max(0,list.length-1)*92,'#DDE7F0');
+  list.forEach((r,i)=>{
+   const y=225+i*92,accent=r.source==='calendar'?'#4586C8':r.source==='task'?'#9A78CC':'#2BA98B';
+   text(clock(r.minute),45,y+25,67,31,18,'#36536C',true);
+   box(105,y+29,14,14,accent);box(134,y,456,77,'#F6F9FC');box(134,y,5,77,accent);
+   text(r.title,156,y+12,409,39,24,'#203955',true);
+   text((r.source==='calendar'?'予定':r.source==='task'?'YOS Tasks':'習慣')+(r.done?'・完了':''),156,y+51,330,23,16,'#668099');
+  });
+ }
+ if(snapshot.rows.length>list.length)text('ほか '+(snapshot.rows.length-list.length)+'件',48,938,240,28,18,'#668099');
+ box(48,975,544,2,'#DCE6EF');
+ const d=new Date(snapshot.checkedAt),hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+ text('取得 '+hm+' · YOS Tasks取得済 · Apple予定'+(snapshot.calendarConfirmed?'取得済':'未取得'),48,989,540,28,15,'#668099');
+ return c.getImage();
+}
+function yosXlExport(templates,calendar){
+ if(typeof DrawContext==='undefined'||typeof FileManager==='undefined')return {ok:false,reason:'画像API未対応'};
+ const snapshot=yosXlRows(templates,calendar),img=yosXlImage(snapshot);
+ const fm=FileManager.iCloud(),dir=fm.joinPath(fm.documentsDirectory(),'YOS_Widgets');
+ if(!fm.fileExists(dir))fm.createDirectory(dir,false);
+ const dest=fm.joinPath(dir,'YOS_DAYSTREAM_XL.png');
+ // Only this new generated filename is replaced. Existing data is untouched.
+ fm.writeImage(dest,img);
+ if(!fm.fileExists(dest))throw Error('画像の保存確認ができません');
+ return {ok:true,path:dest,count:snapshot.rows.length};
+}
+
 const safeScript=s=>s.replace(/<\/script/gi,'<\\/script');
 function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCalendar=null,calendarStatus='Apple予定：未確認'){
  if(!html.includes('// WEB_PORT_BOOT')||!html.includes('</script><script>\nconst tl=')||!html.includes('<script src="./task-wizard.js"></script>'))throw Error('DAYSTREAMの形式が一致しません');
@@ -390,6 +479,9 @@ async function main(){
  // This payload contains only task projections; credentials never enter the WebView.
  const directRows=nativeDirectRows(data.tasks);
  const deviceCalendar=await readDeviceCalendar(native,data.tasks);
+ // Export is best-effort: it cannot modify Notion or block the existing screen.
+ try{yosXlExport(directRows,deviceCalendar)}
+ catch(err){console.warn('DAYSTREAM XL画像作成未確認：'+clean(err?.message||err,100))}
  const output=buildHTML(html,adapters,native,wizard,snapshot,directRows,deviceCalendar,deviceCalendarStatus);
  stage='画面表示';
  await WebView.loadHTML(output,UI_BASE_URL,null,true);
