@@ -198,29 +198,28 @@ test('selected A YOS Lists UI keeps accessible contrast, touch targets and exist
  };
  for(const [role,fg,bg] of [
   ['body','#294054','#F3F4F2'],
-  ['header','#294054','#E6ECF0'],
-  ['header subtitle','#53697D','#E6ECF0'],
+  ['header','#294054','#E8EDF0'],
+  ['header subtitle','#53697D','#E8EDF0'],
   ['selected tab','#FFFFFF','#526F89'],
-  ['task number','#294054','#A9C6D9'],
-  ['shopping number','#294054','#AACAB9'],
-  ['attention number','#294054','#DCC4A6'],
-  ['task caption','#395268','#A9C6D9'],
-  ['shopping caption','#395268','#AACAB9'],
-  ['attention caption','#395268','#DCC4A6'],
+  ['compact row ink','#294054','#FFFFFF'],
+  ['compact tab count','#445C70','#E9ECEE'],
   ['action','#526F89','#E7F0F4'],
   ['task details','#5E7183','#FFFFFF'],
   ['search placeholder','#526779','#FFFFFF'],
   ['P0 tag','#A63C34','#FFE8E4'],
   ['P1 tag','#91601C','#FFF0D8']
  ]) assert.ok(ratio(fg,bg)>=4.5,role+' text needs contrast ratio >= 4.5');
- assert.match(css,/header\{\s*background:#E6ECF0;color:var\(--ink\)/);
+ assert.match(css,/header\{background:#E8EDF0;color:var\(--ink\)/);
  assert.match(css,/\.tabs\{[^}]*background:var\(--tab-bg\)/);
  assert.match(css,/\.tab\[aria-selected=true\]\{background:var\(--accent\);color:#FFFFFF/);
- assert.match(css,/\.stat:nth-child\(2\)\{background:var\(--stat-shopping\)/);
- assert.match(css,/\.stat:nth-child\(3\)\{background:var\(--stat-attention\)/);
+ assert.doesNotMatch(source,/<div class="summary">/,'remove oversized number cards');
+ assert.match(source,/class="tab-count" id="nShopping"/);
+ assert.match(source,/class="tab-count" id="nProjects"/);
+ assert.match(css,/--line:#91A3B1/);
+ assert.match(css,/\.item\{[^}]*border:1\.5px solid var\(--line\)/);
  assert.match(css,/\.action\{[^}]*min-height:44px/);
  assert.match(css,/\.refresh\{[^}]*min-height:44px/);
- assert.match(css,/\.tools input\{[^}]*min-height:48px/);
+ assert.match(css,/\.tools input\{[^}]*min-height:44px/);
  assert.match(css,/button:focus-visible,input:focus-visible/);
  assert.match(css,/@media\(max-width:360px\)/);
  assert.doesNotMatch(css,/border-left:4px/);
@@ -259,7 +258,7 @@ test('tap-to-complete row uses full width, preserves details control and purchas
  assert.match(css,/#undo\{[^}]*min-height:44px/);
  assert.match(source,/<button type="button" class="item-complete" data-action="complete"/);
  assert.match(source,/e\.target\.closest\('\.item-details'\)/,'detail chevron never completes');
- assert.match(source,/class="item-details"><summary aria-label="詳細を表示/);
+ assert.match(source,/class="item-details"><summary aria-label=/);
  assert.doesNotMatch(source,/<button class="action" data-action="complete"/,'old separate task completion button is removed');
  assert.match(source,/<button class="action" data-action="purchase"/,'Shopping purchase UI preserved');
  const h=await harness();
@@ -291,11 +290,17 @@ test('undo rejects forged target and changed Notion state without a PATCH',async
  await assert.rejects(()=>h.app.perform({action:'undo-complete',kind:'task',id:task.id,expected:done.item.updatedAt}),/他の画面/);
  assert.equal(h.writes,1);
 });
-test('priority/overdue/date order is deterministic and drag-and-drop is not pretended',()=>{
+test('overdue/priority/date sort remains default while real grip dragging supports Notion rank',()=>{
  assert.match(source,/const overdue=x=>x\.due&&x\.due\.slice\(0,10\)</);
  assert.match(source,/const order=\(a,b\)=>Number\(overdue\(b\)\)-Number\(overdue\(a\)\)/);
- assert.match(source,/items\.sort\(\(a,b\)=>a\.kind==='task'&&b\.kind==='task'\?order\(a,b\)/);
- assert.doesNotMatch(source,/draggable="true"|data-drag-handle|dragstart/);
+ assert.match(source,/function defaultRanks\(\)/);
+ assert.match(source,/function effectiveRank\(t,defaults\)/);
+ assert.match(source,/function calcReorderRank\(before,after,defaults\)/);
+ assert.match(source,/addEventListener\('pointerdown'/);
+ assert.match(source,/addEventListener\('pointermove'/);
+ assert.match(source,/window\.addEventListener\('pointerup'/);
+ assert.match(source,/touch-action:none/);
+ assert.match(source,/action:'reorder-task'/);
 });
 
 test('undo restores a waiting Task to waiting, not an invented default state',async()=>{
@@ -308,4 +313,63 @@ test('undo restores a waiting Task to waiting, not an invented default state',as
  const undone=await h.app.perform({action:'undo-complete',kind:'task',id:done.item.id,expected:done.item.updatedAt});
  assert.equal(undone.item.state,'待ち');
  assert.equal(h.writes,2);
+});
+
+
+test('reordering writes one existing 実行順 property and reads it back, preserving other tasks',async()=>{
+ const second=row('task');second.id='c'.repeat(32);
+ second.properties['やること']={title:[{plain_text:'二件目'}]};
+ second.properties['実行順']={number:7};
+ const h=await harness({},[second]);
+ const data=await h.app.readAll();
+ const first=data.tasks.find(x=>x.id===ids.task),neighbor=data.tasks.find(x=>x.id===second.id);
+ assert.equal(first.manualRank,null);
+ assert.equal(neighbor.manualRank,7,'legacy rank is visible, not bulk normalized');
+ const change=await h.app.perform({
+  action:'reorder-task',kind:'task',id:first.id,expected:first.updatedAt,
+  oldRank:null,rank:2000512,before:null,
+  after:{id:neighbor.id,updatedAt:neighbor.updatedAt}
+ });
+ assert.equal(change.action,'reorder-task');
+ assert.equal(change.item.manualRank,2000512);
+ assert.equal(h.records[ids.task].properties['実行順'].number,2000512);
+ assert.equal(h.records[second.id].properties['実行順'].number,7,'other legacy numbers unchanged');
+ assert.equal(h.writes,1);
+ const again=await h.app.readAll();
+ assert.equal(again.tasks.find(x=>x.id===ids.task).manualRank,2000512,'persisted rank survives refresh');
+});
+test('reorder fails closed on invalid rank, stale Task, changed anchor and crossed database',async()=>{
+ const second=row('task');second.id='c'.repeat(32);
+ const h=await harness({},[second]);
+ const data=await h.app.readAll();
+ const item=data.tasks.find(x=>x.id===ids.task),near=data.tasks.find(x=>x.id===second.id);
+ const basic={action:'reorder-task',kind:'task',id:item.id,expected:item.updatedAt,oldRank:null,rank:2000512};
+ await assert.rejects(()=>h.app.perform({...basic,rank:-99}),/範囲|不正/);
+ await assert.rejects(()=>h.app.perform({...basic,id:ids.shopping}),/対象|書込/);
+ await assert.rejects(()=>h.app.perform({...basic,before:{id:item.id,updatedAt:item.updatedAt}}),/不正/);
+ h.records[second.id].last_edited_time='2026-11-23T14:03:00.000Z';
+ await assert.rejects(()=>h.app.perform({...basic,after:{id:near.id,updatedAt:near.updatedAt}}),/並び替え先/);
+ assert.equal(h.writes,0,'no PATCH on validation failure');
+ h.records[ids.task].last_edited_time='2026-11-23T14:04:00.000Z';
+ await assert.rejects(()=>h.app.perform(basic),/変更/);
+ assert.equal(h.writes,0);
+});
+test('real draggable UI uses shared details grip; tap completion remains separate',async()=>{
+ const h=await harness();
+ const html=h.app.htmlWithData(await h.app.readAll());
+ const js=html.split('<script>')[1].split('</script>')[0];
+ assert.doesNotThrow(()=>new Function(js));
+ assert.match(html,/id="dragHelp"/);
+ assert.match(html,/class="tab-count" id="nTasks"/);
+ assert.match(html,/id="stamp"/);
+ assert.match(source,/class="item item--task.*is-sortable/);
+ assert.match(source,/tap opens details; drag on it reorders/);
+ assert.match(source,/const direct=e\.target\.closest\('button\[data-action\]'\)/);
+ assert.match(source,/e\.target\.closest\('\.item-details'\)/);
+ assert.match(source,/getBoundingClientRect/);
+ assert.match(source,/window\.scrollBy\(0,18\)/);
+ assert.match(source,/state\.busy=true;lastCompletion=null;/);
+ assert.doesNotMatch(source,/<div class="eyebrow">/);
+ assert.doesNotMatch(source,/<div class="summary">/);
+ assert.equal(h.writes,0,'UI generation never touches Notion');
 });
