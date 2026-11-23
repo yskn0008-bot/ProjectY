@@ -105,3 +105,42 @@ test('OCR text that identifies an individual ride-history screen cannot be treat
    assert.equal(result.grossYen,null);
  }
 });
+
+
+test('month totals keep only the latest snapshot per day and remain provisional',()=>{
+ const e=env();
+ assert.equal(e.api.confirm(receipt({reportClock:'21:00',taxBasis:'tax-included'}),e.store,()=> 'r1').status,'saved');
+ assert.equal(e.api.confirm(receipt({amountYen:24000,reportClock:'22:00',taxBasis:'tax-included',photoSha256:sha('b')}),e.store,()=> 'r2').status,'saved');
+ assert.equal(e.api.confirm(receipt({businessDate:'2026-11-22',amountYen:14750,taxBasis:'tax-included',photoSha256:sha('c')}),e.store,()=> 'r3').status,'saved');
+ const result=e.api.monthSummary('2026-11',e.store);
+ assert.equal(result.status,'partial');
+ assert.equal(result.dayCount,2);
+ assert.equal(result.taxBasis,'tax-included');
+ assert.equal(result.totalYen,38750); // 24,000 + 14,750 (not 21,950+24,000+14,750)
+ assertLegacyUntouched(e.store);
+});
+test('month rejects mixing tax-included and tax-excluded daily figures',()=>{
+ const e=env();
+ e.api.confirm(receipt({taxBasis:'tax-included'}),e.store,()=> 'r1');
+ e.api.confirm(receipt({businessDate:'2026-11-22',taxBasis:'tax-excluded',photoSha256:sha('b')}),e.store,()=> 'r2');
+ const result=e.api.monthSummary('2026-11',e.store);
+ assert.equal(result.status,'mixed-basis');assert.equal(result.dayCount,2);
+ assert.equal(result.totalYen,null);
+});
+test('month rejects aggregating amounts whose tax treatment remains unconfirmed',()=>{
+ const e=env();
+ e.api.confirm(receipt(),e.store,()=> 'r1');
+ e.api.confirm(receipt({businessDate:'2026-11-22',photoSha256:sha('b')}),e.store,()=> 'r2');
+ const result=e.api.monthSummary('2026-11',e.store);
+ assert.equal(result.status,'basis-unconfirmed');assert.equal(result.totalYen,null);
+ assert.equal(e.api.latest('2026-11-21',e.store).amountYen,21950);
+});
+test('month handles invalid months, empty months, and corrupt saved records without deleting them',()=>{
+ const e=env();
+ for(const month of ['2026-13','2026-00','2026-11-01'])assert.equal(e.api.monthSummary(month,e.store).status,'invalid-month');
+ assert.equal(e.api.monthSummary('2026-11',e.store).status,'no-data');
+ const bad=env('corrupted and preserved');
+ assert.equal(bad.api.monthSummary('2026-11',bad.store).status,'corrupt-preserved');
+ assert.equal(bad.store.getItem(bad.api.KEY),'corrupted and preserved');
+ assertLegacyUntouched(bad.store);
+});
