@@ -21,9 +21,11 @@ test('YOS Tasks refresh reuses existing backend and is opt-in and read-only',()=
  assert.match(html,/id="yosWebTaskRefresh"/);
  assert.match(html,/scriptable:\/\/\/run\?scriptName=YOS%20DAYSTREAM%20Notion/);
  assert.match(html,/snapshot\.source!==\u0027yos-auth-cache\u0027/); // source guard on persisted projected data
- assert.match(html,/<script src="\.\/yos-tasks-auth\.js"><\/script>/);
+ assert.doesNotMatch(html,/<script src="\.\/yos-tasks-auth\.js"><\/script>/);
  assert.match(html,/id="yosTimelineSync"/);
- assert.match(html,/readOnly:true,save:snapshot/);
+ assert.doesNotMatch(html,/readOnly:true,save:snapshot/);
+ assert.match(html,/<a id="yosTimelineSync" href="scriptable:\/\/\/run\?scriptName=YOS%20DAYSTREAM%20Notion"/);
+ assert.doesNotMatch(html,/id="yosTimelineGoogle"|Googleで続ける/);
  assert.match(worker,/'\.\/yos\/daystream\/yos-tasks-auth\.js'/);
 });
 test('YOS Tasks credential is used transiently and only sanitized Tasks are saved',async()=>{
