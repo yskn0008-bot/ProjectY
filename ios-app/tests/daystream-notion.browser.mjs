@@ -34,7 +34,7 @@ try{
   assert.equal(await page.locator('#tl .card.task').count(),4,JSON.stringify(detail));
   const projected=await page.locator('#tl .card.task').evaluateAll(x=>x.map(el=>el.innerText));
   assert.deepEqual(projected.map(x=>['睡眠','起床','水を飲む','歯磨き'].find(y=>x.includes(y))),['睡眠','起床','水を飲む','歯磨き']);
-  assert.equal(await page.locator('#tl .card.task .task-copy').count(),4);
+  assert.equal(await page.locator('#tl .card.task .task-copy').count(),0,'read-only Notion cards have no edit controls');
   assert.equal(await page.locator('#tl .card.task .fixed-label').count(),4);
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),null,'preview never writes a plan');
   assert.equal(await page.evaluate(()=>localStorage.getItem('YOS_DAYSTREAM_DIRECT_IMPORTED_V1')),null);
