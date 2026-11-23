@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111721"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="DAYSTREAM"><link rel="manifest" href="./manifest.webmanifest"><title>DAYSTREAM｜YOS Web</title><style>
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f4f8fd"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="DAYSTREAM"><link rel="manifest" href="./manifest.webmanifest"><title>DAYSTREAM｜YOS Web</title><style>
 .yos-web-port{position:relative;z-index:300;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:calc(env(safe-area-inset-top) + 8px) 16px 12px;background:#262c35;color:#f5f7fb;border-bottom:1px solid #667080;font:12px -apple-system,BlinkMacSystemFont,sans-serif;filter:none;-webkit-filter:none;backdrop-filter:none;-webkit-backdrop-filter:none;opacity:1;box-shadow:none}
 .yos-web-port a,.yos-web-port button{color:#f3f6ff;border:1px solid #778395;border-radius:9px;background:#414958;padding:8px 11px;text-decoration:none;font-weight:650;opacity:1;filter:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
 .yos-web-port strong{font-size:12px;margin-right:auto;letter-spacing:.05em}
@@ -9,7 +9,7 @@
 .yos-web-port-dialog p{line-height:1.6}
 </style><style>
 /* DAYSTREAM Web: cover iOS standalone status bar and avoid duplicate safe-area spacing. */
-html{background:#262c35!important}
+html{background:#f4f8fd!important}
 body.yos-daystream-web{background:#353a44;min-height:100svh}
 body.yos-daystream-web .app{padding-top:18px}
 body.yos-daystream-web .yos-web-port{background:#262c35}
@@ -30,8 +30,8 @@ button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,inpu
 .editor{display:none;position:fixed;z-index:25;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100vw - 28px);max-width:600px;max-height:min(78dvh,670px);overflow-y:auto;overscroll-behavior:contain;margin:0;padding:17px;background:#484e59;border:1px solid #778293;border-radius:17px;box-shadow:0 22px 64px #121621a8}
 .editor.show{display:block}.editor b{font-size:15px}.editor .fields{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.editor input,.editor select{padding:9px;background:#303742;color:white;border:1px solid #7b8594;border-radius:8px;min-width:0}.editor input[type=time]{max-width:130px}.editor button,.focus button,.review button,.mutedbutton{padding:10px 13px;background:#277dbb;color:#fff;border:0;border-radius:9px;font-weight:670}.editor .danger{background:#754751;margin-left:6px}.editor .light{background:#647184}.editor .editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:18px}.editor .editor-actions button{min-height:46px;min-width:126px}.editor .editor-shortcut-run{display:inline-block;margin-top:8px;padding:10px 13px;border:1px solid #80a4cb;background:#335371;border-radius:9px;color:#f2f7fd;text-decoration:none;font-weight:680}.editor .editor-shortcut-run[hidden]{display:none}.editor .duration-control{display:flex;align-items:center;gap:5px;flex:0 1 133px}.editor .duration-control label{font-size:12px;color:#f0f4fa;white-space:nowrap}.editor .duration-control input{width:76px}.editor .edit-end{display:block;margin:-5px 0 10px;font-size:12px;color:#dce8f4;font-variant-numeric:tabular-nums}.editor .shortcut-picker{width:100%;padding:10px;border-radius:9px;margin:6px 0;background:#303742;border:1px solid #8b97a9;color:#fff}.editor .shortcut-picker[hidden]{display:none}@media(prefers-reduced-motion:reduce){.editor-backdrop{backdrop-filter:none;-webkit-backdrop-filter:none}}
 .timeline-wrap{position:relative;margin:8px 13px 20px 11px;overflow:visible}.timeline{position:relative;touch-action:pan-y}.hour{position:absolute;left:0;right:0;border-top:1px solid #ffffff0f;height:1px;pointer-events:none}.hour span{position:absolute;top:-9px;left:6px;color:#dce2eb;font-size:12px;font-weight:480;font-variant-numeric:tabular-nums}.axis{position:absolute;left:58px;top:0;bottom:0;width:1.5px;background:#c2cad2b8;pointer-events:none}.tick{position:absolute;left:54.5px;width:9px;height:9px;border-radius:50%;background:#dce2ec;z-index:2;border:2px solid #56616e;box-shadow:0 0 0 2px #d7dee755;pointer-events:none}
-.card{position:absolute;left:73px;right:0;min-height:16px;border:0;border-radius:9px;padding:1px 9px;display:flex;align-items:center;gap:8px;touch-action:none;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
-.card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;touch-action:none;transform:translate3d(0,0,0);backface-visibility:hidden}.card.task:before{display:none}.card.schedule{background:#2e77b3}
+.card{position:absolute;left:73px;right:0;min-height:16px;border:0;border-radius:9px;padding:1px 9px;display:flex;align-items:center;gap:8px;touch-action:pan-y;user-select:none;-webkit-user-select:none;color:#f8faff;background:#307ec2;box-shadow:0 2px 8px #101b2927;transition:filter .18s ease,box-shadow .18s ease;will-change:transform;overflow:hidden}
+.card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#46b9fb;opacity:.9;pointer-events:none}.card.habit{background:#24976e}.card.habit:before{background:#4bd9a1}.card.task{background:#823db0;transform:translate3d(0,0,0);backface-visibility:hidden}.card.task:before{display:none}.card.schedule{background:#2e77b3}
 .card.neutral{background:#636b76}.card.neutral:before{background:#97a6b9}.card.sleep{background:#325477}.card.sleep:before{background:#48bdf5}
 .card.task{cursor:pointer;border-radius:13px;padding:6px 11px;box-shadow:0 4px 12px #17102348}.card.task .task-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;min-width:0;width:100%;height:100%}.card.task .task-copy b{font-size:13.5px;line-height:1.12;font-weight:730;flex:none;max-width:100%;letter-spacing:.06px}.card.task .task-copy small{font-size:11.5px;line-height:1.1;font-weight:610;letter-spacing:.1px;margin:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;color:#fffce9;opacity:.94}.card.task.compact{border-radius:11px}.card.task.compact .task-copy b{font-size:13px}.card.task.compact .task-copy small{font-size:11px}.card.task.swiping{filter:brightness(1.14)}.card.task.drag-preview{z-index:9;box-shadow:0 11px 27px #10131a8a;filter:brightness(1.1);transition:box-shadow .18s ease,filter .18s ease}
 .compat-status{font-size:11px;color:#d8e0ea;margin:6px 14px 3px;line-height:1.55}
@@ -65,8 +65,11 @@ button:active{opacity:.8}@media(min-width:640px){.dock{left:calc((100vw - 640px)
 .yos-history-actions{display:flex;gap:5px;align-items:center;flex-shrink:0;position:fixed;right:max(14px,calc((100vw - 610px)/2));bottom:calc(97px + env(safe-area-inset-bottom));z-index:19;padding:5px;border:1px solid #ffffff35;border-radius:11px;background:#303741eb;box-shadow:0 5px 18px #0006}
 .yos-history-button{display:grid;place-items:center;min-width:32px;height:30px;border:1px solid #ffffff50;background:#ffffff12;border-radius:8px;color:#f2f7ff;font-size:21px;line-height:1;padding:0}
 .yos-history-button:disabled{opacity:.35;cursor:default}
+/* Fixed Apple calendar blocks may fill most of the iPhone viewport.
+   Let native touch scrolling pass through them; only local tasks use drag grips. */
 .card.task{touch-action:pan-y}
-.card.task .task-drag-grip{display:grid;place-items:center;flex:0 0 20px;align-self:stretch;min-height:25px;touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;font-size:24px;color:#f0def8;cursor:grab;line-height:1}
+.card.fixed-scroll{touch-action:pan-y;overscroll-behavior-y:auto}
+.card.task .task-drag-grip{display:grid;place-items:center;flex:0 0 38px;min-width:38px;align-self:stretch;min-height:25px;touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;font-size:24px;color:#f0def8;cursor:grab;line-height:1}
 .card.task .task-drag-grip:active{cursor:grabbing}
 .card.task.press-armed{outline:2px solid #dce6ff;outline-offset:-2px;filter:brightness(1.1)}
 .editor #editorTitle,.editor .edit-end,.editor label{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -125,23 +128,292 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
 .timeline .card.done b{text-decoration:line-through}
 .timeline .card.drag-preview,.timeline .card.moving{z-index:10;box-shadow:0 8px 20px #080d17bb}
 @media(max-width:370px){.timeline{--card-inset:69px}.timeline .layer-status{font-size:9px}}
-</style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script></head><body class="yos-daystream-web"><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
-<a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
-<button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
-<button id="yosWebHistory" type="button">行動学習</button>
-<span class="yos-web-port-note" id="yosWebSourceState">端末内だけに保存 · Notion/Appleカレンダー自動同期は未接続 · Scriptableのデータは変更しません</span>
-<input id="yosWebFile" type="file" accept=".json,.txt,.ics,application/json,text/plain,text/calendar" hidden>
-</div><section id="yosWebHistoryPanel" class="yos-web-port-dialog" hidden aria-label="行動学習の候補"><div id="yosWebHistoryRows"></div></section>
+/* DAYSTREAM · light appearance shared by Web and Scriptable. */
+html{background:#f4f8fd!important;color-scheme:light}
+:root{--bg:#f4f8fd;--bg2:#fff;--text:#1d2d44;--muted:#52657e;--line:#d5e1ee;--blue:#246aa3;--green:#20755c;--violet:#744ba5}
+html body.yos-daystream-web{
+ background:radial-gradient(350px 440px at 92% 0,#dcf5eb 0,transparent 100%),
+ radial-gradient(335px 390px at 0 4%,#e9e1fa 0,transparent 100%),linear-gradient(#ebf5ff,#f9fbfe 540px,#f4f8fd);
+}
+.yos-daystream-web .app{padding-top:18px}
+body.yos-daystream-web .yos-web-port,.yos-daystream-web .dock{background:#ffffffed;color:var(--text);border-color:var(--line)}
+.yos-daystream-web .yos-web-port a,.yos-daystream-web .yos-web-port button,.yos-web-port-dialog button{
+ background:#edf4fc;border-color:var(--line);color:#254867
+}
+.yos-web-port-note,.subtitle,.notice,.gesture-help,.metric label{color:var(--muted)}
+.yos-web-port-dialog{background:#f5faff;color:var(--text)}
+.native-tools{max-width:640px;margin:0 auto;padding:5px 16px 0}
+.native-tools summary{width:max-content;cursor:pointer;list-style:none;padding:6px 9px;border-radius:9px;color:#425e78;font-size:11px;background:#ffffffb0}
+.native-tools summary::-webkit-details-marker{display:none}
+.native-tools summary:before{content:'›';display:inline-block;margin-right:6px;font-weight:800}
+.native-tools[open] summary:before{transform:rotate(90deg)}
+.native-tools .yos-web-port{border:1px solid var(--line);border-radius:13px;padding:8px;margin-top:4px}
+.yos-history-actions{left:max(8px,calc((100vw - 624px)/2));right:auto;background:#ffffffed;border-color:#d5e1ee;box-shadow:0 4px 13px #2e476426}
+.yos-history-actions:not(:has(button:not(:disabled))){display:none}
+.yos-history-button{background:#edf5fc;border-color:#d5e1ee;color:#385d7d}
+.top{padding-inline:16px}
+.headrow{align-items:flex-end}
+.headrow h1{font-size:clamp(19px,5.5vw,25px);line-height:1.16;margin:5px 0 4px;letter-spacing:-.04em}
+.daystream-date{font-size:13px;color:#405a78;font-weight:650}
+.actions{gap:5px}.iconbtn{border-radius:12px;color:#245477;background:#ffffffab;border:1px solid #fff}
+.iconbtn svg{width:18px;height:18px}
+#addBtn{background:#20755c;color:#fff;border-color:#20755c}
+.day,.tab{color:#405a78}.yos-daystream-web .day.active,.calendar-modes button.active{background:#20755c;color:#fff}
+.calendar-modes{background:#e5edf6;border-color:#e2eafa}.calendar-modes button{color:#405875}
+.yos-daystream-web .summary{background:#ffffffc9;border:1px solid var(--line);border-radius:14px}
+.yos-daystream-web .metric{border-color:var(--line)}
+.yos-daystream-web .ring{background:conic-gradient(#258f71 0 var(--pct),#d8e8ed var(--pct) 100%)}
+.yos-daystream-web .ring:after{background:#fff}
+.zoomBtn{background:#fff;border-color:#d5e1ee;color:#3d5674}
+.timeline-legend{display:flex;flex-wrap:wrap;gap:5px;margin:10px 14px 0}
+.timeline-legend span{display:flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:3px 8px;font-size:11px;color:#405570}
+.timeline-legend span:before{content:'';width:7px;height:7px;border-radius:50%;background:#457fca}
+.timeline-legend .legend-habit:before{background:#2b9270}
+.timeline-legend .legend-local:before{background:#8659bf}
+.gesture-help{line-height:1.5;margin-bottom:14px}
+.timeline-wrap{margin:8px 13px 20px 10px}
+.timeline{--card-inset:59px}
+.timeline .axis{left:46px;width:1px;background:linear-gradient(#8acdb5,#93c8eb 55%,#b6a2de)}
+.timeline .hour{border-color:#dce7f1}
+.timeline .hour span{left:2px;color:#50647c;font-size:11px}
+.timeline .tick{left:43px;background:#348d81;border-color:#f8fbff}
+.timeline .nowline{background:#22856a}
+.timeline .nowline:before{left:36px;background:#22856a;border-color:#effbf7}
+.timeline .nowbadge{right:calc(100% - 43px);background:#1d765e;color:#fff;font-size:10px;padding:3px 4px}
+.timeline .card{
+ --layer-surface:#e5f0ff;--layer-edge:#afcdeb;--zone-surface:#e7f1fc;--zone-edge:#bfd7ec;--signal:#365774;
+ background:var(--layer-surface);border-color:var(--layer-edge);border-radius:12px;color:#20334d;
+ box-shadow:0 2px 5px #26436212;padding-inline:7px 6px;gap:5px;touch-action:pan-y;-webkit-touch-callout:none;
+}
+.timeline .card.task{--layer-surface:#f0e7fb;--layer-edge:#d2bdeb;--zone-surface:#f4edfd;--zone-edge:#d9c9ea}
+.timeline .card.habit{--layer-surface:#dff5ec;--layer-edge:#a7d9c6;--zone-surface:#e6f5ee;--zone-edge:#addac9}
+.timeline .card.sleep{--layer-surface:#e8e9fa;--layer-edge:#c5c9e7;--zone-surface:#eef0fb;--zone-edge:#c5c9e7}
+.timeline .card.compat-positive{--layer-surface:#dff5ec;--layer-edge:#a0d6c1;--zone-surface:#e6f5ee;--zone-edge:#addac9;--signal:#17644b}
+.timeline .card.compat-negative{--layer-surface:#fff0da;--layer-edge:#dcbd8a;--zone-surface:#fff6e8;--zone-edge:#e5c896;--signal:#80500e}
+.timeline .card.compat-danger{--layer-surface:#fce5eb;--layer-edge:#db9eb0;--zone-surface:#faeff3;--zone-edge:#d8a7b7;--signal:#8d324d}
+.timeline .card small,.timeline .card.task .task-copy small{color:#455b76}
+.timeline .card-icon{display:grid;place-items:center;flex:0 0 20px;width:20px;height:20px;border-radius:6px;background:#ffffffb5;color:#25669e}
+.timeline .card-icon svg{stroke:currentColor;width:14px;height:14px}
+.timeline .task .card-icon{color:#7545a4}.timeline .habit .card-icon{color:#20755c}
+.timeline .event-copy{flex:1}
+.timeline .fixed-label{color:#3b5878;background:#ffffffb5;padding:2px 4px;border-radius:5px;font-size:9px;white-space:nowrap}
+.timeline .card .task-drag-grip{
+ display:grid;place-items:center;flex-basis:38px;min-width:38px;align-self:stretch;border:0;border-radius:8px;background:#ffffff8f;
+ color:#4c527a;touch-action:none;font-size:21px;margin-right:0;
+}
+.timeline .yos-backdrop .task-drag-grip{height:36px}
+.timeline .yos-backdrop{background:var(--zone-surface);border-color:var(--zone-edge);box-shadow:none}
+.timeline .card.press-armed,.timeline .card.drag-preview{
+ border-color:#25846b;outline:2px solid #72baab;box-shadow:0 9px 20px #316d6455;filter:none
+}
+.timeline .card.selected{outline-color:#2873ad}
+.tab.active{color:#14664f;font-weight:750}
+.compat-status,.compat-status .overlap-details{color:#354e67}
+.compat-status .overlap-button{background:#fff3e2;border-color:#e4c49c;color:#75501e}
+.compat-key .pos{color:#17644b}.compat-key .neg{color:#80500e}.compat-key .danger{color:#8d324d}
+.editor,.tabbox,.review,.focus,.gesture-delete,.month-pop,.week-overview,.all-day{
+ background:#fdfdff;border-color:var(--line);color:var(--text);box-shadow:0 10px 25px #3350701a;
+}
+.editor input,.editor select,.editor .shortcut-picker,.tabbox input[type=time],.searchrow input{
+ background:#f6faff;color:var(--text);border-color:#c8d6e8
+}
+.editor :is(label,small,.edit-end),.tabbox p,.review p,.review .muted,.tabbox .muted,.all-day :is(b,span),
+.yos-source-row small,.month-pop .coverage,.week-overview .coverage,.week-day .empty,.week-day .more{color:var(--muted)}
+.editor small[style]{color:var(--muted)!important}
+.week-day,.month-grid button,.month-grid span{color:var(--text);border-color:var(--line)}
+.month-grid button.outside{color:#61748b}
+.week-day .agenda .task{color:#744ba5}.week-day .agenda .habit{color:#20755c}.week-day .agenda .due{color:#80500e}
+.move-sheet{
+ width:min(440px,calc(100% - 24px));max-height:calc(100dvh - 34px);margin:auto;
+ padding:16px;border:1px solid #c9dceb;border-radius:22px;color:var(--text);
+ background:linear-gradient(150deg,#ecf9f4,#fff 44%,#f1ebfa);box-shadow:0 20px 50px #29466250;
+}
+.move-sheet header{display:grid;gap:5px;margin-bottom:13px}
+.move-sheet h2,.move-sheet h3,.move-sheet p{margin:0}
+.move-sheet h2{font-size:17px}.move-sheet header p{font-size:19px;font-weight:750;overflow-wrap:anywhere}
+.move-time{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:650}
+.move-time input{min-height:44px;padding:5px 10px;border:1px solid #c7d8e7;border-radius:10px;color:var(--text);background:#fff}
+#moveRange{font-variant-numeric:tabular-nums;margin:8px 0;color:#45617f;font-size:13px}
+.move-impact{padding:12px;border:1px solid var(--line);border-radius:13px;background:#ffffffd9}
+.move-impact h3{font-size:14px;color:#1e664f}.move-impact h3[data-level=danger]{color:#8d324d}
+.move-impact ul{padding-left:17px;margin:6px 0 0;font-size:12px;line-height:1.55;color:#405570;overflow-wrap:anywhere}
+.move-impact ul:empty{display:none}
+.move-sheet .move-scope{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}
+.move-sheet footer{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.move-sheet footer button{padding:8px 13px;min-height:44px;border-radius:10px;border:1px solid #bdcfe1;background:#fff;color:#355470;font-weight:650}
+.move-sheet #moveSave{background:#20755c;border-color:#20755c;color:#fff}
+.move-sheet #moveSave:disabled{opacity:.5}
+#moveSuggest{padding:8px 10px;margin-top:8px;min-height:38px;border:1px solid #abd7c6;border-radius:10px;background:#e4f5ed;color:#205d48;font-weight:650}
+#moveSuggest[hidden]{display:none}
+@media(max-width:350px){
+ .timeline .layer-status{font-size:8px}
+ .timeline .card{gap:4px;padding-inline:5px}
+ .timeline .card-icon{flex-basis:16px;width:16px;height:16px}
+ .actions{gap:4px}.actions .iconbtn{width:27px}
+}
+/* LIFE FLOW overview, timeline editing and placement review. */
+html body.yos-daystream-web{
+ background:radial-gradient(170px 280px at 100% 14%,#b6ecdcad 0,transparent 100%),
+ radial-gradient(230px 390px at 0 56%,#dfe9ff 0,transparent 100%),
+ radial-gradient(300px 210px at 64% 0,#e9dcff 0,transparent 100%),
+ linear-gradient(160deg,#ecf9ff 0,#fdfaff 36%,#f7fbff 78%,#fff3e3 100%);
+ background-attachment:fixed;
+}
+.top{padding-inline:16px}
+.yos-daystream-web .app{padding-top:14px}
+.flow-date-row,.flow-date-pill{display:flex;align-items:center;gap:7px}
+.flow-date-pill{flex:1;justify-content:space-between;border:1px solid #ffffffbe;border-radius:26px;min-width:0;background:linear-gradient(100deg,#fff9,#e8f5ffc9);box-shadow:0 4px 12px #aac5e82b}
+.flow-date-pill button,.flow-edit-bar button,.flow-advice-bar button{border:0;background:transparent;color:#142640;min-width:37px;min-height:43px;font-size:25px;line-height:1}
+#dateTitle{font-size:clamp(13px,4vw,18px);white-space:nowrap}
+.flow-date-row #dateBtn{width:43px;height:43px;border-radius:50%;flex:none;background:#ffffff91}
+#flowEdit,#flowDone{border:1px solid #ffffffa6;border-radius:21px;background:#e1f4eb;color:#165e48;padding:0 11px;min-height:37px;font-size:12px;font-weight:750}
+body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
+.calendar-modes{min-height:30px;border-radius:24px;background:#e3ebf4a8;margin:9px 16px 2px}
+#yosTimelineSync{flex:1.45;display:flex;justify-content:center;align-items:center;min-height:32px;padding:0 5px;border-radius:20px;background:#e4f4ef;color:#185e49;text-decoration:none;font-size:11px;font-weight:750;white-space:nowrap}
+.yos-sync-panel{margin:6px 16px;color:#35536b;font-size:12px}
+.yos-sync-panel [role=status]{margin:0 0 4px}
+.flow-editing .yos-sync-panel{display:none}
+.calendar-modes button{min-height:27px;border-radius:20px;font-size:11px}
+.yos-daystream-web .calendar-modes button.active{background:linear-gradient(110deg,#238564,#338f70)}
+.flow-tools{margin:4px 16px;color:#415b76}
+.flow-tools>summary{cursor:pointer;font-size:10px;text-align:right;padding:2px 5px}
+.flow-tools .actions{justify-content:flex-end;margin:5px 0}
+.flow-tools .summary,.flow-tools .microtools{margin-inline:0}
+.flow-add#addBtn{position:fixed;right:max(15px,calc((100vw - 610px)/2));bottom:calc(67px + env(safe-area-inset-bottom));z-index:17;width:45px;height:45px;border-radius:15px;background:linear-gradient(135deg,#2c9575,#14765c);box-shadow:0 7px 17px #24745844}
+.flow-add svg{width:23px;height:23px}
+.compat-status:not(:has(button)){display:none}
+.timeline-legend{justify-content:center;margin:5px 10px 0}
+.timeline-legend span{background:#ffffffd1;padding:4px 8px;box-shadow:0 3px 8px #6071ad13}
+.gesture-help{display:none}
+.timeline-wrap{margin:17px 14px 16px 12px}
+.timeline{--card-inset:59px}
+.timeline .axis{left:45px;width:2px;background:linear-gradient(#86c8af,#62a6ec 38%,#ac92e8 62%,#76b7e2)}
+.timeline .hour{border:0}
+.timeline .hour span{left:0;color:#2d3e56;font-size:12px;font-weight:540}
+.timeline .tick{left:42px;width:8px;height:8px;background:var(--flow-edge,#5a9cda)}
+[data-flow-tone=blue]{--flow-light:#c4e2ff;--flow-other:#d3dff8;--flow-edge:#6aafe9;--flow-ink:#206bc0}
+[data-flow-tone=mint]{--flow-light:#c1edd6;--flow-other:#d9edcc;--flow-edge:#77bf9f;--flow-ink:#148961}
+[data-flow-tone=violet]{--flow-light:#dbcaf8;--flow-other:#e8d5f7;--flow-edge:#ae93e4;--flow-ink:#794dc4}
+[data-flow-tone=peach]{--flow-light:#ffdfc8;--flow-other:#ffe9dc;--flow-edge:#eca77d;--flow-ink:#b85c33}
+.timeline .card[data-flow-tone]{border-color:var(--flow-edge);background-image:linear-gradient(105deg,var(--flow-light),var(--flow-other));padding-inline:8px 6px;gap:8px}
+.timeline .card[data-flow-tone].yos-backdrop{background-image:none}
+.timeline .card .card-icon{color:var(--flow-ink);background:#fff8;width:25px;height:25px;flex-basis:25px;border-radius:8px}
+.timeline .card .card-icon svg{width:18px;height:18px;stroke-width:2}
+.timeline .card .fixed-label{opacity:.85}
+.timeline .card .task-drag-grip{color:var(--flow-ink);background:#ffffff6e}
+.timeline .card.drag-preview{outline:2px dashed var(--flow-ink);outline-offset:2px}
+.timeline .card.yos-backdrop>.card-icon,.timeline .card.yos-backdrop>.fixed-label{position:sticky;top:0}
+#flowDragHint{position:fixed;bottom:calc(72px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:20;max-width:92vw;padding:9px 13px;background:#f0fff7;border:1px solid #65b99b;border-radius:13px;box-shadow:0 5px 18px #54718a35;color:#195c49;font-weight:750;white-space:nowrap;pointer-events:none}
+#flowDragHint[data-level=danger]{background:#fff0f4;border-color:#db93a8;color:#853650}
+.flow-edit-bar{display:none}
+.flow-editing .flow-edit-bar,.flow-advice-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f9fbffe8;border-bottom:1px solid #dbe6ef;padding:3px 2px}
+.flow-editing :is(.flow-date-row,.calendar-modes,.flow-tools,#gestureHelp,.dock,.flow-add,.native-tools){display:none}
+.flow-editing .timeline{margin-top:23px}
+.move-sheet[open]{
+ position:fixed;inset:0;display:grid;align-items:end;justify-items:center;
+ width:100%;height:100%;max-width:none;max-height:none;
+ margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:hidden;
+}
+.move-sheet-content{
+ width:min(460px,100%);max-height:min(560px,68dvh);padding:0 12px max(16px,env(safe-area-inset-bottom));
+ border:1px solid #d0daea;border-radius:23px 23px 0 0;
+ background:radial-gradient(ellipse at 100% 0,#d5edff,transparent 68%),linear-gradient(170deg,#e2e7fb,#f0ebf8 60%,#f3f8e8);
+ overflow:auto;overscroll-behavior:contain;scroll-padding-top:60px;
+}
+.move-sheet::backdrop{background:#34496727}
+.flow-advice-bar{position:sticky;top:0;z-index:2;margin:0 -12px 9px;padding:4px 12px;background:#f9fbff}
+.flow-advice-bar :is(#moveCancel,#moveSave){min-height:44px;padding:0 12px;border-radius:24px;font-size:13px;font-weight:750}
+.flow-advice-bar #moveSave{background:#287b60;color:white}
+.flow-advice-card{padding:16px;margin:0 0 10px;border-radius:23px;background:#ffffffdf;border:1px solid #ffffffed;box-shadow:0 5px 15px #606b9824}
+.flow-advice-card h2,.flow-advice-card h3{color:#172038;font-size:16px;font-weight:780}
+.flow-proposal{display:flex;gap:12px;align-items:center;margin:16px 0}
+.flow-proposal>span{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:linear-gradient(150deg,#5ece8c,#148e50);color:white;font-size:28px;font-weight:750}
+.flow-proposal strong{font-size:19px;overflow-wrap:anywhere}
+.flow-proposal #moveRange{color:#4d637d;margin:2px 0 0}
+.flow-rating{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:10px;margin-top:12px;border-top:1px solid #ccd8e5}
+.flow-rating span{background:#d8f5e3;color:#166046;border-radius:14px;padding:5px 9px;text-align:center;font-size:12px;font-weight:700}
+.flow-rating span[data-level=danger]{background:#ffe4eb;color:#922f4d}
+.move-impact ul{padding:0;margin:8px 0 0;list-style:none}
+.move-impact li{padding:8px 6px;border-bottom:1px solid #e3edf4;overflow-wrap:anywhere}
+.move-impact li:before{content:'•';color:#158861;margin-right:7px}
+.move-impact li:last-child{border-bottom:0}
+/* Glass surfaces and status accents on the existing day view. */
+body.yos-daystream-web .app{padding-top:calc(6px + env(safe-area-inset-top))}
+.yos-daystream-web .top{padding-top:0}
+body.yos-daystream-web.flow-editing .app{padding-top:26px}
+.timeline-legend{margin-top:10px;gap:8px}
+.timeline-legend span{font-size:12px;font-weight:700;padding:5px 10px}
+.timeline-legend span:before{width:9px;height:9px}
+.timeline .axis{left:43px}
+.timeline .tick{left:39.5px;pointer-events:none}
+.timeline{--card-inset:56px}
+.timeline .card[data-flow-tone]{
+ background-color:var(--flow-light);
+ background-image:linear-gradient(112deg,#ffffff40,transparent 65%),linear-gradient(105deg,var(--flow-light),var(--flow-other));
+ border:2px solid var(--flow-stroke);border-radius:12px;box-shadow:inset 0 1px 1px #ffffffa8,0 2px 5px #345c8310;
+ font-family:ui-rounded,"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN",sans-serif;
+}
+.timeline .card[data-flow-tone=blue]{--flow-stroke:#3d83c4;--flow-type:#315e89}
+.timeline .card[data-flow-tone=mint]{--flow-stroke:#2b9677;--flow-type:#2d735d}
+.timeline .card[data-flow-tone=violet]{--flow-stroke:#8760b3;--flow-type:#70518c}
+.timeline .card[data-flow-tone=peach]{--flow-stroke:#c67655;--flow-type:#a65d48}
+.timeline .card[data-flow-tone] :is(b,small),.timeline .card[data-flow-tone] .task-copy small{color:var(--flow-type);font-family:inherit}
+.timeline .card[data-flow-tone] b{font-weight:650;letter-spacing:.01em}
+.timeline .card[data-flow-tone] small{font-weight:550;opacity:.85}
+.timeline .card[data-flow-tone].yos-backdrop.is-overlapped{background:color-mix(in srgb,var(--flow-light) 50%,white)}
+.timeline .card .card-icon{width:29px;height:29px;flex-basis:29px;background:#ffffff7c}
+.timeline .card.compat-positive{--signal-accent:#299d6b}
+.timeline .card.compat-negative{--signal-accent:#ba701f}
+.timeline .card.compat-danger{--signal-accent:#c1475e}
+.timeline .card[data-flow-tone]:is(.compat-positive,.compat-negative,.compat-danger){
+ box-shadow:inset 3px 0 var(--signal-accent),inset 0 1px 1px #ffffffbc,0 3px 8px #345c8311;
+}
+.timeline .card .task-drag-grip{background:transparent}
+.flow-editing .flow-edit-bar{position:sticky;top:0;z-index:15}
+.flow-editing .top{display:contents}
+.flow-editing .flow-edit-bar{padding-inline:14px}
+.timeline .card.drag-preview{pointer-events:none;z-index:25;will-change:transform;box-shadow:0 18px 38px #304a7650;filter:saturate(1.07)}
+.timeline .card.drag-preview,.timeline .card.drag-preview[data-placement]{outline:none;outline-offset:0}
+.timeline .card.short-row{border-radius:8px;box-shadow:inset 0 1px 0 #ffffff9c;padding-block:2px;gap:6px}
+.timeline .card.short-row .card-icon{width:5px;flex:0 0 5px;height:55%;border-radius:4px;padding:0;background:var(--flow-ink)}
+.timeline .card.short-row .card-icon svg{display:none}
+.timeline .card.short-row .task-copy,.timeline .card.short-row .event-copy{display:flex;flex-direction:row;align-items:center;gap:6px;min-width:0;height:100%}
+.timeline .card.short-row .task-copy b,.timeline .card.short-row .event-copy b{font-size:13px;line-height:1.15;white-space:normal;overflow-wrap:anywhere;flex:1 1 auto;min-width:0}
+.timeline .card.short-row .task-meta{flex:0 0 auto;white-space:nowrap}
+.timeline .card.short-row .task-meta small,.timeline .card.short-row .task-copy small{font-size:10px;line-height:1.1;white-space:nowrap}
+.timeline .card.short-row .task-drag-grip{flex-basis:38px;min-width:38px;margin:0;padding:0;font-size:15px;border:0;opacity:.65}
+.timeline .card.drag-neighbor{z-index:9;will-change:transform;transition:transform 190ms cubic-bezier(.22,.82,.25,1),filter 190ms ease;filter:saturate(.94)}
+.timeline .card.drag-neighbor.yos-backdrop{z-index:4}
+@media(prefers-reduced-motion:reduce){.timeline .card.drag-neighbor{transition:none}.timeline .card.drag-preview{filter:none}}
+.timeline .card.drag-preview[data-placement]{outline-color:var(--placement-ink);box-shadow:inset 3px 0 var(--placement-ink),0 12px 26px #55468335}
+[data-placement=positive]{--placement-ink:#299d6b}
+[data-placement=negative]{--placement-ink:#ba701f}
+[data-placement=danger]{--placement-ink:#c1475e}
+[data-placement=unknown]{--placement-ink:#778ca8}
+
+#flowDragHint{white-space:normal;width:min(340px,calc(100% - 32px));text-align:left;bottom:calc(76px + env(safe-area-inset-bottom));padding:12px 14px}
+.flow-editing #flowDragHint{bottom:calc(16px + env(safe-area-inset-bottom))}
+#flowDragHint strong,#flowDragHint small{display:block}
+#flowDragHint small{margin:3px 0 0;font-weight:550;line-height:1.45}
+#flowDragHint[data-level=negative],.flow-rating span[data-level=negative]{background:#fff2df;color:#834a10;border-color:#e3b56e}
+#flowDragHint[data-level=unknown],.flow-rating span[data-level=unknown]{background:#eef2f9;color:#425570;border-color:#b3c0d4}
+.flow-advice-card{padding:17px 18px;margin-bottom:12px}
+.flow-advice-card h3{display:flex;gap:8px;align-items:center}
+.flow-advice-card h3 span{color:#5368b6}
+.flow-proposal>span[data-level=negative]{background:linear-gradient(145deg,#f2ac56,#ba711d)}
+.flow-proposal>span[data-level=danger]{background:linear-gradient(145deg,#e18c9b,#a4455c)}
+.flow-proposal>span[data-level=unknown]{background:linear-gradient(145deg,#aabcda,#657b9e)}
+#moveOptions{margin-top:10px;display:grid;gap:6px}
+#moveOptions button,#flowCandidates{border:1px solid #b8d8ce;background:#eff8f6;color:#1c5e4a;border-radius:12px;padding:9px 12px;min-height:42px;text-align:left}
+#flowCandidates{margin-top:10px}
+#moveEvidence a:not([hidden]){display:inline-block;color:#305a91;margin-top:8px;font-size:12px}
+</style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script></head><body class="yos-daystream-web">
 <div class="app">
   <div class="top">
-    <div class="headrow"><div><div class="datehead" id="dateTitle">今日</div><div class="subtitle" id="dayCaption">Today</div></div>
-      <div class="actions">
+    <div class="flow-edit-bar"><button id="flowBack" type="button" aria-label="編集を閉じる">‹</button><strong>タイムラインを編集</strong><button id="flowDone" type="button">完了</button></div>
+    <div class="flow-date-row" role="group" aria-label="タイムラインの日付"><div class="flow-date-pill"><button id="flowPrev" type="button" aria-label="前の日">‹</button><strong id="dateTitle">今日</strong><button id="flowNext" type="button" aria-label="次の日">›</button><span id="dayCaption" hidden></span></div>
         <button class="iconbtn" type="button" id="dateBtn" aria-label="月カレンダーを開く" aria-controls="monthPicker" aria-expanded="false"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></button>
-        <button class="iconbtn" id="searchBtn" aria-label="検索"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></button>
-        <button class="iconbtn" id="addBtn" aria-label="予定を追加"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></svg></button>
-        <button class="iconbtn" id="moreBtn" aria-label="メニュー"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
-      </div>
-    </div>
+    <button id="flowEdit" type="button">編集</button></div>
     <div class="week" id="weekStrip" aria-label="日付切り替え"></div>
     <input type="date" id="datePicker" hidden aria-label="表示日付（内部）">
     <section class="month-pop" id="monthPicker" hidden aria-label="日付を選ぶ月カレンダー">
@@ -150,7 +422,20 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
       <p class="coverage" id="monthCoverage"></p>
     </section>
   </div>
-  <div class="calendar-modes" id="calendarModes" role="group" aria-label="DAYSTREAM表示切替"><button type="button" data-view="month" aria-pressed="false">月</button><button type="button" data-view="week" aria-pressed="false">週</button><button type="button" data-view="day" aria-pressed="true">日・24時間</button></div>
+  <div class="calendar-modes" id="calendarModes" role="group" aria-label="DAYSTREAM表示切替"><button type="button" data-view="day" aria-pressed="true">24時間</button><button type="button" data-view="week" aria-pressed="false">週</button><button type="button" data-view="month" aria-pressed="false">月</button><a id="yosTimelineSync" href="scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion" title="iPhoneのScriptableでNotionを取得してタイムラインを開く">YOS Tasksを同期</a></div>
+  
+  <details class="native-tools"><summary>接続・データ</summary><div class="yos-web-port" role="navigation" aria-label="DAYSTREAM Web版">
+<a href="../">YOS</a><strong>DAYSTREAM · WEB</strong>
+<button id="yosWebImport" type="button">データ読込</button><button id="yosWebExport" type="button">書き出し</button>
+<button id="yosWebHistory" type="button">行動学習</button>
+<span class="yos-web-port-note" id="yosWebSourceState">端末内だけに保存 · Notion/Appleカレンダー自動同期は未接続 · Scriptableのデータは変更しません</span>
+<input id="yosWebFile" type="file" accept=".json,.txt,.ics,application/json,text/plain,text/calendar" hidden>
+</div></details><section id="yosWebHistoryPanel" class="yos-web-port-dialog" hidden aria-label="行動学習の候補"><div id="yosWebHistoryRows"></div></section>
+  <details class="flow-tools"><summary>表示・操作</summary>      <div class="actions">
+        <button class="iconbtn" id="searchBtn" aria-label="検索"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></button>
+
+        <button class="iconbtn" id="moreBtn" aria-label="メニュー"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
+      </div>
   <section class="summary" aria-label="今日の概要">
     <div class="metric"><span class="ring" id="progressRing" style="--pct:0%"></span><span class="stack"><label>今日の進捗</label><strong id="todayProgress">—</strong></span></div>
     <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="m8 11 2 2 5-5m-7 8h8"/></svg>タスク</label><strong id="taskCount">—</strong></div>
@@ -158,13 +443,20 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
     <div class="metric"><label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16A8 8 0 0 1 8 4 8 8 0 1 0 20 16Z"/></svg>睡眠予定</label><strong id="sleepInfo">—</strong></div>
   </section>
   <div class="searchrow" id="searchRow" hidden><input id="searchInput" type="search" placeholder="予定・タスクを検索" aria-label="検索"></div>
-  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><div class="yos-history-actions" role="group" aria-label="操作の取り消しとやり直し"><button id="yosUndoBtn" class="yos-history-button" type="button" aria-label="操作を戻す" title="操作を戻す" disabled>↶</button><button id="yosRedoBtn" class="yos-history-button" type="button" aria-label="操作を進める" title="操作を進める" disabled>↷</button></div><button class="zoomBtn" id="elasticBtn" type="button" aria-pressed="true" aria-label="時間枠の自動サイズ調整を切り替え">自動サイズ ON</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
+  <div class="microtools"><div class="notice" id="notice" aria-live="polite">端末内の予定を表示します</div><button class="zoomBtn" id="yosTestToggle" type="button" hidden aria-label="テスト予定を表示">テスト表示</button><button class="zoomBtn" id="elasticBtn" type="button" aria-pressed="true" aria-label="時間枠の自動サイズ調整を切り替え">自動サイズ ON</button><button class="zoomBtn" id="zoomBtn" type="button" aria-label="タイムラインの表示倍率を切り替え">詳細に拡大</button></div>
+  </details>
   <div class="all-day" id="dayAllDay" hidden aria-label="終日の予定"></div>
   <div class="editor-backdrop" id="editorBackdrop" aria-hidden="true"></div>
   <div class="editor" id="editor" role="dialog" aria-modal="true" aria-labelledby="editorTitle"><b id="editorTitle">予定を追加</b><div class="fields"><input id="newTitle" placeholder="名前" style="flex:1 1 160px" aria-label="名前"><input id="newTime" type="time" value="10:00" aria-label="開始時刻"><div class="duration-control"><input id="newDuration" type="number" min="5" max="1440" step="5" value="30" aria-label="所要時間（分）"><label for="newDuration">分</label></div><select id="newKind" aria-label="種類"><option value="task">タスク</option><option value="habit">習慣</option><option value="schedule">予定</option></select></div><span class="edit-end" id="editEnd">終了予定：10:30</span><div id="shortcutField"><label for="shortcutPicker">ショートカット（任意）</label><select id="shortcutPicker" class="shortcut-picker" aria-label="登録済みショートカットから選ぶ"><option value="">候補から選ぶ</option></select><input id="newShortcut" maxlength="100" placeholder="既存ショートカットの正式名称" aria-label="起動するiPhoneショートカット名" style="width:100%;margin:5px 0 9px"><small style="color:#d5dce7">設定したショートカットはここから実行できます。実行しても自動完了にはなりません。</small><a id="runShortcut" class="editor-shortcut-run" href="#" hidden>ショートカットを実行</a></div><div class="editor-actions"><button id="saveBtn">追加する</button><button id="cancelEditor" class="light" type="button">閉じる</button></div></div>
   <section class="week-overview" id="weekOverview" hidden aria-label="週の予定"><div class="week-overview-head"><button id="weekPrev" type="button" aria-label="前週">‹</button><strong id="weekCaption"></strong><button id="weekNext" type="button" aria-label="翌週">›</button></div><div id="weekAgenda"></div><p class="coverage" id="weekCoverage"></p></section>
+  <button class="iconbtn flow-add" id="addBtn" aria-label="予定を追加"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></svg></button>
+  <div class="yos-history-actions" role="group" aria-label="操作の取り消しとやり直し"><button id="yosUndoBtn" class="yos-history-button" type="button" aria-label="操作を戻す" title="操作を戻す" disabled>↶</button><button id="yosRedoBtn" class="yos-history-button" type="button" aria-label="操作を進める" title="操作を進める" disabled>↷</button></div>
   <div class="compat-status" id="compatStatus" aria-live="polite">相性を判定中</div>
-  <p class="gesture-help" id="gestureHelp">タスク：軽くタップで完了 ｜ 少し押さえて上下に動かすと移動 ｜ 長押しで編集 ｜ 左スワイプで削除</p>
+  <div id="gestureHelp">
+  <div class="timeline-legend" aria-label="カードの種類"><span class="legend-fixed">固定予定</span><span class="legend-habit">習慣</span><span class="legend-local">タスク</span></div>
+  <p class="gesture-help">上下にスワイプでスクロール · ⠿ または長押しからドラッグで時刻移動</p>
+  </div>
+  <div id="flowDragHint" hidden aria-hidden="true"><strong></strong><small></small></div>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p><button id="yosWebTaskRefresh" type="button">iPhoneでNotionタスクを開く</button>
@@ -175,6 +467,21 @@ html:has(body.yos-daystream-web),body.yos-daystream-web{background:#111721}
   <section class="tabbox" id="recordsPanel"><h3>記録</h3><p>このタイムライン内で完了にした項目のみを表示します。</p><div id="recordsList"></div></section>
   <section class="tabbox" id="aiPanel"><h3>AIプラン</h3><p>AIとの連携は未実装です。実行状況を確認せずに予定の自動変更はしません。</p><p class="muted">追加や時間変更はタイムラインで手動操作できます。</p></section>
   <div class="gesture-delete" id="gestureDelete" hidden aria-live="polite"><span id="gestureDeleteTitle"></span><button id="gestureDeleteConfirm" type="button">削除</button><button id="gestureDeleteCancel" class="cancel" type="button">戻す</button></div>
+  <dialog id="moveDialog" class="move-sheet" aria-labelledby="moveHeading">
+   <div class="move-sheet-content">
+    <div class="flow-advice-bar"><button id="moveCancel" type="button" autofocus>キャンセル</button><strong>時刻の変更</strong><button id="moveSave" type="button">保存</button></div>
+    <section class="flow-advice-card flow-verdict">
+      <h2 id="moveHeading"><span aria-hidden="true">💡</span> 配置アドバイス</h2>
+      <div class="flow-proposal"><span id="flowProposalIcon" aria-hidden="true">＋</span><div><strong id="moveTitle"></strong><p id="moveRange"></p></div></div>
+      <label class="move-time">開始時刻 <input id="moveTime" type="time" step="60" required></label>
+      <div class="flow-rating"><strong>総合評価</strong><span id="moveAdvice" aria-live="polite"></span></div>
+    </section>
+    <section class="flow-advice-card move-impact" aria-label="影響する予定・タスク"><h3><span aria-hidden="true">↔</span> 影響するタスク・習慣</h3><ul id="moveImpact"></ul></section>
+    <section class="flow-advice-card" id="moveEvidence"><h3><span aria-hidden="true">▥</span> 根拠・詳細</h3><p class="move-scope" id="moveBasis"></p><a id="moveSource" hidden href="https://sleepeducation.org/healthy-sleep/healthy-sleep-habits/" target="_blank" rel="noopener noreferrer">米国睡眠医学会の睡眠習慣ガイド ↗</a></section>
+    <section class="flow-advice-card" id="flowNextAction"><h3><span aria-hidden="true">☆</span> 配置候補</h3><button id="flowCandidates" type="button">空き時間を探す</button><div id="moveOptions" aria-live="polite"></div></section>
+
+   </div>
+  </dialog>
   <div class="focus" id="focus"><b id="focusTitle"></b><p id="focusInfo" aria-live="polite"></p><div class="actions-row"><button id="startActualBtn" class="secondary" hidden>開始を記録</button><button id="doneBtn">完了にする</button><button id="editSelected" class="secondary">編集</button><button id="deleteSelected" class="danger">削除</button><button id="hideFixed" class="secondary" hidden>この画面で隠す</button><button id="closeFocus" class="secondary">閉じる</button></div></div>
 </div>
 <nav class="dock" aria-label="画面切り替え"><div class="dock-inner">
@@ -672,6 +979,8 @@ window.addEventListener('yos-notion-tasks',event=>{
  if(snapshot?.origin!=='notion'||!window.YOS_DAYSTREAM_SOURCES.validSaved(snapshot,'tasks'))return;
  taskSource=snapshot;sourceTasks=snapshot.items;boot.taskSource=snapshot;
  items=dayItems(selectedDay);yosRenderSources();smoothRender();updateReview();
+ if(calendarMode==='week')renderWeekAgenda();
+ if(calendarMode==='month'&&!monthPanel.hidden)renderMonth();
 });
 const yosSourceWrites=new Set();
 async function yosCompleteSource(row){
@@ -782,7 +1091,8 @@ const glyphs={
  bath:'<path d="M3 13h18l-2 7H5zM7 10c-3-3 3-4 0-7m6 7c-3-3 3-4 0-7m6 7c-3-3 3-4 0-7"/>',
  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/>'};
 function eventIcon(item){const t=item.t||'';const type=/睡眠|就寝/.test(t)?'sleep':/歩|ウォーキング/.test(t)?'walk':/朝食|昼食|夕食|ご飯/.test(t)?'meal':/入浴|お風呂/.test(t)?'bath':/運動|筋トレ/.test(t)?'fitness':/会議/.test(t)?'meeting':/集中|作業/.test(t)?'laptop':/仕事/.test(t)?'work':'clock';return '<svg viewBox="0 0 24 24" aria-hidden="true">'+glyphs[type]+'</svg>'}
-let density='overview',scale=27;
+const flowScale=22;
+let density='overview',scale=flowScale;
 let zoom=null,selectedId=null;
 function yosElasticAxis(rows,baseScale){
  const valid=rows.filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440);
@@ -867,14 +1177,18 @@ function yosReadableAxis(rows,baseScale,backdrops){
  const starts=[...groups.keys()].sort((a,b)=>a-b),spans=[];
  for(let i=0;i<starts.length;i++){
   const start=starts[i],entries=groups.get(start),next=starts[i+1];
-  const required=entries.reduce((sum,item)=>sum+(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(28,Math.min(60,base.coordinate(item.s+item.d)-base.coordinate(item.s))))+4,0);
+  const required=entries.reduce((sum,item)=>sum+(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(34,Math.min(60,base.coordinate(item.s+item.d)-base.coordinate(item.s)))),0);
   const end=next??Math.min(1440,Math.max(start+1,...entries.map(item=>item.s+item.d)));
   if(end<=start)continue;
   const natural=base.coordinate(end)-base.coordinate(start);
   if(natural<required)spans.push({start,end,extra:required-natural});
  }
+ // Compress leading empty hours in the daily overview while keeping the time map invertible.
+ const first=rows[0]?.s??0;
+ const leading=baseScale===flowScale?base.coordinate(Math.min(first,360)):0;
+ const compress=p=>p-Math.min(p,leading)*.72;
  const coordinate=minute=>{
-  const m=Math.max(0,Math.min(1440,minute));let result=base.coordinate(m);
+  const m=Math.max(0,Math.min(1440,minute));let result=compress(base.coordinate(m));
   for(const band of spans){if(m<=band.start)continue;result+=band.extra*(m>=band.end?1:(m-band.start)/(band.end-band.start))}
   return result;
  };
@@ -983,7 +1297,7 @@ document.getElementById('saveBtn').onclick=()=>{const title=document.getElementB
 // Conservative, explainable compatibility signals from the *local day's actual time slots*.
 // Never infer health, travel distance or subjective mood from a title; unknown remains neutral.
 const yosCompatRank={unknown:0,positive:1,negative:2,danger:3};
-function yosCompatibility(rows){
+function yosCompatibility(rows,{previous=[],following=[]}={}){
  const valid=rows.filter(x=>x&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440);
  const result=new Map(valid.map(x=>[x.id,{level:'unknown',reasons:[]}]));
  const add=(item,level,reason)=>{
@@ -1013,7 +1327,29 @@ function yosCompatibility(rows){
    add(a,'negative',msg);add(b,'negative',msg);
   }
  }
+ const sleep=row=>/^(?:睡眠|就寝|仮眠)(?:$|[（( ・])/u.test(row.t);
+ const meal=row=>/朝食|昼食|夕食|食事|夜食|ご飯/u.test(row.t)&&!/準備|買い物|支度/u.test(row.t);
+ const prior=previous.filter(meal).map(row=>({...row,id:null,s:row.s-1440}));
+ const next=following.filter(sleep).map(row=>({...row,id:null,s:row.s+1440}));
+ for(const food of [...prior,...valid.filter(meal)]){
+  const end=food.s+food.d;
+  const bedtime=[...valid.filter(sleep),...next].filter(row=>row.s>=end).sort((a,b)=>a.s-b.s)[0];
+  if(!bedtime||bedtime.s-end>60||/軽食|少量/u.test(food.t))continue;
+  const gap=bedtime.s-end;
+  const large=/大きな食事|大盛り|大量|量が多い/u.test(food.t);
+  const facts='「'+food.t+'」の終了から「'+bedtime.t+'」まで'+gap+'分';
+  const why=large?facts+'。就寝直前の量が多い食事は注意候補':facts+'。食事量が不明';
+  add(food,large?'negative':'unknown',why);
+  add(bedtime,large?'negative':'unknown',why);
+ }
  return result;
+}
+function yosDayCompatibility(rows){
+ const date=parseDay(selectedDay);
+ date.setDate(date.getDate()-1);
+ const previous=dayItems(localISO(date));
+ date.setDate(date.getDate()+2);
+ return yosCompatibility(rows,{previous,following:dayItems(localISO(date))});
 }
 function yosOverlapWindows(rows){
  const sorted=rows.filter(x=>x&&Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.s>=0&&x.d>0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
@@ -1037,7 +1373,7 @@ function yosOverlapWindows(rows){
 }
 let latestCompatibility=new Map();
 function yosRenderCompatibility(){
- latestCompatibility=yosCompatibility(items);
+ latestCompatibility=yosDayCompatibility(items);
  const rows=[...latestCompatibility.values()];
  const counts={positive:0,negative:0,danger:0,unknown:0};
  for(const item of rows)counts[item.level]++;
@@ -1062,7 +1398,7 @@ function yosRenderCompatibility(){
  for(const [textName,css] of [['＋ 相乗候補','pos'],['− 余裕不足','neg'],['！ 時間衝突','danger'],['？ 判断材料不足','']]){
   const el=document.createElement('span');el.className=css;el.textContent=textName;key.append(el);
  }
- status.append(key);
+ if(counts.positive||counts.negative||counts.danger)status.append(key);
  const details=[];
  for(const record of rows)for(const reason of record.reasons)if(!details.includes(reason))details.push(reason);
  const review=document.getElementById('compatReview');
@@ -1095,8 +1431,8 @@ function showDay(iso){
 }
 function renderWeek(){
  const d=parseDay(selectedDay), label=['日','月','火','水','木','金','土'];
- document.getElementById('dateTitle').textContent=(d.getMonth()+1)+'/'+d.getDate()+'（'+label[d.getDay()]+'）';
- document.getElementById('dayCaption').textContent=selectedDay===todayISO?'Today':'';
+ document.getElementById('dateTitle').textContent=(d.getMonth()+1)+'月'+d.getDate()+'日（'+label[d.getDay()]+'）';
+ document.getElementById('dayCaption').textContent=selectedDay===todayISO?'今日':'';
  const strip=document.getElementById('weekStrip');strip.textContent='';
  const monday=new Date(d);monday.setDate(d.getDate()-((d.getDay()+6)%7));
  for(let offset=0;offset<7;offset++){
@@ -1204,10 +1540,23 @@ function setCalendarMode(mode){
  renderDayAllDay();setTab('timeline');
 }
 for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>setCalendarMode(b.dataset.view);
+function shiftFlowDay(offset){
+ const day=parseDay(selectedDay);day.setDate(day.getDate()+offset);
+ setCalendarMode('day');showDay(localISO(day));
+}
+document.getElementById('flowPrev').onclick=()=>shiftFlowDay(-1);
+document.getElementById('flowNext').onclick=()=>shiftFlowDay(1);
+document.getElementById('flowEdit').onclick=()=>{
+ setCalendarMode('day');document.body.classList.add('flow-editing');window.scrollTo(0,0);
+};
+function exitFlowEdit(){document.body.classList.remove('flow-editing')}
+document.getElementById('flowBack').onclick=exitFlowEdit;
+document.getElementById('flowDone').onclick=exitFlowEdit;
 document.getElementById('weekPrev').onclick=()=>{const d=parseDay(selectedDay);d.setDate(d.getDate()-7);showDay(localISO(d))};
 document.getElementById('weekNext').onclick=()=>{const d=parseDay(selectedDay);d.setDate(d.getDate()+7);showDay(localISO(d))};
 function setTab(name){
- if(name!=='timeline')hideSwipeDelete();
+ if(name!=='timeline'){hideSwipeDelete();exitFlowEdit()}
+ document.getElementById('gestureHelp').hidden=name!=='timeline'||calendarMode!=='day';
  for(const b of document.querySelectorAll('[data-tab]')){b.classList.toggle('active',b.dataset.tab===name);b.setAttribute('aria-current',b.dataset.tab===name?'page':'false');}
  document.getElementById('calendarModes').hidden=name!=='timeline';
  document.getElementById('timelinePanel').style.display=name==='timeline'&&calendarMode==='day'?'block':'none';
@@ -1237,7 +1586,7 @@ document.getElementById('yosTestToggle').onclick=()=>{
  smoothRender();updateReview();
 };
 document.getElementById('elasticBtn').onclick=()=>{elasticEnabled=!elasticEnabled;const btn=document.getElementById('elasticBtn');btn.textContent=elasticEnabled?'自動サイズ ON':'自動サイズ OFF';btn.setAttribute('aria-pressed',String(elasticEnabled));smoothRender();};
-document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?27:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';smoothRender();};
+document.getElementById('zoomBtn').onclick=()=>{density=density==='overview'?'detail':'overview';scale=density==='overview'?flowScale:56;document.getElementById('zoomBtn').textContent=density==='overview'?'詳細に拡大':'全体表示';smoothRender();};
 document.getElementById('searchBtn').onclick=()=>{const row=document.getElementById('searchRow');row.hidden=!row.hidden;if(!row.hidden){setTab('timeline');document.getElementById('searchInput').focus()}else{searchText='';document.getElementById('searchInput').value='';render()}};
 document.getElementById('searchInput').oninput=e=>{searchText=e.target.value.trim().toLocaleLowerCase();render()};
 document.getElementById('moreBtn').onclick=()=>{
@@ -1307,171 +1656,322 @@ function toggleTaskDone(item){
  note.textContent='「'+target.t+'」を'+(target.done?'完了':'未完了に戻した')+(saved?' · 端末内で保存中':' · 保存準備に失敗');
  smoothRender();updateReview();
 }
-// Only local, movable tasks use this gesture system; fixed Apple records and other kinds
-// retain their existing read-only details / vertical time dragging.
+const moveDialog=document.getElementById('moveDialog');
+const moveTime=document.getElementById('moveTime');
+let pendingMove=null;
+
+const flowSignals={positive:['＋','相乗候補'],negative:['−','注意'],danger:['！','時間衝突'],unknown:['？','不明']};
+
+function placementAt(item,start){
+ const others=items.filter(other=>other!==item).sort((a,b)=>a.s-b.s);
+ const end=start+item.d;
+ const overlaps=others.filter(other=>start<other.s+other.d&&other.s<end);
+ const signal=yosDayCompatibility([...others,{...item,s:start}]).get(item.id);
+ const level=signal?.level||'unknown';
+ return {level,reason:signal?.reasons[0]||'前後の相性を判断できる情報がありません',others,overlaps};
+}
+
+function renderMoveAdvice(){
+ if(!pendingMove)return;
+ const {item}=pendingMove;
+ const [hours,minutes]=moveTime.value.split(':').map(Number);
+ const start=hours*60+minutes;
+ const valid=Number.isInteger(start)&&start>=0&&start+item.d<=1440;
+ const entries=document.getElementById('moveImpact');
+ const hint=document.getElementById('moveAdvice');
+ const icon=document.getElementById('flowProposalIcon');
+ const basis=document.getElementById('moveBasis');
+ const source=document.getElementById('moveSource');
+ entries.replaceChildren();
+ document.getElementById('moveOptions').replaceChildren();
+ document.getElementById('flowCandidates').disabled=!valid;
+ document.getElementById('moveSave').disabled=!valid||start===item.s;
+ document.getElementById('moveRange').textContent=valid
+  ? fmt(item.s)+' → '+fmt(start)+'–'+fmt(start+item.d)
+  : '終了時刻が24:00以内になる開始時刻を選んでください';
+ const result=valid?placementAt(item,start):{level:'unknown',reason:'開始時刻を指定してください',others:[],overlaps:[]};
+ const {level,reason,others,overlaps}=result;
+ const [mark,name]=flowSignals[level];
+ icon.dataset.level=hint.dataset.level=level;
+ icon.textContent=mark;
+ hint.textContent=mark+' '+name+(overlaps.length?' '+overlaps.length+'件':'');
+ const append=text=>{
+  const row=document.createElement('li');row.textContent=text;entries.append(row);
+ };
+ if(overlaps.length){
+  for(const other of overlaps){
+   const shared=Math.min(start+item.d,other.s+other.d)-Math.max(start,other.s);
+   append(other.t+' · '+fmt(other.s)+'–'+fmt(other.s+other.d)+'（'+shared+'分重複）');
+  }
+ }else if(valid){
+  const end=start+item.d;
+  const before=others.filter(other=>other.s+other.d<=start).sort((a,b)=>b.s+b.d-a.s-a.d)[0];
+  const after=others.find(other=>other.s>=end);
+  if(before)append('前の予定　'+before.t+' · '+(start-before.s-before.d)+'分前に終了');
+  if(after)append('次の予定　'+after.t+' · 終了から'+(after.s-end)+'分後に開始');
+ }
+ if(!entries.children.length)append('表示できる関連予定がありません');
+ basis.textContent=reason;
+ source.hidden=!reason.includes('量が多い食事');
+}
+
+document.getElementById('flowCandidates').onclick=()=>{
+ if(!pendingMove)return;
+ const {item}=pendingMove;
+ const [hours,minutes]=moveTime.value.split(':').map(Number);
+ const requested=hours*60+minutes;
+ const others=items.filter(other=>other!==item);
+ const slots=[];
+ for(let start=0;start+item.d<=1440;start+=5){
+  if(start===requested||start===item.s||others.some(other=>start<other.s+other.d&&other.s<start+item.d))continue;
+  slots.push(start);
+ }
+ slots.sort((a,b)=>Math.abs(a-requested)-Math.abs(b-requested)||a-b);
+ const options=document.getElementById('moveOptions');
+ options.replaceChildren();
+ const candidates=[];
+ for(const start of slots){
+  if(candidates.some(time=>Math.abs(time-start)<Math.max(item.d,15)))continue;
+  candidates.push(start);
+  if(candidates.length===3)break;
+ }
+ for(const start of candidates){
+  const button=document.createElement('button');
+  const signal=placementAt(item,start);
+  button.type='button';
+  button.textContent=fmt(start)+'–'+fmt(start+item.d)+'　'+flowSignals[signal.level].join(' ');
+  button.title=signal.reason;
+  button.onclick=()=>{moveTime.value=fmt(start);renderMoveAdvice()};
+  options.append(button);
+ }
+ if(!options.children.length)options.textContent='表示中の予定内に空き枠がありません';
+};
+
+function openMoveDialog(item,start,previousRect){
+ if(moveDialog.open||!items.includes(item)||item.f)return;
+ hideSwipeDelete();
+ focus.classList.remove('show');
+ pendingMove={item,day:selectedDay,previousRect,plan:localStorage.getItem(yosPlanKey)};
+ document.getElementById('moveTitle').textContent=item.t;
+ moveTime.value=fmt(start);
+ renderMoveAdvice();
+ moveDialog.showModal();
+ moveDialog.firstElementChild.scrollTop=0;
+}
+moveTime.addEventListener('input',renderMoveAdvice);
+moveDialog.addEventListener('close',()=>{if(!moveDialog.open)pendingMove=null});
+document.getElementById('moveCancel').onclick=()=>moveDialog.close();
+document.getElementById('moveSave').onclick=()=>{
+ if(!pendingMove||document.getElementById('moveSave').disabled)return;
+ const {item,day,previousRect,plan}=pendingMove;
+ if(day!==selectedDay||!items.includes(item)||item.f){moveDialog.close();return}
+ if(localStorage.getItem(yosPlanKey)!==plan){
+  moveDialog.close();note.textContent='別の画面で保存内容が変わりました。開き直してから移動してください';return;
+ }
+ const [hours,minutes]=moveTime.value.split(':').map(Number);
+ const next=hours*60+minutes,original=item.s;
+ if(!Number.isInteger(next)||next<0||next+item.d>1440||next===original)return;
+ item.s=next;
+ const saved=persist();
+ if(!saved)item.s=original;
+ moveDialog.close();
+ note.textContent=saved?'「'+item.t+'」を'+fmt(next)+'に移動しました':'時刻を保存できなかったため、元の位置に戻しました';
+ smoothRender(item.id,saved?previousRect:null);
+ updateReview();
+};
+
+// Card bodies keep native scrolling. A handle press or a stationary hold claims
+// the drag before the first vertical move can be consumed by the WebView.
+function commitDraggedTime(item,next,previousRect){
+ if(item.f||!Number.isInteger(next)||next<0||next+item.d>1440||!items.includes(item))return false;
+ if(next===item.s)return true;
+ const original=item.s,day=selectedDay;
+ let saved=false;
+ if(item.source==='YOS Tasks'){
+  // The source record is read-only. Save a date-scoped time override only.
+  saved=window.YOS_NOTION_LOCAL_MOVE?.(day,item.sourceRef,next,item.d)===true;
+  if(saved)item.s=next;
+ }else{
+  item.s=next;
+  saved=persist();
+  if(!saved)item.s=original;
+ }
+ note.textContent=saved?'「'+item.t+'」を'+fmt(next)+'に移動しました':
+  '保存できなかったため、元の位置に戻しました';
+ smoothRender(saved?item.id:null,saved?previousRect:null);
+ updateReview();
+ return saved;
+}
 function wireTaskGestures(el,item){
- // iPhone Web views do not provide reliable force/pressure. Use press duration,
- // direction, and movement. Short tap completes; hold+drag moves; still long hold edits.
- const HOLD_TO_MOVE=260, HOLD_TO_EDIT=750, MOVE_SLOP=12;
- let active=null,startX=0,startY=0,lastX=0,lastY=0,mode='tap';
- let armTimer=null,editTimer=null,paintFrame=0,swipeFrame=0,lastPreview=item.s,gripStart=false;
- let backgroundLock=null;
- const timeLabel=el.querySelector('small');
-
- const lockBackground=()=>{
-  if(backgroundLock)return;
-  const x=window.scrollX,y=window.scrollY;
-  let correcting=false;
-  // Block native touch scrolling once a card is armed, without disabling ordinary swipes.
-  const preventScroll=e=>{if(e.cancelable)e.preventDefault()};
-  const restoreScroll=()=>{
-   if(!backgroundLock||correcting)return;
-   if(Math.abs(window.scrollX-x)<1&&Math.abs(window.scrollY-y)<1)return;
-   correcting=true;window.scrollTo(x,y);correcting=false;
-  };
-  backgroundLock={x,y,preventScroll,restoreScroll};
-  document.addEventListener('touchmove',preventScroll,{capture:true,passive:false});
-  window.addEventListener('scroll',restoreScroll,{passive:true});
-  restoreScroll();
+ // Keep the gesture thresholds and hint reference from the original controller.
+ // Without these, pointermove throws before entering drag mode.
+ const holdToMove=260,holdToEdit=750,slop=7;
+ const dragHint=document.getElementById('flowDragHint');
+ const label=el.querySelector('.task-meta small');
+ const grip=el.querySelector('.task-drag-grip');
+ let gesture=null,armTimer=0,editTimer=0,paintFrame=0,lastCandidate=null;
+ const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+ const clearTimers=()=>{clearTimeout(armTimer);clearTimeout(editTimer)};
+ const offset=()=>gesture.y-gesture.startY+window.scrollY-gesture.scrollY;
+ const candidateStart=()=>{
+  const snapped=Math.round(minuteAtY(yFor(item.s)+offset())/5)*5;
+  return Math.max(0,Math.min(1440-item.d,snapped));
  };
- const unlockBackground=()=>{
-  if(!backgroundLock)return;
-  const locked=backgroundLock;
-  document.removeEventListener('touchmove',locked.preventScroll,true);
-  window.removeEventListener('scroll',locked.restoreScroll);
-  backgroundLock=null;
+ const reactToNeighbors=()=>{
+  const top=el.offsetTop+offset(),bottom=top+el.offsetHeight,center=(top+bottom)/2;
+  for(const other of tl.querySelectorAll('.card:not(.drag-preview)')){
+   if(other===el)continue;
+   const y=other.offsetTop,height=other.offsetHeight;
+   const gap=Math.max(0,y-bottom,top-(y+height));
+   const near=gap<65;
+   if(!near){
+    if(other.classList.contains('drag-neighbor'))other.style.transform='translate3d(0,0,0)';
+    continue;
+   }
+   const strength=1-gap/65,side=(y+height/2)<center?-1:1;
+   const backdrop=other.classList.contains('yos-backdrop');
+   const push=backdrop?Math.min(7,5*strength):Math.min(29,(9+20*strength));
+   const x=backdrop?Math.round(4*strength):Math.round(8*strength);
+   other.classList.add('drag-neighbor');
+   other.style.transform='translate3d('+x+'px,'+(side*push)+'px,0)';
+  }
  };
-
- const clearTimers=()=>{
-  if(armTimer!==null){clearTimeout(armTimer);armTimer=null}
-  if(editTimer!==null){clearTimeout(editTimer);editTimer=null}
+ const clearNeighbors=()=>{
+  for(const other of tl.querySelectorAll('.drag-neighbor')){
+   if(reduceMotion){other.style.transform='';other.classList.remove('drag-neighbor');continue}
+   other.style.transform='translate3d(0,0,0)';
+   // Let the neighboring card spring back before dropping its transition class.
+   setTimeout(()=>{if(!gesture&&other.isConnected){
+    other.style.transform='';other.classList.remove('drag-neighbor');
+   }},230);
+  }
  };
- const clearPaint=()=>{
-  if(paintFrame){cancelAnimationFrame(paintFrame);paintFrame=0}
-  if(swipeFrame){cancelAnimationFrame(swipeFrame);swipeFrame=0}
- };
- const resetVisual=()=>{
-  el.classList.remove('drag-preview','press-armed');
-  el.style.transform='';
-  if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
- };
- const candidateStart=()=>Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(item.s)+lastY-startY)/5)*5));
- const paintSwipe=()=>{swipeFrame=0;if(mode==='swipe'&&active!==null)el.style.transform='translate3d('+Math.max(-74,lastX-startX)+'px,0,0)'};
- const paintDrag=()=>{
-  paintFrame=0;if(mode!=='drag'||active===null)return;
-  el.style.transform='translate3d(0,'+(lastY-startY)+'px,0)';
+ const paint=()=>{
+  paintFrame=0;
+  if(!gesture||!el.isConnected){finish(true);return}
+  if(gesture.mode==='swipe'){
+   el.style.transform='translate3d('+Math.max(-74,gesture.x-gesture.startX)+'px,0,0)';
+   return;
+  }
+  if(gesture.mode!=='drag')return;
+  const viewport=window.visualViewport?.height||window.innerHeight;
+  const direction=gesture.y<70?-1:gesture.y>viewport-110?1:0;
+  const prior=window.scrollY;
+  if(direction)window.scrollBy(0,direction*8);
+  el.style.transform='translate3d(0,'+offset()+'px,0)'+(reduceMotion?'':' scale(1.025)');
+  reactToNeighbors();
   const at=candidateStart();
-  if(at!==lastPreview){lastPreview=at;if(timeLabel)timeLabel.textContent=fmt(at)+'–'+fmt(at+item.d)}
+  if(at!==lastCandidate){
+   lastCandidate=at;
+   label.textContent=fmt(at)+'–'+fmt(at+item.d);
+   const {level,overlaps}=placementAt(item,at);
+   dragHint.hidden=false;
+   dragHint.dataset.level=el.dataset.placement=level;
+   dragHint.firstElementChild.textContent=fmt(at)+'–'+fmt(at+item.d);
+   dragHint.lastElementChild.textContent=overlaps.length?'ほかの予定と'+overlaps.length+'件重なります':'指を離すと自動保存';
+  }
+  if(window.scrollY!==prior)paintFrame=requestAnimationFrame(paint);
  };
- const begin=(x,y,id,grip)=>{
-  if(active!==null)return;
-  clearTimers();clearPaint();
-  active=id;startX=lastX=x;startY=lastY=y;mode='tap';gripStart=!!grip;
-  if(gripStart)lockBackground();
-  lastPreview=item.s;el.style.transition='';
-  // Long, motionless contact edits. An intermediate armed state never marks done.
+ const trackPointer=e=>{if(gesture?.id===e.pointerId)move(e.clientX,e.clientY,e)};
+ const releasePointer=e=>{if(gesture?.id===e.pointerId)finish(false,e.clientY)};
+ const cancelPointer=e=>{if(gesture?.id===e.pointerId)finish(true)};
+ const cancelOnBlur=()=>finish(true);
+ const begin=(x,y,id,fromGrip)=>{
+  if(gesture)return;
+  gesture={id,x,y,startX:x,startY:y,scrollY:window.scrollY,fromGrip,mode:fromGrip?'armed':'tap'};
+  if(id!=='touch'){
+   // Follow the pointer across neighboring cards even when capture is lost.
+   document.addEventListener('pointermove',trackPointer,{passive:false});
+   document.addEventListener('pointerup',releasePointer);
+   document.addEventListener('pointercancel',cancelPointer);
+   window.addEventListener('blur',cancelOnBlur);
+  }
+  if(fromGrip){el.classList.add('press-armed');return}
   armTimer=setTimeout(()=>{
-   armTimer=null;
-   if(active!==null&&mode==='tap'){
-    mode='armed';el.classList.add('press-armed');lockBackground();vibrate();
-   }
-  },HOLD_TO_MOVE);
+   if(!gesture||gesture.mode!=='tap')return;
+   gesture.mode='armed';el.classList.add('press-armed');
+  },holdToMove);
   editTimer=setTimeout(()=>{
-   editTimer=null;
-   if(active!==null&&(mode==='tap'||mode==='armed')){
-    active=null;clearTimers();clearPaint();unlockBackground();resetVisual();mode='long';
-    beginLocalEdit(item);
-   }
-  },HOLD_TO_EDIT);
+   if(!gesture||gesture.mode!=='armed')return;
+   finish(true);
+   if(item.source==='YOS Tasks')openMoveDialog(item,item.s,null);
+   else beginLocalEdit(item);
+  },holdToEdit);
  };
  const move=(x,y,event)=>{
-  if(active===null||mode==='scroll'||mode==='ignored')return;
-  lastX=x;lastY=y;
-  const dx=x-startX,dy=y-startY,ax=Math.abs(dx),ay=Math.abs(dy);
-  const vertical=ay>MOVE_SLOP&&ay>ax*1.1;
-  const left=ax>14&&dx<0&&ax>ay*1.3;
-  if(mode==='drag'){
-   if(event?.cancelable)event.preventDefault();
-   if(!paintFrame)paintFrame=requestAnimationFrame(paintDrag);
-   return;
-  }
-  if(mode==='swipe'){
-   if(event?.cancelable)event.preventDefault();
-   if(!swipeFrame)swipeFrame=requestAnimationFrame(paintSwipe);
-   return;
-  }
-  if(left){
-   clearTimers();unlockBackground();mode='swipe';el.classList.remove('press-armed');
-   if(event?.cancelable)event.preventDefault();
-   if(!swipeFrame)swipeFrame=requestAnimationFrame(paintSwipe);
-   return;
-  }
-  if(vertical){
-   // A quick swipe scrolls, but a brief stationary press arms a deliberate drag.
-   // The existing ⋮ grip remains an immediate, accessible drag fallback.
-   if(mode==='armed'||gripStart){
-    lockBackground();clearTimers();mode='drag';el.classList.remove('press-armed');
-    el.classList.add('drag-preview');
-    if(event?.cancelable)event.preventDefault();
-    if(!paintFrame)paintFrame=requestAnimationFrame(paintDrag);
-   }else{
-    clearTimers();unlockBackground();mode='scroll';
+  if(!gesture||gesture.mode==='scroll'||gesture.mode==='ignored')return;
+  const dx=x-gesture.startX,dy=y-gesture.startY;
+  const ax=Math.abs(dx),ay=Math.abs(dy);
+  gesture.x=x;gesture.y=y;
+  if(gesture.mode==='armed'||gesture.mode==='drag'){
+   if(!event.cancelable&&gesture.id==='touch'&&!gesture.fromGrip){finish(true);return}
+   event.preventDefault();
+   if(gesture.mode==='armed'&&Math.max(ax,ay)>slop){
+    clearTimers();el.classList.remove('press-armed');
+    if(ay>=ax){
+     gesture.mode='drag';
+     el.classList.add('drag-preview');
+    }else gesture.mode='ignored';
    }
-   return;
+  }else if(gesture.mode==='tap'&&Math.max(ax,ay)>slop){
+   clearTimers();
+   if(item.kind==='task'&&item.source!=='YOS Tasks'&&dx<0&&ax>ay*1.4&&event.cancelable)gesture.mode='swipe';
+   else gesture.mode=ay>=ax?'scroll':'ignored';
   }
-  if((ax>MOVE_SLOP||ay>MOVE_SLOP)&&mode==='tap'){
-   // Non-vertical finger movement is not an affirmative completion tap.
-   if(ax>ay){clearTimers();mode='ignored'}
-  }
+  if(gesture.mode==='swipe')event.preventDefault();
+  if((gesture.mode==='drag'||gesture.mode==='swipe')&&!paintFrame)paintFrame=requestAnimationFrame(paint);
  };
- const finish=cancelled=>{
-  if(active===null)return;
-  const completedMode=mode,wasGrip=gripStart,oldRect=completedMode==='drag'&&!cancelled?el.getBoundingClientRect():null;
-  active=null;clearTimers();clearPaint();unlockBackground();
-  el.classList.remove('press-armed','drag-preview');
-  if(completedMode==='swipe'){
-   el.style.transition='transform .26s cubic-bezier(.22,1,.36,1)';
-   el.style.transform='translate3d(0,0,0)';
-  }else el.style.transform='';
-  if(cancelled){
-   if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
-   return;
+ function finish(cancelled,endY){
+  if(!gesture)return;
+  if(Number.isFinite(endY))gesture.y=endY;
+  const {mode,fromGrip,x,startX}=gesture;
+  const next=mode==='drag'&&!cancelled?candidateStart():item.s;
+  let previousRect=null;
+  if(next!==item.s){
+   el.style.transform='translate3d(0,'+offset()+'px,0)';
+   previousRect=el.getBoundingClientRect();
   }
-  if(completedMode==='swipe'){
-   if(lastX-startX< -45)showSwipeDelete(item);
-   return;
-  }
-  if(completedMode==='drag'){
-   const next=candidateStart();
-   if(next!==item.s){
-    const original=item.s;item.s=next;
-    const saved=persist();
-    if(!saved){item.s=original;note.textContent='時刻の保存に失敗したため移動を取り消しました'}
-    else note.textContent='「'+item.t+'」を'+fmt(next)+'に移動（この端末に保存）';
-    smoothRender(item.id,oldRect);updateReview();
-   }else if(timeLabel)timeLabel.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
-   return;
-  }
-  // A release after an armed hold, scroll or grip tap is not a completion.
-  if(completedMode==='tap'&&!wasGrip)toggleTaskDone(item);
- };
+  gesture=null;dragHint.hidden=true;clearTimers();cancelAnimationFrame(paintFrame);paintFrame=0;
+  document.removeEventListener('pointermove',trackPointer);
+  document.removeEventListener('pointerup',releasePointer);
+  document.removeEventListener('pointercancel',cancelPointer);
+  window.removeEventListener('blur',cancelOnBlur);
+  lastCandidate=null;delete el.dataset.placement;
+  el.classList.remove('press-armed','drag-preview');el.style.transform='';
+  label.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
+  if(cancelled){clearNeighbors();return}
+  if(mode==='swipe'&&x-startX< -45){clearNeighbors();showSwipeDelete(item);return}
+  if(mode==='tap'){clearNeighbors();showFocusFor(item);return}
+  if(mode==='armed'&&fromGrip){clearNeighbors();openMoveDialog(item,item.s,null);return}
+  if(next!==item.s){
+   // Drop is the confirmation: no blocking placement-advice modal.
+   // FLIP animates all neighboring cards from their reactive positions.
+   commitDraggedTime(item,next,previousRect);
+  }else clearNeighbors();
+ }
  el.addEventListener('contextmenu',e=>e.preventDefault());
  el.addEventListener('touchstart',e=>{
-  if(e.touches.length===1)begin(e.touches[0].clientX,e.touches[0].clientY,'touch',e.target.closest('.task-drag-grip'));
+  if(e.touches.length!==1){finish(true);return}
+  const touch=e.touches[0];begin(touch.clientX,touch.clientY,'touch',grip.contains(e.target));
  },{passive:true});
  el.addEventListener('touchmove',e=>{
-  if(active==='touch'&&e.touches.length)move(e.touches[0].clientX,e.touches[0].clientY,e);
+  if(gesture?.id!=='touch')return;
+  if(e.touches.length!==1){finish(true);return}
+  move(e.touches[0].clientX,e.touches[0].clientY,e);
  },{passive:false});
- el.addEventListener('touchend',()=>{if(active==='touch')finish(false)});
- el.addEventListener('touchcancel',()=>{if(active==='touch')finish(true)});
+ el.addEventListener('touchend',e=>{if(gesture?.id==='touch')finish(false,e.changedTouches?.[0]?.clientY)});
+ el.addEventListener('touchcancel',()=>finish(true));
  el.addEventListener('pointerdown',e=>{
   if(e.pointerType==='touch'||e.button!==0)return;
-  begin(e.clientX,e.clientY,e.pointerId,e.target.closest('.task-drag-grip'));
-  el.setPointerCapture?.(e.pointerId);
+  begin(e.clientX,e.clientY,e.pointerId,grip.contains(e.target));
+  try{el.setPointerCapture?.(e.pointerId)}catch{}
  });
- el.addEventListener('pointermove',e=>{if(active===e.pointerId)move(e.clientX,e.clientY,e)});
- el.addEventListener('pointerup',e=>{if(active===e.pointerId)finish(false)});
- el.addEventListener('pointercancel',e=>{if(active===e.pointerId)finish(true)});
+ // WebKit may deliver captured events to the card rather than document.
+ // Duplicate events are safe: paint is coalesced to one animation frame.
+ el.addEventListener('pointermove',e=>{if(gesture?.id===e.pointerId)move(e.clientX,e.clientY,e)});
+ el.addEventListener('pointerup',e=>{if(gesture?.id===e.pointerId)finish(false,e.clientY)});
+ el.addEventListener('pointercancel',e=>{if(gesture?.id===e.pointerId)finish(true)});
+ grip.addEventListener('click',e=>{if(e.detail===0)openMoveDialog(item,item.s,null)});
 }
 function smoothRender(activeId,oldActiveRect){
  const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
@@ -1489,13 +1989,19 @@ function smoothRender(activeId,oldActiveRect){
  });
 }
 function render(){
- latestCompatibility=yosCompatibility(items);
+ latestCompatibility=yosDayCompatibility(items);
  const sorted=[...items].filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
  const backdrops=yosBackdropRows(sorted);
  elasticAxis=elasticEnabled?yosReadableAxis(sorted,scale,backdrops):null;
  tl.querySelectorAll('.hour,.card,.tick').forEach(n=>n.remove());
  const bottom=yFor(1440);
- for(let h=0;h<=24;h++){const el=document.createElement('div');el.className='hour';el.style.top=yFor(h*60)+'px';el.innerHTML='<span>'+fmt(h*60)+'</span>';tl.append(el)}
+ let lastLabel=-24;
+ for(let h=0;h<=24;h++){
+  const y=yFor(h*60);
+  if(h!==24&&(y-lastLabel<22||bottom-y<20))continue;
+  const el=document.createElement('div');el.className='hour';el.style.top=y+'px';
+  el.innerHTML='<span>'+fmt(h*60).replace(/^0(?=\d)/,'')+'</span>';tl.append(el);lastLabel=y;
+ }
  // Keep short cards readable and pack simultaneous starts above interval backdrops.
  const visualOffsets=new Map();const groups=new Map();
  const zones=[...backdrops.keys()];
@@ -1507,7 +2013,7 @@ function render(){
   let offset=0;
   for(const item of group){
    visualOffsets.set(item,offset);
-   offset+=(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(28,Math.min(60,yFor(item.s+item.d)-yFor(item.s))))+4;
+   offset+=(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(34,Math.min(60,yFor(item.s+item.d)-yFor(item.s))));
   }
  }
  let lastBottom=-2;
@@ -1515,13 +2021,16 @@ function render(){
    const natural=yFor(item.s);
    const backdrop=backdrops.has(item),isTask=item.kind==='task'&&!item.f;
    const span=yFor(item.s+item.d)-natural;
-   const height=backdrop?Math.max(1,span-2):isTask?yosReadableTaskHeight(item):Math.max(28,Math.min(60,span));
+   const height=backdrop?Math.max(1,span-2):isTask?yosReadableTaskHeight(item):Math.max(34,Math.min(60,span));
    const top=natural+(visualOffsets.get(item)||0);
    lastBottom=Math.max(lastBottom,top+height);
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
+   if(!backdrop&&item.d<=15&&[...String(item.t||'')].length<=9)el.classList.add('short-row');
+   if(item.f)el.classList.add('fixed-scroll');
    if(isTask){el.dataset.durationBand=item.d<=5?'xs':item.d<=15?'sm':item.d<=30?'md':item.d<=60?'lg':item.d<=120?'xl':'xxl';}
    if(backdrop){
     el.classList.add('yos-backdrop');
+    if(sorted.some(other=>other!==item&&other.s<item.s+item.d&&item.s<other.s+other.d))el.classList.add('is-overlapped');
     const {lane,count}=backdrops.get(item),start=lane/count,remaining=(count-lane-1)/count;
     el.style.setProperty('--zone-start',start*100+'%');
     el.style.setProperty('--zone-left',1-start);
@@ -1537,7 +2046,7 @@ function render(){
    let statusEl;
    if(compat){
     el.classList.add('compat-'+compat.level);
-    const label={positive:'＋ 相乗候補',negative:'− 余裕不足',danger:'！ 時間衝突'}[compat.level];
+    const label={positive:'＋ 相乗候補',negative:'− 注意',danger:'！ 時間衝突'}[compat.level];
     const reason=compat.reasons[0]||'相性：判断材料不足';
     el.setAttribute('aria-label',[item.t,fmt(item.s)+'–'+fmt(item.s+item.d),reason].join('、'));
     el.title=reason;
@@ -1545,19 +2054,27 @@ function render(){
      statusEl=document.createElement('span');statusEl.className='layer-status';statusEl.textContent=label;
     }
    }
-   if(item.kind!=='task'||item.f){
-    const iconEl=document.createElement('span');iconEl.innerHTML=eventIcon(item);el.append(iconEl.firstChild);
-   }
+   const theme=/就寝準備|読書|リラックス|会議/.test(item.t)?'violet':
+    /ウォーキング|起床|朝の準備|運動|筋トレ|入浴|スキンケア/.test(item.t)||item.kind==='habit'?'mint':
+    /夕食/.test(item.t)?'peach':item.f||item.kind==='schedule'||/睡眠|就寝|朝食|昼食|仕事|作業/.test(item.t)?'blue':'violet';
+   el.dataset.flowTone=theme;
+   const iconEl=document.createElement('span');iconEl.className='card-icon';iconEl.innerHTML=eventIcon(item);el.append(iconEl);
    const titleEl=document.createElement('b');titleEl.textContent=item.t;
    const timeEl=document.createElement('small');timeEl.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
    if(item.kind==='task'&&!item.f){
     const copy=document.createElement('span');copy.className='task-copy';
     const meta=document.createElement('span');meta.className='task-meta';meta.append(timeEl);if(statusEl)meta.append(statusEl);
-    copy.append(titleEl,meta);el.append(copy);const grip=document.createElement('span');grip.className='task-drag-grip';grip.textContent='⋮';grip.setAttribute('aria-label','ドラッグして時刻を移動');el.append(grip);
+    copy.append(titleEl,meta);el.append(copy);
    }else{
     const copy=document.createElement('span');copy.className='event-copy';
     const meta=document.createElement('span');meta.className='task-meta';meta.append(timeEl);if(statusEl)meta.append(statusEl);
     copy.append(titleEl,meta);el.append(copy);
+   }
+   if(item.f){
+    const badge=document.createElement('span');badge.className='fixed-label';badge.textContent='固定';el.append(badge);
+   }else{
+    const grip=document.createElement('button');grip.type='button';grip.className='task-drag-grip';
+    grip.textContent='⠿';grip.setAttribute('aria-label',item.t+'の時刻を移動');el.append(grip);
    }
    if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');
    if(['朝の準備','朝食','昼食','夕食','入浴'].includes(item.t))el.classList.add('neutral');
@@ -1565,24 +2082,9 @@ function render(){
    if(density==='overview')el.classList.add('compact');
    if(searchText&&!item.t.toLocaleLowerCase().includes(searchText))el.style.display='none';
    el.dataset.id=String(item.id);if(item.done)el.classList.add('done');tl.append(el);
-   const tick=document.createElement('div');tick.className='tick';tick.style.top=(natural-3)+'px';tl.append(tick);
-   let downY=0,downS=0,moved=false,holding=false,activePointer=null,frame=0,latestY=0,previewS=item.s,lastHaptic=0,startedAt=0;
-   const timeLabel=el.querySelector('small');
-   const paint=()=>{frame=0;if(!holding)return;const offset=latestY-downY;el.style.transform='translate3d(0,'+offset+'px,0) scale(1.015)';const next=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));if(next!==previewS){previewS=next;timeLabel.textContent=fmt(next)+'–'+fmt(next+item.d);const now=performance.now();if(now-lastHaptic>75){lastHaptic=now;vibrate()}}};
-   const startDrag=(y,id)=>{downY=latestY=y;downS=previewS=item.s;startedAt=performance.now();moved=false;holding=false;activePointer=id};
-   const moveDrag=y=>{if(activePointer===null)return;latestY=y;const distance=Math.abs(latestY-downY);if(distance>3&&!item.f){holding=true;moved=true;el.classList.add('moving');if(!frame)frame=requestAnimationFrame(paint)}};
-   const endDrag=cancelled=>{if(activePointer===null)return;activePointer=null;if(frame){cancelAnimationFrame(frame);frame=0}const releasedRect=el.getBoundingClientRect();el.classList.remove('moving');el.style.transform='';if(holding&&moved&&!cancelled){const offset=latestY-downY;previewS=Math.max(0,Math.min(1440-item.d,Math.round(minuteAtY(yFor(downS)+offset)/5)*5));item.s=previewS;const clashes=items.filter(x=>x!==item&&item.s<x.s+x.d&&x.s<item.s+item.d);note.textContent=(clashes.length?'時間が重複：'+clashes.map(x=>x.t).join('、'):'移動しました')+(persist()?'（保存処理中）':'（保存処理失敗）');smoothRender(item.id,releasedRect)}else if(!moved&&!cancelled){showFocusFor(item);smoothRender()}holding=false};
-   if(item.kind==='task'&&!item.f){wireTaskGestures(el,item)}else{
-   // Touch events are used on iOS WebView to avoid pointer capture cancelling a vertical drag.
-   el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;startDrag(e.touches[0].clientY,'touch')},{passive:true});
-   el.addEventListener('touchmove',e=>{if(activePointer!=='touch'||!e.touches.length)return;if(!item.f){e.preventDefault();moveDrag(e.touches[0].clientY)}},{passive:false});
-   el.addEventListener('touchend',()=>{if(activePointer==='touch')endDrag(false)});
-   el.addEventListener('touchcancel',()=>{if(activePointer==='touch')endDrag(true)});
-   el.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==0)return;startDrag(e.clientY,e.pointerId);el.setPointerCapture(e.pointerId)});
-   el.addEventListener('pointermove',e=>{if(activePointer===e.pointerId)moveDrag(e.clientY)});
-   el.addEventListener('pointerup',e=>{if(activePointer===e.pointerId)endDrag(false)});
-   el.addEventListener('pointercancel',e=>{if(activePointer===e.pointerId)endDrag(true)});
-   }
+   const tick=document.createElement('div');tick.className='tick';tick.dataset.flowTone=theme;tick.style.top=(natural-3)+'px';tl.append(tick);
+   if(item.f)el.addEventListener('click',()=>showFocusFor(item));
+   else wireTaskGestures(el,item);
  });
  tl.style.height=(Math.max(bottom,lastBottom)+12)+'px';updateNow();
  // Readable-density layout is visual only; no source time or task mutation.

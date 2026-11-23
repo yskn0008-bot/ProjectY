@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // YOS_SCRIPT_NAME: YOS Sleep Scene
-// YOS Sleep Scene v1.0. Independent, non-destructive; initial run checks settings only.
+// YOS Sleep Scene v1.1. Existing choice modes preserved; focus-only prepares an all-keep plan.
 // Existing YOS Remote, BRAVIA, Tapo Core scripts, keys and files are never modified.
 const tapo=(()=>{
   const module={exports:{}};
@@ -168,20 +168,148 @@ function finish(message){if(typeof Script.setShortcutOutput==="function")Script.
 async function show(title,message){
   const dialog=new Alert();dialog.title=title;dialog.message=message;dialog.addAction("OK");await dialog.presentAlert();
 }
+
+/* Sleep Choice: ephemeral, one-use instructions. Do not change other saved scripts/keys. */
+const CHOICE_KEY="yos.sleep.scene.choice.v1";
+const CHOICE_USED_KEY="yos.sleep.scene.choice-used.v1";
+const CHOICE_TTL_MS=120000;
+const CHOICE_DEFAULT=Object.freeze({tv:"off",light:"off",floor:"on",ac:"keep"});
+const FOCUS_ONLY=Object.freeze({tv:"keep",light:"keep",floor:"keep",ac:"keep"});
+function prepareFocusOnly(){
+  // One-use all-keep plan: the existing iOS Focus automation must not touch appliances.
+  clearChoice();
+  Keychain.set(CHOICE_KEY,JSON.stringify({ts:Date.now(),choices:{...FOCUS_ONLY}}));
+  finish("READY");
+}
+function clearChoice(){if(Keychain.contains(CHOICE_KEY))Keychain.remove(CHOICE_KEY);}
+function consumeChoice(){
+  if(!Keychain.contains(CHOICE_KEY)){
+    // A repeated Focus event must not replay the old fixed scene after choices were applied.
+    if(Keychain.contains(CHOICE_USED_KEY)){
+      const t=Number(Keychain.get(CHOICE_USED_KEY));
+      if(Number.isFinite(t)&&Date.now()>=t&&Date.now()-t<CHOICE_TTL_MS)return {skip:true};
+    }
+    return null; // Ordinary manual Focus ON still uses the original scene.
+  }
+  const raw=Keychain.get(CHOICE_KEY);
+  clearChoice(); // Consume before controlling anything, so duplicate Focus triggers cannot reuse choices.
+  Keychain.set(CHOICE_USED_KEY,String(Date.now()));
+  let data;
+  try{data=JSON.parse(raw);}catch(_){throw Error("就寝設定が破損しています。家電は操作しません");}
+  if(!data||!Number.isFinite(data.ts)||Date.now()-data.ts<0||Date.now()-data.ts>CHOICE_TTL_MS)
+    throw Error("就寝設定の有効期限が切れました。家電は操作しません");
+  const values=data.choices||{};
+  const valid={tv:["keep","off"],light:["keep","off"],floor:["keep","on","off"],ac:["keep","off"]};
+  for(const key of Object.keys(valid))if(!valid[key].includes(values[key]))throw Error("無効な就寝設定です。家電は操作しません");
+  return values;
+}
+async function chooseSleepScene(){
+  // Native Scriptable table; settings are stored only when the final Start row is tapped.
+  clearChoice();
+  const choices={...CHOICE_DEFAULT},table=new UITable();
+  table.showSeparators=true;
+  let accepted=false;
+  const items=[
+    {key:"tv",title:"テレビ",values:["off","keep"]},
+    {key:"light",title:"天井照明",values:["off","keep"]},
+    {key:"floor",title:"フロアランプ",values:["on","off","keep"]},
+    {key:"ac",title:"エアコン",values:["keep","off"]}
+  ];
+  const words={keep:"そのまま",off:"OFF",on:"ON"};
+  function draw(){
+    table.removeAllRows();
+    const header=new UITableRow();header.isHeader=true;header.addText("YOS 就寝モード","各行を押すと変更できます");table.addRow(header);
+    for(const item of items){
+      const row=new UITableRow();
+      row.height=64;row.dismissOnSelect=false;
+      row.addText(item.title,words[choices[item.key]]);
+      row.onSelect=()=>{
+        const next=(item.values.indexOf(choices[item.key])+1)%item.values.length;
+        choices[item.key]=item.values[next];draw();table.reload();
+      };
+      table.addRow(row);
+    }
+    const start=new UITableRow();start.height=62;
+    start.addText("就寝モード開始","選択を保存してショートカットに戻る");
+    start.onSelect=()=>{Keychain.set(CHOICE_KEY,JSON.stringify({ts:Date.now(),choices}));accepted=true;};
+    table.addRow(start);
+    const cancel=new UITableRow();cancel.height=54;cancel.addText("キャンセル");
+    cancel.onSelect=()=>{accepted=false;clearChoice();};
+    table.addRow(cancel);
+  }
+  draw();await table.present(false);
+  finish(accepted?"READY":"CANCEL");
+}
+async function floorOff(){
+  const c=await tapo.clientForHost(Keychain.get(KEYS.floor));
+  const current=findOn(await c.query({method:"get_device_info",params:null}));
+  if(current===null)throw Error("フロアランプの現在状態が不明のため中止");
+  if(current)await c.query({method:"set_device_info",params:{device_on:false}});
+  return current?"消灯指令送信":"既に消灯";
+}
+function findAcStatus(v){
+  if(!v||typeof v!=="object")return null;
+  if(typeof v.ac_status==="string")return v.ac_status;
+  for(const x of Object.values(v)){const s=findAcStatus(x);if(s!==null)return s;}
+  return null;
+}
+async function acOff(){
+  const remote=tapo.findRemote(r=>String(r.model||"").toUpperCase()==="AC"||/エアコン|air.?con/i.test(String(r.nickname||"")));
+  if(!remote)throw Error("エアコンのリモコンが未設定です");
+  const c=await tapo.client();
+  const raw=await c.query({method:"control_child",params:{device_id:remote.device_id,requestData:{method:"get_device_info",params:null}}});
+  const status=findAcStatus(raw);
+  if(!status)throw Error("エアコンの設定状態が未取得のため停止しません");
+  const s={};
+  for(const part of status.split("_")){const m=part.match(/^([PMTSD])(-?\d+)$/);if(m)s[m[1]]=Number(m[2]);}
+  if(!["P","M","T","S","D"].every(k=>Number.isFinite(s[k])))
+    throw Error("エアコンの設定情報が不足しています");
+  if(s.P===0)return "既に停止の記録（実機状態は未確認）";
+  const range=(n,a,b)=>Math.max(a,Math.min(b,n));
+  await c.controlAc(remote.device_id,{power:false,on:false,mode:s.M,temp:range(s.T,18,30),wind_speed:range(s.S,0,4),wind_direct:range(s.D,0,6)});
+  return "停止指令送信（IRのため実機反映は未確認）";
+}
+
 try{
-  if(!["check","sleep","floor","tv","light"].includes(MODE))throw Error("check/sleep/floor/tv/light のいずれかを指定してください");
+  if(!["check","choose","focus-only","sleep","floor","tv","light"].includes(MODE))throw Error("check/choose/focus-only/sleep/floor/tv/light のいずれかを指定してください");
   const missing=prerequisites();
-  if(MODE==="check"){
+  if(MODE==="focus-only"){
+    prepareFocusOnly();
+  }else if(MODE==="choose"){
+    await chooseSleepScene();
+  }else if(MODE==="check"){
     const message=missing.length?"未設定または未検出：\n・"+missing.join("\n・")+"\n既存の設定は変更していません。":"必要な設定項目が見つかりました。\n家電との通信と実動作は、まだ未検証です。\n自動実行は有効にしないでください。";
     finish(missing.length?"未設定 "+missing.join(" / "):"設定項目OK");
     await show("YOS Sleep Scene｜設定確認",message);
   }else{
-    if(missing.length)throw Error("未設定または未検出："+missing.join("、"));
     const results=[];
-    // A full scene is deliberately fail-fast: turn on the floor lamp before darkening the room.
-    if(MODE==="sleep"||MODE==="floor")results.push("ランプ："+await floorOn());
-    if(MODE==="sleep"||MODE==="tv")results.push("BRAVIA："+await tvOff());
-    if(MODE==="sleep"||MODE==="light")results.push("天井照明："+await ceilingOff());
+    // The existing Sleep Focus trigger still passes "sleep". Consume only a fresh, one-use choice.
+    if(MODE==="sleep"){
+      const selected=consumeChoice();
+      // An all-keep plan needs no credentials, connection check or appliance request.
+      const needsDevices=selected===null||(selected&&!selected.skip&&Object.values(selected).some(v=>v!=="keep"));
+      if(needsDevices&&missing.length)throw Error("未設定または未検出："+missing.join("、"));
+      if(selected&&selected.skip){
+        results.push("直前の就寝操作を重複実行しません");
+      }else if(selected===null){
+        // Existing direct Focus ON continues to use the original proven scene.
+        results.push("ランプ："+await floorOn());
+        results.push("BRAVIA："+await tvOff());
+        results.push("天井照明："+await ceilingOff());
+      }else{
+        if(selected.floor==="on")results.push("ランプ："+await floorOn());
+        else if(selected.floor==="off")results.push("ランプ："+await floorOff());
+        if(selected.tv==="off")results.push("BRAVIA："+await tvOff());
+        if(selected.light==="off")results.push("天井照明："+await ceilingOff());
+        if(selected.ac==="off")results.push("エアコン："+await acOff());
+        if(results.length===0)results.push("家電操作なし（すべてそのまま）");
+      }
+    }else{
+      if(missing.length)throw Error("未設定または未検出："+missing.join("、"));
+      if(MODE==="floor")results.push("ランプ："+await floorOn());
+      else if(MODE==="tv")results.push("BRAVIA："+await tvOff());
+      else if(MODE==="light")results.push("天井照明："+await ceilingOff());
+    }
     finish(results.join(" / "));
     if(typeof config!=="undefined"&&config.runsInApp)await show("YOS Sleep Scene｜操作結果",results.join("\n"));
   }

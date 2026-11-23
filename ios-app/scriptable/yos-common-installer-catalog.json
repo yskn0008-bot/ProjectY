@@ -52,6 +52,13 @@
       "sha256": "ee8959104a4d239b8b277fa368824a8810a03e682183a18d95b90dd99fd64d9b"
     },
     {
+      "id": "remote-power-toggle",
+      "name": "YOS Remote Power Toggle",
+      "path": "ios-app/scriptable/remote-widgets/YOS Remote Power Toggle.js",
+      "commit": "3aa2865dbb1c32c178477e8c8032f0d692f8b7ca",
+      "sha256": "88896201c7204b61f614ef47c6d3f50c6b6155676547b8f8bfbb23809b4547b3"
+    },
+    {
       "id": "tapo-h110-core",
       "name": "YOS Tapo H110 Core",
       "path": "ios-app/scriptable/remote-widgets/YOS Tapo H110 Core.js",
@@ -62,15 +69,15 @@
       "id": "sleep-scene",
       "name": "YOS Sleep Scene",
       "path": "ios-app/scriptable/remote-widgets/YOS Sleep Scene.js",
-      "commit": "808d9e797a5734a4f7326e0471d6a4474244bc38",
-      "sha256": "987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8"
+      "commit": "23b09502ea5b4fd854d4e055c393aaca804938a0",
+      "sha256": "7daf038a551ff9d01f2344a60509bcfd4640238b4f4942e4d0320bb204445357"
     },
     {
       "id": "journal-book",
       "name": "YOS Journal Book",
       "path": "ios-app/scriptable/YOS Journal Book.js",
-      "commit": "739eb7cfbbefd9e1c018199dc13bebbf9adf23d5",
-      "sha256": "793b2a90eb6d83394e065104831f58f16d42c5ef5f51fc02bbfb1c192d883a9c"
+      "commit": "459f1c76c1a76ab87bb9221906b98b5f4ee1bbc8",
+      "sha256": "3423e5853c6d30d75f8603bb015dbac9863bab700c6821cc89f1a614ac65a6ac"
     },
     {
       "id": "journal-notion-bridge",
@@ -104,8 +111,8 @@
       "id": "daystream-notion",
       "name": "YOS DAYSTREAM Notion",
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
-      "commit": "70f18fb85c37c2b7c86548d711ee240c6df66111",
-      "sha256": "ad9b615f40ac0f79332ccf0e519ba4f5811778c29313cd1c041de22e03dd73a7"
+      "commit": "f64fce41d32da4090bfe676e6af2155abb96622a",
+      "sha256": "8267bed790893febc7bcd9dca107a4ab9df58acd9b21bf894efdf41da3e7ad54"
     },
     {
       "id": "ikemen-magazine",
@@ -146,8 +153,8 @@
       "id": "shopping",
       "name": "YOS Shopping",
       "path": "ios-app/scriptable/YOS Shopping.js",
-      "commit": "47b6db740cf602968b2ab1111a0817b15e103349",
-      "sha256": "605baa87d9431620594e0b7a622eefcc1fadc0c36c7521989996a0d9a9bf272b"
+      "commit": "873051d98eb9e0261820ff5789a3a74bf38276e4",
+      "sha256": "4c1a4e99a06ac593ef7a8a77ceeb1305aa8113eb3a7730171a58b1882389ab5b"
     },
     {
       "id": "scriptable-inventory",
@@ -155,6 +162,27 @@
       "path": "ios-app/scriptable/YOS Scriptable 棚卸し.js",
       "commit": "fa6c7d41013dcc89e74f4afdff96eaf3630b07d0",
       "sha256": "bbc3b709a9c2a1c10908c5a3eb8b5dd65d1dccbe117c727fc6f12566d0feffad"
+    },
+    {
+      "id": "bravia-picture-integration",
+      "name": "YOS BRAVIA 画質統合",
+      "path": "ios-app/scriptable/YOS BRAVIA 画質統合.js",
+      "commit": "2b61b650314c3cd05b62287134971d3bfa12edfd",
+      "sha256": "78056b332397e98d2351f093f7268593c471a9c0b01c14fbf838a2ba446f7ed2"
+    },
+    {
+      "id": "yos-lists",
+      "name": "YOS Lists",
+      "path": "ios-app/scriptable/YOS Lists.js",
+      "commit": "ed750c0487b6332dc38423d8b4adb68fd36d90b6",
+      "sha256": "44c72eaf539d20696835df8125657af7f3e2f7610eb6e7a30f30d4ff4e4fd3e1"
+    },
+    {
+      "id": "home-scenes",
+      "name": "YOS Home Scenes",
+      "path": "ios-app/scriptable/remote-widgets/YOS Home Scenes.js",
+      "commit": "414354dedd6ad49990ab0d5d66004f68ab88ef2c",
+      "sha256": "5d0782f0bd81bd74076aa4b5b2b6ed2dc31f63f5818757093be1dab843c2930f"
     }
   ]
 }

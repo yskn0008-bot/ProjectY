@@ -131,3 +131,13 @@ test('long handwritten prose is not truncated in print view',async()=>{
  assert.match(r.html,/Math\.max\(320,field\.scrollHeight\)/);
  assert.equal(r.opened.length,1);
 });
+
+test('iPhone narrow layout gives the diary full width without one-character margin columns',async()=>{
+ const r=await open({mode:'compose',review:'今日は穏やかな一日だった'});
+ assert.equal(r.error,undefined);
+ for(const marker of ['.story-grid{display:block;margin:25px 8px 3px}', '.margin-left,.margin-right{display:none}', '.story-main{width:100%;min-width:0}', '.events{max-height:142px;overflow:auto}', '-webkit-line-clamp:2', 'word-break:normal']){
+   assert.ok(r.html.includes(marker),marker);
+ }
+ assert.ok(r.html.includes('id="storyReview"'));
+ assert.ok(r.html.includes('id="events"'));
+});

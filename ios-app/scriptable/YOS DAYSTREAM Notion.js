@@ -1,10 +1,13 @@
 // Variables used by Scriptable.
 // icon-color: blue; icon-glyph: tasks;
 // YOS_SCRIPT_NAME: YOS DAYSTREAM Notion
-// Existing DAYSTREAM UI + native Notion reads. A confirmed move can update only '期限'.
+// Existing DAYSTREAM UI with read-only Notion/iCloud inputs and a local plan.
 'use strict';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
-const UI_REF='177c3671af645e32d7a08af82d8dedef4bc82098';
+const UI_REF='c0735bf7dc092f8c30753b1c0c73cfd1cd758416';
+// Stable, already-published HTTPS base for Scriptable's generated HTML.
+// Do not delete or migrate any existing DAYSTREAM localStorage keys.
+const UI_BASE_URL='https://yskn0008-bot.github.io/ProjectY/yos/daystream/';
 const ROOT='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/';
 const SOURCE='965c6086-32c1-463d-93b4-87a9cb69b3ad';
 const STATES=['次にやる','実行中','本人操作','待ち','保留','完了'];
@@ -105,8 +108,14 @@ const BROWSER_BOOT=String.raw`
   const button=document.getElementById('yosWebTaskRefresh');
   const refresh=()=>{location.href='scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion'};
   button.textContent='↻ Notionを更新';button.onclick=refresh;
+  // The Web-only sync link was absent from the previously pinned HTML.
+  // Keep one visible action in the existing timeline, not another settings page.
+  const sync=document.getElementById('yosTimelineSync');
+  if(sync){sync.textContent='↻ Notion同期';sync.title='Notionの最新タスクを取得してDAYSTREAMを開く';}
   const top=document.createElement('button');top.textContent='↻ Notionを更新';top.onclick=refresh;
-  document.querySelector('.yos-web-port').insertBefore(top,document.getElementById('yosWebImport'));
+  const port=document.querySelector('.yos-web-port');
+  port.insertBefore(top,document.getElementById('yosWebImport'));
+
   document.getElementById('yosWebSourceState').textContent='Notion '+snapshot.items.length+'件取得 · '+new Date(snapshot.checkedAt).toLocaleString('ja-JP')+' · 開き直し・更新で再取得 · '+calendarStatus;
  });
 })();
@@ -115,74 +124,93 @@ const BROWSER_BOOT=String.raw`
 const BROWSER_DIRECT_IMPORT=String.raw`
 (()=>{
  'use strict';
- // The original DAYSTREAM renders its own native task cards; no overlay renderer.
- window.addEventListener('DOMContentLoaded',()=>document.getElementById('yosNativeBoot')?.remove());
- const seeds=__DIRECT_ROWS__,boot=window.YOS_CHARCOAL_BOOT,web=window.YOS_DAYSTREAM_WEB;
- if(!boot?.days||!web?.write||window.YOS_WEB_DATA_ERROR||!Array.isArray(seeds)||seeds.length>40)return;
- const key='YOS_DAYSTREAM_DIRECT_IMPORTED_V1';
- let seen;
- try{const raw=localStorage.getItem(key);seen=raw?JSON.parse(raw):{};
-  if(!seen||typeof seen!=='object'||Array.isArray(seen)||Object.keys(seen).length>80||
-    Object.values(seen).some(v=>v!==true))return;
- }catch{return}
- const days=boot.days,refs=new Set(),ids=new Set();
- let nextId=310000000;
- for(const rows of Object.values(days)){
-  if(!Array.isArray(rows))return;
-  for(const r of rows){
-   if(typeof r?.sourceRef==='string')refs.add(r.sourceRef);
-   if(Number.isSafeInteger(Number(r?.id))){ids.add(Number(r.id));nextId=Math.max(nextId,Number(r.id)+1)}
+ // Notion projection with per-day, time-only local overrides. Never mutate the saved plan or Notion source.
+ const templates=__DIRECT_ROWS__,DAY=86400000;
+ if(!Array.isArray(templates)||templates.length>40)return;
+ const MOVE_KEY='YOS_DAYSTREAM_NOTION_MOVES_V1';
+ const validDay=x=>/^\d{4}-\d{2}-\d{2}$/.test(x);
+ const slotKey=(day,ref)=>day+'|'+ref;
+ const readMoves=()=>{
+  try{
+   const raw=localStorage.getItem(MOVE_KEY);
+   if(raw===null)return {};
+   const parsed=JSON.parse(raw);
+   if(!parsed||Array.isArray(parsed)||typeof parsed!=='object')return null;
+   const pairs=Object.entries(parsed);
+   if(pairs.length>200||pairs.some(([k,v])=>!/^\d{4}-\d{2}-\d{2}\|notion:[a-f0-9]{32}$/.test(k)||
+    !Number.isInteger(v)||v<0||v>1439))return null;
+   return parsed;
+  }catch{return null;}
+ };
+ window.YOS_NOTION_LOCAL_MOVE=(day,ref,start,duration)=>{
+  if(!validDay(day)||!/^notion:[a-f0-9]{32}$/.test(ref)||
+    !Number.isInteger(start)||!Number.isInteger(duration)||
+    duration<=0||duration>1440||start<0||start+duration>1440)return false;
+  const moves=readMoves();
+  if(!moves)return false;
+  moves[slotKey(day,ref)]=start;
+  try{
+   const json=JSON.stringify(moves);
+   localStorage.setItem(MOVE_KEY,json);
+   return localStorage.getItem(MOVE_KEY)===json;
+  }catch{return false;}
+ };
+ const toneFor=title=>{
+  if(/睡眠|就寝|YOS Night|JOURNAL|自由時間|休息|読書|リラックス/i.test(title))return 'violet';
+  if(/食事|朝食|昼食|夕食|保湿|肌|イケメン|美容|基準写真/.test(title))return 'peach';
+  if(/歯磨き|歯間|筋トレ|運動|ウォーキング|水を飲む/.test(title))return 'mint';
+  return 'blue';
+ };
+ window.YOS_ONE_TAP_FOR_DAY=(day,existing=[])=>{
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!Array.isArray(existing))return [];
+  const from=Date.parse(day+'T00:00:00+09:00'),until=from+DAY;
+  if(!Number.isFinite(from))return [];
+  const out=[],moves=readMoves()||{};
+  for(let i=0;i<templates.length;i++){
+   const x=templates[i],a=Date.parse(x.startAt),b=Date.parse(x.endAt);
+   if(!Number.isFinite(a)||!Number.isFinite(b)||b<=a||b-a>DAY)continue;
+   const n=x.repeat==='daily'?Math.floor((from-a)/DAY):0;
+   for(const [k,shift] of (x.repeat==='daily'?[n,n+1]:[0]).entries()){
+    if(shift<0)continue;
+    const s0=Math.max(from,a+shift*DAY),e0=Math.min(until,b+shift*DAY);
+    if(s0>=e0)continue;
+    const s=(s0-from)/60000,d=(e0-s0)/60000,ref='notion:'+x.id;
+    if(existing.some(y=>y?.sourceRef===ref||y?.sourceRef==='yos-direct:'+x.id))continue;
+    if(existing.some(y=>y?.t===x.title&&y?.s===s&&y?.d===d))continue;
+    const moved=moves[slotKey(day,ref)];
+    const at=Number.isInteger(moved)&&moved>=0&&moved+d<=1440?moved:s;
+    out.push({id:880000000+i*3+k,t:x.title,s:at,d,f:0,
+     kind:'task',source:'YOS Tasks',flowTone:toneFor(x.title),
+     sourceRef:ref,done:x.repeat==='daily'?false:x.done});
+   }
   }
- }
- const next={...days},covered={...seen};
- let count=0;
- for(const v of seeds){
-  const {id,day,title,s,d,done}=v||{},ref='yos-direct:'+id;
-  if(!/^[a-f0-9]{32}$/.test(id)||!/^\d{4}-\d{2}-\d{2}$/.test(day)||
-    typeof title!=='string'||!title||title.length>120||
-    !Number.isInteger(s)||!Number.isInteger(d)||s<0||d<1||s+d>1440||typeof done!=='boolean')return;
-  if(covered[ref])continue;
-  const rows=next[day]||[];
-  if(refs.has(ref)||rows.some(r=>r?.t===title&&r.s===s&&r.d===d&&r.kind==='task')){
-   covered[ref]=true;continue;
-  }
-  while(ids.has(nextId))nextId++;
-  const row={id:nextId++,t:title,s,d,kind:'task',source:'YOS Direct',sourceRef:ref,done};
-  next[day]=[...rows,row];ids.add(row.id);refs.add(ref);covered[ref]=true;count++;
- }
- if(Object.keys(covered).length>80||Object.keys(next).length>120||
-    Object.values(next).some(rows=>!Array.isArray(rows)||rows.length>150))return;
- if(count&&!web.write({version:1,days:next,hiddenCalendar:boot.hiddenCalendar||{}}))return;
- if(count)boot.days=next;
- try{localStorage.setItem(key,JSON.stringify(covered))}catch{}
- const imported=new Set(Object.keys(covered).filter(k=>covered[k]).map(k=>k.slice('yos-direct:'.length)));
- if(Array.isArray(boot.taskSource?.items))
-  boot.taskSource={...boot.taskSource,items:boot.taskSource.items.filter(t=>!imported.has(t.id))};
- window.YOS_DIRECT_IMPORT={created:count,count:imported.size};
+  return out;
+ };
+ window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('yosNativeBoot')?.remove();
+  const status=document.getElementById('notice');
+  if(status)status.textContent='YOS Tasks同期済み · 時刻移動はこの端末だけに保存（Notion原本は変更しません）';
+ });
 })();
 `;
 function nativeDirectRows(tasks){
  if(!Array.isArray(tasks)||tasks.length>400)throw Error('Notionのタスク件数が不正');
- const tokyo=s=>{
-  const ms=Date.parse(s);
-  if(!Number.isFinite(ms))return null;
-  const d=new Date(ms+540*60000);
-  return {day:d.toISOString().slice(0,10),minute:d.getUTCHours()*60+d.getUTCMinutes()};
- };
+ const enabled=/^yos-daystream-routine-202612-(?:night(?:-[a-z]+)?|wake(?:-[a-z]+)?|care(?:-[a-z]+)?|sleep)$|^yos-daystream-ideal-20261123-(?:meal|journal|free)$|^yos-ikemen90-task-0[12]$/;
  const rows=[],used=new Set();
  for(const t of tasks){
-  if(!t||!/^yos-daystream-routine-202612-(?:night(?:-[a-z]+)?|wake(?:-[a-z]+)?|care(?:-[a-z]+)?|sleep)$/.test(t.syncKey||''))continue;
+  if(!t||!enabled.test(t.syncKey||''))continue;
   if(t.sourceKind!=='task'||!/^[a-f0-9]{32}$/.test(t.id||'')||!STATES.includes(t.state)||
     !validAt(t.due)||!validAt(t.dueEnd)||!t.due.includes('T')||!t.dueEnd.includes('T')||
-    used.has(t.id))throw Error('生活タスクの元データを確認できません');
-  const a=tokyo(t.due),b=tokyo(t.dueEnd),duration=(Date.parse(t.dueEnd)-Date.parse(t.due))/60000;
-  if(!a||!b||a.day!==b.day||!Number.isInteger(duration)||duration<1||a.minute+duration>1440||
-    !t.title||typeof t.title!=='string')throw Error('生活タスクの時間を確認できません');
+    used.has(t.id)||!t.title||typeof t.title!=='string')throw Error('生活タスクの元データを確認できません');
+  const start=Date.parse(t.due),end=Date.parse(t.dueEnd);
+  if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start||end-start>86400000)
+    throw Error('生活タスクの時刻・所要時間を確認できません');
   used.add(t.id);
-  rows.push({id:t.id,day:a.day,title:clean(t.title,120),s:a.minute,d:duration,done:t.state==='完了'});
+  rows.push({id:t.id,title:clean(t.title,120),startAt:t.due,endAt:t.dueEnd,
+    repeat:t.habitCycle==='毎日'?'daily':'once',done:t.state==='完了'});
  }
  if(rows.length>40)throw Error('生活タスクの登録上限を超えました');
- return rows.sort((a,b)=>a.day.localeCompare(b.day)||a.s-b.s||a.id.localeCompare(b.id));
+ return rows.sort((a,b)=>Date.parse(a.startAt)-Date.parse(b.startAt)||a.id.localeCompare(b.id));
 }
 
 /**
@@ -209,17 +237,21 @@ async function readDeviceCalendar(nativeSource,tasks,now=new Date()){
  if(events.length>80){
   deviceCalendarStatus='Apple予定：15日間に'+events.length+'件あり、取得上限80件を超過';return null;
  }
+ // Only deduplicate Notion Clarity windows that the DAYSTREAM timeline
+ // actually renders. Notion calendar mirrors (yos-shift-, apple-calendar:,
+ // calendar:) are shown only as source candidates, not native timeline cards.
+ // Skipping their iCloud event would silently hide the actual fixed schedule.
  const matched=(Array.isArray(tasks)?tasks:[]).filter(t=>t&&t.due?.includes('T')&&t.dueEnd?.includes('T')&&
    Number.isFinite(Date.parse(t.due))&&Number.isFinite(Date.parse(t.dueEnd))&&
-   (t.sourceKind==='calendar'||(t.sourceKind==='task'&&/^YOS Inbox clarity:/i.test(t.evidence||''))));
+   t.sourceKind==='task'&&/^YOS Inbox clarity:/i.test(t.evidence||''));
  const mirror=[],ids=new Set();
  for(const e of events){
   const title=clean(e?.title,100),a=new Date(e?.startDate),b=new Date(e?.endDate);
   if(!title||!Number.isFinite(+a)||!Number.isFinite(+b)||b<=a||b-a>15*86400000){
    deviceCalendarStatus='Apple予定：日時・件名の形式を確認できません';return null;
   }
-  // A Notion row with identical title and exact time is already on DAYSTREAM.
-  // The iCloud event is not written to Tasks or imported as a second task.
+  // A rendered Clarity window with identical title and exact time already
+  // occupies the timeline; keep it once, but never suppress a calendar mirror.
   if(matched.some(t=>clean(t.title,100)===title&&Date.parse(t.due)===+a&&Date.parse(t.dueEnd)===+b))continue;
   const identity=clean(e.identifier,130)||('no-id:'+title+'|'+a.toISOString()+'|'+b.toISOString());
   const id=(identity+':'+a.toISOString()).slice(0,180);
@@ -252,6 +284,144 @@ async function readDeviceCalendar(nativeSource,tasks,now=new Date()){
  }
 }
 
+
+// PRIVATE DAYSTREAM XL: DrawContext image saved only to Scriptable iCloud.
+// The image contains on-device task and calendar titles, never credentials.
+function yosXlRows(templates,calendar,now=new Date(),moves=null){
+ const begin=new Date(now.getFullYear(),now.getMonth(),now.getDate()),end=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
+ const day=[begin.getFullYear(),String(begin.getMonth()+1).padStart(2,'0'),String(begin.getDate()).padStart(2,'0')].join('-');
+ if(!Array.isArray(templates)||templates.length>40)throw Error('生活タスクの形式が不正');
+ const rows=[],seen=new Set();
+ function push(title,start,finish,source,done=false,ref=''){
+  const t=String(title||'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,70);
+  const a=Math.max(+begin,+start),b=Math.min(+end,+finish);
+  if(!t||!Number.isFinite(a)||!Number.isFinite(b)||a>=b)return;
+  const minute=Math.max(0,Math.min(1439,Math.floor((a-+begin)/60000)));
+  const duration=Math.max(1,Math.ceil((b-a)/60000));
+  const key=minute+'|'+duration+'|'+t;
+  if(seen.has(key))return;seen.add(key);rows.push({title:t,minute,duration,source,done:done===true,ref});
+ }
+ for(const t of templates){
+  if(!t||typeof t.title!=='string')continue;
+  const a=new Date(t.startAt),b=new Date(t.endAt),span=+b-+a;
+  if(!Number.isFinite(+a)||!Number.isFinite(span)||span<=0||span>86400000)continue;
+  if(t.repeat==='daily'){
+   for(const offset of [-1,0]){
+    const d=new Date(begin.getFullYear(),begin.getMonth(),begin.getDate()+offset,a.getHours(),a.getMinutes(),a.getSeconds());
+    // The native DAYSTREAM never projects a routine before its first Notion day.
+    if(d<new Date(a.getFullYear(),a.getMonth(),a.getDate()))continue;
+    push(t.title,d,new Date(+d+span),'habit',t.done,t.id);
+   }
+  }else if(t.repeat==='once')push(t.title,a,b,'task',t.done,t.id);
+ }
+ const agenda=calendar?.calendarDays?.[day];
+ if(Array.isArray(agenda))for(const e of agenda.slice(0,80)){
+  const m=Number(e?.start),dur=Number(e?.duration);
+  if(!Number.isFinite(m)||!Number.isFinite(dur)||m<0||m>=1440||dur<=0||m+dur>1440)continue;
+  push(e.title||'予定',new Date(+begin+m*60000),new Date(+begin+(m+dur)*60000),'calendar');
+ }
+ const all=calendar?.allDayDays?.[day];
+ if(Array.isArray(all))for(const name of all.slice(0,12)){
+  const t=String(name||'').trim().slice(0,70);
+  if(/^YOS-TEST(?:[-_]|$)/i.test(t)||t.includes('[架空]')||t.includes('【架空】'))continue;
+  if(t&&!seen.has('allday|'+t)){seen.add('allday|'+t);rows.push({title:t,minute:-1,duration:1440,source:'calendar',done:false})}
+ }
+ const validMoves=moves&&typeof moves==='object'&&!Array.isArray(moves)&&
+  Object.keys(moves).length<=200&&Object.entries(moves).every(([k,v])=>
+   /^\d{4}-\d{2}-\d{2}\|notion:[a-f0-9]{32}$/.test(k)&&Number.isInteger(v)&&v>=0&&v<1440);
+ let appliedMoves=0;
+ if(validMoves){
+  const counts=new Map();for(const r of rows)if(r.ref)counts.set(r.ref,(counts.get(r.ref)||0)+1);
+  for(const r of rows){
+   if(!/^[a-f0-9]{32}$/.test(r.ref)||counts.get(r.ref)!==1)continue;
+   const moved=moves[day+'|notion:'+r.ref];
+   if(Number.isInteger(moved)&&moved>=0&&moved+r.duration<=1440){r.minute=moved;appliedMoves++}
+  }
+ }
+ const rank={calendar:0,habit:1,task:2};
+ rows.sort((a,b)=>a.minute-b.minute||rank[a.source]-rank[b.source]||a.title.localeCompare(b.title,'ja'));
+ for(const r of rows)delete r.ref;
+ return {schema:'yos-xl-private-v1',day,checkedAt:now.toISOString(),rows,notionConfirmed:true,calendarConfirmed:calendar?.status==='ok',localMovesConfirmed:validMoves===true,localMovesApplied:appliedMoves>0};
+}
+async function yosXlReadMoves(view){
+ try{
+  const json=await view.evaluateJavaScript("localStorage.getItem('YOS_DAYSTREAM_NOTION_MOVES_V1')");
+  if(json===null)return {};
+  if(typeof json!=='string'||json.length>18000)return null;
+  const moves=JSON.parse(json);
+  if(!moves||typeof moves!=='object'||Array.isArray(moves)||Object.keys(moves).length>200||
+   Object.entries(moves).some(([k,v])=>!/^\d{4}-\d{2}-\d{2}\|notion:[a-f0-9]{32}$/.test(k)||
+    !Number.isInteger(v)||v<0||v>1439))return null;
+  return moves;
+ }catch{return null}
+}
+function yosXlImage(snapshot){
+ const c=new DrawContext();c.size=new Size(640,1040);c.respectScreenScale=false;c.opaque=true;
+ const box=(x,y,w,h,hex)=>{c.setFillColor(new Color(hex));c.fillRect(new Rect(x,y,w,h))};
+ const text=(s,x,y,w,h,size,hex,strong=false)=>{
+  c.setFont(strong?Font.semiboldSystemFont(size):Font.regularSystemFont(size));
+  c.setTextColor(new Color(hex));c.drawTextInRect(String(s),new Rect(x,y,w,h));
+ };
+ const clock=m=>m<0?'終日':String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+ box(0,0,640,1040,'#F1F6FB');box(18,18,604,1004,'#FFFFFF');
+ text('YOS / DAYSTREAM',48,40,520,38,23,'#51708C',true);
+ text('今日のタイムライン',48,93,540,62,36,'#203955',true);
+ text(snapshot.day.replace(/-/g,'/'),48,159,275,32,21,'#668099');
+ text(snapshot.rows.length+'件の時間枠',408,159,190,32,20,'#668099');
+ box(48,203,544,2,'#DCE6EF');
+ const list=snapshot.rows.slice(0,8);
+ if(!list.length){
+  text('時刻を確認できる予定はありません',60,300,550,55,26,'#203955',true);
+  text('DAYSTREAMの同期を確認してください',60,360,550,44,20,'#668099');
+ }else{
+  box(110,245,2,Math.max(0,list.length-1)*92,'#DDE7F0');
+  list.forEach((r,i)=>{
+   const y=225+i*92,accent=r.source==='calendar'?'#4586C8':r.source==='task'?'#9A78CC':'#2BA98B';
+   text(clock(r.minute),45,y+25,67,31,18,'#36536C',true);
+   box(105,y+29,14,14,accent);box(134,y,456,77,'#F6F9FC');box(134,y,5,77,accent);
+   text(r.title,156,y+12,409,39,24,'#203955',true);
+   text((r.source==='calendar'?'予定':r.source==='task'?'YOS Tasks':'習慣')+(r.done?'・完了':''),156,y+51,330,23,16,'#668099');
+  });
+ }
+ if(snapshot.rows.length>list.length)text('ほか '+(snapshot.rows.length-list.length)+'件',48,938,240,28,18,'#668099');
+ box(48,975,544,2,'#DCE6EF');
+ const d=new Date(snapshot.checkedAt),hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+ text('取得 '+hm+' · '+(snapshot.localMovesApplied?'端末内移動反映':'Notion基準時刻・移動未反映')+' · Apple予定'+(snapshot.calendarConfirmed?'取得済':'未取得'),48,989,540,28,15,'#668099');
+ return c.getImage();
+}
+function yosXlExport(templates,calendar,moves=null){
+ if(typeof DrawContext==='undefined'||typeof FileManager==='undefined')return {ok:false,reason:'画像API未対応'};
+ const snapshot=yosXlRows(templates,calendar,new Date(),moves),img=yosXlImage(snapshot);
+ const fm=FileManager.iCloud(),dir=fm.joinPath(fm.documentsDirectory(),'YOS_Widgets');
+ if(!fm.fileExists(dir))fm.createDirectory(dir,false);
+ const dest=fm.joinPath(dir,'YOS_DAYSTREAM_XL.png');
+ const receipt=fm.joinPath(dir,'YOS_DAYSTREAM_XL.owner.txt');
+ const marker='YOS DAYSTREAM XL generated image v1';
+ // An unrecognized image or receipt belongs to the user. Never replace it.
+ if(fm.fileExists(dest)&&(!fm.fileExists(receipt)||fm.readString(receipt)!==marker))
+  throw Error('既存の同名画像を保護しました');
+ if(!fm.fileExists(dest)&&fm.fileExists(receipt))throw Error('画像と管理記録が一致しません');
+ // Keep the preceding generated image intact if writing the replacement fails.
+ const backup=fm.joinPath(dir,'YOS_DAYSTREAM_XL.previous.png');
+ if(fm.fileExists(backup))throw Error('前回の画像更新を確認できません');
+ const hadImage=fm.fileExists(dest);
+ if(hadImage)fm.copy(dest,backup);
+ let keepBackup=false;
+ try{
+  fm.writeImage(dest,img);
+  if(!fm.fileExists(dest))throw Error('画像の保存確認ができません');
+  if(!hadImage)fm.writeString(receipt,marker);
+  if(fm.readString(receipt)!==marker)throw Error('画像の管理記録を確認できません');
+ }catch(error){
+  if(hadImage&&fm.fileExists(backup)){
+   try{if(fm.fileExists(dest))fm.remove(dest);fm.copy(backup,dest)}
+   catch{keepBackup=true;throw Error('画像の復旧を確認できません')}
+  }else if(fm.fileExists(dest))fm.remove(dest);
+  throw error;
+ }finally{if(!keepBackup&&fm.fileExists(backup))fm.remove(backup)}
+ return {ok:true,path:dest,count:snapshot.rows.length};
+}
+
 const safeScript=s=>s.replace(/<\/script/gi,'<\\/script');
 function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCalendar=null,calendarStatus='Apple予定：未確認'){
  if(!html.includes('// WEB_PORT_BOOT')||!html.includes('</script><script>\nconst tl=')||!html.includes('<script src="./task-wizard.js"></script>'))throw Error('DAYSTREAMの形式が一致しません');
@@ -263,13 +433,48 @@ function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCale
  .replace('<script src="./yos-tasks-auth.js"></script>','')
  .replace('</script><script>\nconst tl=','</script><script>'+safeScript(BROWSER_BOOT.replace('__SNAPSHOT__',json).replace('__CALENDAR_STATUS__',JSON.stringify(clean(calendarStatus,100))))+'</script><script>'+safeScript(BROWSER_DIRECT_IMPORT.replace('__DIRECT_ROWS__',directJSON))+'</script><script>\nconst tl=')
  .replace('<script src="./task-wizard.js"></script>','<script>'+safeScript(wizard)+'</script>');
+ const timelineAnchor='return [...calendarItems(day),...local,...clarity];';
+ if(out.split(timelineAnchor).length!==2)throw Error('DAYSTREAMの時間割が変わりました');
+ out=out.replace(timelineAnchor,'const calendar=calendarItems(day);const synced=window.YOS_ONE_TAP_FOR_DAY?.(day,[...calendar,...local,...clarity])||[];return [...calendar,...local,...clarity,...synced];');
+ const badgeAnchor="badge.textContent='固定'";
+ if(out.split(badgeAnchor).length!==2)throw Error('DAYSTREAMラベル形式が変わりました');
+ out=out.replace(badgeAnchor,"badge.textContent=item.source==='YOS Tasks'?'同期':'固定'");
+ const persistAnchor="x=>x.source!=='Apple Calendar'&&x.source!=='Clarity'";
+ if(out.split(persistAnchor).length!==2)throw Error('DAYSTREAMのローカル保存対象が変わりました');
+ out=out.replace(persistAnchor,"x=>x.source!=='Apple Calendar'&&x.source!=='Clarity'&&x.source!=='YOS Tasks'");
+ const focusAnchor=' const reasons=latestCompatibility.get(item.id)?.reasons;';
+ if(out.split(focusAnchor).length!==2)throw Error('DAYSTREAM詳細形式が変わりました');
+ out=out.replace(focusAnchor," if(item.source==='YOS Tasks')fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+' · Notion YOS Tasksから同期。時刻はDAYSTREAM内で移動できます（この端末のみ・Notion原本は変更しません）。';\n"+focusAnchor);
+ // Notion cards are moveable locally, but the source records remain immutable.
+ // Drag-drop saves immediately; explicit keyboard/time editing still uses the existing sheet.
+ const nativePatches=[
+  ["const fixed=!!item.f,canHide=fixed&&item.source==='Apple Calendar';",
+   "const fixed=!!item.f||item.source==='YOS Tasks',canHide=!!item.f&&item.source==='Apple Calendar';"],
+  ["document.getElementById('editSelected').hidden=!!fixed;",
+   "document.getElementById('editSelected').hidden=!!item.f&&item.source!=='YOS Tasks';document.getElementById('editSelected').textContent=item.source==='YOS Tasks'?'時刻を移動':'編集';"],
+  ["document.getElementById('editSelected').onclick=()=>beginLocalEdit(items.find(x=>x.id===selectedId));",
+   "document.getElementById('editSelected').onclick=()=>{const item=items.find(x=>x.id===selectedId);if(item?.source==='YOS Tasks')openMoveDialog(item,item.s,null);else beginLocalEdit(item)};"],
+  ["pendingMove={item,day:selectedDay,previousRect,plan:localStorage.getItem(yosPlanKey)};",
+   "pendingMove={item,day:selectedDay,previousRect,plan:item.source==='YOS Tasks'?null:localStorage.getItem(yosPlanKey)};"],
+  ["if(localStorage.getItem(yosPlanKey)!==plan){\n  moveDialog.close();",
+   "if(item.source==='YOS Tasks'){const [hours,minutes]=moveTime.value.split(':').map(Number);const next=hours*60+minutes;if(!Number.isInteger(next)||next<0||next+item.d>1440||next===item.s)return;const saved=window.YOS_NOTION_LOCAL_MOVE?.(day,item.sourceRef,next,item.d)===true;if(saved)item.s=next;moveDialog.close();note.textContent=saved?'「'+item.t+'」を'+fmt(next)+'に移動しました（この端末だけ・Notion原本は不変）':'保存領域を利用できないため、移動を確定できません。元の予定は変更していません';smoothRender(item.id,saved?previousRect:null);updateReview();return;}\n if(localStorage.getItem(yosPlanKey)!==plan){\n   moveDialog.close();"],
+  ["const theme=/就寝準備|読書|リラックス|会議/.test(item.t)?'violet':",
+   "const theme=item.source==='YOS Tasks'&&item.flowTone?item.flowTone:/就寝準備|読書|リラックス|会議/.test(item.t)?'violet':"],
+  ["if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');",
+   "if(item.source==='YOS Tasks'){el.dataset.notion='1';const badge=document.createElement('span');badge.className='fixed-label';badge.textContent='同期';el.append(badge)}\n    if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');"]
+ ];
+ for(const [from,to] of nativePatches){
+  if(out.split(from).length!==2)throw Error('DAYSTREAMの時刻移動・描画箇所が一致しません');
+  out=out.replace(from,to);
+ }
  if(deviceJSON){
   const marker=" const nativeCalendar=(()=>{try{return window.YOS_CALENDAR_NATIVE?.asDaystream(localStorage)||null}catch{return null}})();";
   if(!out.includes(marker))throw Error('DAYSTREAMのカレンダー接続箇所が一致しません');
   out=out.replace(marker," const nativeCalendar="+deviceJSON+";");
  }
- out=out.replace('<head>','<head><base href="https://yskn0008-bot.github.io/ProjectY/yos/daystream/">')
- .replace('<body class="yos-daystream-web">','<body class="yos-daystream-web"><div id="yosNativeBoot" role="status" style="position:fixed;inset:0;z-index:99999;background:#343943;color:white;padding:80px 20px;font-family:-apple-system,sans-serif">DAYSTREAMを読み込んでいます…</div>');
+ out=out.replace('<head>','<head><base href="https://yskn0008-bot.github.io/ProjectY/yos/daystream/">'+
+  '<style>.timeline .card[data-notion="1"]{cursor:grab}.timeline .card[data-notion="1"] .task-drag-grip{touch-action:none;display:grid;place-items:center;min-width:34px;color:var(--flow-ink);background:#ffffff70;border-radius:9px}.timeline .card[data-notion="1"] .fixed-label{font-size:10px;opacity:.72}.timeline .card[data-notion="1"] .task-copy{min-width:0}.timeline .card[data-notion="1"].yos-backdrop{background-color:var(--flow-light)!important;border-color:var(--flow-edge)}</style>')
+ .replace('<body class="yos-daystream-web">','<body class="yos-daystream-web"><div id="yosNativeBoot" role="status" style="position:fixed;inset:0;z-index:99999;background:#f4f8fd;color:#1d2d44;padding:80px 20px;font-family:-apple-system,sans-serif">DAYSTREAMを読み込んでいます…</div>');
  // Never start a service worker from the native HTML presentation.
  out=out.replace("if('serviceWorker' in navigator)","if(false)");
  if(/<script[^>]+src=/.test(out))throw Error('未解決の画面部品があります');
@@ -321,7 +526,24 @@ async function main(){
  const deviceCalendar=await readDeviceCalendar(native,data.tasks);
  const output=buildHTML(html,adapters,native,wizard,snapshot,directRows,deviceCalendar,deviceCalendarStatus);
  stage='画面表示';
- await WebView.loadHTML(output,null,null,true);
+ if(typeof config!=='undefined'&&config.runsInApp){
+  const view=new WebView();await view.loadHTML(output,UI_BASE_URL);
+  // Read only the existing per-day move key from the same loaded DAYSTREAM origin.
+  // Never write to its localStorage or alter the saved plan.
+  const moves=await yosXlReadMoves(view);
+  try{yosXlExport(directRows,deviceCalendar,moves)}
+  catch(err){console.warn('DAYSTREAM XL画像作成未確認：'+clean(err?.message||err,100))}
+  await view.present(true);
+  // If the user moved a task while the page was open, refresh after dismissal.
+  // A released WebView can refuse evaluation; keep the previous PNG in that case.
+  const finalMoves=await yosXlReadMoves(view);
+  if(finalMoves!==null)try{yosXlExport(directRows,deviceCalendar,finalMoves)}
+  catch(err){console.warn('DAYSTREAM XL画像再作成未確認：'+clean(err?.message||err,100))}
+ }else{
+  try{yosXlExport(directRows,deviceCalendar)}
+  catch(err){console.warn('DAYSTREAM XL画像作成未確認：'+clean(err?.message||err,100))}
+  await WebView.loadHTML(output,UI_BASE_URL,null,true);
+ }
 }
 // SCRIPTABLE_ENTRY
 try{await main()}catch(error){

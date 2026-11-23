@@ -21,7 +21,11 @@ test('YOS Tasks refresh reuses existing backend and is opt-in and read-only',()=
  assert.match(html,/id="yosWebTaskRefresh"/);
  assert.match(html,/scriptable:\/\/\/run\?scriptName=YOS%20DAYSTREAM%20Notion/);
  assert.match(html,/snapshot\.source!==\u0027yos-auth-cache\u0027/); // source guard on persisted projected data
- assert.doesNotMatch(html,/<script src="\.\/yos-tasks-auth\.js"><\/script>|yosWebGoogleButton/);
+ assert.doesNotMatch(html,/<script src="\.\/yos-tasks-auth\.js"><\/script>/);
+ assert.match(html,/id="yosTimelineSync"/);
+ assert.doesNotMatch(html,/readOnly:true,save:snapshot/);
+ assert.match(html,/<a id="yosTimelineSync" href="scriptable:\/\/\/run\?scriptName=YOS%20DAYSTREAM%20Notion"/);
+ assert.doesNotMatch(html,/id="yosTimelineGoogle"|Googleで続ける/);
  assert.match(worker,/'\.\/yos\/daystream\/yos-tasks-auth\.js'/);
 });
 test('YOS Tasks credential is used transiently and only sanitized Tasks are saved',async()=>{
@@ -41,7 +45,7 @@ test('YOS Tasks credential is used transiently and only sanitized Tasks are save
  vm.runInNewContext(sourceCode,ctx,{timeout:2000});
  vm.runInNewContext(authCode,ctx,{timeout:2000});
  const host={replaceChildren(){},getBoundingClientRect:()=>({width:280})},status={textContent:''};
- assert.equal(await local.YOS_DAYSTREAM_TASK_AUTH.setup({host,status,save:part=>{sanitized=part;return true}}),true);
+ assert.equal(await local.YOS_DAYSTREAM_TASK_AUTH.setup({host,status,readOnly:true,save:part=>{sanitized=part;return true}}),true);
  assert.equal(rendered,true);
  assert.equal(serverCalls.length,1,'identity setup only loads public config, no tasks before explicit sign-in');
  await callback({credential:'test-id-token'});
@@ -52,6 +56,8 @@ test('YOS Tasks credential is used transiently and only sanitized Tasks are save
  assert.equal(sanitized.items[0].action,'確認');
  assert.equal(sanitized.source,'yos-auth-cache');
  assert.equal(local.YOS_DAYSTREAM_SOURCES.validSaved(sanitized,'tasks'),true);
+ assert.equal((await local.YOS_DAYSTREAM_TASK_AUTH.complete(sanitized.items[0])).ok,false);
+ assert.equal(serverCalls.length,2,'timeline read-only mode never writes to Notion');
 });
 test('cross-origin page cannot start YOS identity flow',async()=>{
  const win={};win.window=win;

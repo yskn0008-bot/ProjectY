@@ -142,3 +142,56 @@ button[disabled]{cursor:not-allowed;opacity:.55}
 .product-grid.list-mode .product-card{grid-template-columns:92px 1fr;min-height:120px}
 .product-grid.list-mode .product-photo{min-height:100px}
 @media(prefers-reduced-motion:no-preference){.product-card,.chip,.round-icon,.add-button{transition:box-shadow .15s ease,transform .15s ease}.product-card:hover{box-shadow:0 6px 19px #2e41521e;transform:translateY(-1px)}}
+
+/* Shopping real-device fit: iPhone 390–430 CSS pixels, two-column list. */
+.product-card{grid-template-columns:minmax(0,40%) minmax(0,1fr);min-height:169px}
+.product-photo{min-height:152px}
+.product-details{padding-left:7px;gap:3px;overflow:hidden}
+.product-heading-row{display:grid;grid-template-columns:minmax(0,1fr) 22px;align-items:start;gap:2px;min-height:44px}
+.product-heading{margin:0;padding:0;min-height:0;max-height:44px;font-size:11px;line-height:1.33;font-weight:850;overflow:hidden;overflow-wrap:anywhere;word-break:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.product-heading-row .heart{position:static;width:22px;height:28px;margin:-4px -2px 0 0;font-size:25px;line-height:1;align-self:start}
+.product-photo .no-photo{background:linear-gradient(155deg,#f4f6fa,#e9f0f7);border:1px solid #e5ebf3;border-radius:13px}
+.product-photo .missing-glyph{font-size:31px;line-height:1;color:#7893aa}
+.product-photo .no-photo small{font-size:9px;white-space:nowrap;color:#718299}
+.product-photo .photo-quick{position:absolute;bottom:5px;right:5px;width:30px;height:30px;border:1px solid #fff;border-radius:50%;background:#fb527c;color:white;font-size:22px;line-height:1;box-shadow:0 2px 6px #25354b42;z-index:2}
+.product-card .flag.selected{background:linear-gradient(110deg,#417ef4,#6754d6)}
+.product-card .flag{z-index:3}
+.price-row{min-height:20px;gap:3px;margin-top:auto}
+.price-now.unknown{font-size:11px;letter-spacing:0;font-weight:850;color:#657589;white-space:normal;line-height:1.2}
+.store-label{font-size:9px;line-height:1.35}
+.product-actions{display:flex;justify-content:flex-end;gap:3px;flex-wrap:nowrap}
+.product-actions button,.product-actions a{min-width:28px;height:26px;width:auto;padding:0 5px;border-radius:9px;font-size:10px;font-weight:800;line-height:1;text-align:center}
+.product-actions a{font-size:16px}
+@media(max-width:430px){
+ .product-card{min-height:166px;grid-template-columns:minmax(0,39%) minmax(0,1fr);padding:7px 5px}
+ .product-photo{min-height:150px}
+ .product-details{padding-left:5px;gap:2px}
+ .product-heading-row{grid-template-columns:minmax(0,1fr) 20px;min-height:44px}
+ .product-heading{font-size:10.5px;max-height:44px;line-height:1.35}
+ .product-heading-row .heart{width:20px;height:26px;font-size:24px}
+ .product-actions button,.product-actions a{min-width:27px;height:25px;padding:0 4px;font-size:10px}
+ .category-tag{max-width:100%}
+}
+@media(max-width:350px){
+ .product-card{grid-template-columns:105px minmax(0,1fr)}
+ .product-photo{min-height:138px}
+ .product-heading{font-size:12px}
+ .product-heading-row{min-height:46px}
+}
+
+/* Native WebView safe-area is preserved to keep the header below the iOS toolbar. */
+
+/* Image provenance must remain visible: category photos are not exact products. */
+.product-photo .reference-photo-label{position:absolute;left:4px;bottom:5px;z-index:2;background:#fbfdffee;border:1px solid #d3dce8;border-radius:9px;padding:3px 5px;color:#415975;font-size:9px;font-weight:850;letter-spacing:0;box-shadow:0 1px 3px #00000010}
+
+/* Shopping: evidence density, not marketing banners. Native/Web share this UI. */
+.data-health{display:flex;flex-wrap:wrap;gap:3px 8px;align-items:center;padding:7px 10px;margin:5px 0 11px;border:1px solid #e9e7ef;border-radius:12px;background:#fdfdff;color:#526075;font-size:10px;line-height:1.45}
+.data-health strong{color:#28364d;font-weight:800}
+.data-health span{font-weight:650}
+.data-health small{flex-basis:100%;font-size:9px;color:#778093}
+.price-evidence{display:block;line-height:1.35;font-size:9px;color:#6d7685;min-height:22px;overflow-wrap:anywhere}
+.price-evidence.web{color:#257365;font-weight:680}
+.price-evidence.stale{color:#90765d}
+.price-source{color:#5674a3;font-size:10px;font-weight:730;text-decoration:underline;text-underline-offset:2px;width:max-content;max-width:100%}
+.source-notice{font-size:11px;line-height:1.55;color:#626c80}
+.source-notice a{color:#4663a1;text-decoration:underline}

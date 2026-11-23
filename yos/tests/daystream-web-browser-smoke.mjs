@@ -9,6 +9,12 @@ try{
  const res=await page.goto('http://127.0.0.1:4173/yos/daystream/',{waitUntil:'domcontentloaded'});
  assert.equal(res.status(),200);
  await page.locator('#timelinePanel').waitFor();
+ const dateTop=await page.locator('.flow-date-row').boundingBox();
+ const connectionTop=await page.locator('.native-tools summary').boundingBox();
+ assert.ok(dateTop && dateTop.y <= 12,'date starts at the top on a normal mobile viewport');
+ assert.ok(connectionTop && dateTop.y+dateTop.height<=connectionTop.y,'connection controls are below the date');
+
+ await page.locator('.native-tools summary').click();
  await page.locator('#yosWebImport').waitFor();
  assert.equal(await page.locator('#yosWebHistory').isVisible(),true);
  await page.locator('#addBtn').click();
@@ -110,8 +116,8 @@ try{
  assert.equal(importState.calendarCount,1);
  assert.equal(importState.taskCount,1);
  await page.reload({waitUntil:'domcontentloaded'});
- assert.match(await page.locator('#yosWebSourceState').innerText(),/タスク手動取込/);
- assert.match(await page.locator('#yosWebSourceState').innerText(),/Apple予定手動取込/);
+ assert.match(await page.locator('#yosWebSourceState').textContent(),/タスク手動取込/);
+ assert.match(await page.locator('#yosWebSourceState').textContent(),/Apple予定手動取込/);
  await page.locator('[data-tab="task"]').click();
  assert.match(await page.locator('#yosTaskSourceStatus').innerText(),/手動取込のTasks写し/);
  assert.match(await page.locator('#yosSourceTasks').innerText(),/Web imported task/);
@@ -126,6 +132,7 @@ try{
  assert.equal(started.kind,'start');
  assert.equal(started.count,3);
  const downloadTask=page.waitForEvent('download');
+ await page.locator('.native-tools').evaluate(el=>{el.open=true});
  await page.locator('#yosWebExport').click();
  const download=await downloadTask;
  assert.equal(download.suggestedFilename(),'YOS_DAYSTREAM_WEB_ALL_BACKUP.json');
@@ -169,7 +176,7 @@ try{
  const inherited=await page.evaluate(()=>window.YOS_CHARCOAL_BOOT);
  assert.equal(inherited.calendarSource,'yos-life-local');
  assert.equal(inherited.calendarDays['2026-11-13'][0].title,'LIFE BROWSER SMOKE');
- assert.match(await page.locator('#yosWebSourceState').innerText(),/保存済みMY WAY生活予定/);
+ assert.match(await page.locator('#yosWebSourceState').textContent(),/保存済みMY WAY生活予定/);
  page.on('dialog',async dialog=>dialog.accept());
  const adopted=await page.evaluate(()=>{
   const title='WEB PORT STORAGE SMOKE',web=window.YOS_DAYSTREAM_WEB;
@@ -225,27 +232,22 @@ try{
   assert.deepEqual(offline.plan,pack.plan,'offline launch preserves restored plan');
   assert.equal(offline.calendar['2026-11-13'][0].start,570,'offline launch retains imported calendar');
  }
- // Previously obtained Notion data stays private; the Web page has no Google sign-in path.
+ // The public DAYSTREAM never initiates Google identity to read private Notion tasks.
+ // Its single sync action opens the existing iPhone Scriptable route instead.
  const liveContext=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Asia/Tokyo',serviceWorkers:'block'});
  const live=await liveContext.newPage();
  const remote=[];
  live.on('request',request=>{if(/accounts\.google\.com|project-y-yos-ai\.vercel\.app/.test(request.url()))remote.push(request.url())});
- const captureDay=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  await live.goto('http://127.0.0.1:4173/yos/daystream/',{waitUntil:'domcontentloaded'});
- assert.equal(await live.evaluate(()=>window.YOS_DAYSTREAM_TASK_AUTH),undefined);
- assert.equal(await live.locator('#yosWebGoogleButton').count(),0);
- await live.evaluate(day=>{
-  const data={source:'notion',complete:true,tasks:[{
-   id:'22222222333344445555666666666666',title:'CLARITY TIMED',state:'次にやる',sourceKind:'task',
-   evidence:'YOS Inbox clarity:test-window-0001',due:day+'T19:00:00+09:00',dueEnd:day+'T19:30:00+09:00'
-  }]};
-  const snapshot=window.YOS_DAYSTREAM_SOURCES.fromYosTaskDashboardCache({savedAt:Date.now(),data});
-  if(!window.YOS_DAYSTREAM_WEB.saveAuthorizedTasks(snapshot))throw Error('fixture not saved');
- },captureDay);
- assert.equal(await live.locator('#tl .card').filter({hasText:'CLARITY TIMED'}).count(),1);
- await live.reload({waitUntil:'domcontentloaded'});
- assert.equal(await live.locator('#tl .card').filter({hasText:'CLARITY TIMED'}).count(),1);
- assert.deepEqual(remote,[]);
+ const link=live.locator('#yosTimelineSync');
+ assert.equal(await link.isVisible(),true);
+ assert.equal(await link.getAttribute('href'),'scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion');
+ assert.equal(await live.locator('#yosTimelineGoogle').count(),0);
+ assert.equal(await live.locator('script[src="./yos-tasks-auth.js"]').count(),0);
+ await live.evaluate(()=>{window.__syncHandoff=null;const el=document.getElementById('yosTimelineSync');el.addEventListener('click',event=>{event.preventDefault();window.__syncHandoff=el.href},{once:true})});
+ await link.click();
+ assert.equal(await live.evaluate(()=>window.__syncHandoff),'scriptable:///run?scriptName=YOS%20DAYSTREAM%20Notion');
+ assert.deepEqual(remote,[],'no Google sign-in or server request for a one-tap handoff');
  await liveContext.close();
 
  // A private JSON import merges into THIS original PWA's existing plan.
@@ -339,6 +341,7 @@ try{
     backdrop:node.classList.contains('yos-backdrop'),foreground:node.classList.contains('yos-foreground'),
     thickness:r.height,band:node.dataset.durationBand||'',radius:getComputedStyle(node).borderRadius,
     title:b.textContent,time:time.textContent,color:getComputedStyle(node).backgroundColor,
+    accent:getComputedStyle(node).getPropertyValue('--signal-accent').trim(),
     whiteSpace:getComputedStyle(b).whiteSpace,
     textOK:b.scrollWidth<=b.clientWidth+2&&b.scrollHeight<=b.clientHeight+2,
     timeOK:time.scrollWidth<=time.clientWidth+2};
@@ -366,7 +369,7 @@ try{
   }
   assert.ok(byId.get(2105).thickness>byId.get(2110).thickness,
    'long task title wraps instead of being cut in a slim bar');
-  assert.equal(byId.get(2110).color,'rgb(34, 46, 68)','default task uses the Layer slate surface');
+  assert.equal(byId.get(2110).color,'rgb(219, 202, 248)','default task uses the lavender surface');
   for(const id of [2102,2106,2108,2110]){
    const surface=await p.locator('#tl [data-id="'+id+'"]').evaluate(el=>({
     shadow:getComputedStyle(el).boxShadow,
@@ -375,10 +378,13 @@ try{
    assert.equal(surface.before,'none','left stripe must be hidden for task '+id);
    assert.ok(!surface.shadow.includes('inset 4px'),'left accent shadow absent for task '+id);
   }
-  assert.equal(byId.get(2106).color,'rgb(35, 71, 62)','positive status has a green surface');
-  assert.equal(byId.get(2108).color,'rgb(73, 55, 34)','negative status has an amber surface');
-  assert.equal(byId.get(2102).color,'rgb(75, 48, 59)','overlap has a rose surface');
-  assert.equal(byId.get(2110).radius,'11px','compact task cards keep rounded corners');
+  assert.equal(byId.get(2106).color,'rgb(193, 237, 214)','exercise keeps its category surface');
+  for(const [id,accent] of [[2106,'#299d6b'],[2108,'#ba701f'],[2102,'#c1475e'],[2110,'']]){
+   assert.equal(byId.get(id).accent,accent,'the compatibility accent is independent of the category surface');
+  }
+  assert.equal(byId.get(2108).color,byId.get(2110).color,'advice preserves the task category');
+  assert.equal(byId.get(2102).color,byId.get(2110).color,'conflicts preserve the task category');
+  assert.equal(byId.get(2110).radius,'8px','compact contiguous task keeps a gentle rounded edge');
 
   const distinct=await p.locator('#tl [data-id="2100"], #tl [data-id="2102"], #tl [data-id="2110"]').evaluateAll(nodes=>nodes.map(el=>({
    id:Number(el.dataset.id),background:getComputedStyle(el).backgroundColor,
@@ -386,18 +392,18 @@ try{
    borderColor:getComputedStyle(el).borderColor,shadow:getComputedStyle(el).boxShadow,image:getComputedStyle(el).backgroundImage
   })));
   const appearance=new Map(distinct.map(x=>[x.id,x]));
-  assert.equal(appearance.get(2100).background,'rgb(56, 41, 51)','long overlapping sleep span is muted behind cards');
   assert.equal(appearance.get(2100).borderStyle,'solid','long backdrop has a quiet solid outline');
   assert.equal(appearance.get(2102).borderStyle,'solid','short overlapping card has a crisp solid edge');
-  assert.equal(appearance.get(2102).border,'1px','short task remains distinct from backdrop');
+  assert.equal(appearance.get(2102).border,'2px','short task keeps a darker color-matched boundary');
+  assert.equal(appearance.get(2102).borderColor,'rgb(135, 96, 179)','same-tone short tasks remain individually outlined');
   assert.notEqual(appearance.get(2102).shadow,'none','foreground cards retain a separating shadow in any browser color notation');
   assert.notEqual(appearance.get(2100).background,appearance.get(2102).background,'background sleep does not look like the red foreground');
-  assert.equal(appearance.get(2110).border,'1px','neutral cards also have a border');
+  assert.equal(appearance.get(2110).border,'2px','neutral cards also have a clear border');
 
   assert.equal(appearance.get(2100).image,'none','long sleep backdrop stays flat');
   for(const id of [2102,2110]){
    const fg=appearance.get(id);
-   assert.equal(fg.image,'none','foreground task '+id+' uses a flat Layer surface');
+   assert.match(fg.image,/linear-gradient/,'foreground cards keep their category gradient');
    assert.notEqual(fg.shadow,'none','foreground task '+id+' uses a soft separating shadow');
    assert.ok(!fg.shadow.includes('inset 4px'),'do not restore a stripe on task '+id);
   }
@@ -406,7 +412,6 @@ try{
 
   const visible=cells.filter(c=>!c.backdrop).sort((a,b)=>a.top-b.top);
   for(let i=1;i<visible.length;i++)assert.ok(visible[i].top>=visible[i-1].bottom-2,'dense tasks do not cover one another: '+visible[i-1].id+'/'+visible[i].id);
-  for(const id of [2102,2106,2108])assert.notEqual(byId.get(id).color,byId.get(2110).color,'semantic color '+id+' differs from unknown');
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no sideways overflow');
   const grip=p.locator('#tl [data-id="2102"] .task-drag-grip');
   // iPhone has a fixed bottom navigation bar: position the grip in the visible center,
@@ -416,7 +421,9 @@ try{
   await p.evaluate(()=>{const el=document.querySelector('#tl [data-id="2102"]');window.__yosDragTrace=[];for(const name of ['pointerdown','pointermove','pointerup','pointercancel','touchstart','touchmove','touchend'])el.addEventListener(name,e=>window.__yosDragTrace.push({event:name,y:e.clientY,pointerType:e.pointerType,button:e.button,target:e.target.className}),true)});
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2);await p.mouse.down();
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2+130,{steps:12});await p.mouse.up();
+  assert.equal(await p.locator('#moveDialog').isVisible(),false,'drag drop must not open the large placement sheet');
   const dragState=await p.evaluate(()=>({s:items.find(x=>x.id===2102).s,note:note.textContent,events:window.__yosDragTrace,scrollY:scrollY}));
+  assert.notEqual(dragState.s,345,'drag drop commits immediately without extra confirmation: '+JSON.stringify(dragState));
   assert.notEqual(dragState.s,345,'the grip actually moves a task: '+JSON.stringify(dragState));
   await p.locator('#yosUndoBtn').click();
   assert.equal(await p.evaluate(()=>items.find(x=>x.id===2102).s),345,'undo reverses task move');
@@ -425,126 +432,12 @@ try{
  }
 
 
- // Three-finger-intent regression: short tap => complete, held-moving => move,
- // long stationary hold => editor. Does not require unavailable iPhone force data.
+ // The Scriptable boot browser suite covers native finger drags, WebKit
+ // gestures, preview/cancel, failure, undo/redo, and saved-plan reload.
  const gestureContext=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,timezoneId:'Asia/Tokyo',serviceWorkers:'block'});
  const gp=await gestureContext.newPage();
  const gestureErrors=[];gp.on('pageerror',e=>gestureErrors.push(e.message));
  await gp.goto('http://127.0.0.1:4173/yos/daystream/',{waitUntil:'domcontentloaded'});
- await gp.evaluate(()=>{
-  const day=localISO(new Date()),p={version:1,days:{[day]:[
-   {id:91001,t:'THREE GESTURES',s:360,d:15,kind:'task',done:false}
-  ]},hiddenCalendar:{}};
-  if(!window.YOS_DAYSTREAM_WEB.write(p))throw Error('gesture fixture save failed');
- });
- await gp.reload({waitUntil:'domcontentloaded'});
- await gp.evaluate(()=>{
-  window.__gestureTouch=async (id,steps,fromGrip=false)=>{
-   const card=document.querySelector('#tl [data-id="'+id+'"]');
-   if(!card)throw Error('gesture fixture card missing');
-   const target=fromGrip?card.querySelector('.task-drag-grip'):card.querySelector('.task-copy');
-   for(const [type,x,y,hold] of steps){
-    // WebKit test runners do not expose constructible Touch objects. A synthetic
-    // cancelable Event carrying TouchList-shaped coordinates tests the same handlers.
-    const touch={identifier:1,target,clientX:x,clientY:y};
-    const contacts=type==='touchend'||type==='touchcancel'?[]:[touch];
-    const event=new Event(type,{bubbles:true,cancelable:true});
-    Object.defineProperty(event,'touches',{value:contacts});
-    Object.defineProperty(event,'targetTouches',{value:contacts});
-    Object.defineProperty(event,'changedTouches',{value:[touch]});
-    target.dispatchEvent(event);
-    if(hold)await new Promise(ok=>setTimeout(ok,hold));
-   }
-   return {start:items.find(x=>x.id===id)?.s,done:!!items.find(x=>x.id===id)?.done,
-    editor:document.getElementById('editor').classList.contains('show'),
-    deleteVisible:!document.getElementById('gestureDelete').hidden};
-  };
- });
- const g1=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,45],['touchend',200,360,0]]));
- assert.equal(g1.done,true,'brief tap completes local task');
- const g2=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,40],['touchend',200,360,0]]));
- assert.equal(g2.done,false,'second brief tap toggles local completion');
- const g3=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchend',200,360,0]]));
- assert.equal(g3.done,false,'a held but un-dragged touch does not complete');
- const g4=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,0],['touchmove',200,420,0],['touchend',200,420,0]]));
- assert.equal(g4.start,360,'quick vertical swipe scrolls instead of changing task time');
- assert.equal(g4.done,false,'scrolling does not mark task complete');
-
- // While a card is armed, even an attempted viewport scroll must leave the
- // hour grid pinned. On finger release native scrolling must work again.
- const pinned=await gp.evaluate(async()=>{
-  const nap=ms=>new Promise(ok=>setTimeout(ok,ms));
-  const target=document.querySelector('#tl [data-id="91001"] .task-copy');
-  const send=(type,x=200,y=360)=>{
-   const touch={identifier:100,target,clientX:x,clientY:y};
-   const touches=(type==='touchend'||type==='touchcancel')?[]:[touch];
-   const e=new Event(type,{bubbles:true,cancelable:true});
-   Object.defineProperty(e,'touches',{value:touches});
-   Object.defineProperty(e,'changedTouches',{value:[touch]});
-   target.dispatchEvent(e);return e.defaultPrevented;
-  };
-  window.scrollTo(0,175);await nap(55);
-  const before=window.scrollY;
-  send('touchstart');await nap(320);
-  const touchBlocked=send('touchmove');
-  window.scrollTo(0,before+125);await nap(60);
-  const during=window.scrollY;
-  send('touchend');
-  window.scrollTo(0,before+125);await nap(60);
-  const after=window.scrollY;
-  return {before,during,after,touchBlocked,start:items.find(x=>x.id===91001).s};
- });
- assert.ok(pinned.before>0,'scroll-lock fixture has an actual scrollable timeline');
- assert.equal(pinned.touchBlocked,true,'armed press prevents native document scrolling');
- assert.ok(Math.abs(pinned.during-pinned.before)<=2,'background time ruler must remain still on armed press: '+JSON.stringify(pinned));
- assert.ok(pinned.after>pinned.before+40,'normal background scroll is restored on release: '+JSON.stringify(pinned));
- assert.equal(pinned.start,360,'press does not change source start');
-
- const canceledLock=await gp.evaluate(async()=>{
-  const nap=ms=>new Promise(done=>setTimeout(done,ms));
-  const target=document.querySelector('#tl [data-id="91001"] .task-copy');
-  const send=(type)=>{
-   const touch={identifier:101,target,clientX:200,clientY:360};
-   const touches=type==='touchcancel'?[]:[touch];
-   const event=new Event(type,{bubbles:true,cancelable:true});
-   Object.defineProperty(event,'touches',{value:touches});
-   Object.defineProperty(event,'changedTouches',{value:[touch]});
-   target.dispatchEvent(event);
-  };
-  window.scrollTo(0,170);await nap(60);
-  const before=window.scrollY;
-  send('touchstart');await nap(320);
-  send('touchcancel');
-  window.scrollTo(0,before+100);await nap(60);
-  return {before,after:window.scrollY};
- });
- assert.ok(canceledLock.after>canceledLock.before+40,
-  'canceled gesture must release the global scroll lock: '+JSON.stringify(canceledLock));
-
-
- const g5=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchmove',200,530,30],['touchend',200,530,0]]));
- assert.notEqual(g5.start,360,'hold then move on the task body actually moves time');
- assert.equal(g5.done,false,'drag must not complete a task');
- await gp.locator('#yosUndoBtn').click();
- assert.equal(await gp.evaluate(()=>items.find(x=>x.id===91001).s),360,'undo restores the original time');
- const g6=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,780],['touchend',200,360,0]]));
- assert.equal(g6.editor,true,'motionless long hold opens task editor');
- assert.equal(g6.done,false,'editing never auto-completes task');
- await gp.locator('#cancelEditor').click();
- const g7=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchmove',200,530,0],['touchcancel',200,530,0]]));
- assert.equal(g7.start,360,'cancelled move does not overwrite saved time');
- const g8=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',240,370,35],['touchend',240,370,0]],true));
- assert.equal(g8.done,false,'tapping the drag grip never accidentally completes');
- const g9=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,0],['touchmove',120,360,0],['touchend',120,360,0]]));
- assert.equal(g9.deleteVisible,true,'swipe delete still requires confirmation');
- await gp.locator('#gestureDeleteCancel').click();
- const cancelledArmed=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,320],['touchcancel',200,360,0]]));
- assert.equal(cancelledArmed.done,false,'interrupted press does not complete a task');
- assert.equal(cancelledArmed.start,360,'interrupted press does not alter task time');
- const tinySlideTap=await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,35],['touchmove',204,364,0],['touchend',204,364,0]]));
- assert.equal(tinySlideTap.done,true,'normal finger jitter under 12px still allows deliberate brief tap');
- await gp.evaluate(()=>window.__gestureTouch(91001,[['touchstart',200,360,35],['touchend',200,360,0]]));
- assert.equal(await gp.evaluate(()=>!!items.find(x=>x.id===91001).done),false,'test restores original task state');
  // Verify the existing timeline renders long fixed and editable windows behind live status cards.
  await gp.evaluate(()=>{
   items=[
@@ -564,14 +457,14 @@ try{
  assert.match(await card(3).getAttribute('class'),/yos-backdrop/);
  assert.equal(await card(2).locator('.layer-status').textContent(),'！ 時間衝突');
  assert.equal(await card(4).locator('.layer-status').textContent(),'＋ 相乗候補');
- assert.equal(await card(6).locator('.layer-status').textContent(),'− 余裕不足');
+ assert.equal(await card(6).locator('.layer-status').textContent(),'− 注意');
  assert.equal(await card(8).locator('.layer-status').count(),0);
  const sleep=await card(1).boundingBox(),work=await card(3).boundingBox(),testCard=await card(2).boundingBox();
  assert.ok(sleep.x+sleep.width<=work.x,'overlapping long intervals have separate lanes');
  assert.ok(testCard.y>sleep.y&&testCard.y<sleep.y+sleep.height,'short action is inside the sleep window');
  assert.equal(await card(2).evaluate(el=>{
   const rect=el.getBoundingClientRect();
-  return getComputedStyle(el).backgroundColor==='rgb(75, 48, 59)'&&Number(getComputedStyle(el).zIndex)>Number(getComputedStyle(document.querySelector('.yos-backdrop')).zIndex)&&rect.width>0;
+  return getComputedStyle(el).getPropertyValue('--signal-accent').trim()==='#c1475e'&&Number(getComputedStyle(el).zIndex)>Number(getComputedStyle(document.querySelector('.yos-backdrop')).zIndex)&&rect.width>0;
  }),true,'danger tint and foreground stacking are computed by the browser');
  await gp.evaluate(()=>{items.find(item=>item.id===2).s=540;render();updateReview();});
  assert.equal(await card(2).locator('.layer-status').count(),0,'conflict tint disappears when moved clear');

@@ -93,6 +93,10 @@ jobs:
           )
           PYTHON
 
+      # Reuses the existing hourly Pages workflow; no additional scheduler or DB.
+      - name: Build official YOS TAXI research snapshot (fail closed by source)
+        run: python3 taxi/build_research_feed.py
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
