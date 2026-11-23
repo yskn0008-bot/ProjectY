@@ -128,6 +128,8 @@ test('app WebView reads only existing move storage; Siri retains original presen
  assert.match(script,/const view=new WebView\(\);await view\.loadHTML\(output,UI_BASE_URL\)/);
  assert.match(script,/const moves=await yosXlReadMoves\(view\)/);
  assert.match(script,/await view\.present\(true\)/);
+ assert.match(script,/const finalMoves=await yosXlReadMoves\(view\)/);
+ assert.match(script,/if\(finalMoves!==null\)try\{yosXlExport\(directRows,deviceCalendar,finalMoves\)\}/);
  assert.match(script,/await WebView\.loadHTML\(output,UI_BASE_URL,null,true\)/);
  assert.doesNotMatch(code,/localStorage\.setItem|localStorage\.removeItem/);
 });
