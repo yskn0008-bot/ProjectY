@@ -630,3 +630,69 @@ test('Scriptable icon header managed update interrupted is fully restorable',asy
   assert.equal(cloud.files.has(marker),false);
   assert.match(r.alerts.at(-1).message,/復旧しました/);
 });
+
+test('verified original Sleep Scene v1.0 can be migrated only with consent, backup and valid historical receipt',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ await run({cloud,local,id:'sleep-scene',choices:[-1]});
+ const name='YOS Sleep Scene',path='/icloud/'+name+'.js',rec='/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.receipt.json';
+ const legacy=fs.readFileSync(new URL('fixtures/YOS Sleep Scene original v1.0.js',import.meta.url),'utf8');
+ assert.equal(hash(legacy),'987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8');
+ cloud.files.set(path,legacy);
+ const historicalReceipt=JSON.parse(cloud.files.get(rec));
+ historicalReceipt.sha256='5db5b1e0278e9ab0da3c25f2a74a0a5d8682962ad9ac2de3cfd29c8dc98ac47f';
+ const oldReceipt=JSON.stringify(historicalReceipt);cloud.files.set(rec,oldReceipt);
+ cloud.files.set('/icloud/YOS Sleep Scene 1.js','ACCIDENTAL USER COPY');
+ let r=await run({cloud,local,id:'sleep-scene',choices:[-1]});
+ assert.equal(cloud.files.get(path),legacy,'decline must not alter original');
+ assert.equal(cloud.files.get(rec),oldReceipt,'decline must not alter historical receipt');
+ assert.equal(r.alerts.at(-1).title,'YOS Sleep Scene｜旧正式版の安全更新');
+ r=await run({cloud,local,id:'sleep-scene',choices:[0,-1]});
+ assert.equal(cloud.files.get(path),fixtures['sleep-scene']);
+ assert.equal(JSON.parse(cloud.files.get(rec)).sha256,shipped.targets.find(t=>t.id==='sleep-scene').sha256);
+ assert.equal(cloud.files.get('/icloud/YOS Common Installer Data/backups/'+encodeURIComponent(name)+'-'+hash(legacy)+'.txt'),legacy);
+ assert.equal(cloud.files.get('/icloud/YOS Sleep Scene 1.js'),'ACCIDENTAL USER COPY');
+ assert.equal(cloud.files.has('/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.pending.json'),false);
+});
+test('verified old Sleep Scene with only a Scriptable icon banner remains updateable with raw backup',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ await run({cloud,local,id:'sleep-scene',choices:[-1]});
+ const name='YOS Sleep Scene',path='/icloud/'+name+'.js';
+ const old=fs.readFileSync(new URL('fixtures/YOS Sleep Scene original v1.0.js',import.meta.url),'utf8');
+ const banner='// Variables used by Scriptable.\\n// These must be at the very top of the file. Do not edit.\\n// icon-color: deep-green; icon-glyph: magic;\\n';
+ cloud.files.set(path,banner+old);
+ const rec='/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.receipt.json';
+ const oldReceipt=JSON.parse(cloud.files.get(rec));oldReceipt.sha256='5db5b1e0278e9ab0da3c25f2a74a0a5d8682962ad9ac2de3cfd29c8dc98ac47f';cloud.files.set(rec,JSON.stringify(oldReceipt));
+ await run({cloud,local,id:'sleep-scene',choices:[0,-1]});
+ assert.equal(cloud.files.get(path),fixtures['sleep-scene']);
+ assert.equal(cloud.files.get('/icloud/YOS Common Installer Data/backups/'+encodeURIComponent(name)+'-'+hash(banner+old)+'.txt'),banner+old);
+});
+test('unrecognized Sleep Scene edit or spoofed historical receipt cannot bypass protection',async()=>{
+ for(const type of ['edit','receipt']){
+  const cloud=fm('/icloud'),local=fm('/local');
+  await run({cloud,local,id:'sleep-scene',choices:[-1]});
+  const name='YOS Sleep Scene',path='/icloud/'+name+'.js',rec='/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.receipt.json';
+  const old=fs.readFileSync(new URL('fixtures/YOS Sleep Scene original v1.0.js',import.meta.url),'utf8');
+  const live=type==='edit'?old.replace('YOS Sleep Scene v1.0','YOS Sleep Scene user changed'):old;
+  cloud.files.set(path,live);
+  const r0=JSON.parse(cloud.files.get(rec));r0.sha256=type==='receipt'?'f'.repeat(64):'5db5b1e0278e9ab0da3c25f2a74a0a5d8682962ad9ac2de3cfd29c8dc98ac47f';
+  const receipt=JSON.stringify(r0);cloud.files.set(rec,receipt);
+  const r=await run({cloud,local,id:'sleep-scene',choices:[0,-1]});
+  assert.equal(cloud.files.get(path),live);
+  assert.equal(cloud.files.get(rec),receipt);
+  assert.equal(r.alerts.at(-1).title,'YOS導入・更新は未完了');
+  assert.match(r.alerts.at(-1).message,/Scriptable内で変更されたコード/);
+ }
+});
+test('verified unmanaged original Sleep Scene upgrades only after explicit confirmation and backup',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const old=fs.readFileSync(new URL('fixtures/YOS Sleep Scene original v1.0.js',import.meta.url),'utf8');
+ const name='YOS Sleep Scene',path='/icloud/'+name+'.js',rec='/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.receipt.json';
+ cloud.files.set(path,old);
+ let r=await run({cloud,local,id:'sleep-scene',choices:[-1]});
+ assert.equal(cloud.files.get(path),old);assert.equal(cloud.files.has(rec),false);
+ assert.equal(r.alerts.at(-1).title,'YOS Sleep Scene｜旧正式版の安全更新');
+ r=await run({cloud,local,id:'sleep-scene',choices:[0,-1]});
+ assert.equal(cloud.files.get(path),fixtures['sleep-scene']);
+ assert.equal(JSON.parse(cloud.files.get(rec)).sha256,hash(fixtures['sleep-scene']));
+ assert.equal(cloud.files.get('/icloud/YOS Common Installer Data/backups/'+encodeURIComponent(name)+'-'+hash(old)+'.txt'),old);
+});
