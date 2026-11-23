@@ -860,17 +860,24 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
  function handleFile(file){if(!file)return;if(!file.type.startsWith('image/')){toast('画像ファイルを選んでください');return}selectedFile=file;openSheet('日報写真を選択しました',`${file.name}\n画像は現在未送信・未保存です。金額の確認後に端末内へ記録できます。Notionへの自動照合は未実装です。`,[{text:'総収入を確認して記録',primary:true,run:openRevenueConfirm},{text:'共有シートを開く',run:sharePhoto}])}
  async function sharePhoto(){const file=selectedFile;if(!file){toast('写真を先に選択してください');return}try{if(navigator.canShare?.({files:[file]})&&navigator.share){await navigator.share({files:[file],title:'YOS Taxi｜手書き日報',text:'YOS Taxiの日報写真です。既存の乗務記録と差分を照合してください。'});toast('共有先での取り込み結果を確認してください（Notion連携なし）')}else{openSheet('写真の共有は未対応','この環境では写真共有シートを利用できません。写真をChatGPT等へ直接共有してください。')}}catch(e){if(e?.name!=='AbortError')toast('写真を共有できませんでした')}}
  function exportJson(){
-   const revenueApi=window.YosTaxiConfirmedRevenueV1;
-   let revenueBackup=null;
-   if(revenueApi){
-     const loaded=revenueApi.load();
-     // Even if the new ledger is corrupt, preserve its exact raw text for possible recovery.
-     revenueBackup=loaded.error
-       ?{status:'corrupt-preserved',raw:localStorage.getItem(revenueApi.KEY)}
-       :{version:1,records:loaded.records};
+   // Export exact bytes as well as parsed views: malformed records must never disappear
+   // behind parse()'s safe empty-state fallback. No writes, imports, or remote uploads.
+   const keys=[STORE,WAIT_STORE,FIELD_STORE,window.YosTaxiConfirmedRevenueV1?.KEY].filter(Boolean);
+   const rawLedgers={};
+   try{
+     for(const key of keys)rawLedgers[key]=localStorage.getItem(key);
+   }catch{
+     toast('端末の記録を読み取れず、バックアップを作成できませんでした。既存データは変更していません。');
+     return;
    }
-   const data={disclaimer:'このファイルは端末内の乗務・確認済み日報をバックアップします。Notion正本・紙日報の代替ではなく、自動復元や自動同期はしません。',
-     state,confirmedRevenue:revenueBackup};
+   const revenueApi=window.YosTaxiConfirmedRevenueV1;
+   const loaded=revenueApi?.load();
+   const revenueBackup=!revenueApi?null:loaded.error
+     ?{status:'corrupt-preserved',raw:rawLedgers[revenueApi.KEY]}
+     :{version:1,records:loaded.records};
+   const data={formatVersion:2,exportedAt:instant(),
+     disclaimer:'端末内の乗務・待機・現場報告・確認済み日報の手動バックアップです。Notion正本・紙日報の代替ではなく、自動復元・自動同期はしません。',
+     state,confirmedRevenue:revenueBackup,rawLedgers};
    const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
    const a=document.createElement('a');a.href=url;a.download=`yos-taxi-local-${state.businessDate}.json`;a.click();
    setTimeout(()=>URL.revokeObjectURL(url),5000);
