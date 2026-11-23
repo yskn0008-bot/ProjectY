@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T03:21:15+09:00",
+  "updated_at": "2026-11-24T03:56:11+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-857",
-      "title": "PR #857 YOS JOURNAL｜一次資料照合の非公開プロトタイプと安全テスト",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
-      "updated_at": "2026-11-23T05:39:00Z"
-    },
     {
       "id": "github-pr-890",
       "title": "PR #890 Draft: YOS TAXI 戦略の未判定カード・明示待機タイマー最小改修",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/915",
       "updated_at": "2026-11-23T18:15:02Z"
+    },
+    {
+      "id": "github-pr-917",
+      "title": "PR #917 feat(daystream): iPhone内だけで作る特大ウィジェット用タイムライン画像",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/917",
+      "updated_at": "2026-11-23T18:55:45Z"
     },
     {
       "id": "github-issue-10",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T03:21:15+09:00",
+      "last_update": "2026-11-24T03:56:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 75件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T03:21:15+09:00",
+      "last_update": "2026-11-24T03:56:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T03:21:15+09:00",
+      "last_update": "2026-11-24T03:56:11+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2cbbd6571f2e9239e10e5b541527172bff462277c78cbfe17dc6891912192d5c"
+  "github_snapshot_hash": "e650cdf407c9df4ab0f55070b60a69ea30fcdd972d5904af08401e7853757292"
 }
