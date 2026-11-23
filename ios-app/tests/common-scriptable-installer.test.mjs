@@ -687,16 +687,3 @@ test('self-update network failure preserves existing code and makes no backup',a
  assert.match(r.alerts.at(-1).title,/未完了/);
 });
 
-test('self-update never overwrites unknown local modifications',async()=>{
- const cloud=fm('/icloud'),local=fm('/local'),target='/icloud/YOS Common Installer.js';
- const original='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nCUSTOM';
- cloud.files.set(target,original);
- const release={schema:1,name:'YOS Common Installer',path:'ios-app/scriptable/YOS Common Installer.js',commit:'a'.repeat(40),sha256:'b'.repeat(64),priorSha256:['c'.repeat(64)]};
- // The existing mock does not yet serve the release manifest; offline
- // failure must leave unknown local code intact in all cases.
- const r=await run({cloud,local,id:'installer-self-update',offline:true});
- assert.equal(cloud.files.get(target),original);
- assert.equal(cloud.files.size,1);
- assert.equal(local.files.size,0);
- assert.equal(release.priorSha256.length,1);
-});
