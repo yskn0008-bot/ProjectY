@@ -52,7 +52,7 @@ const fallback=[{issuedOn:'2026-11-19',articles:[
 const el=(type,cls,txt)=>{const node=document.createElement(type);if(cls)node.className=cls;if(txt!=null)node.textContent=txt;return node};
 function draw(issues,verified){
  const container=document.getElementById('list');
- let shown=0,fragment=document.createDocumentFragment();
+ let shown=0,renderRows=[];
  for(const edition of issues.filter(valid).sort((a,b)=>b.issuedOn.localeCompare(a.issuedOn))){
   for(let i=0;i<edition.articles.length&&shown<5;i++){
    const a=edition.articles[i];if(!a||typeof a.title!=='string'||!a.title.trim())continue;
@@ -60,11 +60,11 @@ function draw(issues,verified){
    if(typeof a.image==='string'&&a.image.length<1400&&/^https:\/\//i.test(a.image)){
     const img=el('img');img.src=a.image;img.alt='';img.loading='eager';img.referrerPolicy='no-referrer';img.onerror=()=>img.replaceWith(el('div','blank',String(a.category||'JOURNAL').split('/')[0].trim().slice(0,12)));row.append(img);
    }else row.append(el('div','blank',String(a.category||'JOURNAL').split('/')[0].trim().slice(0,12)));
-   const side=el('span');side.append(el('small','meta',edition.issuedOn+'  ｜  '+String(a.category||'JOURNAL').slice(0,55)),el('strong','',a.title));row.append(side);fragment.append(row);shown++;
+   const side=el('span');side.append(el('small','meta',edition.issuedOn+'  ｜  '+String(a.category||'JOURNAL').slice(0,55)),el('strong','',a.title));row.append(side);renderRows.push(row);shown++;
   }
   if(shown>=5)break;
  }
- if(shown)container.replaceChildren(fragment);
+ if(shown)container.replaceChildren(...renderRows);
  else if(!container.children.length)container.append(el('p','', '公開記事を確認できません。'));
  document.getElementById('count').textContent=(shown||container.children.length)+'記事の見出し';
  document.getElementById('status').textContent=shown?(verified?'公開データ取得済み':'保存済み見本／更新未確認'):'保存済み記事／更新未確認';
