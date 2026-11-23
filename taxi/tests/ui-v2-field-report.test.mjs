@@ -184,3 +184,96 @@ test('YOS handoff uses the explicitly started wait timer, not last dropoff time'
   assert.match(after,/端末で開始を記録した待機時間：5分/);
   assert.doesNotMatch(after,/正確な待機開始時刻：未確認/);
 });
+
+
+test('YOS transport only starts on explicit click and reuses the existing ephemeral credential client',async()=>{
+  const e=env(),f=e.window.YOSTaxiPreview.fieldReport,old=e.store.get(OLD);
+  let count=0,got=null,tokenCalls=0;
+  e.window.YOS_AI_BASE_URL='https://project-y-yos-ai.vercel.app';
+  e.window.YOS_AUTH={getGoogleIdToken:async()=>{tokenCalls++;return 'ephemeral-only'}};
+  e.window.YosAiClient=class{
+    constructor(opts){assert.equal(opts.baseUrl,e.window.YOS_AI_BASE_URL);assert.equal(typeof opts.getGoogleIdToken,'function')}
+    async chat(input){count++;got=input;return {answer:'確認できた情報だけで安全に判断してください'};}
+  };
+  f.record('go_none');
+  assert.equal(count,0);assert.equal(tokenCalls,0);
+  assert.equal(await f.sendToYos(),true);
+  assert.equal(count,1);
+  assert.match(got.userText,/GO反応なし/);
+  assert.equal(e.el('field-yos-answer').textContent,'確認できた情報だけで安全に判断してください');
+  assert.equal(e.el('field-yos-answer').hidden,false);
+  assert.equal(e.el('strategy-action').dataset.decision,undefined);
+  assert.equal(e.store.get(OLD),old);
+  assert.doesNotMatch(JSON.stringify([...e.store.entries()]),/ephemeral-only|確認できた情報だけで/);
+});
+test('YOS transport refuses unknown HTTPS providers and missing identity client before sending',async()=>{
+  const e=env(),f=e.window.YOSTaxiPreview.fieldReport;
+  f.record('go_none');
+  let sent=0;
+  e.window.YosAiClient=class{async chat(){sent++;return {answer:'untrusted'}}};
+  e.window.YOS_AUTH={getGoogleIdToken:async()=>'token'};
+  e.window.YOS_AI_BASE_URL='https://attacker.example';
+  assert.equal(await f.sendToYos(),false);
+  assert.equal(sent,0);
+  assert.match(e.el('field-yos-status').textContent,/公式接続先/);
+  assert.equal(e.el('field-yos-answer').hidden,true);
+  e.window.YOS_AI_BASE_URL='https://project-y-yos-ai.vercel.app';
+  e.window.YOS_AUTH=null;
+  assert.equal(await f.sendToYos(),false);
+  assert.equal(sent,0);
+});
+test('YOS transport failures preserve reports and never render fake responses',async()=>{
+  const e=env(),f=e.window.YOSTaxiPreview.fieldReport;
+  f.record('queue_still');
+  const original=e.store.get(FIELD);
+  e.window.YOS_AI_BASE_URL='https://project-y-yos-ai.vercel.app';
+  e.window.YOS_AUTH={getGoogleIdToken:async()=>'token'};
+  e.window.YosAiClient=class{async chat(){throw Object.assign(Error('auth'),{status:403})}};
+  assert.equal(await f.sendToYos(),false);
+  assert.match(e.el('field-yos-status').textContent,/接続許可/);
+  assert.equal(e.el('field-yos-answer').hidden,true);
+  assert.equal(e.store.get(FIELD),original);
+  e.window.YosAiClient=class{async chat(){return {answer:null}}};
+  assert.equal(await f.sendToYos(),false);
+  assert.equal(e.el('field-yos-answer').hidden,true);
+});
+test('YOS consultation never sends a second request while one is pending',async()=>{
+  const e=env(),f=e.window.YOSTaxiPreview.fieldReport;
+  f.record('go_none');
+  e.window.YOS_AI_BASE_URL='https://project-y-yos-ai.vercel.app';
+  e.window.YOS_AUTH={getGoogleIdToken:async()=>'token'};
+  let release,count=0;
+  e.window.YosAiClient=class{async chat(){count++;return await new Promise(resolve=>{release=resolve})}};
+  const first=f.sendToYos();
+  assert.equal(await f.sendToYos(),false);
+  assert.equal(count,1);
+  release({answer:'未判定です'});
+  assert.equal(await first,true);
+  assert.equal(count,1);
+});
+test('late YOS answer does not replace new observations',async()=>{
+  const e=env(),f=e.window.YOSTaxiPreview.fieldReport;
+  f.record('go_none');
+  e.window.YOS_AI_BASE_URL='https://project-y-yos-ai.vercel.app';
+  e.window.YOS_AUTH={getGoogleIdToken:async()=>'token'};
+  let release;
+  e.window.YosAiClient=class{async chat(){return await new Promise(resolve=>{release=resolve})}};
+  const pending=f.sendToYos();
+  e.clock.now+=6000;
+  f.record('supply_many');
+  release({answer:'古い情報の提案'});
+  assert.equal(await pending,false);
+  assert.equal(e.el('field-yos-answer').hidden,true);
+  assert.doesNotMatch(e.el('field-yos-answer').textContent,/古い情報/);
+  assert.match(e.el('field-yos-status').textContent,/新しい報告/);
+});
+test('YOS send is not available for stale observations',async()=>{
+  const e=env(),f=e.window.YOSTaxiPreview.fieldReport;
+  f.record('radio_none');e.clock.now+=31*60000;
+  let networkCalls=0;
+  e.window.YOS_AI_BASE_URL='https://project-y-yos-ai.vercel.app';
+  e.window.YOS_AUTH={getGoogleIdToken:async()=>'token'};
+  e.window.YosAiClient=class{async chat(){networkCalls++;return {answer:'no'}}};
+  assert.equal(await f.sendToYos(),false);
+  assert.equal(networkCalls,0);
+});
