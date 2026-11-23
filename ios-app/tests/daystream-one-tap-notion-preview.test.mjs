@@ -53,7 +53,7 @@ test('one tap shows daily items and two looks tasks without manual proposal',()=
  const {project}=preview();
  const today=project('2026-11-23',[]);
  assert.equal(today.length,6);
- assert.ok(today.every(x=>x.f===1&&x.source==='YOS Tasks'));
+ assert.ok(today.every(x=>x.f===0&&x.kind==='task'&&x.source==='YOS Tasks'));
  assert.equal(today.find(x=>x.t==='起床').s,14*60+20);
 });
 test('next day recurrence, but no repeated one-time looks tasks',()=>{
@@ -79,8 +79,9 @@ test('cross-midnight sessions are clipped per day without changing their Notion 
  assert.deepEqual(a.map(x=>[x.s,x.d]),[[23*60+50,10]]);
  assert.deepEqual(b.map(x=>[x.s,x.d]),[[0,20],[23*60+50,10]]);
 });
-test('never write preview rows to local storage or bypass corrupt-save protection',()=>{
- assert.doesNotMatch(browser,/localStorage\s*[.(]/);
+test('time-only overrides never modify the existing DAYSTREAM plan',()=>{
+ assert.match(browser,/const MOVE_KEY='YOS_DAYSTREAM_NOTION_MOVES_V1'/);
+ assert.doesNotMatch(browser,/YOS_DAYSTREAM_WEB_PLAN_V1/);
  assert.match(script,/x\.source!=='YOS Tasks'/);
  assert.match(script,/window\.YOS_ONE_TAP_FOR_DAY\?\.\(day/);
  assert.doesNotMatch(browser,/YOS_DAYSTREAM_DIRECT_IMPORTED_V1/);
@@ -103,5 +104,44 @@ test('read-only Notion projection remains independent of unavailable browser sto
  // No storage is passed into the projection; accessing either method is forbidden.
  assert.equal(project('2026-11-23',[]).length,6);
  assert.throws(()=>forbidden.getItem(),/SecurityError/);
- assert.doesNotMatch(browser,/localStorage/);
+ assert.match(browser,/catch\{return null;\}/);
+});
+
+test('synced task categories receive distinct existing DAYSTREAM tones',()=>{
+ const {project}=preview();
+ const cards=project('2026-11-23',[]);
+ assert.ok(cards.every(x=>['blue','mint','peach','violet'].includes(x.flowTone)));
+ const tones=new Map(cards.map(x=>[x.t,x.flowTone]));
+ assert.equal(tones.get('起床'),'blue');
+ assert.equal(tones.get('食事'),'peach');
+ assert.equal(tones.get('JOURNAL'),'violet');
+});
+test('moving synced task time persists only a per-day override',()=>{
+ const rows=nativeDirectRows(fixture),storage=new Map();
+ const localStorage={getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)};
+ const window={addEventListener(){}};
+ new Function('window','document','localStorage',browser.replace('__DIRECT_ROWS__',JSON.stringify(rows)))(window,{getElementById(){return null}},localStorage);
+ const a=window.YOS_ONE_TAP_FOR_DAY('2026-11-24',[]);
+ assert.equal(a.find(x=>x.t==='起床').s,860);
+ assert.equal(window.YOS_NOTION_LOCAL_MOVE('2026-11-24','notion:'+'a'.repeat(32),930,2),true);
+ assert.equal(window.YOS_ONE_TAP_FOR_DAY('2026-11-24',[]).find(x=>x.t==='起床').s,930);
+ assert.equal(window.YOS_ONE_TAP_FOR_DAY('2026-11-25',[]).find(x=>x.t==='起床').s,860);
+ assert.deepEqual([...storage.keys()],['YOS_DAYSTREAM_NOTION_MOVES_V1']);
+ assert.equal(storage.get('YOS_DAYSTREAM_WEB_PLAN_V1'),undefined);
+ assert.equal(window.YOS_NOTION_LOCAL_MOVE('2026-11-24','notion:'+'a'.repeat(32),1439,2),false);
+});
+test('invalid or inaccessible override storage never overwrites a saved value',()=>{
+ const rows=nativeDirectRows(fixture);
+ let value='{corrupt',writes=0;
+ const storage={getItem:()=>value,setItem:(_,v)=>{writes++;value=v}};
+ const window={addEventListener(){}};
+ new Function('window','document','localStorage',browser.replace('__DIRECT_ROWS__',JSON.stringify(rows)))(window,{getElementById(){return null}},storage);
+ assert.equal(window.YOS_ONE_TAP_FOR_DAY('2026-11-24',[]).length,5);
+ assert.equal(window.YOS_NOTION_LOCAL_MOVE('2026-11-24','notion:'+'a'.repeat(32),930,2),false);
+ assert.equal(value,'{corrupt');assert.equal(writes,0);
+ const denied={getItem(){throw Error('SecurityError')},setItem(){throw Error('SecurityError')}};
+ const other={addEventListener(){}};
+ new Function('window','document','localStorage',browser.replace('__DIRECT_ROWS__',JSON.stringify(rows)))(other,{getElementById(){return null}},denied);
+ assert.equal(other.YOS_ONE_TAP_FOR_DAY('2026-11-24',[]).length,5);
+ assert.equal(other.YOS_NOTION_LOCAL_MOVE('2026-11-24','notion:'+'a'.repeat(32),930,2),false);
 });
