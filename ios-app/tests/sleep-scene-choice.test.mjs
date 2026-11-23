@@ -105,7 +105,7 @@ test('expired or malformed plans fail closed without touching any devices',async
 
 test('original Focus-only sleep and individual device modes remain available',()=>{
   assert.match(source,/if\(selected===null\)/);
-  assert.match(source,/if\(MODE==="sleep"\|\|MODE==="floor"\)/); // fallback below uses floor mode explicitly? 
+  assert.match(source,/else if\(MODE==="floor"\)/);
   assert.match(source,/if\(MODE==="choose"\)/);
   assert.match(source,/const CHOICE_TTL_MS=120000/);
 });
