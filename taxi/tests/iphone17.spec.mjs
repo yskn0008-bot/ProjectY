@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const pages = [
@@ -1043,6 +1043,14 @@ test('photo-linked confirmed revenue: keeps the paper total, refuses duplicate i
   expect(records.records[0].amountYen).toBe(21950);
   expect(records.records[0].photoSha256).toMatch(/^sha256:[a-f0-9]{64}$/);
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ops-v1'))).toBeNull();
+  await page.locator('[data-page="history"]').click();
+  const downloadPromise=page.waitForEvent('download');
+  await page.locator('#export-btn').click();
+  const download=await downloadPromise;
+  const backup=JSON.parse(await readFile(await download.path(),'utf8'));
+  expect(backup.confirmedRevenue.records).toHaveLength(1);
+  expect(backup.confirmedRevenue.records[0].amountYen).toBe(21950);
+  await page.locator('[data-page="sales"]').click();
   await page.reload({waitUntil:'domcontentloaded'});
   await expect(page.locator('#sales-value')).toContainText('21,950');
   await page.locator('#monthly-open').click();
