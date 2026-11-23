@@ -1013,9 +1013,10 @@ test('YOS field consultation requires explicit tap and keeps the recommendation 
 });
 
 
+test.describe('isolated research feed mocks (no service worker)',()=>{
+  test.use({serviceWorkers:'block'});
+
 test('strategy research displays only fresh official-source evidence, never taxi-demand recommendations',async({page})=>{
-  // Isolate the fetch mock from the app's service worker (Playwright page.route cannot intercept SW fetch).
-  await page.route('**/service-worker.js',route=>route.abort());
   await page.clock.setFixedTime(new Date('2026-11-24T12:00:00+09:00'));
   let requests=0;
   await page.route('**/research-feed.json?*',async route=>{
@@ -1050,7 +1051,6 @@ test('strategy research displays only fresh official-source evidence, never taxi
 });
 
 test('strategy research fails closed on malformed or unavailable official feed',async({page})=>{
-  await page.route('**/service-worker.js',route=>route.abort());
   await page.clock.setFixedTime(new Date('2026-11-24T12:00:00+09:00'));
   await page.route('**/research-feed.json?*',async route=>route.fulfill({status:200,contentType:'application/json',body:'{"schema":1,"sources":[],"generatedAt":"bad"}'}));
   await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
@@ -1060,6 +1060,8 @@ test('strategy research fails closed on malformed or unavailable official feed',
   await expect(page.locator('#strategy-main')).toContainText('未判定');
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
 });
+
+}); // Restore default service worker behavior for all other app tests.
 
 test('daily-report OCR handoff uses on-device clipboard only and requires photo confirmation',async({page})=>{
   await page.clock.setFixedTime(new Date('2026-11-21T20:50:00+09:00'));
