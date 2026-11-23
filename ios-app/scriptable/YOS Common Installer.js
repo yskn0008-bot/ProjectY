@@ -19,6 +19,16 @@ const REMOTE_PRIOR_HASHES=new Set([
  '06366b88e0c2781dc7703952003074af538a7e3edbc504f9f7a15e715eb0ca66',
  '76088d615ab1add60ae0d41b591f55e631efa94ee79d8b320abee963e8abb90b'
 ]);
+// A single verified historical sleep script from ProjectY commit 97a46cb9.
+// This list is never a blanket bypass for unknown edits or forged receipts.
+const SLEEP_PRIOR_ID='sleep-scene',SLEEP_PRIOR_NAME='YOS Sleep Scene';
+const SLEEP_PRIOR_PATH='ios-app/scriptable/remote-widgets/YOS Sleep Scene.js';
+const SLEEP_PRIOR_HASH='987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8';
+const SLEEP_KNOWN_RECEIPT_HASHES=new Set([
+ SLEEP_PRIOR_HASH,
+ '5db5b1e0278e9ab0da3c25f2a74a0a5d8682962ad9ac2de3cfd29c8dc98ac47f',
+ '7daf038a551ff9d01f2344a60509bcfd4640238b4f4942e4d0320bb204445357'
+]);
 const REMOTE_NAME_MAP=[
  ['YOS Remote Hub','リモコン'],['YOS BRAVIA Remote','テレビリモコン'],
  ['YOS BRAVIA Widget','テレビウィジェット'],['YOS AC Remote','エアコンリモコン'],
@@ -153,6 +163,12 @@ function hasOnlyScriptableIconHeader(source,expectedHash){
   const match=source.match(header);
   return !!match&&digest(source.slice(match[0].length))===expectedHash;
 }
+function isVerifiedLegacySleep(entry,source,receipt,kind){
+  if(!entry||entry.id!==SLEEP_PRIOR_ID||entry.name!==SLEEP_PRIOR_NAME||entry.path!==SLEEP_PRIOR_PATH||typeof source!=='string')return false;
+  const exact=digest(source)===SLEEP_PRIOR_HASH||hasOnlyScriptableIconHeader(source,SLEEP_PRIOR_HASH);
+  if(!exact)return false;
+  return receipt===null||(receiptMatches(receipt,entry,kind)&&SLEEP_KNOWN_RECEIPT_HASHES.has(receipt.sha256));
+}
 function receiptFor(entry,hash,kind){return {schema:1,name:entry.name,id:entry.id,path:entry.path,sha256:hash,storage:kind,commit:entry.commit}}
 function receiptMatches(receipt,entry,kind){
   return !!receipt&&receipt.schema===1&&receipt.name===entry.name&&receipt.id===entry.id&&receipt.path===entry.path&&receipt.storage===kind&&typeof receipt.sha256==='string'&&/^[0-9a-f]{64}$/.test(receipt.sha256);
@@ -269,10 +285,12 @@ async function install(entry){
   }
   if(current!==null){
     const trustedPrior=isRemoteEntry(entry)&&previous===null&&REMOTE_PRIOR_HASHES.has(currentHash);
-    if(!trustedPrior&&!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous,desiredHash);return;}
-    if(!trustedPrior&&previous.sha256!==currentHash&&!hasOnlyScriptableIconHeader(current,previous.sha256))throw Error('Scriptable内で変更されたコードです。上書きしません');
-    const approved=await confirm(trustedPrior?'既存リモコンの安全更新':'更新の確認',
+    const trustedSleepPrior=isVerifiedLegacySleep(entry,current,previous,chosen.kind);
+    if(!trustedPrior&&!trustedSleepPrior&&!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous,desiredHash);return;}
+    if(!trustedPrior&&!trustedSleepPrior&&previous.sha256!==currentHash&&!hasOnlyScriptableIconHeader(current,previous.sha256))throw Error('Scriptable内で変更されたコードです。上書きしません');
+    const approved=await confirm(trustedPrior?'既存リモコンの安全更新':trustedSleepPrior?'YOS Sleep Scene｜旧正式版の安全更新':'更新の確認',
       trustedPrior?'既知の旧版「リモコン」と完全一致しました。現在の本体をバックアップし、テレビ・照明・エアコンを保持した新しい画質機能付きリモコンに更新しますか？':
+      trustedSleepPrior?'現在のYOS Sleep SceneはGitHub公開済みの初期版と完全一致します。管理記録が異なる場合も、元のコードをバックアップし、確認された配布版へ更新しますか？ 他のスクリプトは変更しません。':
       '「'+name+'」をGitHub検証済みの版へ更新します。現在のコードをバックアップしてから変更します。','バックアップして更新');
     if(!approved)return;
   }else if(previous){

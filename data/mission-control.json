@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T04:20:27+09:00",
+  "updated_at": "2026-11-24T04:41:22+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,6 +13,16 @@
   },
   "inbox": [
     {
+      "id": "github-pr-857",
+      "title": "PR #857 YOS JOURNAL｜一次資料照合の非公開プロトタイプと安全テスト",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
+      "updated_at": "2026-11-23T19:36:58Z"
+    },
+    {
       "id": "github-pr-890",
       "title": "PR #890 Draft: YOS TAXI 戦略の未判定カード・明示待機タイマー最小改修",
       "type": "GitHub PR",
@@ -23,26 +33,6 @@
       "updated_at": "2026-11-23T13:38:48Z"
     },
     {
-      "id": "github-pr-891",
-      "title": "PR #891 feat(morning): show DAYSTREAM next step in existing Today Note (draft)",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/891",
-      "updated_at": "2026-11-23T06:20:18Z"
-    },
-    {
-      "id": "github-pr-892",
-      "title": "PR #892 Clarity｜入力専用ショートカット（履歴・写真OCR・音声）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/892",
-      "updated_at": "2026-11-23T06:27:05Z"
-    },
-    {
       "id": "github-pr-894",
       "title": "PR #894 Draft: YOS TAXI タップ式現状報告UI（待機PRと分離）",
       "type": "GitHub PR",
@@ -50,7 +40,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/894",
-      "updated_at": "2026-11-23T16:40:47Z"
+      "updated_at": "2026-11-23T19:38:24Z"
     },
     {
       "id": "github-pr-901",
@@ -60,7 +50,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/901",
-      "updated_at": "2026-11-23T16:06:11Z"
+      "updated_at": "2026-11-23T19:32:00Z"
     },
     {
       "id": "github-pr-902",
@@ -93,16 +83,6 @@
       "updated_at": "2026-11-23T17:46:13Z"
     },
     {
-      "id": "github-pr-915",
-      "title": "PR #915 YOS Sleep｜公開済初期版とレシート不一致の安全移行",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/915",
-      "updated_at": "2026-11-23T18:15:02Z"
-    },
-    {
       "id": "github-pr-917",
       "title": "PR #917 feat(daystream): iPhone内だけで作る特大ウィジェット用タイムライン画像",
       "type": "GitHub PR",
@@ -110,7 +90,27 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/917",
-      "updated_at": "2026-11-23T19:06:43Z"
+      "updated_at": "2026-11-23T19:40:20Z"
+    },
+    {
+      "id": "github-pr-919",
+      "title": "PR #919 YOS Lists｜タスク行タップで完了・詳細は∨・直前の完了を戻す",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/919",
+      "updated_at": "2026-11-23T19:38:16Z"
+    },
+    {
+      "id": "github-pr-920",
+      "title": "PR #920 fix(daystream): fluid direct-drop drag with reactive neighboring bars",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/920",
+      "updated_at": "2026-11-23T19:40:01Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T19:19:53Z"
+      "updated_at": "2026-11-23T19:40:34Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-369b90e60fd7",
+      "title": "Merge PR #915: guard legacy YOS Sleep Scene installer upgrade",
+      "completed_at": "2026-11-23T19:32:42Z",
+      "result": "GitHub mainへ反映（369b90e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/369b90e60fd78d2962f88dc88b016d1a1e6c6c83"
+    },
+    {
       "id": "github-commit-a2c9434cda84",
       "title": "Merge PR #918: compact YOS Lists rows with expandable details",
       "completed_at": "2026-11-23T19:19:46Z",
@@ -241,13 +248,6 @@
       "completed_at": "2026-11-23T18:56:58Z",
       "result": "GitHub mainへ反映（d5d14c9）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d5d14c9a3178fd955ad0470f21c64500d15b8cc5"
-    },
-    {
-      "id": "github-commit-dd6003d971ec",
-      "title": "test(yos-lists): compact collapsible row layout and 44px write button contract",
-      "completed_at": "2026-11-23T18:56:40Z",
-      "result": "GitHub mainへ反映（dd6003d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/dd6003d971ec3dccb528eb0f0771e6decd171709"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T04:20:27+09:00",
+      "last_update": "2026-11-24T04:41:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 75件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 76件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T04:20:27+09:00",
+      "last_update": "2026-11-24T04:41:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T04:20:27+09:00",
+      "last_update": "2026-11-24T04:41:22+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "b16268db80156e906bb0536200c0d857d2a7bee3f592df3fa264201e08823628"
+  "github_snapshot_hash": "4d974e5a2a7ee0d369742feb0d53e36f536dad207521c29600585e4eeec12b83"
 }
