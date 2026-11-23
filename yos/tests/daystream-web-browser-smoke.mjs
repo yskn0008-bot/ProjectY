@@ -420,17 +420,8 @@ try{
   await p.evaluate(()=>{const el=document.querySelector('#tl [data-id="2102"]');window.__yosDragTrace=[];for(const name of ['pointerdown','pointermove','pointerup','pointercancel','touchstart','touchmove','touchend'])el.addEventListener(name,e=>window.__yosDragTrace.push({event:name,y:e.clientY,pointerType:e.pointerType,button:e.button,target:e.target.className}),true)});
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2);await p.mouse.down();
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2+130,{steps:12});await p.mouse.up();
-  await p.locator('#moveDialog').waitFor();
-  const sheet=await p.locator('.move-sheet-content').boundingBox();
-  const viewportHeight=await p.evaluate(()=>innerHeight);
-  assert.ok(sheet.y>=viewportHeight*.25,'placement panel leaves the timeline visible above it: '+JSON.stringify({sheet,viewportHeight}));
-  assert.ok(sheet.y+sheet.height<=viewportHeight+1,'placement panel stays within the viewport: '+JSON.stringify({sheet,viewportHeight}));
-  assert.equal(await p.locator('#moveSave').isVisible(),true);
-  assert.equal(await p.locator('#moveCancel').isVisible(),true);
-  assert.equal(await p.locator('#moveSource').isVisible(),false,'generic placement advice hides the sleep reference');
-
-  assert.equal(await p.evaluate(()=>items.find(x=>x.id===2102).s),345,'preview never writes before confirmation');
-  await p.locator('#moveSave').click();
+  assert.equal(await p.locator('#moveDialog').isVisible(),false,'drag drop must not open the large placement sheet');
+  assert.equal(await p.evaluate(()=>items.find(x=>x.id===2102).s===345),false,'drag drop commits immediately without extra confirmation');
   const dragState=await p.evaluate(()=>({s:items.find(x=>x.id===2102).s,note:note.textContent,events:window.__yosDragTrace,scrollY:scrollY}));
   assert.notEqual(dragState.s,345,'the grip actually moves a task: '+JSON.stringify(dragState));
   await p.locator('#yosUndoBtn').click();
