@@ -406,7 +406,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 <label>日報の総収入（円）<input id="revenue-amount" type="text" inputmode="numeric" placeholder="例：21950" required></label>
 <label>金額の区分<select id="revenue-basis"><option value="unconfirmed">税込・税抜は未確認</option><option value="tax-included">税込と確認</option><option value="tax-excluded">税抜と確認</option></select></label>
 <label>日報に記載された時刻（あれば）<input id="revenue-clock" type="time"></label>
-<label>写真からコピーした文字（任意・自動確定しません）<textarea id="revenue-text" placeholder="iPhoneのテキスト認識結果を貼り付けると、総収入候補を表示します"></textarea></label>
+<label>写真から読み取った文字（任意・自動確定しません）<textarea id="revenue-text" placeholder="写真の文字を貼り付けると、総収入候補を表示します"></textarea></label><button type="button" id="revenue-paste-ocr">iPhoneで認識した文字を貼り付け</button>
 <span id="revenue-extract" class="revenue-note">写真の文字は自動読取していません。</span>
 <label class="revenue-check"><input id="revenue-is-total" type="checkbox" required>これは個別乗車履歴ではなく、総収入欄のある日報です</label>
 <label class="revenue-check"><input id="revenue-checked" type="checkbox" required>写真を見比べ、営業日と金額を確認しました</label>
@@ -854,7 +854,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
    if(!selectedFile){toast('写真を選択してください');return}
    const api=window.YosTaxiConfirmedRevenueV1;
    if(!api){openSheet('記録できません','安全な保存機能を読み込めませんでした。既存データは変更していません。');return}
-   openSheet('紙日報の累積額を確認','この画面では写真から数字を自動認識しません。写真の総収入欄だけを確認して記録します。');
+   openSheet('紙日報の累積額を確認','写真の文字は「YOS TAXI 日報」ショートカットで端末内認識できます。必ず写真の総収入欄を確認して記録します。');
    const form=$('revenue-form');form.reset();form.hidden=false;
    $('revenue-day').value=state.businessDate;
    $('revenue-extract').textContent='写真の文字は自動読取していません。';
@@ -924,6 +924,20 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
      }
    }
  }
+ async function pasteRevenueOcr(){
+   const output=$('revenue-status');
+   if(!navigator.clipboard?.readText){output.textContent='このブラウザーは貼り付けボタンに非対応です。テキスト欄を長押しして「ペースト」を選んでください。';return}
+   try{
+     const value=await navigator.clipboard.readText();
+     if(!value.trim()||value.length>12000){output.textContent='コピーされた文字がないか長すぎます。写真を確認し、必要な文字だけ貼り付けてください。';return}
+     if($('revenue-form').hidden)return;
+     $('revenue-text').value=value;
+     onRevenueText();
+     output.textContent='文字を貼り付けました。総収入候補を写真と照合してください。金額はまだ保存していません。';
+   }catch{
+     output.textContent='クリップボードを読めません。テキスト欄を長押しして「ペースト」を選んでください。';
+   }
+ }
  function onRevenueText(){
    const api=window.YosTaxiConfirmedRevenueV1;if(!api)return;
    const found=api.detectText($('revenue-text').value);
@@ -989,7 +1003,8 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
    if(!action)return;
    const requestId=url.searchParams.get('yos_req');
    // Remove the action BEFORE doing anything; refresh/back must not re-run the operation.
-   url.searchParams.delete('yos_action');url.searchParams.delete('yos_req');
+   const ocrClipboard=action==='report'&&url.searchParams.get('yos_ocr')==='clipboard';
+   url.searchParams.delete('yos_action');url.searchParams.delete('yos_req');url.searchParams.delete('yos_ocr');
    history.replaceState(history.state,'',url.pathname+url.search+url.hash);
    if(action==='dropoff'){
      if(!requestId||!/^[A-Za-z0-9_-]{12,80}$/.test(requestId)){
@@ -1016,12 +1031,13 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
      if(!isActive()){openSheet('営業終了は記録していません','この画面の保存先に営業中の記録がありません。履歴と実際の勤務を確認してください。');return;}
      changeShift();return;
    }
-   if(action==='report'){navigate('sales');$('photo-btn').focus();toast('日報写真ボタンから写真を選択してください');return;}
+   if(action==='report'){navigate('sales');$('photo-btn').focus();toast(ocrClipboard?'OCR文字をコピー済み。同じ写真を選び、確認画面の「文字を貼り付け」を押してください':'日報写真ボタンから写真を選択してください');return;}
    if(action==='history'){navigate('history');return;}
    if(action==='analysis'){navigate('analysis');return;}
    if(action==='m100'){navigate('strategy');showM100();}
  }
  $('strategy-research-load').addEventListener('click',loadStrategyResearch);
+ $('revenue-paste-ocr').addEventListener('click',pasteRevenueOcr);
  $('monthly-open').addEventListener('click',()=>{renderMonthly();navigate('monthly')});$('status-btn').addEventListener('click',changeShift);$('drop-btn').addEventListener('click',()=>stampDropoff());$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
  renderMonthly();render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait();renderYosSend();if(strategyResearchFeed)renderStrategyResearch()},15000);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderWait();renderYosSend()}});
