@@ -468,19 +468,22 @@ $('list').addEventListener('pointermove',e=>{
  if(other&&other!==d.row){
   const center=other.getBoundingClientRect().top+other.getBoundingClientRect().height/2;
   const el=e.clientY<center?other:other.nextElementSibling;
-  const visible=Array.from($('list').querySelectorAll('.item--task.is-sortable')).filter(x=>{
-   const r=x.getBoundingClientRect();return r.bottom>0&&r.top<window.innerHeight;
-  });
-  const before=new Map(visible.map(x=>[x,x.getBoundingClientRect().top]));
-  $('list').insertBefore(d.row,el||null);
-  if(!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
-   for(const node of visible){
-    if(node===d.row)continue;
-    const dy=(before.get(node)??0)-node.getBoundingClientRect().top;
-    if(Math.abs(dy)>1&&typeof node.animate==='function'){
-     node.getAnimations?.().forEach(a=>a.cancel());
-     node.animate([{transform:'translateY('+dy+'px)'},{transform:'translateY(0)'}],
-      {duration:145,easing:'ease-out'});
+  // Avoid redundant DOM/layout work when the pointer remains over an adjacent row.
+  if(el!==d.row&&el!==d.row.nextElementSibling){
+   const visible=Array.from($('list').querySelectorAll('.item--task.is-sortable')).filter(x=>{
+    const r=x.getBoundingClientRect();return r.bottom>0&&r.top<window.innerHeight;
+   });
+   const before=new Map(visible.map(x=>[x,x.getBoundingClientRect().top]));
+   $('list').insertBefore(d.row,el||null);
+   if(!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
+    for(const node of visible){
+     if(node===d.row)continue;
+     const dy=(before.get(node)??0)-node.getBoundingClientRect().top;
+     if(Math.abs(dy)>1&&typeof node.animate==='function'){
+      node.getAnimations?.().forEach(a=>a.cancel());
+      node.animate([{transform:'translateY('+dy+'px)'},{transform:'translateY(0)'}],
+       {duration:145,easing:'ease-out'});
+     }
     }
    }
   }
