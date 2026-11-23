@@ -73,5 +73,13 @@ async function run(input, opts = {}) {
   assert.equal(result.calls[0][1].on, false);
 
 
+  const history = new Map([['yos.remote.power-toggle.v1.ac', JSON.stringify({
+    on: true, profile: { mode: 1, temp: 28, wind_speed: 1, wind_direct: 4 }
+  })]]);
+  result = await run('ac', { store: history, acRaw: {} });
+  assert.equal(result.calls[0][1].on, false);
+  assert.equal(result.calls[0][1].mode, 1);
+  assert.equal(result.calls[0][1].temp, 28);
+
   process.stdout.write('PASS remote power toggle: first-run, flip, failure, AC profile, reset, cancel\n');
 })().catch(error => { console.error(error); process.exitCode = 1; });
