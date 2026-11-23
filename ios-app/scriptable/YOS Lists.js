@@ -439,6 +439,84 @@ function render(){
    (detail?'<p>'+safe(detail)+'</p>':'')+'</details></div>'+action+'</article>';
  }).join(''):'<div class="empty">'+(failed?'この項目はNotionから取得できませんでした。右上の更新で再試行してください。':'表示する項目がありません。')+'</div>';
 }
+// The right-side 50px summary is intentionally dual-purpose:
+// tap opens details; drag on it reorders. The body still completes tasks on tap.
+// Do not save a temporary DOM preview until Notion has verified the PATCH.
+let activeDrag=null,suppressDetailClick=false;
+document.addEventListener('click',e=>{
+ if(!suppressDetailClick||!e.target.closest('.item--task .item-details summary'))return;
+ e.preventDefault();e.stopImmediatePropagation();suppressDetailClick=false;
+},true);
+$('list').addEventListener('pointerdown',e=>{
+ const handle=e.target.closest('.item--task.is-sortable .item-details summary');
+ if(!handle||state.busy||(e.pointerType==='mouse'&&e.button!==0)||activeDrag)return;
+ const row=handle.closest('.item--task');
+ const ordered=Array.from($('list').querySelectorAll('.item--task.is-sortable'));
+ activeDrag={id:e.pointerId,row,handle,startY:e.clientY,index:ordered.indexOf(row),moved:false};
+ try{handle.setPointerCapture(e.pointerId)}catch{}
+});
+$('list').addEventListener('pointermove',e=>{
+ const d=activeDrag;
+ if(!d||d.id!==e.pointerId)return;
+ if(!d.moved&&Math.abs(e.clientY-d.startY)<9)return;
+ d.moved=true;e.preventDefault();
+ d.row.classList.add('is-dragging');
+ const hit=document.elementFromPoint(e.clientX,e.clientY);
+ const other=hit?.closest('.item--task.is-sortable');
+ if(other&&other!==d.row){
+  const center=other.getBoundingClientRect().top+other.getBoundingClientRect().height/2;
+  const el=e.clientY<center?other:other.nextElementSibling;
+  const visible=Array.from($('list').querySelectorAll('.item--task.is-sortable')).filter(x=>{
+   const r=x.getBoundingClientRect();return r.bottom>0&&r.top<window.innerHeight;
+  });
+  const before=new Map(visible.map(x=>[x,x.getBoundingClientRect().top]));
+  $('list').insertBefore(d.row,el||null);
+  if(!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
+   for(const node of visible){
+    if(node===d.row)continue;
+    const dy=(before.get(node)??0)-node.getBoundingClientRect().top;
+    if(Math.abs(dy)>1&&typeof node.animate==='function'){
+     node.getAnimations?.().forEach(a=>a.cancel());
+     node.animate([{transform:'translateY('+dy+'px)'},{transform:'translateY(0)'}],
+      {duration:145,easing:'ease-out'});
+    }
+   }
+  }
+ }
+ // Edge scrolling permits moving an item through a longer list.
+ const limit=window.innerHeight;
+ if(e.clientY>limit-85)window.scrollBy(0,18);
+ else if(e.clientY<95)window.scrollBy(0,-18);
+},{passive:false});
+function stopReorder(e,cancelled=false){
+ const d=activeDrag;if(!d||d.id!==e.pointerId)return;
+ activeDrag=null;
+ try{d.handle.releasePointerCapture(e.pointerId)}catch{}
+ d.row.classList.remove('is-dragging');
+ if(!d.moved)return; // normal tap: native <details> remains functional
+ suppressDetailClick=true;
+ setTimeout(()=>{suppressDetailClick=false},350);
+ if(cancelled){render();return;}
+ const nodes=Array.from($('list').querySelectorAll('.item--task.is-sortable'));
+ const dest=nodes.indexOf(d.row);
+ if(dest===-1||dest===d.index){render();return;}
+ const item=state.tasks.find(x=>x.id===d.row.dataset.id);
+ const before=dest>0?state.tasks.find(x=>x.id===nodes[dest-1].dataset.id):null;
+ const after=dest<nodes.length-1?state.tasks.find(x=>x.id===nodes[dest+1].dataset.id):null;
+ if(!item||state.busy||state.loaded?.task===false){render();return;}
+ let rank;
+ try{rank=Number(calcReorderRank(before,after,defaultRanks()).toFixed(6))}
+ catch(err){notice(String(err?.message||err));render();return;}
+ if(item.manualRank===rank){render();return;}
+ state.busy=true;lastCompletion=null;
+ notice('Notionへ並び順を保存・確認中…');
+ emit({action:'reorder-task',kind:'task',id:item.id,expected:item.updatedAt,
+  oldRank:item.manualRank??null,rank,
+  before:before?{id:before.id,updatedAt:before.updatedAt}:null,
+  after:after?{id:after.id,updatedAt:after.updatedAt}:null});
+}
+window.addEventListener('pointerup',e=>stopReorder(e));
+window.addEventListener('pointercancel',e=>stopReorder(e,true));
 $('tabs').addEventListener('click',e=>{const tab=e.target.closest('[data-tab]');if(!tab)return;state.tab=tab.dataset.tab;render()});
 $('search').addEventListener('input',e=>{state.query=e.target.value;render()});
 $('refresh').addEventListener('click',()=>{if(state.busy)return;state.busy=true;notice('Notionの最新情報を取得中…');render();emit({action:'refresh'})});
@@ -480,7 +558,9 @@ window.YOS_LISTS_REPLY=function(result){
     lastCompletion={id:result.item.id,expected:result.item.updatedAt};
    else lastCompletion=null;
   }
-  if(result.action==='complete')
+  if(result.action==='reorder-task')
+   notice('並び順をNotionに保存しました。');
+  else if(result.action==='complete')
    notice('Notionに完了を保存しました。',false,Boolean(lastCompletion));
   else if(result.action==='undo-complete')
    notice('Notionで完了を元に戻しました。');
