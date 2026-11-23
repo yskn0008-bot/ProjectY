@@ -89,3 +89,19 @@ test('notion credentials and local user preferences remain outside the preview p
  assert.doesNotMatch(browser,/YOS_NOTION_INTEGRATION_TOKEN|Keychain/);
  assert.match(script,/if\(out\.split\(timelineAnchor\)\.length!==2\)throw/);
 });
+
+test('Scriptable uses published DAYSTREAM HTML and a stable HTTPS storage origin',()=>{
+ assert.match(script,/const UI_REF='c0735bf7dc092f8c30753b1c0c73cfd1cd758416'/);
+ assert.match(script,/const UI_BASE_URL='https:\/\/yskn0008-bot\.github\.io\/ProjectY\/yos\/daystream\/'/);
+ assert.match(script,/WebView\.loadHTML\(output,UI_BASE_URL,null,true\)/);
+ assert.match(script,/getElementById\('yosTimelineSync'\)/);
+ assert.doesNotMatch(script,/localStorage\.clear\(|removeItem\('YOS_DAYSTREAM_WEB_PLAN_V1'\)/);
+});
+test('read-only Notion projection remains independent of unavailable browser storage',()=>{
+ const {project}=preview();
+ const forbidden={getItem(){throw Error('SecurityError')},setItem(){throw Error('SecurityError')}};
+ // No storage is passed into the projection; accessing either method is forbidden.
+ assert.equal(project('2026-11-23',[]).length,6);
+ assert.throws(()=>forbidden.getItem(),/SecurityError/);
+ assert.doesNotMatch(browser,/localStorage/);
+});
