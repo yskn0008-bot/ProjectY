@@ -381,8 +381,8 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 <div class="strat-list"><button class="strat-row" data-strat="0"><time>17–20</time><span class="strat-copy"><b>久茂地・泉崎・旭橋</b><small>退勤・ホテル・飲食／GO・無線</small></span></button><button class="strat-row" data-strat="1"><time>20–22</time><span class="strat-copy"><b>久茂地・牧志・安里</b><small>短中距離の回転と次客獲得を重視</small></span></button><button class="strat-row" data-strat="2"><time>22–00</time><span class="strat-copy"><b>松山・久茂地・前島</b><small>深夜割増・長い付け待ちは避ける</small></span></button><button class="strat-row" data-strat="3"><time>00–02</time><span class="strat-copy"><b>松山・久茂地・若狭</b><small>帰宅需要、空車の多さに注意</small></span></button><button class="strat-row" data-strat="4"><time>02–05</time><span class="strat-copy"><b>降車地・帰庫動線</b><small>残存需要と帰庫への回送を比較</small></span></button></div>
 <button type="button" class="strategy-foot" id="m100-rule-btn" aria-label="M100営業判断ルールを停車中に確認"><span>◎ M100｜営業判断の型（仮説）</span><strong>判断ルールの詳細を開く ›</strong></button>
 </main>
-<main class="view monthly" id="monthly-view" aria-label="月次売上画面"><section class="panel monthly-head"><h2 id="monthly-title">2026年11月</h2><span>確認済み日報のみを集計</span></section><section class="panel monthly-calendar" id="monthly-calendar" aria-label="月間カレンダー"></section><section class="panel monthly-summary"><div><small id="monthly-sum-label">確認済み日報の累積</small><strong id="monthly-sum-value">未登録</strong></div><div><small>月間目標</small><strong>未設定</strong></div><div><small>達成率</small><strong>—</strong></div></section><section class="panel monthly-notice" id="monthly-notice">日報の確認額は未登録です。勤務時間・給与予測・Notion同期は未接続です。</section></main><main class="view history" id="history-view" aria-label="記録履歴画面"><div class="section-head">端末内｜降車・乗務記録</div><div class="panel history-sub">本画面は端末内の降車時刻を保存します。日報との自動照合・Notion保存は未接続。旧UIの記録は保持しています。</div><div id="history-list" class="history-list"></div><div class="history-controls"><button class="secondary-btn" id="export-btn">JSONバックアップを保存</button><button class="secondary-btn" id="history-info-btn">旧UIの記録を開く</button></div><div class="footer-card"><svg><use href="#icon-info"/></svg>保存先：この端末内のみ。Notion未連携</div></main>
-<main class="view analysis" id="analysis-view" aria-label="営業分析画面"><div class="section-head">確認できる数値だけを表示</div><div class="statgrid"><div class="stat"><small>降車ボタン記録</small><strong id="analysis-drops">0件</strong></div><div class="stat"><small>日報の売上</small><strong>未接続</strong></div><div class="stat"><small>実車時間率</small><strong>未計測</strong></div><div class="stat"><small>空車時間</small><strong>未計測</strong></div></div><div class="panel analysis-note">過去の紙日報に降車時刻がない場合、正確な空車時間は算出できません。新しい降車タップと、日報から得る乗車時刻・乗車番号を照合できたものだけ分析に利用します。</div><div class="panel analysis-memo">計画中：<br>① 日報写真と前回写真の差分読取<br>② 降車時刻との一意な照合<br>③ Notion正本へ認証付きの安全な登録<br>④ 30乗務の実績で那覇戦略の再校正</div><div class="footer-card"><svg><use href="#icon-info"/></svg>未確認情報を実績・確定売上として扱わない</div></main>
+<main class="view monthly" id="monthly-view" aria-label="月次売上画面"><section class="panel monthly-head"><h2 id="monthly-title">2026年11月</h2><span>確認済み日報のみを集計</span></section><section class="panel monthly-calendar" id="monthly-calendar" aria-label="月間カレンダー"></section><section class="panel monthly-summary"><div><small id="monthly-sum-label">確認済み日報の累積</small><strong id="monthly-sum-value">未登録</strong></div><div><small>月商目標（参考）</small><strong id="monthly-goal-value">¥1,000,000</strong></div><div><small>確認済み比率（暫定）</small><strong id="monthly-progress-value">—</strong></div></section><section class="panel monthly-notice" id="monthly-notice">日報の確認額は未登録です。勤務時間・給与予測・Notion同期は未接続です。</section></main><main class="view history" id="history-view" aria-label="記録履歴画面"><div class="section-head">端末内｜降車・乗務記録</div><div class="panel history-sub">本画面は端末内の降車時刻を保存します。日報との自動照合・Notion保存は未接続。旧UIの記録は保持しています。</div><div id="history-list" class="history-list"></div><div class="history-controls"><button class="secondary-btn" id="export-btn">JSONバックアップを保存</button><button class="secondary-btn" id="history-info-btn">旧UIの記録を開く</button></div><div class="footer-card"><svg><use href="#icon-info"/></svg>保存先：この端末内のみ。Notion未連携</div></main>
+<main class="view analysis" id="analysis-view" aria-label="営業分析画面"><div class="section-head">確認できる数値だけを表示</div><div class="statgrid"><div class="stat"><small>降車ボタン記録</small><strong id="analysis-drops">0件</strong></div><div class="stat"><small>当営業日の日報確認額</small><strong id="analysis-sales">未登録</strong></div><div class="stat"><small>実車時間率</small><strong>未計測</strong></div><div class="stat"><small>空車時間</small><strong>未計測</strong></div></div><div class="panel analysis-note"><p id="analysis-revenue-note">写真確認額は端末内の記録だけを表示します。Notion未同期。</p>過去の紙日報に降車時刻がない場合、正確な空車時間は算出できません。新しい降車タップと、日報から得る乗車時刻・乗車番号を照合できたものだけ分析に利用します。</div><div class="panel analysis-memo">計画中：<br>① 日報写真と前回写真の差分読取<br>② 降車時刻との一意な照合<br>③ Notion正本へ認証付きの安全な登録<br>④ 30乗務の実績で那覇戦略の再校正</div><div class="footer-card"><svg><use href="#icon-info"/></svg>未確認情報を実績・確定売上として扱わない</div></main>
 <nav class="nav" aria-label="画面切替"><button type="button" class="active" data-page="sales"><svg><use href="#icon-car"/></svg>営業</button><button type="button" data-page="strategy"><svg><use href="#icon-pin"/></svg>戦略</button><button type="button" data-page="history"><svg><use href="#icon-note"/></svg>履歴</button><button type="button" data-page="analysis"><svg><use href="#icon-bars"/></svg>分析</button></nav>
 <div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="操作確認"><div class="sheet"><button class="close" type="button" id="close-modal" aria-label="閉じる">×</button><h2 id="modal-title">確認</h2><div id="dropoff-outcome" class="dropoff-outcome" hidden><span id="dropoff-outcome-badge"></span><strong id="dropoff-outcome-time"></strong><span id="dropoff-outcome-count"></span></div><div id="modal-body"></div>
 <form id="revenue-form" class="confirmed-revenue-form" hidden>
@@ -751,10 +751,13 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
      el.append(date,val);cal.append(el);
    }
    $('monthly-sum-label').textContent=monthly.dayCount?'確認済み '+monthly.dayCount+'日（暫定）':'確認済み日報の累積';
-   const value=$('monthly-sum-value'),notice=$('monthly-notice');
+   const value=$('monthly-sum-value'),notice=$('monthly-notice'),progress=$('monthly-progress-value');
+   // This ratio is informational only; the goal tax basis is not yet configured.
+   progress.textContent=monthly.status==='partial'&&Number.isSafeInteger(monthly.totalYen)
+     ?(monthly.totalYen/1000000*100).toFixed(1)+'%（参考）':'—';
    if(monthly.status==='partial'){
      value.textContent=money(monthly.totalYen);
-     notice.textContent=(monthly.taxBasis==='tax-included'?'税込':'税抜')+'で確認した各営業日の最新累積額だけを参考合計。勤務終了後の確定月商ではありません。Notion未同期・給与予測未計算。';
+     notice.textContent=(monthly.taxBasis==='tax-included'?'税込':'税抜')+'で確認した各営業日の最新累積額だけを参考合計。100万円との比率は税区分の一致が未確認の参考値であり、目標達成の判定ではありません。勤務終了後の確定月商ではありません。Notion未同期・給与予測未計算。';
    }else if(monthly.status==='mixed-basis'){
      value.textContent='区分混在';
      notice.textContent='税込・税抜・未確認の金額が混在しているため、誤った月商を作らないよう合計を表示しません。各日の日報で確認してください。';
@@ -775,9 +778,17 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 
  let revenuePreviewUrl=null,revenueSubmissionPending=false,revenueFormEpoch=0;
  function renderConfirmedRevenue(){
-   const api=window.YosTaxiConfirmedRevenueV1;if(!api)return;
-   const r=api.load();if(r.error){$('report-clock').textContent='日報記録を読めません';return}
-   const confirmed=api.latest(state.businessDate);
+   const api=window.YosTaxiConfirmedRevenueV1;
+   const ledger=api?.load(),analysis=$('analysis-sales'),note=$('analysis-revenue-note');
+   if(ledger?.error){
+     $('report-clock').textContent='日報記録を読めません';
+     analysis.textContent='読込エラー';
+     note.textContent='日報記録が壊れているため金額を表示しません。元データを上書きせず保護しています。';
+     return;
+   }
+   const confirmed=api?.latest(state.businessDate);
+   analysis.textContent=confirmed?money(confirmed.amountYen):'未登録';
+   note.textContent=confirmed?'営業日 '+confirmed.businessDate+' の写真を本人が確認した累積額（'+(confirmed.taxBasis==='tax-included'?'税込':confirmed.taxBasis==='tax-excluded'?'税抜':'税区分未確認')+'）。未確定・Notion未同期。':'写真で確認した日報はまだありません。Notion未同期。';
    if(!confirmed)return;
    $('sales-value').textContent=money(confirmed.amountYen);
    $('report-clock').textContent='総収入を端末で確認・'+(confirmed.taxBasis==='unconfirmed'?'税込／税抜未確認':confirmed.taxBasis==='tax-included'?'税込':'税抜');
