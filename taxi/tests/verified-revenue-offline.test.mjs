@@ -21,3 +21,10 @@ test('existing fixed PWA v149 cache contract remains isolated from local ledgers
   assert.doesNotMatch(sw,/\blocalStorage\b|\bindexedDB\b|\bsessionStorage\b/);
   assert.match(sw,/cache\.addAll\(STATIC\)/);
 });
+
+test('official research snapshots are network-only and never silently restored from service worker cache',()=>{
+  assert.match(sw,/url\.pathname\.endsWith\('\/taxi\/research-feed\.json'\)/);
+  assert.match(sw,/event\.respondWith\(fetch\(event\.request,\{cache:'no-store'\}\)\);return;/);
+  assert.match(html,/strategy-research-status/);
+  assert.match(html,/配信が古いか不正です。営業判断に使用しないでください/);
+});
