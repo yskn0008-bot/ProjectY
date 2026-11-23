@@ -39,7 +39,7 @@ test('offline fallback labels historical issue as unverified, never as today',as
  const ids=await render(async()=>{throw Error('network unavailable');});
  assert.equal(ids.list.children.length,5);
  assert.equal(ids.status.textContent,'保存済み見本／更新未確認');
- assert.ok(ids.list.children.every(x=>x.href.includes('#archive-2026-11-19-')));
+ assert.deepEqual(ids.list.children.map(x=>x.href.match(/#archive-(2026-11-\d{2})-/)?.[1]),['2026-11-19','2026-11-19','2026-11-19','2026-11-18','2026-11-18']);
 });
 
 test('journal UI and device local storage are protected',()=>{
