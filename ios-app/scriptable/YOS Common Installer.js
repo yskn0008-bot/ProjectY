@@ -358,7 +358,9 @@ function validateSelfRelease(release){
   if(!release||release.schema!==1||release.name!==SELF||
     release.path!=='ios-app/scriptable/YOS Common Installer.js'||
     typeof release.commit!=='string'||!/^[a-f0-9]{40}$/.test(release.commit)||
-    typeof release.sha256!=='string'||!/^[a-f0-9]{64}$/.test(release.sha256))
+    typeof release.sha256!=='string'||!/^[a-f0-9]{64}$/.test(release.sha256)||
+    !Array.isArray(release.priorSha256)||release.priorSha256.length<1||release.priorSha256.length>20||
+    release.priorSha256.some(x=>typeof x!=='string'||!/^[a-f0-9]{64}$/.test(x)))
     throw Error('自己更新の配布情報が不正です。変更していません');
   return release;
 }
@@ -375,6 +377,9 @@ async function updateSelf(){
   if(!original.includes('// YOS_SCRIPT_NAME: '+SELF))
     throw Error('既存本体の正式名称を確認できません。変更していません');
   const release=validateSelfRelease(JSON.parse(await get(SELF_MANIFEST)));
+  if(oldHash!==release.sha256&&!hasOnlyScriptableIconHeader(original,release.sha256)&&
+    !release.priorSha256.some(hash=>oldHash===hash||hasOnlyScriptableIconHeader(original,hash)))
+    throw Error('既存本体が配布元の既知の旧版と一致しません。個人編集を保護して停止しました');
   if(oldHash===release.sha256||hasOnlyScriptableIconHeader(original,release.sha256)){
     await inform('更新不要','共通インストーラーは検証済みの最新版です。',null);return;
   }
