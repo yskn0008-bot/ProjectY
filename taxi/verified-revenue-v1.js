@@ -44,7 +44,7 @@
   // Intentionally refuses whole-day totals from individual ride-history screens.
   const detectText=text=>{
     const s=String(text||'').replace(/\u00a0/g,' ');
-    if(/営業\s*履\s*歴/.test(s)&&!/総\s*収\s*入/.test(s))return {kind:'ride-history',grossYen:null};
+    if(/営\s*業\s*履\s*歴/.test(s))return {kind:'ride-history',grossYen:null};
     const hits=[...s.matchAll(/総\s*収\s*入\s*[:：]?\s*[¥￥]?\s*(\d{1,3}(?:,\d{3}){1,2}|\d{1,8})(?!\d)/g)];
     if(hits.length!==1)return {kind:'unverified',grossYen:null};
     return {kind:'paper-total',grossYen:toYen(hits[0][1])};
