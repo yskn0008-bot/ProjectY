@@ -43,16 +43,17 @@ try{
   assert.ok(new Set(tones).size>=3,'synced cards must not be green-only: '+tones);
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),null,'preview never writes a plan');
   // Native iPhone request: release directly saves; nearby bars visibly react while moving.
-  const dragCard=page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'水を飲む'});
+  const dragCard=page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'歯磨き'});
   await dragCard.scrollIntoViewIfNeeded();
   const gripBox=await dragCard.locator('.task-drag-grip').boundingBox();
   assert.ok(gripBox,'drag grip is reachable');
   const dragX=gripBox.x+gripBox.width/2,dragY=gripBox.y+gripBox.height/2;
-  const beforeDrag=await page.evaluate(()=>items.find(x=>x.t==='水を飲む').s);
+  const beforeDrag=await page.evaluate(()=>items.find(x=>x.t==='歯磨き').s);
   await page.mouse.move(dragX,dragY);await page.mouse.down();
-  await page.mouse.move(dragX,dragY+55,{steps:12});
+  await page.mouse.move(dragX,dragY-55,{steps:12});
   await page.waitForTimeout(90);
-  assert.equal(await dragCard.evaluate(el=>el.classList.contains('drag-preview')),true,'bar lifts under the finger');
+  const dragDebug=await dragCard.evaluate(el=>({active:el.classList.contains('drag-preview'),css:el.className,transform:el.style.transform,scroll:scrollY}));
+  assert.equal(dragDebug.active,true,'bar lifts under the finger: '+JSON.stringify(dragDebug));
   assert.ok(await page.locator('#tl .card.drag-neighbor').count()>0,'other bars react during the drag');
   await page.mouse.up();
   assert.equal(await page.locator('#moveDialog').isVisible(),false,'drop never opens placement advice');
