@@ -228,7 +228,6 @@ body.yos-daystream-web .yos-web-port,.yos-daystream-web .dock{background:#ffffff
  padding:16px;border:1px solid #c9dceb;border-radius:22px;color:var(--text);
  background:linear-gradient(150deg,#ecf9f4,#fff 44%,#f1ebfa);box-shadow:0 20px 50px #29466250;
 }
-.move-sheet::backdrop{background:#34496755}
 .move-sheet header{display:grid;gap:5px;margin-bottom:13px}
 .move-sheet h2,.move-sheet h3,.move-sheet p{margin:0}
 .move-sheet h2{font-size:17px}.move-sheet header p{font-size:19px;font-weight:750;overflow-wrap:anywhere}
@@ -288,10 +287,10 @@ body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
 .timeline .hour{border:0}
 .timeline .hour span{left:0;color:#2d3e56;font-size:12px;font-weight:540}
 .timeline .tick{left:42px;width:8px;height:8px;background:var(--flow-edge,#5a9cda)}
-[data-flow-tone=blue]{--flow-light:#d7ebff;--flow-other:#dfe7fb;--flow-edge:#6aafe9;--flow-ink:#206bc0}
-[data-flow-tone=mint]{--flow-light:#d5f6e4;--flow-other:#e7f4dc;--flow-edge:#77bf9f;--flow-ink:#148961}
-[data-flow-tone=violet]{--flow-light:#e7defc;--flow-other:#f2e2fc;--flow-edge:#ae93e4;--flow-ink:#794dc4}
-[data-flow-tone=peach]{--flow-light:#ffebdb;--flow-other:#fff1e9;--flow-edge:#eca77d;--flow-ink:#b85c33}
+[data-flow-tone=blue]{--flow-light:#c4e2ff;--flow-other:#d3dff8;--flow-edge:#6aafe9;--flow-ink:#206bc0}
+[data-flow-tone=mint]{--flow-light:#c1edd6;--flow-other:#d9edcc;--flow-edge:#77bf9f;--flow-ink:#148961}
+[data-flow-tone=violet]{--flow-light:#dbcaf8;--flow-other:#e8d5f7;--flow-edge:#ae93e4;--flow-ink:#794dc4}
+[data-flow-tone=peach]{--flow-light:#ffdfc8;--flow-other:#ffe9dc;--flow-edge:#eca77d;--flow-ink:#b85c33}
 .timeline .card[data-flow-tone]{border-color:var(--flow-edge);background-image:linear-gradient(105deg,var(--flow-light),var(--flow-other));padding-inline:8px 6px;gap:8px}
 .timeline .card[data-flow-tone].yos-backdrop{background-image:none}
 .timeline .card .card-icon{color:var(--flow-ink);background:#fff8;width:25px;height:25px;flex-basis:25px;border-radius:8px}
@@ -306,9 +305,21 @@ body:not(:has(#calendarModes [data-view=week].active)) #weekStrip{display:none}
 .flow-editing .flow-edit-bar,.flow-advice-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f9fbffe8;border-bottom:1px solid #dbe6ef;padding:3px 2px}
 .flow-editing :is(.flow-date-row,.calendar-modes,.flow-tools,#gestureHelp,.dock,.flow-add,.native-tools){display:none}
 .flow-editing .timeline{margin-top:23px}
-.move-sheet:open{width:min(460px,100%);max-width:100%;max-height:100dvh;height:100dvh;margin:0 auto;padding:0 12px 24px;border:0;border-radius:0;background:radial-gradient(ellipse at 100% 0,#d5edff,transparent 68%),linear-gradient(170deg,#e2e7fb,#f0ebf8 60%,#f3f8e8);overflow:auto}
-.flow-advice-bar{position:sticky;top:0;z-index:2;margin:0 -12px 9px;padding:4px 12px}
-.flow-advice-bar #moveSave{min-height:34px;padding:0 14px;border:0;border-radius:24px;background:#288b68;color:white;font-size:13px;font-weight:750}
+.move-sheet[open]{
+ position:fixed;inset:0;display:grid;align-items:end;justify-items:center;
+ width:100%;height:100%;max-width:none;max-height:none;
+ margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:hidden;
+}
+.move-sheet-content{
+ width:min(460px,100%);max-height:min(560px,68dvh);padding:0 12px max(16px,env(safe-area-inset-bottom));
+ border:1px solid #d0daea;border-radius:23px 23px 0 0;
+ background:radial-gradient(ellipse at 100% 0,#d5edff,transparent 68%),linear-gradient(170deg,#e2e7fb,#f0ebf8 60%,#f3f8e8);
+ overflow:auto;overscroll-behavior:contain;scroll-padding-top:60px;
+}
+.move-sheet::backdrop{background:#34496727}
+.flow-advice-bar{position:sticky;top:0;z-index:2;margin:0 -12px 9px;padding:4px 12px;background:#f9fbff}
+.flow-advice-bar :is(#moveCancel,#moveSave){min-height:44px;padding:0 12px;border-radius:24px;font-size:13px;font-weight:750}
+.flow-advice-bar #moveSave{background:#287b60;color:white}
 .flow-advice-card{padding:16px;margin:0 0 10px;border-radius:23px;background:#ffffffdf;border:1px solid #ffffffed;box-shadow:0 5px 15px #606b9824}
 .flow-advice-card h2,.flow-advice-card h3{color:#172038;font-size:16px;font-weight:780}
 .flow-proposal{display:flex;gap:12px;align-items:center;margin:16px 0}
@@ -334,7 +345,7 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
 .timeline{--card-inset:56px}
 .timeline .card[data-flow-tone]{
  background-color:var(--flow-light);
- background-image:linear-gradient(112deg,#ffffff65,transparent 65%),linear-gradient(105deg,var(--flow-light),var(--flow-other));
+ background-image:linear-gradient(112deg,#ffffff40,transparent 65%),linear-gradient(105deg,var(--flow-light),var(--flow-other));
  border-color:var(--flow-edge);border-radius:15px;box-shadow:inset 0 1px 1px #ffffffbc,0 3px 8px #345c8311;
 }
 .timeline .card[data-flow-tone].yos-backdrop.is-overlapped{background:color-mix(in srgb,var(--flow-light) 50%,white)}
@@ -372,7 +383,7 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
 #moveOptions{margin-top:10px;display:grid;gap:6px}
 #moveOptions button,#flowCandidates{border:1px solid #b8d8ce;background:#eff8f6;color:#1c5e4a;border-radius:12px;padding:9px 12px;min-height:42px;text-align:left}
 #flowCandidates{margin-top:10px}
-#moveEvidence a{display:inline-block;color:#305a91;margin-top:8px;font-size:12px}
+#moveEvidence a:not([hidden]){display:inline-block;color:#305a91;margin-top:8px;font-size:12px}
 </style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script></head><body class="yos-daystream-web">
 <div class="app">
   <div class="top">
@@ -433,7 +444,8 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
   <section class="tabbox" id="aiPanel"><h3>AIプラン</h3><p>AIとの連携は未実装です。実行状況を確認せずに予定の自動変更はしません。</p><p class="muted">追加や時間変更はタイムラインで手動操作できます。</p></section>
   <div class="gesture-delete" id="gestureDelete" hidden aria-live="polite"><span id="gestureDeleteTitle"></span><button id="gestureDeleteConfirm" type="button">削除</button><button id="gestureDeleteCancel" class="cancel" type="button">戻す</button></div>
   <dialog id="moveDialog" class="move-sheet" aria-labelledby="moveHeading">
-    <div class="flow-advice-bar"><button id="moveCancel" type="button" aria-label="キャンセル">‹</button><strong>タイムラインを編集</strong><button id="moveSave" type="button">保存</button></div>
+   <div class="move-sheet-content">
+    <div class="flow-advice-bar"><button id="moveCancel" type="button" autofocus>キャンセル</button><strong>時刻の変更</strong><button id="moveSave" type="button">保存</button></div>
     <section class="flow-advice-card flow-verdict">
       <h2 id="moveHeading"><span aria-hidden="true">💡</span> 配置アドバイス</h2>
       <div class="flow-proposal"><span id="flowProposalIcon" aria-hidden="true">＋</span><div><strong id="moveTitle"></strong><p id="moveRange"></p></div></div>
@@ -444,6 +456,7 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
     <section class="flow-advice-card" id="moveEvidence"><h3><span aria-hidden="true">▥</span> 根拠・詳細</h3><p class="move-scope" id="moveBasis"></p><a id="moveSource" hidden href="https://sleepeducation.org/healthy-sleep/healthy-sleep-habits/" target="_blank" rel="noopener noreferrer">米国睡眠医学会の睡眠習慣ガイド ↗</a></section>
     <section class="flow-advice-card" id="flowNextAction"><h3><span aria-hidden="true">☆</span> 配置候補</h3><button id="flowCandidates" type="button">空き時間を探す</button><div id="moveOptions" aria-live="polite"></div></section>
 
+   </div>
   </dialog>
   <div class="focus" id="focus"><b id="focusTitle"></b><p id="focusInfo" aria-live="polite"></p><div class="actions-row"><button id="startActualBtn" class="secondary" hidden>開始を記録</button><button id="doneBtn">完了にする</button><button id="editSelected" class="secondary">編集</button><button id="deleteSelected" class="danger">削除</button><button id="hideFixed" class="secondary" hidden>この画面で隠す</button><button id="closeFocus" class="secondary">閉じる</button></div></div>
 </div>
@@ -1717,6 +1730,7 @@ function openMoveDialog(item,start,previousRect){
  moveTime.value=fmt(start);
  renderMoveAdvice();
  moveDialog.showModal();
+ moveDialog.firstElementChild.scrollTop=0;
 }
 moveTime.addEventListener('input',renderMoveAdvice);
 moveDialog.addEventListener('close',()=>{if(!moveDialog.open)pendingMove=null});

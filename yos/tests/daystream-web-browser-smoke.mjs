@@ -374,7 +374,7 @@ try{
   }
   assert.ok(byId.get(2105).thickness>byId.get(2110).thickness,
    'long task title wraps instead of being cut in a slim bar');
-  assert.equal(byId.get(2110).color,'rgb(231, 222, 252)','default task uses the lavender surface');
+  assert.equal(byId.get(2110).color,'rgb(219, 202, 248)','default task uses the lavender surface');
   for(const id of [2102,2106,2108,2110]){
    const surface=await p.locator('#tl [data-id="'+id+'"]').evaluate(el=>({
     shadow:getComputedStyle(el).boxShadow,
@@ -383,7 +383,7 @@ try{
    assert.equal(surface.before,'none','left stripe must be hidden for task '+id);
    assert.ok(!surface.shadow.includes('inset 4px'),'left accent shadow absent for task '+id);
   }
-  assert.equal(byId.get(2106).color,'rgb(213, 246, 228)','exercise keeps its category surface');
+  assert.equal(byId.get(2106).color,'rgb(193, 237, 214)','exercise keeps its category surface');
   for(const [id,accent] of [[2106,'#299d6b'],[2108,'#ba701f'],[2102,'#c1475e'],[2110,'']]){
    assert.equal(byId.get(id).accent,accent,'the compatibility accent is independent of the category surface');
   }
@@ -426,6 +426,14 @@ try{
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2);await p.mouse.down();
   await p.mouse.move(r.x+r.width/2,r.y+r.height/2+130,{steps:12});await p.mouse.up();
   await p.locator('#moveDialog').waitFor();
+  const sheet=await p.locator('.move-sheet-content').boundingBox();
+  const viewportHeight=await p.evaluate(()=>innerHeight);
+  assert.ok(sheet.y>=viewportHeight*.25,'placement panel leaves the timeline visible above it: '+JSON.stringify({sheet,viewportHeight}));
+  assert.ok(sheet.y+sheet.height<=viewportHeight+1,'placement panel stays within the viewport: '+JSON.stringify({sheet,viewportHeight}));
+  assert.equal(await p.locator('#moveSave').isVisible(),true);
+  assert.equal(await p.locator('#moveCancel').isVisible(),true);
+  assert.equal(await p.locator('#moveSource').isVisible(),false,'generic placement advice hides the sleep reference');
+
   assert.equal(await p.evaluate(()=>items.find(x=>x.id===2102).s),345,'preview never writes before confirmation');
   await p.locator('#moveSave').click();
   const dragState=await p.evaluate(()=>({s:items.find(x=>x.id===2102).s,note:note.textContent,events:window.__yosDragTrace,scrollY:scrollY}));
