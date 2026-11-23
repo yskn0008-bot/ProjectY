@@ -258,6 +258,9 @@ function buildHTML(html,adapters,native,wizard,snapshot,directRows=[],deviceCale
  const badgeAnchor="badge.textContent='固定'";
  if(out.split(badgeAnchor).length!==2)throw Error('DAYSTREAMラベル形式が変わりました');
  out=out.replace(badgeAnchor,"badge.textContent=item.source==='YOS Tasks'?'同期':'固定'");
+ const persistAnchor="x=>x.source!=='Apple Calendar'&&x.source!=='Clarity'";
+ if(out.split(persistAnchor).length!==2)throw Error('DAYSTREAMのローカル保存対象が変わりました');
+ out=out.replace(persistAnchor,"x=>x.source!=='Apple Calendar'&&x.source!=='Clarity'&&x.source!=='YOS Tasks'");
  const focusAnchor=' const reasons=latestCompatibility.get(item.id)?.reasons;';
  if(out.split(focusAnchor).length!==2)throw Error('DAYSTREAM詳細形式が変わりました');
  out=out.replace(focusAnchor," if(item.source==='YOS Tasks')fi.textContent=fmt(item.s)+'–'+fmt(item.s+item.d)+' · Notion YOS Tasksの読み取り専用表示。変更は原本で行ってください。';\n"+focusAnchor);
