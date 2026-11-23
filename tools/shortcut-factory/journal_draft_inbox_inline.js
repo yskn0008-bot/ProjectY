@@ -26,7 +26,7 @@ function stateFile(){const fm=FileManager.local();return {fm,path:fm.joinPath(fm
 function loadRecords(store){
   if(!store.fm.fileExists(store.path))return [];
   const rows=JSON.parse(store.fm.readString(store.path));
-  if(!Array.isArray(rows)||rows.length>3000||rows.some(x=>!x||typeof x.id!=='string'||!/^\[YOS_JOURNAL_DRAFT_V1:[0-9a-f]{16}:\d{3,5}\]$/.test(x.id)||!['unknown','submitted'].includes(x.status)))throw Error('LOCAL_RECEIPTS_INVALID');
+  if(!Array.isArray(rows)||rows.length>3000||rows.some(x=>!x||typeof x.id!=='string'||!/^\[YOS_JOURNAL_DRAFT_V1:[0-9a-f]{16}:\d{3,5}\]$/.test(x.id)||!['unknown','submitted','verified'].includes(x.status)))throw Error('LOCAL_RECEIPTS_INVALID');
   return rows;
 }
 function persist(store,records){
@@ -46,7 +46,31 @@ async function send(token,segments){
     const block=response.results[i];
     if(!block?.id||block.type!=='paragraph'||plain(block)!==segments[i])throw Error('NOTION_REPLY_CONTENT_MISMATCH');
   }
+  return response.results.map(x=>x.id);
+}
+async function readback(token,segments,ids){
+  if(!Array.isArray(ids)||ids.length!==segments.length)return false;
+  for(let i=0;i<ids.length;i++){
+    if(typeof ids[i]!=='string'||!/^[0-9a-z-]{6,80}$/i.test(ids[i]))return false;
+    const req=new Request('https://api.notion.com/v1/blocks/'+encodeURIComponent(ids[i]));
+    req.method='GET';req.timeoutInterval=7;
+    req.headers={Authorization:'Bearer '+token,'Notion-Version':J.version};
+    const block=await req.loadJSON();
+    if(!req.response||req.response.statusCode<200||req.response.statusCode>=300||
+       block?.id!==ids[i]||block?.type!=='paragraph'||plain(block)!==segments[i])return false;
+  }
   return true;
+}
+async function confirm(store,records,row,token,segments){
+  if(row.status==='verified')return {status:'verified',reason:'ALREADY_READBACK_VERIFIED'};
+  if(!Array.isArray(row.blockIds)||row.blockIds.length!==segments.length)
+    return {status:'pending',reason:'SUBMITTED_READBACK_PENDING'};
+  let ok=false;
+  try{ok=await readback(token,segments,row.blockIds);}catch(e){/* never retransmit */ }
+  if(!ok)return {status:'pending',reason:'NOTION_READBACK_PENDING'};
+  row.status='verified';
+  try{persist(store,records);}catch(e){return {status:'pending',reason:'LOCAL_VERIFIED_RECEIPT_WRITE_FAILED'};}
+  return {status:'verified',reason:'NOTION_INDEPENDENT_READBACK_MATCH'};
 }
 async function transfer(input){
   if(typeof input!=='string')return {status:'held',reason:'NO_TEXT_INPUT'};
@@ -64,17 +88,21 @@ async function transfer(input){
   let records=loadRecords(store);
   const row=records.find(x=>x.id===id);
   // Unknown deliveries must never be blindly retried.
-  if(row)return {status:row.status==='submitted'?'submitted':'held',reason:row.status==='submitted'?'ALREADY_SUBMITTED_CHECK_PENDING':'PREVIOUS_RESULT_UNKNOWN'};
+  if(row){
+    if(row.status==='unknown')return {status:'held',reason:'PREVIOUS_RESULT_UNKNOWN'};
+    return confirm(store,records,row,token,segments);
+  }
   records.push({id,status:'unknown'});
   persist(store,records);
-  try{await send(token,segments);}catch(e){return {status:'held',reason:'NOTION_RESULT_UNKNOWN'};}
+  let ids;
+  try{ids=await send(token,segments);}catch(e){return {status:'held',reason:'NOTION_RESULT_UNKNOWN'};}
   records=loadRecords(store);
   const candidate=records.find(x=>x.id===id);
   if(!candidate||candidate.status!=='unknown')return {status:'held',reason:'LOCAL_RECEIPT_CONFLICT'};
-  candidate.status='submitted';
-  try{persist(store,records);}catch(e){return {status:'held',reason:'LOCAL_RECEIPT_UPDATE_FAILED'};}
-  // API acknowledgement is not independent Notion readback; never call it verified.
-  return {status:'submitted',reason:'NOTION_API_ACK_PENDING_READBACK'};
+  candidate.status='submitted';candidate.blockIds=ids;
+  try{persist(store,records);}catch(e){return {status:'pending',reason:'LOCAL_RECEIPT_UPDATE_FAILED'};}
+  // A PATCH acknowledgement alone must not be treated as successful saving.
+  return confirm(store,records,candidate,token,segments);
 }
 async function main(){
   let result={status:'held',reason:'UNKNOWN'};
