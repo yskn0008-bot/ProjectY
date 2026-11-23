@@ -731,7 +731,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
  }
  function releaseRevenuePreview(){
    if(revenuePreviewUrl){URL.revokeObjectURL(revenuePreviewUrl);revenuePreviewUrl=null}
-   $('revenue-preview').removeAttribute('src');
+   $('revenue-preview').removeAttribute?.('src');
  }
  function openRevenueConfirm(){
    if(!selectedFile){toast('写真を選択してください');return}
