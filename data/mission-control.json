@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T03:19:20+09:00",
+  "updated_at": "2026-11-24T03:21:15+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-857",
+      "title": "PR #857 YOS JOURNAL｜一次資料照合の非公開プロトタイプと安全テスト",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
+      "updated_at": "2026-11-23T05:39:00Z"
+    },
     {
       "id": "github-pr-890",
       "title": "PR #890 Draft: YOS TAXI 戦略の未判定カード・明示待機タイマー最小改修",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-23T18:15:02Z"
     },
     {
-      "id": "github-pr-916",
-      "title": "PR #916 YOS Lists｜選択されたA案の画面デザインを実装",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/916",
-      "updated_at": "2026-11-23T18:18:48Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-23T18:15:31Z"
+      "updated_at": "2026-11-23T18:20:35Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-593199bd0eaa",
-      "title": "Merge PR #913: distinct YOS Lists summary colors and remove priority edge stripes",
-      "completed_at": "2026-11-23T17:40:09Z",
-      "result": "GitHub mainへ反映（593199b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/593199bd0eaa7df0fa1a83a0232593fbaaaefa26"
+      "id": "github-commit-a0f505fc1248",
+      "title": "Merge PR #916: implement selected A design for YOS Lists",
+      "completed_at": "2026-11-23T18:20:28Z",
+      "result": "GitHub mainへ反映（a0f505f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a0f505fc1248a35b8f1355824c398c49c14dbc3f"
     },
     {
-      "id": "github-commit-f3f16e43c695",
-      "title": "chore(yos-lists): pin distinct-color theme in existing common installer",
-      "completed_at": "2026-11-23T17:23:16Z",
-      "result": "GitHub mainへ反映（f3f16e4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f3f16e43c695e5fc7c4dca493a7c74ffe1677e73"
+      "id": "github-commit-78a866784435",
+      "title": "Merge latest main into PR #916 and keep all common installer targets while implementing selected A UI",
+      "completed_at": "2026-11-23T18:18:29Z",
+      "result": "GitHub mainへ反映（78a8667）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/78a8667844353546aa1d3f01099a4c4c8996caca"
     },
     {
-      "id": "github-commit-bfe5b781ebe6",
-      "title": "test(yos-lists): distinguish three summary hues and prohibit colored left-edge stripes",
-      "completed_at": "2026-11-23T17:22:59Z",
-      "result": "GitHub mainへ反映（bfe5b78）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bfe5b781ebe6933cc3602955009a074f9c80e74e"
+      "id": "github-commit-5341102f2987",
+      "title": "chore(yos-lists): pin approved A visual design to the existing common installer target",
+      "completed_at": "2026-11-23T18:09:09Z",
+      "result": "GitHub mainへ反映（5341102）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5341102f29872865b6fa7786fff26671fc894d61"
     },
     {
-      "id": "github-commit-4165d3d17d0e",
-      "title": "style(yos-lists): differentiate task/shopping/attention palettes and remove priority edge stripes",
-      "completed_at": "2026-11-23T17:22:39Z",
-      "result": "GitHub mainへ反映（4165d3d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4165d3d17d0e66f5ce6578cf2e3f30dacfa73dc2"
+      "id": "github-commit-bf5b23805244",
+      "title": "test(yos-lists): match selected A palette, restrained cards, A11y contrast and preserved native actions",
+      "completed_at": "2026-11-23T18:08:49Z",
+      "result": "GitHub mainへ反映（bf5b238）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/bf5b23805244e30bd2d2ea3ae856f9ecb2cc69bf"
     },
     {
-      "id": "github-commit-4d0c4d75b461",
-      "title": "Merge PR #912: stronger navy YOS Lists visual design",
-      "completed_at": "2026-11-23T17:13:51Z",
-      "result": "GitHub mainへ反映（4d0c4d7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/4d0c4d75b46167ca54aa2b3f6973fd3f79505aa0"
+      "id": "github-commit-395f8535ed26",
+      "title": "style(yos-lists): ensure A header secondary labels and search placeholder remain legible",
+      "completed_at": "2026-11-23T18:08:21Z",
+      "result": "GitHub mainへ反映（395f853）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/395f8535ed26226c5e265bb2124960689190c3cd"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T03:19:20+09:00",
+      "last_update": "2026-11-24T03:21:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 75件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T03:19:20+09:00",
+      "last_update": "2026-11-24T03:21:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T03:19:20+09:00",
+      "last_update": "2026-11-24T03:21:15+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "42248af769caa043d3ee7306387e22507ec52ec01ba041678bea8ae8e61a4a14"
+  "github_snapshot_hash": "2cbbd6571f2e9239e10e5b541527172bff462277c78cbfe17dc6891912192d5c"
 }
