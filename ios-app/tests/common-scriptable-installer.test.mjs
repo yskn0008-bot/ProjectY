@@ -626,3 +626,28 @@ test('Scriptable icon header managed update interrupted is fully restorable',asy
   assert.equal(cloud.files.has(marker),false);
   assert.match(r.alerts.at(-1).message,/復旧しました/);
 });
+
+test('installer-diagnose reads both existing copies without network or writes',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const pink='// Variables used by Scriptable.\n// YOS_SCRIPT_NAME: YOS Common Installer\nPINK';
+ const orange='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: brown; icon-glyph: magic;\n'+pink;
+ cloud.files.set('/icloud/YOS Common Installer.js',pink);
+ local.files.set('/local/YOS Common Installer 最新版.js',orange);
+ const beforeCloud=[...cloud.files],beforeLocal=[...local.files];
+ const r=await run({cloud,local,id:'installer-diagnose'});
+ assert.deepEqual([...cloud.files],beforeCloud);
+ assert.deepEqual([...local.files],beforeLocal);
+ assert.equal(r.requests.length,0);
+ assert.equal(r.opened.length,0);
+ assert.match(r.alerts.at(-1).message,/YOS Common Installer 最新版/);
+ assert.match(r.alerts.at(-1).message,/iCloud/);
+ assert.match(r.alerts.at(-1).message,/local/);
+ assert.match(r.alerts.at(-1).message,/変更はしていません/);
+});
+test('installer-diagnose leaves absent copies untouched',async()=>{
+ const r=await run({id:'installer-diagnose'});
+ assert.equal(r.cloud.files.size,0);
+ assert.equal(r.local.files.size,0);
+ assert.equal(r.requests.length,0);
+ assert.match(r.alerts.at(-1).message,/見つかりません/);
+});
