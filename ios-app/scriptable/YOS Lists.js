@@ -232,18 +232,25 @@ main{padding:0 13px}
 .tools input::placeholder{color:#526779;font-weight:550}
 .tools input:focus{border-color:#7899B2;outline:3px solid #CFDEE8;outline-offset:1px}
 .section{color:#294054;font-size:16px;font-weight:800;margin:19px 2px 13px;letter-spacing:-.015em}
-.list{display:flex;flex-direction:column;gap:11px}
-.item{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:16px 14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 4px 0 rgba(31,52,70,.055)}
+.list{display:flex;flex-direction:column;gap:6px}
+.item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px 10px;display:flex;gap:9px;align-items:center;box-shadow:0 2px 0 rgba(31,52,70,.045)}
 .item.done{background:#F0F3F3;box-shadow:none}
 .item-body{min-width:0;flex:1}
-.item h3{margin:0 0 11px;font-size:15px;font-weight:780;line-height:1.5;letter-spacing:-.018em;word-break:break-word;color:#294054}
-.item.done h3{color:#607183}
-.meta{display:flex;flex-wrap:wrap;gap:6px}
-.tag{display:inline-block;background:#EEF1F3;color:#506579;border:0;padding:5px 8px;border-radius:7px;font-size:11px;line-height:1.25;font-weight:750}
+.item-details{min-width:0}
+.item-details summary{position:relative;display:block;list-style:none;cursor:pointer;padding-right:12px}
+.item-details summary::-webkit-details-marker{display:none}
+.item-details summary::after{content:"⌄";position:absolute;right:0;top:0;color:#778A99;font-size:14px;font-weight:700}
+.item-details[open] summary::after{transform:rotate(180deg)}
+.item-details[open] .item-name{-webkit-line-clamp:unset;overflow:visible}
+.item-details summary:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:3px}
+.item-name{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-size:14px;font-weight:780;line-height:1.3;letter-spacing:-.015em;overflow-wrap:anywhere;color:#294054}
+.item.done .item-name{color:#607183}
+.meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.tag{display:inline-block;background:#EEF1F3;color:#506579;border:0;padding:2px 5px;border-radius:6px;font-size:10px;line-height:1.2;font-weight:750}
 .tag.urgent{background:#FFE8E4;color:#A63C34}
 .tag.high{background:#FFF0D8;color:#91601C}
-.item p{font-size:12px;font-weight:550;color:#5E7183;margin:11px 0 0;line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.action{flex-shrink:0;min-width:66px;min-height:44px;border:1px solid #B6CCD9;border-radius:11px;padding:9px 10px;font-size:12.5px;font-weight:800;background:#E7F0F4;color:#526F89;box-shadow:none}
+.item p{font-size:12px;font-weight:550;color:#5E7183;margin:8px 0 1px;padding-top:7px;border-top:1px solid #E5E9EB;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.action{flex-shrink:0;min-width:62px;min-height:44px;border:1px solid #B6CCD9;border-radius:10px;padding:7px 8px;font-size:12px;font-weight:800;background:#E7F0F4;color:#526F89;box-shadow:none}
 .action:active{background:#D6E6F0}
 .action.done{color:#37664E;background:#DFEEE6;border-color:#A8CDB8;box-shadow:none}
 .notice{border:1px solid #D2A451;color:#654417;background:#FFF3D8;border-radius:13px;padding:12px;font-size:12px;font-weight:650;line-height:1.65;margin:10px 0 14px;white-space:pre-wrap;overflow-wrap:anywhere}
@@ -252,7 +259,7 @@ main{padding:0 13px}
 #message{position:fixed;bottom:max(14px,env(safe-area-inset-bottom));left:13px;right:13px;border-radius:14px;padding:13px 15px;background:#294054;color:#FFFFFF;box-shadow:0 7px 24px rgba(14,43,75,.2);font-size:12px;font-weight:700;line-height:1.45;z-index:9;min-height:20px}
 #message[hidden]{display:none}
 .footer{text-align:center;color:#526779;font-size:11px;font-weight:550;line-height:1.6;padding:24px 4px}
-@media(max-width:360px){.tab{font-size:12px}.stat{padding:12px 8px}.stat b{font-size:28px}.stat small{font-size:10px}.item{padding:13px 11px}.action{min-width:62px}}
+@media(max-width:360px){.tab{font-size:12px}.stat{padding:12px 8px}.stat b{font-size:28px}.stat small{font-size:10px}.item{padding:6px 8px}.item-name{font-size:13px}.action{min-width:59px}}
 @media(prefers-reduced-motion:no-preference){.tab,.refresh,.action{transition:background-color .15s,border-color .15s}}
 </style>
 </head>
@@ -318,8 +325,8 @@ function render(){
   const tags=task?labels(item):[item.category,item.type,item.priority].filter(Boolean);
   const action=task&&item.type==='Task'?'<button class="action" data-action="complete" data-kind="task" data-id="'+safe(item.id)+'" '+(state.busy||ready[item.kind]===false?'disabled':'')+'>完了</button>':
     !task&&!done?'<button class="action" data-action="purchase" data-kind="shopping" data-id="'+safe(item.id)+'" '+(state.busy?'disabled':'')+'>購入済</button>':'';
-  return '<article class="item'+(done?' done':'')+'"><div class="item-body"><h3>'+safe(item.name)+'</h3><div class="meta">'+tags.map(t=>'<span class="tag'+(t==='P0'?' urgent':t==='P1'?' high':'')+'">'+safe(t)+'</span>').join('')+'</div>'+
-   (detail?'<p>'+safe(detail)+'</p>':'')+'</div>'+action+'</article>';
+  return '<article class="item'+(done?' done':'')+'"><div class="item-body"><details class="item-details"><summary aria-label="詳細を開く・閉じる：'+safe(item.name)+'"><span class="item-name">'+safe(item.name)+'</span><span class="meta">'+tags.map(t=>'<span class="tag'+(t==='P0'?' urgent':t==='P1'?' high':'')+'">'+safe(t)+'</span>').join('')+'</span></summary>'+
+   (detail?'<p>'+safe(detail)+'</p>':'')+'</details></div>'+action+'</article>';
  }).join(''):'<div class="empty">'+(failed?'この項目はNotionから取得できませんでした。右上の更新で再試行してください。':'表示する項目がありません。')+'</div>';
 }
 $('tabs').addEventListener('click',e=>{const tab=e.target.closest('[data-tab]');if(!tab)return;state.tab=tab.dataset.tab;render()});
