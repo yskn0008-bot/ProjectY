@@ -1055,6 +1055,8 @@ test('photo-linked confirmed revenue: keeps the paper total, refuses duplicate i
   await expect(page.locator('#sales-value')).toContainText('21,950');
   await page.locator('#monthly-open').click();
   await expect(page.locator('#monthly-sum-value')).toHaveText('区分未確認');
+  await expect(page.locator('#monthly-goal-value')).toHaveText('¥1,000,000');
+  await expect(page.locator('#monthly-progress-value')).toHaveText('—');
   await expect(page.locator('#monthly-calendar .month-day small').filter({hasText:'21,950'})).toHaveCount(1);
   await page.locator('[data-page="sales"]').click();
   await page.locator('#photo-input').setInputFiles({name:'same-photo.png',mimeType:'image/png',buffer:mockImage});
@@ -1112,8 +1114,12 @@ test('monthly revenue counts the latest daily snapshot only when confirmed tax b
     ];
   });
   expect(statuses).toEqual(['saved','saved']);
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#analysis-sales')).toHaveText('¥14,750');
+  await expect(page.locator('#analysis-revenue-note')).toContainText('税込');
   await page.locator('#monthly-open').click();
   await expect(page.locator('#monthly-sum-value')).toHaveText('¥36,700');
+  await expect(page.locator('#monthly-progress-value')).toHaveText('3.7%（参考）');
   await expect(page.locator('#monthly-sum-label')).toContainText('2日');
   await expect(page.locator('#monthly-notice')).toContainText('確定月商ではありません');
   await page.evaluate(()=>{
@@ -1124,6 +1130,7 @@ test('monthly revenue counts the latest daily snapshot only when confirmed tax b
   await page.locator('[data-page="sales"]').click();
   await page.locator('#monthly-open').click();
   await expect(page.locator('#monthly-sum-value')).toHaveText('区分混在');
+  await expect(page.locator('#monthly-progress-value')).toHaveText('—');
   await expect(page.locator('#monthly-notice')).toContainText('合計を表示しません');
 });
 
