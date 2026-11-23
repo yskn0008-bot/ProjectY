@@ -1,0 +1,29 @@
+name: YOS Common Installer issue 900 checks
+on:
+  push:
+    branches:
+      - draft/issue-900-installer-self-update
+    paths:
+      - 'ios-app/scriptable/YOS Common Installer.js'
+      - 'ios-app/tests/common-scriptable-installer.test.mjs'
+      - '.github/workflows/yos-common-installer-issue-900.yml'
+  pull_request:
+    paths:
+      - 'ios-app/scriptable/YOS Common Installer.js'
+      - 'ios-app/tests/common-scriptable-installer.test.mjs'
+      - '.github/workflows/yos-common-installer-issue-900.yml'
+permissions:
+  contents: read
+jobs:
+  installer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scriptable syntax check
+        run: node --check 'ios-app/scriptable/YOS Common Installer.js'
+      - name: Installer unit tests
+        run: node --test ios-app/tests/common-scriptable-installer.test.mjs
