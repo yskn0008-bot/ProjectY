@@ -14,15 +14,19 @@ test('Web port uses the DAYSTREAM light appearance and existing navigation',()=>
  assert.match(native,/YOS_LIFE_LEARNING_LIVE_START/);
  assert.match(html,/YOS_LIFE_LEARNING_LIVE_START/);
 });
-test('Move confirmation uses the existing undo/redo and browser plan',()=>{
+test('Direct drop saves immediately, keeps explicit time edit and undo/redo',()=>{
  assert.match(html,/id="yosUndoBtn"/);
  assert.match(html,/id="yosRedoBtn"/);
  assert.match(html,/function yosHistoryRestore\(direction\)/);
  assert.match(html,/yosHistorySnapshot\(\)/);
  assert.match(html,/<dialog id="moveDialog"/);
- assert.match(html,/if\(mode==='tap'\)showFocusFor\(item\)/);
- assert.match(html,/if\(next!==item.s\)openMoveDialog/);
+ assert.match(html,/if\(mode==='tap'\)\{clearNeighbors\(\);showFocusFor\(item\)/);
+ assert.match(html,/function commitDraggedTime\(item,next,previousRect\)/);
+ assert.match(html,/commitDraggedTime\(item,next,previousRect\)/);
+ assert.doesNotMatch(html,/if\(next!==item.s\)openMoveDialog/);
  assert.match(html,/if\(!saved\)item.s=original/);
+ assert.match(html,/function reactToNeighbors\(\)/);
+ assert.match(html,/\.card\.drag-neighbor/);
  assert.doesNotMatch(html,/addEventListener\('scroll',restoreScroll/);
 });
 
