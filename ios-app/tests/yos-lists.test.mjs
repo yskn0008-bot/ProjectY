@@ -229,3 +229,24 @@ test('selected A YOS Lists UI keeps accessible contrast, touch targets and exist
  assert.match(source,/classList\.toggle\('is-ready'/);
  assert.match(source,/'P1'\?' high'/);
 });
+
+test('compact row layout keeps high-value fields and an independent 44px completion action',async()=>{
+ const css=source.slice(source.indexOf('<style>'),source.indexOf('</style>')+8);
+ assert.match(css,/\.list\{[^}]*gap:6px/);
+ assert.match(css,/\.item\{[^}]*padding:7px 10px/);
+ assert.match(css,/\.item-name\{[^}]*-webkit-line-clamp:2/);
+ assert.match(css,/\.item-details\[open\] \.item-name\{[^}]*-webkit-line-clamp:unset/);
+ assert.match(css,/\.action\{[^}]*min-height:44px/);
+ assert.match(css,/\.tag\{[^}]*padding:2px 5px/);
+ assert.doesNotMatch(css,/\.item\{[^}]*padding:16px 14px/);
+ assert.match(source,/<details class="item-details"><summary aria-label=/);
+ assert.match(source,/<\/details><\/div>'\+action\+'<\/article>/);
+ assert.match(source,/tags\.map\(t=>/);
+ const h=await harness();
+ const data=await h.app.readAll();
+ const html=h.app.htmlWithData(data);
+ assert.match(html,/class="item-details"/);
+ assert.doesNotMatch(html,/mock-only-token-not-a-secret/);
+ assert.doesNotThrow(()=>new Function(html.split('<script>')[1].split('</script>')[0]));
+ assert.equal(h.writes,0,'compact display does not mutate Notion');
+});
