@@ -1038,7 +1038,7 @@ test('strategy research displays only fresh official-source evidence, never taxi
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
   await page.clock.setFixedTime(new Date('2026-11-24T15:30:00+09:00'));
-  await page.waitForTimeout(250);
+  await page.clock.runFor(15000);
   await expect(page.locator('#strategy-research-status')).toContainText('配信が古い');
   await expect(page.locator('#strategy-research-sources>div')).toHaveCount(0);
 });
