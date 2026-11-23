@@ -11,6 +11,7 @@ const SHIFT='2026-11-23T17:00:00+09:00';
 const initial=()=>({version:1,businessDate:'2026-11-23',shiftStart:SHIFT,shiftEnd:null,events:[],photos:[{id:'kept-photo'}]});
 function env({at='2026-11-23T20:00:00+09:00',ledger=initial(),wait=null,field=null,fail=false}={}){
   const clock={now:Date.parse(at)},store=new Map([['yos-taxi-ops-v1','keep-legacy']]),els=new Map();
+  let uuidSeq=0;
   if(ledger!==null)store.set(OLD,JSON.stringify(ledger));
   if(wait!==null)store.set(WAIT,wait);
   if(field!==null)store.set(FIELD,field);
@@ -30,7 +31,7 @@ function env({at='2026-11-23T20:00:00+09:00',ledger=initial(),wait=null,field=nu
   };
   class ClockDate extends Date{constructor(...args){super(...(args.length?args:[clock.now]))}static now(){return clock.now}}
   const window={};
-  runInNewContext(script,{window,document,localStorage,navigator:{},crypto:{randomUUID:()=> 'uuid-test'},
+  runInNewContext(script,{window,document,localStorage,navigator:{},crypto:{randomUUID:()=> 'uuid-test-'+(++uuidSeq)},
     location:{href:'https://example.test/ProjectY/taxi/ui-v2.html'},history:{state:null,replaceState(){}},
     addEventListener(){},setInterval(){},setTimeout(){return 1},clearTimeout(){},
     structuredClone:x=>JSON.parse(JSON.stringify(x)),Date:ClockDate,Intl,URL});
