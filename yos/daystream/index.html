@@ -1852,9 +1852,20 @@ function wireTaskGestures(el,item){
   }
   if(window.scrollY!==prior)paintFrame=requestAnimationFrame(paint);
  };
+ const trackPointer=e=>{if(gesture?.id===e.pointerId)move(e.clientX,e.clientY,e)};
+ const releasePointer=e=>{if(gesture?.id===e.pointerId)finish(false,e.clientY)};
+ const cancelPointer=e=>{if(gesture?.id===e.pointerId)finish(true)};
+ const cancelOnBlur=()=>finish(true);
  const begin=(x,y,id,fromGrip)=>{
   if(gesture)return;
   gesture={id,x,y,startX:x,startY:y,scrollY:window.scrollY,fromGrip,mode:fromGrip?'armed':'tap'};
+  if(id!=='touch'){
+   // Follow the pointer across neighboring cards even when capture is lost.
+   document.addEventListener('pointermove',trackPointer,{passive:false});
+   document.addEventListener('pointerup',releasePointer);
+   document.addEventListener('pointercancel',cancelPointer);
+   window.addEventListener('blur',cancelOnBlur);
+  }
   if(fromGrip){el.classList.add('press-armed');return}
   armTimer=setTimeout(()=>{
    if(!gesture||gesture.mode!=='tap')return;
@@ -1904,6 +1915,10 @@ function wireTaskGestures(el,item){
    previousRect=el.getBoundingClientRect();
   }
   gesture=null;dragHint.hidden=true;clearTimers();cancelAnimationFrame(paintFrame);paintFrame=0;
+  document.removeEventListener('pointermove',trackPointer);
+  document.removeEventListener('pointerup',releasePointer);
+  document.removeEventListener('pointercancel',cancelPointer);
+  window.removeEventListener('blur',cancelOnBlur);
   ghost?.remove();ghost=null;lastCandidate=null;delete el.dataset.placement;
   el.classList.remove('press-armed','drag-preview');el.style.transform='';
   label.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
@@ -1932,12 +1947,7 @@ function wireTaskGestures(el,item){
  el.addEventListener('pointerdown',e=>{
   if(e.pointerType==='touch'||e.button!==0)return;
   begin(e.clientX,e.clientY,e.pointerId,grip.contains(e.target));
-  el.setPointerCapture?.(e.pointerId);
  });
- el.addEventListener('pointermove',e=>{if(gesture?.id===e.pointerId)move(e.clientX,e.clientY,e)});
- el.addEventListener('pointerup',e=>{if(gesture?.id===e.pointerId)finish(false,e.clientY)});
- el.addEventListener('pointercancel',e=>{if(gesture?.id===e.pointerId)finish(true)});
- el.addEventListener('lostpointercapture',e=>{if(gesture?.id===e.pointerId)finish(true)});
  grip.addEventListener('click',e=>{if(e.detail===0)openMoveDialog(item,item.s,null)});
 }
 function smoothRender(activeId,oldActiveRect){
