@@ -365,7 +365,10 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
 .flow-editing .top{display:contents}
 .flow-editing .flow-edit-bar{padding-inline:14px}
 .timeline .flow-ghost{position:absolute;left:var(--card-inset);right:0;border:2px dashed #8b72c3;border-radius:15px;background:#ede4ff80;pointer-events:none;z-index:5}
-.timeline .card.drag-preview{pointer-events:none;z-index:11;box-shadow:0 12px 26px #55468335}
+.timeline .card.drag-preview{pointer-events:none;z-index:25;will-change:transform;box-shadow:0 18px 38px #304a7650;filter:saturate(1.07)}
+.timeline .card.drag-neighbor{z-index:9;will-change:transform;transition:transform 190ms cubic-bezier(.22,.82,.25,1),filter 190ms ease;filter:saturate(.94)}
+.timeline .card.drag-neighbor.yos-backdrop{z-index:4}
+@media(prefers-reduced-motion:reduce){.timeline .card.drag-neighbor{transition:none}.timeline .card.drag-preview{filter:none}}
 .timeline .card.drag-preview[data-placement]{outline-color:var(--placement-ink);box-shadow:inset 3px 0 var(--placement-ink),0 12px 26px #55468335}
 [data-placement=positive]{--placement-ink:#299d6b}
 [data-placement=negative]{--placement-ink:#ba701f}
@@ -1763,18 +1766,62 @@ document.getElementById('moveSave').onclick=()=>{
 
 // Card bodies keep native scrolling. A handle press or a stationary hold claims
 // the drag before the first vertical move can be consumed by the WebView.
+function commitDraggedTime(item,next,previousRect){
+ if(item.f||!Number.isInteger(next)||next<0||next+item.d>1440||!items.includes(item))return false;
+ if(next===item.s)return true;
+ const original=item.s,day=selectedDay;
+ let saved=false;
+ if(item.source==='YOS Tasks'){
+  // The source record is read-only. Save a date-scoped time override only.
+  saved=window.YOS_NOTION_LOCAL_MOVE?.(day,item.sourceRef,next,item.d)===true;
+  if(saved)item.s=next;
+ }else{
+  item.s=next;
+  saved=persist();
+  if(!saved)item.s=original;
+ }
+ note.textContent=saved?'「'+item.t+'」を'+fmt(next)+'に移動しました':
+  '保存できなかったため、元の位置に戻しました';
+ smoothRender(saved?item.id:null,saved?previousRect:null);
+ updateReview();
+ return saved;
+}
 function wireTaskGestures(el,item){
- const holdToMove=260,holdToEdit=750,slop=7;
- const label=el.querySelector('small');
- const dragHint=document.getElementById('flowDragHint');
+ const label=el.querySelector('.task-meta small');
  const grip=el.querySelector('.task-drag-grip');
- let gesture=null;
- let armTimer=0,editTimer=0,paintFrame=0,ghost=null,lastCandidate=null;
+ let gesture=null,armTimer=0,editTimer=0,paintFrame=0,ghost=null,lastCandidate=null;
+ const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
  const clearTimers=()=>{clearTimeout(armTimer);clearTimeout(editTimer)};
  const offset=()=>gesture.y-gesture.startY+window.scrollY-gesture.scrollY;
  const candidateStart=()=>{
   const snapped=Math.round(minuteAtY(yFor(item.s)+offset())/5)*5;
   return Math.max(0,Math.min(1440-item.d,snapped));
+ };
+ const reactToNeighbors=()=>{
+  const top=el.offsetTop+offset(),bottom=top+el.offsetHeight,center=(top+bottom)/2;
+  for(const other of tl.querySelectorAll('.card:not(.drag-preview)')){
+   if(other===el)continue;
+   const y=other.offsetTop,height=other.offsetHeight;
+   const gap=Math.max(0,y-bottom,top-(y+height));
+   const near=gap<65;
+   if(!near){
+    if(other.classList.contains('drag-neighbor')){
+     other.style.transform='';other.classList.remove('drag-neighbor');
+    }
+    continue;
+   }
+   const strength=1-gap/65,side=(y+height/2)<center?-1:1;
+   const backdrop=other.classList.contains('yos-backdrop');
+   const push=backdrop?Math.min(7,5*strength):Math.min(29,(9+20*strength));
+   const x=backdrop?Math.round(4*strength):Math.round(8*strength);
+   other.classList.add('drag-neighbor');
+   other.style.transform='translate3d('+x+'px,'+(side*push)+'px,0)';
+  }
+ };
+ const clearNeighbors=()=>{
+  for(const other of tl.querySelectorAll('.drag-neighbor')){
+   other.style.transform='';other.classList.remove('drag-neighbor');
+  }
  };
  const paint=()=>{
   paintFrame=0;
@@ -1785,19 +1832,20 @@ function wireTaskGestures(el,item){
   }
   if(gesture.mode!=='drag')return;
   const viewport=window.visualViewport?.height||window.innerHeight;
-  const direction=gesture.y<60?-1:gesture.y>viewport-100?1:0;
+  const direction=gesture.y<70?-1:gesture.y>viewport-110?1:0;
   const prior=window.scrollY;
   if(direction)window.scrollBy(0,direction*8);
-  el.style.transform='translate3d(0,'+offset()+'px,0)';
+  el.style.transform='translate3d(0,'+offset()+'px,0)'+(reduceMotion?'':' scale(1.025)');
+  reactToNeighbors();
   const at=candidateStart();
   if(at!==lastCandidate){
    lastCandidate=at;
    label.textContent=fmt(at)+'–'+fmt(at+item.d);
-   const {level,reason}=placementAt(item,at);
+   const {level,overlaps}=placementAt(item,at);
    dragHint.hidden=false;
    dragHint.dataset.level=el.dataset.placement=level;
-   dragHint.firstElementChild.textContent=flowSignals[level].join(' ')+'　'+fmt(item.s)+' → '+fmt(at);
-   dragHint.lastElementChild.textContent=reason;
+   dragHint.firstElementChild.textContent=fmt(at)+'–'+fmt(at+item.d);
+   dragHint.lastElementChild.textContent=overlaps.length?'ほかの予定と'+overlaps.length+'件重なります':'指を離すと自動保存';
   }
   if(window.scrollY!==prior)paintFrame=requestAnimationFrame(paint);
  };
@@ -1811,7 +1859,9 @@ function wireTaskGestures(el,item){
   },holdToMove);
   editTimer=setTimeout(()=>{
    if(!gesture||gesture.mode!=='armed')return;
-   finish(true);beginLocalEdit(item);
+   finish(true);
+   if(item.source==='YOS Tasks')openMoveDialog(item,item.s,null);
+   else beginLocalEdit(item);
   },holdToEdit);
  };
  const move=(x,y,event)=>{
@@ -1828,17 +1878,13 @@ function wireTaskGestures(el,item){
      gesture.mode='drag';
      el.classList.add('drag-preview');
      ghost=document.createElement('div');
-     ghost.className='flow-ghost';
-     ghost.setAttribute('aria-hidden','true');
-     ghost.style.top=el.style.top;
-     ghost.style.height=el.offsetHeight+'px';
-     tl.append(ghost);
-    }
-    else gesture.mode='ignored';
+     ghost.className='flow-ghost';ghost.setAttribute('aria-hidden','true');
+     ghost.style.top=el.style.top;ghost.style.height=el.offsetHeight+'px';tl.append(ghost);
+    }else gesture.mode='ignored';
    }
   }else if(gesture.mode==='tap'&&Math.max(ax,ay)>slop){
    clearTimers();
-   if(item.kind==='task'&&dx<0&&ax>ay*1.4&&event.cancelable)gesture.mode='swipe';
+   if(item.kind==='task'&&item.source!=='YOS Tasks'&&dx<0&&ax>ay*1.4&&event.cancelable)gesture.mode='swipe';
    else gesture.mode=ay>=ax?'scroll':'ignored';
   }
   if(gesture.mode==='swipe')event.preventDefault();
@@ -1858,26 +1904,27 @@ function wireTaskGestures(el,item){
   ghost?.remove();ghost=null;lastCandidate=null;delete el.dataset.placement;
   el.classList.remove('press-armed','drag-preview');el.style.transform='';
   label.textContent=fmt(item.s)+'–'+fmt(item.s+item.d);
-  if(cancelled)return;
-  if(mode==='swipe'&&x-startX< -45)showSwipeDelete(item);
-  if(mode==='tap')showFocusFor(item);
-  if(mode==='armed'&&fromGrip)openMoveDialog(item,item.s,null);
-  if(next!==item.s)openMoveDialog(item,next,previousRect);
+  if(cancelled){clearNeighbors();return}
+  if(mode==='swipe'&&x-startX< -45){clearNeighbors();showSwipeDelete(item);return}
+  if(mode==='tap'){clearNeighbors();showFocusFor(item);return}
+  if(mode==='armed'&&fromGrip){clearNeighbors();openMoveDialog(item,item.s,null);return}
+  if(next!==item.s){
+   // Drop is the confirmation: no blocking placement-advice modal.
+   // FLIP animates all neighboring cards from their reactive positions.
+   commitDraggedTime(item,next,previousRect);
+  }else clearNeighbors();
  }
  el.addEventListener('contextmenu',e=>e.preventDefault());
  el.addEventListener('touchstart',e=>{
   if(e.touches.length!==1){finish(true);return}
-  const touch=e.touches[0];
-  begin(touch.clientX,touch.clientY,'touch',grip.contains(e.target));
+  const touch=e.touches[0];begin(touch.clientX,touch.clientY,'touch',grip.contains(e.target));
  },{passive:true});
  el.addEventListener('touchmove',e=>{
   if(gesture?.id!=='touch')return;
   if(e.touches.length!==1){finish(true);return}
   move(e.touches[0].clientX,e.touches[0].clientY,e);
  },{passive:false});
- el.addEventListener('touchend',e=>{
-  if(gesture?.id==='touch')finish(false,e.changedTouches?.[0]?.clientY);
- });
+ el.addEventListener('touchend',e=>{if(gesture?.id==='touch')finish(false,e.changedTouches?.[0]?.clientY)});
  el.addEventListener('touchcancel',()=>finish(true));
  el.addEventListener('pointerdown',e=>{
   if(e.pointerType==='touch'||e.button!==0)return;
