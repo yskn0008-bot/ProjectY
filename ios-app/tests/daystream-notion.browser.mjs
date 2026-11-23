@@ -215,7 +215,7 @@ try{
  await blockedPage.evaluate(()=>showDay('2026-12-01'));
  assert.equal(await blockedPage.locator('#tl .card.task').count(),4,
   'Notion projection remains visible when iPhone WebView storage is unavailable');
- assert.match(await blockedPage.locator('#yosWebSourceState').innerText(),/Notion 4件取得/);
+ assert.match(await blockedPage.locator('#yosWebSourceState').textContent(),/Notion 4件取得/);
  assert.ok(!blockedErrors.some(e=>/Uncaught|SecurityError/.test(e)),
   'the read-only preview should not crash on a denied storage API');
  await blocked.close();
