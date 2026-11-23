@@ -117,7 +117,8 @@ test('storage errors report failure and preserve shift ledger',()=>{
 test('observations never invent a recommendation, GO data feed or actual taxi supply',()=>{
   const e=env(),r=e.window.YOSTaxiPreview.fieldReport;
   r.record('go_yes');r.record('supply_many');
-  assert.equal(e.el('strategy-main').textContent,'◌ 未判定');
+  assert.equal(e.el('strategy-main').textContent,'');
+  assert.match(html,/id="strategy-main">◌ 未判定/);
   assert.equal(e.el('strategy-action').dataset.decision,undefined);
   assert.equal(r.list().length,2);
   assert.ok(r.list().every(x=>x.source==='manual-tap'));
