@@ -174,8 +174,8 @@
       "id": "home-scenes",
       "name": "YOS Home Scenes",
       "path": "ios-app/scriptable/remote-widgets/YOS Home Scenes.js",
-      "commit": "8260aa3e08f8bfc40e89a75759406ff7cd2d6d53",
-      "sha256": "460e1e80d49992c228396e8413730a3eeddeb2950f8224264cebe4cd1c1e25a9"
+      "commit": "ea51273e9abdd5c825dbbcafb1c2c4e91a42fa65",
+      "sha256": "8bb2feda8eef8f558ebe965f588939c892d6f7fbfea395ee0bfee4978867d856"
     }
   ]
 }
