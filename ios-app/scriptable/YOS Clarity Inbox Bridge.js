@@ -22,8 +22,8 @@ const input = typeof args === 'undefined' ? '' : args.shortcutParameter;
 // legacy Clarity free-text inputs completely unchanged. A malformed JOURNAL
 // envelope fails closed rather than being misfiled as a Clarity voice capture.
 function journalEnvelope(value) {
-  if (typeof value !== 'string' || !/^\\s*\\{/.test(value) ||
-      !/"source"\\s*:\\s*"journal"/.test(value)) return null;
+  if (typeof value !== 'string' || !/^\s*\{/.test(value) ||
+      !/"source"\s*:\s*"journal"/.test(value)) return null;
   try {
     const parsed=JSON.parse(value);
     if(parsed && typeof parsed==='object' && !Array.isArray(parsed) && parsed.source==='journal')
