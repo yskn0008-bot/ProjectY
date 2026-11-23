@@ -57,7 +57,8 @@ class CollectorTests(unittest.TestCase):
   self.assertEqual(b.forecast_period_time('2026-11-20'),dt.datetime(2026,11,19,15,0,tzinfo=UTC))
   self.assertIsNone(b.parse_time('2026-11-20'))  # publication dates still require a timezone
   self.assertEqual(b.forecast(daily,CHECKED)['summary'],'くもり')
-  self.assertEqual(b.forecast(daily,dt.datetime(2026,11,20,16,0,tzinfo=UTC))['summary'],'雨')
+  late=daily.replace(b'2026-11-20T10:00:00+09:00',b'2026-11-20T17:00:00+09:00')
+  self.assertEqual(b.forecast(late,dt.datetime(2026,11,20,15,30,tzinfo=UTC))['summary'],'雨')
 
  def test_bad_date_only_forecast_period_never_becomes_current(self):
   invalid=FORECAST.replace(b'2026-11-20T09:00:00+09:00',b'2026-11-99')\
