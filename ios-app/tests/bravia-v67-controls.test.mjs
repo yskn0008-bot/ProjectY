@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {createHash} from 'node:crypto';
 
 const prev=fs.readFileSync(new URL('../scriptable/remote-widgets/picture-v66/YOS Remote Hub.js',import.meta.url),'utf8');
 const src=fs.readFileSync(new URL('../scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js',import.meta.url),'utf8');
@@ -101,4 +102,19 @@ test('embedded remote screen JavaScript parses (not merely Scriptable outer scri
  assert.ok(begin>=0&&end>begin,'remote script was found');
  const htmlJS=src.slice(begin+8,end).replace(/\$\{[^}]+\}/g,'0');
  assert.doesNotThrow(()=>new vm.Script(htmlJS));
+});
+
+
+test('isolated remote test target is pinned and does not replace the existing remote or recovery targets',()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
+ const target=catalog.targets.find(x=>x.id==='remote-hub-quick-test');
+ assert.equal(target.name,'YOS Remote Hub Quick TEST');
+ assert.equal(target.path,'ios-app/scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js');
+ assert.match(target.commit,/^[a-f0-9]{40}$/);
+ assert.equal(target.sha256,createHash('sha256').update(src).digest('hex'));
+ assert.equal(catalog.targets.find(x=>x.id==='remote-hub').name,'リモコン');
+ assert.ok(catalog.targets.some(x=>x.id==='bravia-picture-off-repair'));
+ assert.ok(catalog.targets.some(x=>x.id==='common-installer-repair'));
+ assert.equal(new Set(catalog.targets.map(x=>x.id)).size,catalog.targets.length);
+ assert.equal(new Set(catalog.targets.map(x=>x.name)).size,catalog.targets.length);
 });
