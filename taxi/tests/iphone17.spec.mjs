@@ -383,11 +383,17 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
         statusFont:parseFloat(getComputedStyle(document.querySelector('.status-label')).fontSize),
       };
     });
-    expect(cockpit.periodRows,'only current time band shown').toBe(1);
-    expect(cockpit.kpiCells,'only measured counters shown').toBe(2);
+    expect(cockpit.periodRows,'secondary period rows hidden on cockpit').toBe(0);
+    expect(cockpit.kpiCells,'secondary counters hidden on cockpit').toBe(0);
     expect(cockpit.dropFont,'primary action must remain legible').toBeGreaterThanOrEqual(width<=350?12:16);
     expect(cockpit.statusFont,'shift status must remain legible').toBeGreaterThanOrEqual(width<=350?15:17);
     await expect(page.locator('#photo-btn')).toContainText('経過日報を送る');
+    await expect(page.locator('.nav button')).toHaveCount(5);
+    await expect(page.locator('#monthly-open')).toHaveText('カレンダー');
+    await page.locator('#monthly-open').click();
+    await expect(page.locator('#monthly-view')).toBeVisible();
+    await expect(page.locator('#monthly-open')).toHaveClass(/active/);
+    await page.locator('[data-page="sales"]').click();
     let problems = await page.evaluate(() => {
       const items=[...document.querySelectorAll('.quick .copy b,.quick .copy small,.decision strong,.decision span,.period b,.period small,.kpi-label,.kpi-value,.footer-card span')];
       const active = element => {const style=getComputedStyle(element);return style.display!=='none' && style.visibility!=='hidden' && element.getBoundingClientRect().height>0};
