@@ -23,6 +23,22 @@ jobs:
       - run: npm run prepare:web
       - run: test -f www/bravia.html && test -f www/bravia.js && test -f www/bravia-preferences.js
 
+  remote-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: ios-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save --package-lock=false playwright@1.54.2
+      - run: npx playwright install --with-deps chromium webkit
+      - run: node tests/remote-power-toggle.test.cjs
+      - run: node tests/bravia-quick-browser-smoke.mjs
+
   native:
     runs-on: macos-15
     defaults:

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T20:26:11+09:00",
+  "updated_at": "2026-11-24T22:04:17+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-944",
+      "title": "PR #944 Self v0.4 — private device data and existing installer distribution",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/944",
+      "updated_at": "2026-11-24T11:47:46Z"
+    },
     {
       "id": "github-pr-830",
       "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
@@ -90,17 +100,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/935",
-      "updated_at": "2026-11-24T09:36:08Z"
-    },
-    {
-      "id": "github-pr-942",
-      "title": "PR #942 BRAVIA｜統合最終改修：画質取得・TVショートカット・操作UI",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/942",
-      "updated_at": "2026-11-24T11:25:09Z"
+      "updated_at": "2026-11-24T13:02:37Z"
     },
     {
       "id": "github-pr-943",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T11:25:11Z"
+      "updated_at": "2026-11-24T13:03:06Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-9f3f9648a52f",
-      "title": "TAXI: specialist YOS research advice instead of canned summaries (#941)",
-      "completed_at": "2026-11-24T11:00:11Z",
-      "result": "GitHub mainへ反映（9f3f964）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9f3f9648a52f01f0bc3494a57a44abeb526d6ad6"
+      "id": "github-commit-836bc9bad0d9",
+      "title": "BRAVIA: customize picture presets and remote layout on proven launch baseline",
+      "completed_at": "2026-11-24T13:03:22Z",
+      "result": "GitHub mainへ反映（836bc9b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/836bc9bad0d9a8d9da1e8e05f681c579f0064b1a"
     },
     {
-      "id": "github-commit-6eae60f74f93",
-      "title": "Merge pull request #940 from yskn0008-bot/fix/bravia-webview-startup-20261124",
-      "completed_at": "2026-11-24T10:25:21Z",
-      "result": "GitHub mainへ反映（6eae60f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6eae60f74f9305b9c7aecd613bd3b88342612f88"
+      "id": "github-commit-5e70317b8308",
+      "title": "Pin the preserved-startup preset and layout candidate",
+      "completed_at": "2026-11-24T11:49:56Z",
+      "result": "GitHub mainへ反映（5e70317）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5e70317b8308f7323896d6cf464260efc0988c7d"
     },
     {
-      "id": "github-commit-3f926a1c88d1",
-      "title": "test(bravia): validate actual generated HTML, not template text",
-      "completed_at": "2026-11-24T10:20:36Z",
-      "result": "GitHub mainへ反映（3f926a1）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3f926a1c88d19bbda8a5e048c0d8e1852b17f9f3"
+      "id": "github-commit-845add1a14f6",
+      "title": "Verify preset editing and placement in rendered browser UI on the preserved navigation baseline",
+      "completed_at": "2026-11-24T11:49:46Z",
+      "result": "GitHub mainへ反映（845add1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/845add1a14f6f209db2f722f1cf33d58c511b5d9"
     },
     {
-      "id": "github-commit-0b4f3c629ee6",
-      "title": "fix(installer): pin WebView startup fix",
-      "completed_at": "2026-11-24T10:20:33Z",
-      "result": "GitHub mainへ反映（0b4f3c6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0b4f3c629ee6801a74fd574bbd7f065e405c31b3"
+      "id": "github-commit-8e0eca6f0b5d",
+      "title": "Align candidate verification with proven direct-launch baseline and preset customization",
+      "completed_at": "2026-11-24T11:49:34Z",
+      "result": "GitHub mainへ反映（8e0eca6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8e0eca6f0b5d664b7b75eaeb23fb96a9d9201839"
     },
     {
-      "id": "github-commit-8282bed99407",
-      "title": "fix(bravia): escape cooked WebView regex and close TV panel",
-      "completed_at": "2026-11-24T10:20:31Z",
-      "result": "GitHub mainへ反映（8282bed）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8282bed9940722e187de8740cec2b4889ecec29d"
+      "id": "github-commit-79c5c61809e0",
+      "title": "Align candidate verification with proven direct-launch baseline and preset customization",
+      "completed_at": "2026-11-24T11:49:31Z",
+      "result": "GitHub mainへ反映（79c5c61）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/79c5c61809e0f465438f182ea308e716941ad6ae"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #944をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T20:26:11+09:00",
+      "last_update": "2026-11-24T22:04:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -365,7 +365,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T20:26:11+09:00",
+      "last_update": "2026-11-24T22:04:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -379,7 +379,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #944をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T20:26:11+09:00",
+      "last_update": "2026-11-24T22:04:17+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "d6bb5a4feedc3eff2601d81a110d257b1bb01206ba955b71a5eeeccc3a517e03"
+  "github_snapshot_hash": "c7489b254e05d4bc41ac6cc8657eda9222b69110d00a1190ff5558edce892cc6"
 }
