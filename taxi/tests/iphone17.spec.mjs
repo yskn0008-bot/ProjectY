@@ -1287,3 +1287,83 @@ test('corrupted legacy shift data is never overwritten by a new shift, even if c
   await expect(page.locator('#toast')).toContainText('上書きせず停止');
   expect(await page.evaluate(k=>localStorage.getItem(k),key)).toBe('{legacy-corrupt');
 });
+
+test('matte cockpit calendar reuses existing plans, safe salary range and weekday analysis without rewriting ledgers',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T20:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const before=await page.evaluate(()=>{
+    const plans={monthlyGoals:{},days:{
+      '2026-11-21':{status:'work',target:450000,actualHours:80,event:'登録イベント'},
+      '2026-11-22':{status:'work',target:180000,actualHours:60},
+      '2026-11-24':{status:'off'}
+    }};
+    const settings={months:{'2026-11':{hourLimit:175,carryHours:3}}};
+    localStorage.setItem('yos-taxi-calendar-v1',JSON.stringify(plans));
+    localStorage.setItem('yos-taxi-calendar-settings-v3',JSON.stringify(settings));
+    const api=window.YosTaxiConfirmedRevenueV1;
+    for(const [day,amount,hash] of [['2026-11-21',440000,'a'],['2026-11-22',180000,'b']]){
+      const r=api.confirm({businessDate:day,amountYen:amount,taxBasis:'tax-excluded',reportClock:'23:00',
+        photoSha256:'sha256:'+hash.repeat(64),photoKind:'paper-total'});
+      if(r.status!=='saved')throw Error(r.status);
+    }
+    return Object.fromEntries(['yos-taxi-calendar-v1','yos-taxi-calendar-settings-v3','yos-taxi-confirmed-reports-v1'].map(k=>[k,localStorage.getItem(k)]));
+  });
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#cockpit-wait-toggle')).toBeDisabled();
+  await expect(page.locator('#cockpit-research')).toBeVisible();
+  await expect(page.locator('#cockpit-yos')).toBeVisible();
+  await page.locator('#monthly-open').click();
+  await expect(page.locator('#monthly-sum-value')).toHaveText('¥620,000');
+  await expect(page.locator('#monthly-pay')).toHaveText('¥310,600〜¥328,600');
+  await expect(page.locator('#monthly-hours-left')).toHaveText('32時間');
+  await expect(page.locator('.month-day .below-target')).toHaveText('¥440,000');
+  await expect(page.locator('.month-day .cal-plan').filter({hasText:'公休'})).toHaveCount(1);
+  await expect(page.locator('.month-day .cal-event').filter({hasText:'登録イベント'})).toHaveCount(1);
+  await page.locator('#cal-show-sales').uncheck();
+  await expect(page.locator('.month-day .below-target')).toBeHidden();
+  await page.locator('#cal-show-plans').uncheck();
+  await expect(page.locator('.cal-plan')).toHaveCount(0);
+  await page.locator('#cal-show-events').uncheck();
+  await expect(page.locator('.cal-event')).toHaveCount(0);
+  await page.locator('#cal-show-sales').check();
+  await page.locator('#month-prev').click();
+  await expect(page.locator('#monthly-title')).toHaveText('2026年10月');
+  await expect(page.locator('#monthly-pay')).toHaveText('—');
+  await page.locator('#month-next').click();
+  await expect(page.locator('#monthly-title')).toHaveText('2026年11月');
+  await page.locator('.month-day').filter({hasText:'¥440,000'}).click();
+  await expect(page.locator('#modal-body')).toContainText('日次目標：¥450,000');
+  await page.locator('#close-modal').click();
+  await page.locator('#monthly-analysis-open').click();
+  await expect(page.locator('#weekday-bars>div')).toHaveCount(7);
+  await expect(page.locator('#weekday-bars')).toContainText('¥440,000');
+  await expect(page.locator('#monthly-trend')).toContainText('¥620,000');
+  const after=await page.evaluate(keys=>Object.fromEntries(keys.map(k=>[k,localStorage.getItem(k)])),Object.keys(before));
+  expect(after).toEqual(before);
+});
+
+test('daily cockpit uses recorded shift and existing target without inventing break time',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T20:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await page.evaluate(()=>{
+    localStorage.setItem('yos-taxi-calendar-v1',JSON.stringify({days:{'2026-11-24':{status:'work',target:45000,serviceEnd:'05:00'}}}));
+    const r=window.YosTaxiConfirmedRevenueV1.confirm({businessDate:'2026-11-24',amountYen:15000,taxBasis:'tax-excluded',reportClock:'19:30',
+      photoSha256:'sha256:'+'c'.repeat(64),photoKind:'paper-total'});
+    if(r.status!=='saved')throw Error(r.status);
+  });
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#sales-value')).toHaveText('¥15,000');
+  await expect(page.locator('#target-value')).toHaveText('¥45,000');
+  await expect(page.locator('#remaining-target')).toHaveText('¥30,000');
+  await expect(page.locator('#remaining-shift')).toHaveText('未確認');
+  await page.locator('#status-btn').click();
+  await page.locator('#modal-actions button.primary').click();
+  await expect(page.locator('#remaining-shift')).toHaveText('9h 00m');
+  await expect(page.locator('#required-hourly')).toHaveText('¥3,333');
+  await expect(page.locator('#confirmed-hourly')).toHaveText('算出不可');
+  await page.locator('#cockpit-wait-toggle').click();
+  await expect(page.locator('#cockpit-wait-toggle')).toHaveText('待機終了');
+  await expect(page.locator('#cockpit-wait-time')).toHaveText('00:00');
+  await page.locator('#cockpit-wait-toggle').click();
+  await expect(page.locator('#cockpit-wait-toggle')).toHaveText('待機開始');
+});
