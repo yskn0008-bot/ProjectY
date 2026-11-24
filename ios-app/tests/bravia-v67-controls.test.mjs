@@ -180,3 +180,20 @@ test('picture read lane leaves commands responsive and rejects stale results',as
  for(let i=0;i<20;i++)await Promise.resolve();
  assert.equal(reads,2);assert.ok(received.some(x=>x.includes('new')));assert.ok(!received.some(x=>x.includes('stale')));
 });
+
+test('launcher never interprets incoming Shortcuts objects or commands as a write',()=>{
+ const start=src.indexOf('const REMOTE_LAUNCHER_ONLY=false;'),end=src.indexOf('async function executeTVShortcut(',start);
+ assert.ok(start>0&&end>start);
+ const api=new Function(src.slice(start,end)+'return {resolveRemoteInput,parseTVShortcut};')();
+ for(const raw of [undefined,null,'',' ',{},[],{unexpected:'value'},123,'tv off']){
+  assert.equal(api.resolveRemoteInput({shortcutParameter:raw},true),'');
+ }
+ for(const raw of [undefined,null,'',' ',{},[]])assert.equal(api.resolveRemoteInput({shortcutParameter:raw}),'');
+ assert.equal(api.resolveRemoteInput({shortcutParameter:' tv off '}),'tv off');
+ assert.equal(api.resolveRemoteInput({queryParameters:{action:'tv home'}}),'tv home');
+ for(const raw of [123,{action:'tv off'},['tv off']])assert.throws(()=>api.resolveRemoteInput({shortcutParameter:raw}),/文字列/);
+ const embedded=src.slice(start,end).replace('const REMOTE_LAUNCHER_ONLY=false;','const REMOTE_LAUNCHER_ONLY=true;');
+ const launch=new Function(embedded+'return resolveRemoteInput;')();
+ assert.equal(launch({shortcutParameter:'tv off'}),'');
+ assert.equal(launch({shortcutParameter:{text:'tv off'}}),'');
+});
