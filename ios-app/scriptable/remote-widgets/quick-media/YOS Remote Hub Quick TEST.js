@@ -346,7 +346,7 @@ function nativeAction(device,action,label,slot=""){
 }
 window.YOS_REMOTE_EXCHANGE=function(results,done){
  for(const result of results||[]){try{nativeResult(result)}catch(_){}}
- if(!remoteBridgeReady){remoteBridgeReady=true;document.getElementById("bridgeStatus").textContent="操作受付中";setTimeout(()=>{if(activePanel==="tv")probePictureScene()},350);}
+ if(!remoteBridgeReady){remoteBridgeReady=true;document.getElementById("bridgeStatus").textContent="操作受付中";setTimeout(()=>{if(activePanel==="tv"){requestMode();nativeAction("tvApps","list","アプリ一覧");probePictureScene()}},350);}
  let timer=null,finished=false;
  const finish=()=>{if(finished)return;finished=true;if(timer!==null)clearTimeout(timer);remoteWake=null;done(JSON.stringify(remoteOutbox.splice(0,32)));};
  remoteWake=finish;if(remoteOutbox.length)finish();else timer=setTimeout(finish,160);
@@ -1292,7 +1292,10 @@ function readQueueItem(item){return item.device==="system"||isProbe(item)||(item
 function tvMutation(item){return !readQueueItem(item)&&(String(item.device).startsWith("tv")||item.device==="picture"||item.device==="quick");}
 function enqueueRemote(item){
  if(webClosed)return;
- if(isProbe(item)){if(activeProbe!==item.device)probePending.add(item.device);runProbeLane();return;}
+ if(isProbe(item)||item.device==="system"&&item.action==="refreshMode"||item.device==="tvApps"&&item.action==="list"){
+  const key=item.device==="system"?"mode":item.device==="tvApps"?"apps":item.device;
+  if(activeProbe!==key)probePending.add(key);runProbeLane();return;
+ }
  if(readQueueItem(item)&&[activeQueueItem,...queue].some(x=>x&&x.device===item.device&&x.action===item.action))return;
  if(item.device==="picture"&&item.action==="set"&&[activeQueueItem,...queue].some(x=>x&&x.device===item.device&&x.action===item.action&&x.slot===item.slot))return;
  if(tvMutation(item))probeEpoch++;
@@ -1303,14 +1306,18 @@ async function runProbeLane(){
  if(webClosed||activeProbe||!probePending.size||queue.some(tvMutation)||(activeQueueItem&&tvMutation(activeQueueItem)))return;
  const device=probePending.values().next().value;probePending.delete(device);activeProbe=device;
  const epoch=probeEpoch;let result;
- try{result=device==="picture"?{ok:true,picture:await pictureProbe()}:{ok:true,quick:await quickProbe()}}
+ try{if(device==="picture")result={ok:true,picture:await pictureProbe()};
+ else if(device==="quick")result={ok:true,quick:await quickProbe()};
+ else if(device==="mode")result={ok:true,mode:await inferMode()};
+ else if(device==="apps")result=await yosTVMediaAction("list","");
+ else throw Error("未対応の取得操作");}
  catch(error){result={ok:false,device,message:String(error?.message||error)}}
  if(epoch!==probeEpoch){probePending.add(device)}
  else if(!webClosed){postRemoteResult(result);}
  activeProbe=null;
  if(!webClosed)runProbeLane();
 }
-async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();activeQueueItem=item;let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvApps"){result=await yosTVMediaAction(item.action,item.slot)}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:modeState.mode}}else if(item.device==="tvAdaptive"){const currentMode=modeState.mode;let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:modeState.mode}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:modeState.mode}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:modeState.mode}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else if(item.device==="openRemote"&&Object.prototype.hasOwnProperty.call(REMOTES,item.action)){Safari.open(REMOTES[item.action]);result={ok:true}}else throw new Error("不明なデバイスです")}catch(error){result={ok:false,device:item.device,message:error&&error.message?error.message:String(error)}}postRemoteResult(result);if(item.device==="picture"&&["set","load"].includes(item.action))probePending.add("picture");activeQueueItem=null;runProbeLane()}running=false;runProbeLane()}
+async function processQueue(){if(running)return;running=true;while(queue.length&&!webClosed){const item=queue.shift();activeQueueItem=item;let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvApps"){result=await yosTVMediaAction(item.action,item.slot)}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:modeState.mode}}else if(item.device==="tvAdaptive"){const currentMode=modeState.mode;let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:modeState.mode}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:modeState.mode}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:modeState.mode}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else if(item.device==="openRemote"&&Object.prototype.hasOwnProperty.call(REMOTES,item.action)){Safari.open(REMOTES[item.action]);result={ok:true}}else throw new Error("不明なデバイスです")}catch(error){result={ok:false,device:item.device,message:error&&error.message?error.message:String(error)}}postRemoteResult(result);if(item.device==="picture"&&["set","load"].includes(item.action))probePending.add("picture");activeQueueItem=null;runProbeLane()}running=false;runProbeLane()}
 const directInput=resolveRemoteInput(args);
 if(directInput!==""&&directInput!==null){
  // Validate before any lock or device communication; do not auto-retry uncertain writes.
@@ -1342,8 +1349,8 @@ while(!webClosed){
  const pending=web.evaluateJavaScript(code,true).then(value=>({value}),error=>({error}));
  const next=await Promise.race([pending,presented]);
  if(webClosed||next.closed)break;
- if(next.error){console.warn("Remote bridge: "+String(next.error));break}
+ if(next.error){console.warn("Remote bridge: "+String(next.error));stopTVHold();stopLightHold();break}
  try{const items=JSON.parse(String(next.value));if(Array.isArray(items))for(const item of items.slice(0,32))dispatchRemote(item)}catch(error){console.warn("Remote input: "+String(error))}
 }
-await presented;stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);Script.complete()
+await presented;queue.length=0;probePending.clear();stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);Script.complete()
 }
