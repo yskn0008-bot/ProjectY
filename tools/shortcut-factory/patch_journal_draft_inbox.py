@@ -77,10 +77,35 @@ def patch(path:Path,script_path:Path):
     if patched['script']['Value']['string']!=script:raise SystemExit('script changed after readback')
     print('YOS JOURNAL private Notion draft patch PASS')
 
+def diagnostic(path:Path,out:Path):
+    root=plistlib.loads(path.read_bytes())
+    actions=root['WFWorkflowActions']
+    idx=next(i for i,a in enumerate(actions) if a.get('WFWorkflowActionIdentifier')==INTENT and 'YOS_JOURNAL_DRAFT_V1' in repr(a))
+    bound=copy.deepcopy(actions[idx-1])
+    assert bound['WFWorkflowActionIdentifier']=='is.workflow.actions.gettext'
+    bp=bound['WFWorkflowActionParameters']
+    original=bp['WFTextActionText']['Value']
+    tokens=original['attachmentsByRange']
+    inputs=[]
+    for i,token in enumerate(tokens.values()):
+        inputs.append({'WFWorkflowActionIdentifier':'is.workflow.actions.gettext','WFWorkflowActionParameters':{'UUID':token['OutputUUID'],'CustomOutputName':token['OutputName'],'WFTextActionText':{'WFSerializationType':'WFTextTokenString','Value':{'string':['YOS_DIAGNOSTIC_DRAFT','YOS_DIAGNOSTIC_RESEARCH'][i]}}}})
+    intent=copy.deepcopy(actions[idx])
+    expected='YOS_DIAGNOSTIC_DRAFT'+original['string'][1:-1]+'YOS_DIAGNOSTIC_RESEARCH'
+    import json
+    probe="let x=args.shortcutParameter;if(Array.isArray(x)&&x.length===1)x=x[0];Script.setShortcutOutput(x==="+json.dumps(expected)+"?'受け渡し成功：原稿と資料の完全一致':'受け渡し失敗：'+(x===null?'NULL':typeof x));Script.complete();"
+    intent['WFWorkflowActionParameters']['script']['Value']['string']=probe
+    output=intent['WFWorkflowActionParameters']['UUID']
+    root['WFWorkflowActions']=inputs+[bound,intent,{'WFWorkflowActionIdentifier':'is.workflow.actions.showresult','WFWorkflowActionParameters':{'Text':{'WFSerializationType':'WFTextTokenString','Value':{'string':'\\ufffc','attachmentsByRange':{'{0, 1}':{'Type':'ActionOutput','OutputUUID':output}}}}}}]
+    out.write_bytes(plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False))
+    assert 'api.notion.com' not in repr(root['WFWorkflowActions'])
+    print('JOURNAL no-network parameter diagnostic PASS')
+
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser()
     ap.add_argument('shortcut',type=Path)
     ap.add_argument('--script',type=Path,required=True)
+    ap.add_argument('--diagnostic',type=Path)
     a=ap.parse_args()
     patch(a.shortcut,a.script)
+    if a.diagnostic:diagnostic(a.shortcut,a.diagnostic)
