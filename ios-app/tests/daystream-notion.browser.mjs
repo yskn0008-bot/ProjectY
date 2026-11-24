@@ -15,7 +15,8 @@ const date='2026-12-01',rows=[
 ];
 // The next-day override assertion requires a recurring Notion fixture.
 for(const record of rows)record.properties['習慣周期']={select:{name:'毎日'}};
-const html=htmlFor(rows),browser=await (process.env.LIFE_BROWSER==='webkit'?webkit:chromium).launch({headless:true});
+const html=htmlFor(rows),browser=await (process.env.LIFE_BROWSER==='webkit'?webkit:chromium).launch({headless:true,
+ ...(process.env.DAYSTREAM_BROWSER_BIN?{executablePath:process.env.DAYSTREAM_BROWSER_BIN}:{})});
 const store='YOS_DAYSTREAM_WEB_PLAN_V1';
 try{
  for(const width of [320,390,402]){
@@ -60,6 +61,10 @@ try{
   assert.equal(await page.locator('#moveDialog').isVisible(),false,'drop never opens placement advice');
   assert.notEqual(await page.evaluate(()=>items.find(x=>x.t==='歯磨き').s),beforeDrag,'drop saves the new time');
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),null,'direct Notion drag never changes the manual plan');
+  assert.equal(await page.locator('#moveToast').isVisible(),true,'compact confirmation appears after saving');
+  await page.locator('#moveUndo').click();
+  assert.equal(await page.evaluate(()=>items.find(x=>x.t==='歯磨き').s),beforeDrag,'one tap undo restores the original time');
+  assert.equal(await page.locator('#moveDialog').isVisible(),false,'undo never opens placement advice');
   const startCard=page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'起床'});
   await startCard.locator('.task-drag-grip').click();
   assert.equal(await page.locator('#moveDialog').isVisible(),true,'tap move grip opens existing placement advisor');
