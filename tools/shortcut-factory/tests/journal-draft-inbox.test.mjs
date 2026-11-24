@@ -108,10 +108,14 @@ test('three-source private draft preserves exact research provenance',async()=>{
  assert.match(t.outputs[0],/NOTION_VERIFIED/);
  assert.ok(t.calls.find(c=>c.method==='PATCH').body.includes('YOS_JOURNAL_RESEARCH_PROVENANCE_V1'));
 });
-test('missing or invented DOI prevents transfer',async()=>{
+test('missing or invented DOI is archived only as unverified private draft',async()=>{
  for(const links of [urls.slice(0,2),[...urls.slice(0,2),'https://doi.org/10.1234/invented']]){
  const t=mock({input:raw+'\n'+links.join('\n')+provenance});await t.execute();
- assert.match(t.outputs[0],/THREE_SOURCE_PROVENANCE_MISMATCH/);assert.equal(t.calls.length,0);
+ assert.match(t.outputs[0],/NOTION_VERIFIED:NOTION_INDEPENDENT_READBACK_MATCH:THREE_SOURCE_PROVENANCE_MISMATCH_REVIEW_REQUIRED/);
+ const sent=JSON.parse(t.calls.find(c=>c.method==='PATCH').body).children.map(b=>b.paragraph.rich_text[0].text.content);
+ assert.equal(sent[1],'JOURNAL下書き・未検証・公開禁止');
+ assert.equal(sent.slice(2).join(''),(raw+'\n'+links.join('\n')+provenance).trim());
+ assert.equal(t.calls.filter(c=>c.method==='PATCH').length,1);
  }
 });
 
@@ -121,3 +125,14 @@ test('Markdown citations match exact research URL without closing delimiter',asy
 
 test('single text list from Shortcuts preserves exact draft',async()=>{const t=mock({input:[raw]});await t.execute();assert.match(t.outputs[0],/NOTION_VERIFIED/);});
 test('null and ambiguous list inputs fail closed with type-only diagnostic',async()=>{for(const input of [null,[raw,raw],{text:raw}]){const t=mock({input});await t.execute();assert.match(t.outputs[0],/NO_TEXT_INPUT_(NULL|ARRAY|OBJECT)/);assert.equal(t.calls.length,0);}});
+
+test('unverified provenance stays flagged on retry, with no duplicate write',async()=>{
+ const t=mock({input:raw+'\n'+urls[0]+provenance});await t.execute();await t.execute();
+ assert.match(t.outputs[1],/ALREADY_READBACK_VERIFIED:THREE_SOURCE_PROVENANCE_MISMATCH_REVIEW_REQUIRED/);
+ assert.equal(t.calls.filter(c=>c.method==='PATCH').length,1);
+});
+test('source mismatch does not bypass secret guard or readback failure',async()=>{
+ const input=raw+'\n'+urls[0]+provenance;
+ const bad=mock({input:input+'\nBearer fake-secret'});await bad.execute();assert.equal(bad.calls.length,0);assert.match(bad.outputs[0],/SENSITIVE_TOKEN_MARKER/);
+ const pending=mock({input,readbackLoss:true});await pending.execute();assert.match(pending.outputs[0],/NOTION_PENDING:NOTION_READBACK_PENDING:THREE_SOURCE_PROVENANCE_MISMATCH_REVIEW_REQUIRED/);
+});
