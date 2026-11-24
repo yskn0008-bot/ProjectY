@@ -9,6 +9,8 @@ const OFFICIAL_NAME='YOS Common Installer';
 const PIN='510fa3f2f032eecc062df9d7d2033cf6057c6d04';
 const EXPECTED='1fd8e27aab18c267569312689d206899ba9713eb654e7dbdd41dd2cf7b77b8d4';
 const OLD_TRUSTED=new Set([
+ // Exact official 69ca7064 body without its final LF (Scriptable editor export).
+ 'bed6310f82c4047f81a2314a2d93b5a4fbaf2b8e44c0994be97035c25db1a74a',
  '0f0af090deec3c9c523ee885d37f4d5394321bd009f8e04962deff91ea3fc0b0',
  'e8f6ad7ab426ee53cfca3c9528f12418b1659d6d5be88558181721a9cc221507',
  '92a40d07db2f89594f05e9daa8236035df93c0ee5bccd126cd8a94beac87ea5c',
