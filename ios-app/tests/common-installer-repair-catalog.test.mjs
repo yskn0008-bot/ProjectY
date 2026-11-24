@@ -181,7 +181,7 @@ test('one-time repair is packaged for existing Scriptable installer and never ru
  assert.ok(entry);
  assert.equal(entry.name,'YOS Common Installer 修復');
  assert.equal(entry.path,'ios-app/scriptable/YOS Common Installer 修復.js');
- assert.equal(entry.commit,'ea3ffd0e470ffe877ad7533cc71031a89a5ea2e8');
+ assert.equal(entry.commit,'607484f37f28eba407c5493c2d90e085a40db1ad');
  assert.equal(sha(runtime),entry.sha256);
  assert.equal(sha(official),'1fd8e27aab18c267569312689d206899ba9713eb654e7dbdd41dd2cf7b77b8d4');
 });
@@ -211,7 +211,7 @@ test('actual historical Common Installer accepts new pinned helper through the e
   async loadString(){
    requests.push(this.url);
    if(this.url.endsWith('yos-common-installer-catalog.json'))return catalog;
-   if(this.url.includes('ea3ffd0e470ffe877ad7533cc71031a89a5ea2e8')&&this.url.includes('Common%20Installer%20'))return runtime;
+   if(this.url.includes('607484f37f28eba407c5493c2d90e085a40db1ad')&&this.url.includes('Common%20Installer%20'))return runtime;
    this.response.statusCode=404;
    return 'unapproved resource';
   }
@@ -268,4 +268,18 @@ test('new installer validates the extension globally and installs only the pinne
  assert.equal(cloud.files.get('/cloud/YOS Common Installer.js'),official);
  assert.equal(local.writes.length,0);assert.equal(requests.length,2);
  assert.match(alerts.at(-1),/登録完了/);
+});
+
+test('device-reported pink magic legacy header and missing final LF upgrade safely',async()=>{
+ const raw=legacy.slice(0,-1);
+ const header='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: pink; icon-glyph: magic;\n';
+ const installed=header+raw;
+ assert.equal(sha(installed),'88e8803881057a50fc743a57b6c770586d4b8c2b6f3e14999a9bc2150b1475de');
+ const r=await execute({script:installed});
+ assert.equal(r.chosen.files.get('/cloud/'+name),official);
+ const backups=[...r.chosen.files.entries()].filter(([p])=>p.includes('bootstrap-backups'));
+ assert.equal(backups.length,1);assert.equal(backups[0][1],installed);
+ const rejected=await execute({script:installed+'\n// user edit'});
+ assert.equal(rejected.chosen.writes.length,0);
+ assert.equal(rejected.requests.length,0);
 });
