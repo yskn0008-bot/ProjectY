@@ -397,6 +397,12 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
 #flowDragHint small{margin:3px 0 0;font-weight:550;line-height:1.45}
 #flowDragHint[data-level=negative],.flow-rating span[data-level=negative]{background:#fff2df;color:#834a10;border-color:#e3b56e}
 #flowDragHint[data-level=unknown],.flow-rating span[data-level=unknown]{background:#eef2f9;color:#425570;border-color:#b3c0d4}
+#flowDragHint{width:auto;max-width:180px;padding:7px 11px;border-radius:15px;box-shadow:0 8px 22px #344c7630}
+#flowDragHint small{display:none}
+.timeline .card.compat-danger .layer-status{font-size:0;width:17px;height:17px;display:grid;place-items:center;border-radius:50%;background:#bf4761;color:#fff}
+.timeline .card.compat-danger .layer-status::after{content:'!';font-size:11px;font-weight:800}
+.move-toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:10px;padding:7px 8px 7px 13px;border-radius:22px;background:#25364deF;color:#fff;box-shadow:0 12px 30px #223a5a40;font-size:13px;white-space:nowrap}
+.move-toast[hidden]{display:none}.move-toast button{min-width:44px;min-height:36px;border:1px solid #ffffff65;background:#ffffff22;color:#fff;border-radius:17px;font:inherit;font-weight:700}
 .flow-advice-card{padding:17px 18px;margin-bottom:12px}
 .flow-advice-card h3{display:flex;gap:8px;align-items:center}
 .flow-advice-card h3 span{color:#5368b6}
@@ -413,7 +419,7 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
     <div class="flow-edit-bar"><button id="flowBack" type="button" aria-label="編集を閉じる">‹</button><strong>タイムラインを編集</strong><button id="flowDone" type="button">完了</button></div>
     <div class="flow-date-row" role="group" aria-label="タイムラインの日付"><div class="flow-date-pill"><button id="flowPrev" type="button" aria-label="前の日">‹</button><strong id="dateTitle">今日</strong><button id="flowNext" type="button" aria-label="次の日">›</button><span id="dayCaption" hidden></span></div>
         <button class="iconbtn" type="button" id="dateBtn" aria-label="月カレンダーを開く" aria-controls="monthPicker" aria-expanded="false"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></button>
-    <button id="flowEdit" type="button">編集</button></div>
+    <button id="flowEdit" type="button" aria-label="タイムラインを編集" title="編集">✎</button></div>
     <div class="week" id="weekStrip" aria-label="日付切り替え"></div>
     <input type="date" id="datePicker" hidden aria-label="表示日付（内部）">
     <section class="month-pop" id="monthPicker" hidden aria-label="日付を選ぶ月カレンダー">
@@ -457,6 +463,7 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
   <p class="gesture-help">上下にスワイプでスクロール · ⠿ または長押しからドラッグで時刻移動</p>
   </div>
   <div id="flowDragHint" hidden aria-hidden="true"><strong></strong><small></small></div>
+  <div id="moveToast" class="move-toast" role="status" hidden><span id="moveToastText">✓ 保存</span><button id="moveUndo" type="button" aria-label="直前の時刻移動を取り消す">戻す</button></div>
   <div class="timeline-wrap" id="timelinePanel"><div class="timeline" id="tl"><div class="axis"></div><div class="nowline" id="nowLine" hidden><span class="nowbadge" id="nowBadge"></span></div></div></div>
   <section class="tabbox" id="taskPanel"><h3>タスク・未配置</h3><p class="muted">専門タスクの期限と、実行する時間は別。配置しても元データの期限・完了は変わりません。</p>
  <div id="taskList"></div><section id="yosLearningHints" class="yos-learning-live" aria-label="期限が近いタスク" hidden><h3>期限が近いタスク <small>確認のみ</small></h3><p class="muted" id="yosLearningCoverage"></p><div id="yosLearningRows"></div></section><h3>各専門ページから集約</h3><p class="muted" id="yosTaskSourceStatus">Notion Tasks：確認中</p><button id="yosWebTaskRefresh" type="button">iPhoneでNotionタスクを開く</button>
@@ -1782,10 +1789,24 @@ document.getElementById('moveSave').onclick=()=>{
 
 // Card bodies keep native scrolling. A handle press or a stationary hold claims
 // the drag before the first vertical move can be consumed by the WebView.
+const moveToast=document.getElementById('moveToast');
+let moveUndoAction=null,moveToastTimer=0;
+function showMoveToast(message,undo){
+ clearTimeout(moveToastTimer);moveUndoAction=undo||null;
+ document.getElementById('moveToastText').textContent=message;
+ document.getElementById('moveUndo').hidden=!undo;
+ moveToast.hidden=false;
+ moveToastTimer=setTimeout(()=>{moveToast.hidden=true;moveUndoAction=null},6500);
+}
+document.getElementById('moveUndo').onclick=()=>{
+ const undo=moveUndoAction;moveUndoAction=null;moveToast.hidden=true;
+ if(undo)undo();
+};
 function commitDraggedTime(item,next,previousRect){
  if(item.f||!Number.isInteger(next)||next<0||next+item.d>1440||!items.includes(item))return false;
  if(next===item.s)return true;
  const original=item.s,day=selectedDay;
+ const previousOverride=item.source==='YOS Tasks'?window.YOS_NOTION_LOCAL_READ_MOVE?.(day,item.sourceRef):null;
  let saved=false;
  if(item.source==='YOS Tasks'){
   // The source record is read-only. Save a date-scoped time override only.
@@ -1796,8 +1817,17 @@ function commitDraggedTime(item,next,previousRect){
   saved=persist();
   if(!saved)item.s=original;
  }
- note.textContent=saved?'「'+item.t+'」を'+fmt(next)+'に移動しました':
-  '保存できなかったため、元の位置に戻しました';
+ if(saved){
+  showMoveToast('✓ '+fmt(next),()=>{
+   if(day!==selectedDay||!items.includes(item)||item.s!==next){showMoveToast('戻せません');return}
+   const restored=item.source==='YOS Tasks'
+    ?window.YOS_NOTION_LOCAL_RESTORE_MOVE?.(day,item.sourceRef,next,previousOverride)===true
+    :yosHistoryUndo.length>0&&(yosHistoryRestore('undo'),true);
+   if(restored&&item.source==='YOS Tasks'){item.s=original;smoothRender(item.id);updateReview()}
+   else if(!restored)showMoveToast('戻せません');
+  });
+  note.textContent='';
+ }else{showMoveToast('保存できませんでした');note.textContent='保存できなかったため、元の位置に戻しました'}
  smoothRender(saved?item.id:null,saved?previousRect:null);
  updateReview();
  return saved;
@@ -1868,7 +1898,7 @@ function wireTaskGestures(el,item){
    dragHint.hidden=false;
    dragHint.dataset.level=el.dataset.placement=level;
    dragHint.firstElementChild.textContent=fmt(at)+'–'+fmt(at+item.d);
-   dragHint.lastElementChild.textContent=overlaps.length?'ほかの予定と'+overlaps.length+'件重なります':'指を離すと自動保存';
+   dragHint.lastElementChild.textContent='';
   }
   if(window.scrollY!==prior)paintFrame=requestAnimationFrame(paint);
  };
@@ -2046,7 +2076,7 @@ function render(){
    let statusEl;
    if(compat){
     el.classList.add('compat-'+compat.level);
-    const label={positive:'＋ 相乗候補',negative:'− 注意',danger:'！ 時間衝突'}[compat.level];
+    const label={positive:'＋ 相乗候補',negative:'− 注意',danger:'！'}[compat.level];
     const reason=compat.reasons[0]||'相性：判断材料不足';
     el.setAttribute('aria-label',[item.t,fmt(item.s)+'–'+fmt(item.s+item.d),reason].join('、'));
     el.title=reason;
