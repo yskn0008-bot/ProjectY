@@ -15,6 +15,25 @@ SCRIPT_MARKER="__YOS_JOURNAL_INBOX_INLINE__"
 PARAM_MARKER="__YOS_JOURNAL_DRAFT_INPUT__"
 
 
+def provenance_parameter(actions, draft):
+    research_saves=[a.get('WFWorkflowActionParameters',{}) for a in actions
+        if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.documentpicker.save'
+        and 'YOS-JOURNAL-GPT-RESEARCH-' in repr(a.get('WFWorkflowActionParameters',{}))]
+    if not research_saves:
+        return copy.deepcopy(draft)  # preserve legacy two-stage candidate
+    if len(research_saves)!=1:
+        raise SystemExit('ambiguous research backup')
+    research=research_saves[0].get('WFInput',{})
+    r=research.get('Value',{})
+    if research.get('WFSerializationType')!='WFTextTokenAttachment' or r.get('Type')!='ActionOutput' or r.get('OutputName')!='researchText' or not r.get('OutputUUID'):
+        raise SystemExit('wrong research variable in backup')
+    separator='\n\n<<YOS_JOURNAL_RESEARCH_PROVENANCE_V1>>\n\n'
+    return {'WFSerializationType':'WFTextTokenString','Value':{
+        'string':'\ufffc'+separator+'\ufffc',
+        'attachmentsByRange':{'{0, 1}':copy.deepcopy(draft['Value']),
+            '{'+str(1+len(separator))+', 1}':copy.deepcopy(r)}}}
+
+
 def patch(path:Path,script_path:Path):
     root=plistlib.loads(path.read_bytes())
     actions=root.get('WFWorkflowActions',[])
@@ -39,14 +58,15 @@ def patch(path:Path,script_path:Path):
     if len(script)<300 or 'YOS_JOURNAL_DRAFT_V1' not in script or 'Keychain.contains(' not in script:
         raise SystemExit('private Inbox script contract missing')
     p['script']={'Value':{'string':script},'WFSerializationType':'WFTextTokenString'}
-    p['parameter']=copy.deepcopy(attachment)
+    parameter=provenance_parameter(actions,attachment)
+    p['parameter']=parameter
     result=repr(root)
     if SCRIPT_MARKER in result or PARAM_MARKER in result:
         raise SystemExit('handoff placeholders survived')
     path.write_bytes(plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False))
     check=plistlib.loads(path.read_bytes())
     patched=check['WFWorkflowActions'][idx]['WFWorkflowActionParameters']
-    if patched['parameter']!=attachment:raise SystemExit('draft variable parameter mismatch after readback')
+    if patched['parameter']!=parameter:raise SystemExit('draft variable parameter mismatch after readback')
     if patched['script']['Value']['string']!=script:raise SystemExit('script changed after readback')
     print('YOS JOURNAL private Notion draft patch PASS')
 
