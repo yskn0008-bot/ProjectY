@@ -72,6 +72,15 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   assert.ok(appMetrics.scroll>appMetrics.width&&appMetrics.height>=44);
   await page.evaluate(()=>openPictureEditor());
   assert.ok((await page.locator('#pictureGroups').textContent()).includes('テレビで設定'));
+  await page.evaluate(()=>window.sent.length=0);
+  await page.locator('#discoverPictureButton').click();
+  assert.equal(await page.locator('#discoverPictureButton').isDisabled(),true);
+  assert.match(await page.locator('#discoverPictureStatus').textContent(),/問い合わせ中/);
+  assert.equal(await page.evaluate(()=>window.sent.filter(x=>x.device==='picture'&&x.action==='discover').length),1);
+  await page.evaluate(()=>nativeResult({ok:true,picture:{discovery:true,message:'v1.1：API拒否（12）'}}));
+  assert.equal(await page.locator('#discoverPictureButton').isEnabled(),true);
+  assert.match(await page.locator('#discoverPictureStatus').textContent(),/API拒否/);
+  assert.equal(await page.locator('#tvBrightness').isEnabled(),true);
   await page.evaluate(()=>closePictureEditor());
   // Verify saved-mode editing uses the existing native action boundary and does not apply settings.
   await page.evaluate(()=>openShortcuts());
