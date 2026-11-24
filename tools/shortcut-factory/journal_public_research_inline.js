@@ -16,7 +16,8 @@ const clean=x=>String(x||'').replace(/<[^>]*>/g,' ').replace(/&(?:nbsp|amp|lt|gt
 // Shortcuts extensions may be killed on long network waits. Reuse only the
 // exact UTC-day's public abstract notes; this cache never stores private input.
 const CACHE_FILE = 'YOS JOURNAL Public Abstract Cache V1.json';
-const HOLD = 'YOS_RESEARCH_HOLD_V1:SOURCE_UNAVAILABLE';
+const HOLD = 'YOS_RESEARCH_HOLD_V1:THREE_VALID_SOURCES_UNAVAILABLE';
+const validNotes=s=>typeof s==='string'&&s.startsWith('YOS_RESEARCH_ABSTRACT_V1')&&s.includes('自動公開禁止')&&[...new Set((s.match(/^論文リンク: https:\/\/doi\.org\/[^\s]+$/gm)||[]).map(x=>x.toLowerCase()))].length===3&&(s.match(/^資料[123]｜/gm)||[]).length===3;
 function cacheStore(){
   try{
     const fm=FileManager.local();
@@ -31,7 +32,7 @@ function readCache(day){
     const obj=JSON.parse(store.fm.readString(store.path));
     if(!obj||obj.day!==day||typeof obj.notes!=='string'||
       obj.notes.length>10000||!obj.notes.startsWith('YOS_RESEARCH_ABSTRACT_V1')||
-      !obj.notes.includes('自動公開禁止')||!obj.notes.includes('論文リンク: https://')||
+      !validNotes(obj.notes)||
       typeof obj.savedAt!=='number'||Date.now()-obj.savedAt>24*60*60*1000||
       Date.now()<obj.savedAt)return null;
     return obj.notes;
@@ -55,7 +56,7 @@ const makeRecord=x=>{
   const year=Number(x?.pubYear);
   const pmid=String(x?.pmid||'');
   if(title.length<25||abstract.length<250||!Number.isInteger(year)||year<2015||year>new Date().getFullYear()||
-    !doi&&!/^\d{6,9}$/.test(pmid))return null;
+    !doi)return null;
   const url=doi?'https://doi.org/'+doi:'https://pubmed.ncbi.nlm.nih.gov/'+pmid+'/';
   return {title,year,doi:doi||'',url,abstract};
 };
@@ -63,7 +64,7 @@ function format(records,topic,query,provider){
   return ['YOS_RESEARCH_ABSTRACT_V1','状態: 公開抄録の実取得済み／本文原典の意味照合待ち／自動公開禁止',
     '選択テーマ: '+topic,'検索語: '+query,'情報源: '+provider+'／原典の研究発表・内容は未独立照合',
     ...records.map((r,i)=>['資料'+(i+1)+'｜'+r.title,'出版年: '+r.year,'DOI: '+r.doi,
-       '論文リンク: '+r.url,'原典抄録（抜粋・翻訳ではない）: '+r.abstract,
+       '論文リンク: '+r.url,'取得元: '+r.provider,'原典抄録（抜粋・翻訳ではない）: '+r.abstract,
        '取り扱い: 元の研究条件と解釈は別途照合。誇張・因果断定禁止。'].join('\n')),
     '事実確認: 抄録の文字列は実取得したが、研究結果や主張の独立した意味照合は未実施。',
     '執筆ルール: 研究の対象者・効果量・設計・限界が不明なら創作せず【要裏取り】。資料にない事実や数字を追加しない。'
@@ -85,10 +86,10 @@ async function fetchStudies(topic){
     const v=makeRecord(row);
     if(!v||seen.has(v.url))continue;
     matched.push(v);seen.add(v.url);
-    if(matched.length===2)break;
+    if(matched.length===5)break;
   }
   if(!matched.length)throw Error('NO_PUBLIC_ABSTRACTS');
-  return format(matched,topic[0],topic[1],'Europe PMC公式REST（抄録）');
+  return matched.map(r=>({...r,provider:'Europe PMC公式REST（抄録）'}));
 }
 async function fetchCrossref(topic){
   // Only publisher-deposited public metadata and abstracts; never treated as full text.
@@ -112,10 +113,10 @@ async function fetchCrossref(topic){
     });
     if(!v||seen.has(v.url))continue;
     seen.add(v.url);matched.push(v);
-    if(matched.length===2)break;
+    if(matched.length===5)break;
   }
   if(!matched.length)throw Error('NO_CROSSREF_ABSTRACTS');
-  return format(matched,topic[0],topic[1],'Crossref公式REST（登録抄録・全文未確認）');
+  return matched.map(r=>({...r,provider:'Crossref公式REST（登録抄録・全文未確認）'}));
 }
 async function main(){
   // Daily theme rotation, never transmit shortcut input or personal data in a query.
@@ -124,9 +125,17 @@ async function main(){
   try{
     const previous=readCache(day);
     if(previous){Script.setShortcutOutput(previous);return;}
-    let notes;
-    try{notes=await fetchStudies(TOPICS[index]);}
-    catch(e){notes=await fetchCrossref(TOPICS[index]);}
+    const topics=[0,3,5].map(offset=>TOPICS[(index+offset)%TOPICS.length]);
+    // Three independent topic searches in parallel; at most two bounded waves.
+    const primary=await Promise.all(topics.map(t=>fetchStudies(t).catch(()=>[])));
+    const seen=new Set();
+    const choose=rows=>rows.find(r=>!seen.has(r.doi.toLowerCase()));
+    const selected=primary.map(rows=>{const r=choose(rows);if(r)seen.add(r.doi.toLowerCase());return r;});
+    const fallback=await Promise.all(topics.map((t,i)=>selected[i]?Promise.resolve([]):fetchCrossref(t).catch(()=>[])));
+    for(let i=0;i<selected.length;i++)if(!selected[i]){const r=choose(fallback[i]);if(r){seen.add(r.doi.toLowerCase());selected[i]=r;}}
+    if(selected.filter(Boolean).length!==3)throw Error('THREE_VALID_SOURCES_UNAVAILABLE');
+    const notes=format(selected,topics.map(t=>t[0]).join('／'),topics.map(t=>t[1]).join('／'),'各資料の取得元を参照');
+    if(!validNotes(notes))throw Error('INVALID_NOTES');
     // Always output before optional cache write; local file errors are non-fatal.
     Script.setShortcutOutput(notes);
     writeCache(day,notes);
