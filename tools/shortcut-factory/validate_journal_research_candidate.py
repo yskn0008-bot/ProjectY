@@ -4,6 +4,7 @@ Does not claim runtime, Notion readback or original-publication validation.
 """
 import argparse
 import plistlib
+from patch_journal_draft_inbox import provenance_parameter
 from pathlib import Path
 
 INTENT="dk.simonbs.Scriptable.RunScriptInlineIntent"
@@ -52,8 +53,8 @@ def validate(path):
         raise AssertionError('research backup not from actual public source output')
     if p1['WFInput'].get('Value',{}).get('OutputName')!='writerText' or p2['WFInput'].get('Value',{}).get('OutputName')!='draftText':
         raise AssertionError("backups don't preserve original model outputs")
-    if actions[inline[1]]['WFWorkflowActionParameters']['parameter']!=p2['WFInput']:
-        raise AssertionError("Notion private handoff must use exact editor backup")
+    if actions[inline[1]]['WFWorkflowActionParameters']['parameter']!=provenance_parameter(actions,p2['WFInput']):
+        raise AssertionError("Notion private handoff must bind exact editor and research backups")
     researchUUID=actions[inline[0]].get('WFWorkflowActionParameters',{}).get('UUID')
     # Use text/gettext output chain; because rawAction is currently not guaranteed
     # to be inferred as an ActionOutput by the compiler, compiler checks only.
