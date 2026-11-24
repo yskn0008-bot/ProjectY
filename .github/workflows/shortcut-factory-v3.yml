@@ -518,3 +518,63 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+
+  # Isolated signed native notification candidate; no main or phone mutation.
+  build-private-daily-hint:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'oel/self-notification-shortcut-20261125'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secret-free and exact source guard
+        run: |
+          python3 tools/shortcut-factory/validate_secret_free.py 'tools/shortcut-factory/shortcuts/今日のヒント.cherri'
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('tools/shortcut-factory/shortcuts/今日のヒント.cherri').read_text()
+          assert s.splitlines()[-1]=='showNotification("新しい内容があります。", "今日のヒント", false)'
+          assert len(s.splitlines())==3
+          PY
+      - name: Build and verify one native notification action
+        run: |
+          mkdir -p /tmp/daily-hint
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          action={'WFWorkflowActionIdentifier':'is.workflow.actions.notification','WFWorkflowActionParameters':{'WFNotificationActionTitle':'今日のヒント','WFNotificationActionBody':'新しい内容があります。','WFNotificationActionSound':False}}
+          data={'WFWorkflowMinimumClientVersionString':'900','WFWorkflowMinimumClientVersion':900,'WFWorkflowIcon':{'WFWorkflowIconStartColor':2071128575,'WFWorkflowIconGlyphNumber':61440},'WFWorkflowClientVersion':'5037.109','WFWorkflowOutputContentItemClasses':[],'WFWorkflowHasOutputFallback':False,'WFWorkflowActions':[action],'WFWorkflowInputContentItemClasses':[],'WFWorkflowImportQuestions':[],'WFQuickActionSurfaces':[],'WFWorkflowTypes':['WFWorkflowTypeShowInSearch'],'WFWorkflowHasShortcutInputVariables':False}
+          p=Path('/tmp/daily-hint/unsigned.plist')
+          p.write_bytes(plistlib.dumps(data,sort_keys=False))
+          assert plistlib.loads(p.read_bytes())==data
+          print('One local notification; sound false; no input, network or storage: PASS')
+          PY
+      - name: Sign with existing HubSign adapter
+        run: |
+          python3 tools/clarity-factory/sign_with_hubsign.py --input /tmp/daily-hint/unsigned.plist --output '/tmp/daily-hint/今日のヒント.shortcut' --name '今日のヒント'
+      - name: Verify signed artifact semantics
+        run: |
+          python3 -m pip install --disable-pip-version-check --quiet lzfse
+          python3 - <<'PY'
+          import plistlib,lzfse,hashlib,base64
+          from pathlib import Path
+          p=Path('/tmp/daily-hint/今日のヒント.shortcut')
+          b=p.read_bytes()
+          assert b.startswith(b'AEA1') and len(b)>500
+          start=12+int.from_bytes(b[8:12],'little')
+          idx=b.find(b'bvx',start)
+          assert idx>=0
+          raw=lzfse.decompress(b[idx:])
+          idx=raw.find(b'bplist00')
+          assert idx>=0
+          actual=plistlib.loads(raw[idx:])
+          original=plistlib.loads(Path('/tmp/daily-hint/unsigned.plist').read_bytes())
+          assert actual['WFWorkflowActions']==original['WFWorkflowActions']
+          print('Signed action exact: PASS; SHA256',hashlib.sha256(b).hexdigest())
+          print('DAILY_HINT_SIGNED_BASE64='+base64.b64encode(b).decode())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: daily-hint-iphone-signed
+          path: /tmp/daily-hint/今日のヒント.shortcut
+          if-no-files-found: error
+          retention-days: 14
