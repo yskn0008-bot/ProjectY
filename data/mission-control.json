@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T17:10:05+09:00",
+  "updated_at": "2026-11-24T17:14:06+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
-      "updated_at": "2026-11-24T08:09:19Z"
+      "updated_at": "2026-11-24T08:13:00Z"
     },
     {
       "id": "github-pr-857",
@@ -90,7 +90,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/932",
-      "updated_at": "2026-11-24T07:57:34Z"
+      "updated_at": "2026-11-24T08:12:41Z"
     },
     {
       "id": "github-pr-935",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/937",
-      "updated_at": "2026-11-24T07:55:36Z"
+      "updated_at": "2026-11-24T08:12:46Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T08:09:25Z"
+      "updated_at": "2026-11-24T08:13:32Z"
     },
     {
       "id": "github-issue-234",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T17:10:05+09:00",
+      "last_update": "2026-11-24T17:14:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -365,7 +365,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T17:10:05+09:00",
+      "last_update": "2026-11-24T17:14:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T17:10:05+09:00",
+      "last_update": "2026-11-24T17:14:06+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1dbc21eb88648557ed8351a9c549af18551f3ca38aa32518d76bcbc7af0298a2"
+  "github_snapshot_hash": "fac12c213892a923f54d3b0c72ae17f46c75694ec0079ddad2738c2c7feb1ca3"
 }
