@@ -162,7 +162,11 @@ async function main(){
         if(row){selected[i]=row;used.add(row.url);}
       }
     }
-    if(selected.filter(Boolean).length!==3)throw Error('THREE_VALID_SOURCES_UNAVAILABLE');
+    if(selected.filter(Boolean).length!==3){
+      const partial=selected.filter(Boolean);
+      Script.setShortcutOutput(HOLD+(partial.length?'\n'+format(partial,'取材候補','未完了','実取得資料のみ').replace('YOS_RESEARCH_ABSTRACT_V1','YOS_RESEARCH_PARTIAL_V1'):''));
+      return;
+    }
     const notes=format(selected,topics.map(t=>t[0]).join('／'),topics.map(t=>t[1]).join('／'),'各資料の取得元を参照');
     if(!validNotes(notes))throw Error('INVALID_NOTES');
     // Always output before optional cache write; local file errors are non-fatal.
