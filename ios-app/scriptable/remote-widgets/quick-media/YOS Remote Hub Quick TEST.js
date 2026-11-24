@@ -517,7 +517,7 @@ function quickSoundButtons(id,target){
  const box=document.getElementById(id);if(!box)return
  const data=quickSound[target],opts=data&&data.available&&Array.isArray(data.options)?data.options:[]
  box.innerHTML=""
- if(!opts.length){box.textContent="テレビから操作可能な音声項目を取得できません";return}
+ if(!opts.length){box.textContent=!data?"音声を取得中":({unavailable:"現在の入力では利用不可",missing:"直接操作未確認",failed:"取得失敗・再取得",invalid:"許可値未確認"}[data.state]||"音声を再取得してください");return}
  for(const value of opts){
   const button=document.createElement("button")
   button.className="quick-action"+(String(value)===String(data.value)?" selected":"")
@@ -955,7 +955,7 @@ async function sonyQuickJSON(service,method,params=[],version="1.0"){
  r.headers={"Content-Type":"application/json","X-Auth-PSK":sonyPSK()}
  r.body=JSON.stringify({method,params,id:1,version})
  const data=JSON.parse(await r.loadString())
- if(data&&Array.isArray(data.error))throw Error("テレビがこの操作に非対応（"+String(data.error[0])+"）")
+ if(data&&Array.isArray(data.error))throw Error("テレビが操作を拒否（"+String(data.error[0])+"）")
  if(!data||!Array.isArray(data.result))throw Error("BRAVIAの応答形式が不正です")
  return data
 }
@@ -976,26 +976,27 @@ async function quickLaunchApp(id){
  await sonyQuickJSON("appControl","setActiveApp",[{uri:selected.uri}],"1.0")
  return {message:"テレビへアプリ起動要求を送りました（表示は実機で確認）。",apps:Object.fromEntries(Object.keys(QUICK_APP_MATCHERS).map(k=>[k,Boolean(quickAppPick(list,k))]))}
 }
-async function quickAudioRead(){
- const sound={},found=new Set()
- const ingest=data=>{
+async function quickAudioRead(details=false){
+ const sound={},states={},targets=["soundMode","outputTerminal"];
+ const ingest=(data,expected=null)=>{
    for(const r of quickSoundFlatten(data.result)){
-     if(!["soundMode","outputTerminal"].includes(r.target))continue
-     const options=Array.isArray(r.candidate)?r.candidate.filter(c=>c&&typeof c.value==="string").map(c=>c.value):[]
-     const current=String(r.currentValue??r.value??"")
-     if(!options.includes(current))continue
-     sound[r.target]={target:r.target,value:current,options,available:true}
-     found.add(r.target)
+     if(!targets.includes(r.target)||(expected&&r.target!==expected))continue;
+     if(r.isAvailable===false){states[r.target]="unavailable";delete sound[r.target];continue;}
+     const options=Array.isArray(r.candidate)?r.candidate.filter(c=>c&&typeof c.value==="string"&&c.value!=="").map(c=>c.value):[];
+     const current=String(r.currentValue??r.value??"");
+     if(!options.includes(current)){states[r.target]="invalid";continue;}
+     sound[r.target]={target:r.target,value:current,options,available:true,state:"ready"};
+     states[r.target]="ready";
    }
- }
+ };
  try{ingest(await sonyQuickJSON("audio","getSoundSettings",[{target:""}],"1.1"))}catch(_){}
- // Some BRAVIA firmware rejects aggregate target="", but supports individual targets.
- const targets=["soundMode","outputTerminal"].filter(target=>!found.has(target))
- if(targets.length){
-   const replies=await Promise.allSettled(targets.map(target=>sonyQuickJSON("audio","getSoundSettings",[{target}],"1.1")))
-   for(const response of replies)if(response.status==="fulfilled")ingest(response.value)
- }
- return sound
+ const missing=targets.filter(target=>!["ready","unavailable"].includes(states[target]));
+ await Promise.all(missing.map(async target=>{
+   try{ingest(await sonyQuickJSON("audio","getSoundSettings",[{target}],"1.1"),target);if(!states[target])states[target]="missing";}
+   catch(_){states[target]="failed";}
+ }));
+ if(details)for(const target of targets)if(!sound[target])sound[target]={target,available:false,options:[],value:"",state:states[target]||"missing"};
+ return sound;
 }
 async function quickAudioWrite(payload){
  if(!payload||!["soundMode","outputTerminal"].includes(payload.target)||typeof payload.value!=="string")throw Error("未対応の音声変更")
@@ -1031,9 +1032,9 @@ async function quickTVTuner(){
  return {message:"テレビ放送の切替コマンドを送信しました"}
 }
 async function quickProbe(){
- const values=await Promise.allSettled([pictureProbe(),quickAudioRead(),quickInstalledApps()])
+ const values=await Promise.allSettled([pictureProbe(),quickAudioRead(true),quickInstalledApps()])
  return {picture:values[0].status==="fulfilled"?values[0].value:null,sound:values[1].status==="fulfilled"?values[1].value:{},apps:values[2].status==="fulfilled"?values[2].value:{},
-   message:"利用できる項目だけ表示します。音質・アプリが取得できなければテレビ側で変更してください。"}
+   message:values[2].status==="rejected"?"アプリ一覧の取得に失敗しました。再取得してください。":"利用可能な設定を取得しました。未取得・非対応は各項目に表示します。"}
 }
 async function quickAction(action,slot){
  if(action==="probe")return quickProbe()
@@ -1223,7 +1224,7 @@ function parseTVShortcut(raw){
  const action=match[1].toLowerCase(),value=match[2]||"";
  if(["on","off","toggle","home","input","pictureoff","hdmi3"].includes(action)&&!value)return{action,value};
  if(action==="app"&&value.trim()&&value.length<=60)return{action,value:value.trim()};
- if(action==="picturemode"&&/^[a-z0-9_-]{1,40}$/i.test(value))return{action,value};
+ if(action==="picturemode"&&value.trim()&&value.length<=60&&!/[\u0000-\u001f\u007f]/.test(value))return{action,value:value.trim()};
  if(["brightness","contrast"].includes(action)&&/^[+-]?\d{1,4}$/.test(value))return{action,value};
  throw Error("未対応または不正なテレビ操作。送信していません");
 }
@@ -1258,7 +1259,15 @@ function enqueueRemote(item){
 async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();activeQueueItem=item;let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvApps"){result=await yosTVMediaAction(item.action,item.slot)}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else throw new Error("不明なデバイスです")}catch(error){result={ok:false,device:item.device,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}activeQueueItem=null}running=false}
 const directInput=args.shortcutParameter??args.queryParameters?.action??"";
 if(directInput!==""&&directInput!==null){
- const output=await executeTVShortcut(directInput);Script.setShortcutOutput(output);Script.complete();
+ // Validate before any lock or device communication; do not auto-retry uncertain writes.
+ parseTVShortcut(directInput);
+ const lockKey="yos.remote.quick.shortcut.lock.v1",now=Date.now();
+ let held=null;try{if(Keychain.contains(lockKey))held=JSON.parse(Keychain.get(lockKey))}catch(_){}
+ if(held&&Number.isFinite(held.at)&&now>=held.at&&now-held.at<60000)throw Error("直前のテレビ操作が処理中です。再送を防止しました");
+ const token=String(now)+":"+Math.random();Keychain.set(lockKey,JSON.stringify({at:now,token}));
+ try{const output=await executeTVShortcut(directInput);Script.setShortcutOutput(output);}
+ finally{try{if(JSON.parse(Keychain.get(lockKey)).token===token)Keychain.remove(lockKey)}catch(_){}}
+ Script.complete();
 }else{
 web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);if(query.device==="tvHoldStart"){startTVHold(query.action);return false}if(query.device==="tvHoldHeartbeat"){renewTVHold(query.action);return false}if(query.device==="tvHoldStop"){stopTVHold();return false}if(query.device==="lightHoldStart"){startLightHold(query.action);return false}if(query.device==="lightHoldHeartbeat"){renewLightHold(query.action);return false}if(query.device==="lightHoldStop"){stopLightHold();return false}enqueueRemote({device:query.device,action:query.action,label:query.label,slot:query.slot});return false}
 await web.loadHTML(html,"https://yos-remote.local/");await web.present(true);stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);Script.complete()
