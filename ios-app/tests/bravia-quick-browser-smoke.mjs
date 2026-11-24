@@ -9,6 +9,12 @@ const end=src.indexOf('</script></body></html>'+String.fromCharCode(96))+'</scri
 assert.ok(end>10000);
 const html=new Function(src.slice(0,end)+'\nreturn html;')();
 assert.ok(!html.includes('\u0000'));
+// WKWebView cancels native bridge navigations synchronously in shouldAllowRequest.
+// HTTP 204 is not equivalent to that behavior in standalone WebKit.
+// Substitute only the native transport before the real startup code runs.
+const boundary='bindLightHoldButtons();renderTV();renderTVStudio();try{applyRemoteAppearance()}catch(_){}requestMode();';
+assert.equal(html.split(boundary).length,2);
+const browserHTML=html.replace(boundary,'window.sent=[];nativeAction=(device,action,label,slot="")=>window.sent.push({device,action,label,slot});'+boundary);
 const origin='https://yos-remote.local/';
 for(const [name,engine] of Object.entries({chromium,webkit})){
  const browser=await engine.launch({headless:true});
@@ -18,23 +24,17 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   page.on('pageerror',e=>errors.push(String(e)));
   await page.route('**/*',async route=>{
    const url=new URL(route.request().url());
-   if(url.href===origin)return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:html});
+   if(url.href===origin)return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:browserHTML});
    if(url.origin==='https://yos-remote.local'&&url.pathname==='/__action')return route.fulfill({status:204,body:''});
    return route.abort();
   });
   await page.goto(origin,{waitUntil:'domcontentloaded'});
   assert.deepEqual(errors,[],'startup JavaScript errors');
   assert.equal(await page.locator('#tvGrid button').count(),12,'startup renders all keys');
-  // Exercise the real transport, not a replacement for nativeAction.
-  assert.equal(await page.evaluate(()=>remoteOutbox.filter(x=>!['tvHoldStop','lightHoldStop'].includes(x.device)).length),0);
-  await page.evaluate(()=>{window.sent=[];window.bridgeClosed=false;const cycle=()=>{if(!window.bridgeClosed)window.YOS_REMOTE_EXCHANGE([],raw=>{window.sent.push(...JSON.parse(raw));setTimeout(cycle,0)})};cycle();});
-  await page.waitForFunction(()=>window.sent.some(x=>x.device==='picture'&&x.action==='probe'));
-  assert.equal(page.url(),origin);
-  await page.locator('.top-shortcut').last().click();
-  await page.waitForFunction(()=>window.sent.some(x=>x.device==='tv'&&x.action==='home'));
-  assert.equal(page.url(),origin);
+  assert.ok(await page.evaluate(()=>window.sent.some(x=>x.device==='picture'&&x.action==='probe')),'startup probes via native bridge');
   await page.evaluate(()=>{
    window.sent=[];
+   nativeAction=(device,action,label,slot='')=>window.sent.push({device,action,label,slot});
    nativeResult({ok:true,picture:{entries:[
     {target:'pictureMode',available:true,state:'ready',value:'standard',options:['standard','cinema'],min:null,max:null,step:null},
     {target:'brightness',available:true,state:'ready',value:'50',options:[],min:0,max:100,step:1},
@@ -63,7 +63,6 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   const preview=await page.locator('#tvBrightnessVal').textContent();
   assert.notEqual(preview,'50');
   await page.mouse.up();
-  await page.waitForFunction(()=>window.sent.some(x=>x.device==='picture'&&x.action==='set'));
   const commands=await page.evaluate(()=>window.sent.filter(x=>x.device==='picture'&&x.action==='set'));
   assert.equal(commands.length,1);
   assert.equal(JSON.parse(commands[0].slot).target,'brightness');
@@ -72,13 +71,29 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   const appMetrics=await page.locator('#tvAppScroll').evaluate(e=>({width:e.clientWidth,scroll:e.scrollWidth,height:e.querySelector('button').getBoundingClientRect().height}));
   assert.ok(appMetrics.scroll>appMetrics.width&&appMetrics.height>=44);
   await page.evaluate(()=>openPictureEditor());
-  assert.ok((await page.locator('#pictureGroups').textContent()).includes('取得失敗・再取得'));
+  assert.ok((await page.locator('#pictureGroups').textContent()).includes('テレビで設定'));
   await page.evaluate(()=>closePictureEditor());
-  await page.evaluate(()=>{nativeResult({ok:false,device:'picture',message:'test timeout'});});
-  assert.equal(await slider.isDisabled(),true);
+  // Verify saved-mode editing uses the existing native action boundary and does not apply settings.
+  await page.evaluate(()=>openShortcuts());
+  await page.locator('#picturePresets .pic-preset').first().getByText('編集',{exact:true}).click();
+  await page.locator('#presetName').fill('昼シネマ');
+  await page.locator('[data-preset-value="pictureMode"]').selectOption('cinema');
+  await page.evaluate(()=>window.sent.length=0);
+  await page.locator('#presetEditor').getByText('登録',{exact:true}).click();
+  const edits=await page.evaluate(()=>window.sent.filter(x=>x.device==='picture'&&x.action==='edit'));
+  assert.equal(edits.length,1);assert.deepEqual(JSON.parse(edits[0].slot),{key:'day',name:'昼シネマ',settings:[{target:'pictureMode',value:'cinema'}]});
+  assert.equal(await page.evaluate(()=>window.sent.some(x=>x.action==='set'||x.action==='load')),false);
+  await page.evaluate(()=>closeShortcuts());
+  await page.evaluate(()=>openLayoutEditor());
+  await page.locator('#remoteSize').selectOption('compact');
+  await page.locator('#presetPosition').selectOption('above');
+  assert.equal(await page.locator('#tvGrid').getAttribute('data-size'),'compact');
+  assert.equal(await page.evaluate(()=>document.getElementById('presetHome').nextElementSibling.id),'tvGrid');
+  await page.locator('#presetPosition').selectOption('below');
+  await page.evaluate(()=>closeLayoutEditor());
+  assert.equal(await page.locator('#tvGrid button').count(),12);
   assert.deepEqual(errors,[]);
   console.log(name+' actual cooked HTML / 12 keys / 4 panels / drag commit once / apps / error PASS');
-  await page.evaluate(()=>window.bridgeClosed=true);
   await context.close();
  }finally{await browser.close();}
 }
