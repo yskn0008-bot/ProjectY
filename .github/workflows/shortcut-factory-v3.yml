@@ -377,7 +377,8 @@ jobs:
           cd ../../..
           python3 tools/shortcut-factory/patch_journal_research_inline.py \
             'tools/shortcut-factory/shortcuts/YOS JOURNAL 調査安定版 TEST_unsigned.shortcut' \
-            --script 'tools/shortcut-factory/journal_public_research_inline.js'
+            --script 'tools/shortcut-factory/journal_public_research_inline.js' \
+            --selection 'tools/shortcut-factory/journal_review_selection_inline.js'
           python3 tools/shortcut-factory/patch_journal_draft_inbox.py \
             'tools/shortcut-factory/shortcuts/YOS JOURNAL 調査安定版 TEST_unsigned.shortcut' \
             --script 'tools/shortcut-factory/journal_draft_inbox_inline.js' \
@@ -391,6 +392,8 @@ jobs:
         shell: bash
         run: |
           node --check tools/shortcut-factory/journal_public_research_inline.js
+          node --check tools/shortcut-factory/journal_review_selection_inline.js
+          node --test tools/shortcut-factory/tests/journal-review-selection.test.mjs
           node --test tools/shortcut-factory/tests/journal-public-research.test.mjs
           node --check tools/shortcut-factory/journal_draft_inbox_inline.js
           node --test tools/shortcut-factory/tests/journal-draft-inbox.test.mjs
