@@ -87,3 +87,11 @@ test('private JOURNAL bridge reconstructs 36k multi-block text and rejects missi
  assert.equal(got[0].content,body);
  assert.throws(()=>inspectDrafts(blocks.slice(0,-1)),/INCOMPLETE_BRIDGE_DRAFT/);
 });
+
+test('same 36000 character limit as inline Scriptable sender; no publication approval',()=>{
+ const body=payload.padEnd(36000,'学');
+ const result=inspectDrafts(pack(body));
+ assert.equal(result[0].content,body);
+ assert.equal(result[0].state,'private_unverified_never_publish');
+ assert.throws(()=>inspectDrafts(pack(body+'学')),/UNSAFE_LENGTH/);
+});
