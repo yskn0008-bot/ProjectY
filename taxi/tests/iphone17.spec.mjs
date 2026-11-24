@@ -1432,3 +1432,23 @@ test('real-device feedback: sales hierarchy, matte strategy, contrast and preser
   await expect(page.locator('.field-sheet')).toBeVisible();
   await page.screenshot({path:resolve(artifactRoot,testInfo.project.name+'-field-sheet.png')});
 });
+
+test('private Notion sales import uses fragment, explicit confirmation and preserves same-day records',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T20:00:00+09:00'));
+  const rows=[{businessDate:'2026-11-01',amountYen:1000,sourceId:'a'.repeat(32)},{businessDate:'2026-11-02',amountYen:2000,sourceId:'b'.repeat(32)}];
+  const url='./ui-v2.html#yos_sales_import='+encodeURIComponent(JSON.stringify(rows));
+  await page.goto(url,{waitUntil:'domcontentloaded'});
+  await expect(page).not.toHaveURL(/yos_sales_import/);
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
+  await page.locator('#modal-actions button.primary').click();
+  await expect(page.locator('#monthly-sum-value')).toHaveText('¥3,000');
+  await expect(page.locator('#monthly-progress-value')).toContainText('0.3%');
+  await expect(page.locator('#monthly-notice')).toContainText('税区分・会社確定額は未確認');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="monthly"]').click();
+  await expect(page.locator('#monthly-sum-value')).toHaveText('¥3,000');
+  await page.goto(url,{waitUntil:'domcontentloaded'});
+  await page.locator('#modal-actions button.primary').click();
+  await expect(page.locator('#monthly-sum-value')).toHaveText('¥3,000');
+  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-taxi-confirmed-reports-v1')).records.length)).toBe(2);
+});
