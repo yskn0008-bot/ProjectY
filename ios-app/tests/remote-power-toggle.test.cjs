@@ -22,6 +22,7 @@ async function run(input, opts = {}) {
     })
   };
   let output = '';
+  let tvStatus = opts.tvStatus || 'standby';
   const context = {
     args: { shortcutParameter: input },
     Keychain: {
@@ -34,6 +35,14 @@ async function run(input, opts = {}) {
       addAction() {}
       addCancelAction() {}
       async presentAlert() { return choice; }
+    },
+    Request: class {
+      async loadString() {
+        const req = JSON.parse(this.body); calls.push(req.method);
+        if (req.method === 'getPowerStatus') return JSON.stringify({result:[{status:tvStatus}]});
+        if (req.method === 'setPowerStatus') { if(!opts.noChange) tvStatus=req.params[0].status?'active':'standby'; return JSON.stringify({result:[]}); }
+        throw Error('unexpected RPC');
+      }
     },
     importModule: () => core,
     Script: { setShortcutOutput: value => { output = value; }, complete() {} }
@@ -81,5 +90,17 @@ async function run(input, opts = {}) {
   assert.equal(result.calls[0][1].mode, 1);
   assert.equal(result.calls[0][1].temp, 28);
 
+  const tvStore = new Map([['yos.bravia.scriptable.host','192.0.2.1'],['yos.bravia.scriptable.psk','mock']]);
+  result = await run('tv', {store:tvStore});
+  assert.deepEqual(result.calls,['getPowerStatus','setPowerStatus','getPowerStatus']);
+  assert.match(result.output,/テレビ ON 確認/);
+  result = await run('tv on', {store:tvStore,tvStatus:'active'});
+  assert.deepEqual(result.calls,['getPowerStatus','getPowerStatus']);
+  const unknown=[];
+  await assert.rejects(run('tv',{store:tvStore,tvStatus:'unknown',calls:unknown}),/状態不明/);
+  assert.deepEqual(unknown,['getPowerStatus']);
+  await assert.rejects(run('tv reset',{store:tvStore}),/テレビは/);
+  await assert.rejects(run('tv on',{store:tvStore,noChange:true}),/状態未確認/);
+  assert.equal(tvStore.has('yos.remote.power-toggle.lock.v1.tv'),false);
   process.stdout.write('PASS remote power toggle: first-run, flip, failure, AC profile, reset, cancel\n');
 })().catch(error => { console.error(error); process.exitCode = 1; });
