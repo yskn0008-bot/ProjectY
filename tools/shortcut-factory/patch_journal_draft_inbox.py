@@ -104,11 +104,31 @@ def diagnostic(path:Path,out:Path):
     print('JOURNAL no-network parameter diagnostic PASS')
 
 
+def recovery(path:Path,out:Path):
+    root=plistlib.loads(path.read_bytes())
+    intent=copy.deepcopy(next(a for a in root['WFWorkflowActions'] if a.get('WFWorkflowActionIdentifier')==INTENT and 'YOS_JOURNAL_DRAFT_V1' in repr(a)))
+    p=intent['WFWorkflowActionParameters']
+    script=p['script']['Value']['string']
+    marker="try{await main();}\nfinally{Script.complete();}"
+    assert script.count(marker)==1
+    wrapper="async function recover(){\n  const folder=await DocumentPicker.openFolder();\n  if(typeof folder!=='string'||!folder) return '選択キャンセル。未送信。';\n  const fm=FileManager.local();\n  const names=fm.listContents(folder);\n  const byKind={DRAFT:new Map(),RESEARCH:new Map()};\n  for(const name of names){\n    const m=/^YOS-JOURNAL-GPT-(DRAFT|RESEARCH)-(\\d{4}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-\\d{2})\\.(txt|md)$/.exec(name);\n    if(!m)continue;\n    const rows=byKind[m[1]];\n    if(rows.has(m[2]))rows.set(m[2],null);\n    else rows.set(m[2],name);\n  }\n  const stamp=[...byKind.DRAFT.keys()].sort().reverse()[0];\n  if(!stamp||!byKind.DRAFT.get(stamp)||!byKind.RESEARCH.get(stamp))\n    return '最新原稿と同時刻の研究資料が揃っていません。未送信。';\n  const read=async name=>{\n    const path=fm.joinPath(folder,name);\n    if(!fm.fileExists(path)||fm.isDirectory(path))throw Error('FILE_NOT_FOUND');\n    const cloud=FileManager.iCloud();\n    await cloud.downloadFileFromiCloud(path);\n    const str=fm.readString(path);\n    if(typeof str!=='string'||!str.trim())throw Error('EMPTY_FILE');\n    return str.replace(/^\\uFEFF/,'').trim();\n  };\n  const draft=await read(byKind.DRAFT.get(stamp));\n  const research=await read(byKind.RESEARCH.get(stamp));\n  if(!research.startsWith('YOS_RESEARCH_ABSTRACT_V1')||!research.includes('自動公開禁止')||\n     !draft.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1')||!draft.includes('公開不可・要審査'))\n    return '原稿と資料の形式が一致しません。未送信。';\n  const combined=draft+'\\n\\n<<YOS_JOURNAL_RESEARCH_PROVENANCE_V1>>\\n\\n'+research;\n  const a=new Alert();a.title='YOS JOURNAL 非公開保存';a.message=stamp+' の保存済み原稿をNotionへ送ります。記事生成・公開はしません。';\n  a.addAction('保存');a.addCancelAction('キャンセル');\n  if(await a.presentAlert()!==0)return 'キャンセル。未送信。';\n  const r=await transfer(combined);\n  return 'YOS_JOURNAL_NOTION_'+r.status.toUpperCase()+':'+r.reason;\n}\ntry{\n  let msg;\n  try{msg=await recover();}catch(e){msg='復旧未確認：'+String(e?.message||e).slice(0,80);}\n  const a=new Alert();a.title='YOS JOURNAL';a.message=msg;a.addAction('OK');await a.presentAlert();\n}finally{Script.complete();}\n"
+    p['script']['Value']['string']=script.replace(marker,wrapper)
+    p['parameter']=''
+    p['runInApp']=True
+    root['WFWorkflowActions']=[intent]
+    assert 'DocumentPicker.openFolder()' in p['script']['Value']['string']
+    assert 'await transfer(combined)' in p['script']['Value']['string']
+    out.write_bytes(plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False))
+    print('JOURNAL recovery-only Shortcut generated; iPhone folder access not verified')
+
+
 if __name__=='__main__':
     ap=argparse.ArgumentParser()
     ap.add_argument('shortcut',type=Path)
     ap.add_argument('--script',type=Path,required=True)
     ap.add_argument('--diagnostic',type=Path)
+    ap.add_argument('--recovery',type=Path)
     a=ap.parse_args()
     patch(a.shortcut,a.script)
     if a.diagnostic:diagnostic(a.shortcut,a.diagnostic)
+    if a.recovery:recovery(a.shortcut,a.recovery)
