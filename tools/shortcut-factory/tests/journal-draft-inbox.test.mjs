@@ -114,3 +114,5 @@ test('missing or invented DOI prevents transfer',async()=>{
  assert.match(t.outputs[0],/THREE_SOURCE_PROVENANCE_MISMATCH/);assert.equal(t.calls.length,0);
  }
 });
+
+test('editorial source URLs are accepted only when present in research backup',async()=>{const links=['https://www.theguardian.com/science/test-a','https://www.bbc.com/news/test-b',urls[2]];const p=provenance.replaceAll(urls[0],links[0]).replaceAll(urls[1],links[1]);const t=mock({input:raw+'\n'+links.join('\n')+p});await t.execute();assert.match(t.outputs[0],/NOTION_VERIFIED/);});
