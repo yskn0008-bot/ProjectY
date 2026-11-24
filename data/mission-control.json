@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-25T03:26:57+09:00",
+  "updated_at": "2026-11-25T06:58:24+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,14 +23,14 @@
       "updated_at": "2026-11-24T18:25:55Z"
     },
     {
-      "id": "github-pr-954",
-      "title": "PR #954 YOS TAXI: render before Notion sync and serialize WebView startup",
+      "id": "github-pr-901",
+      "title": "PR #901 draft: iPhone共通インストーラー自己更新の安全要件 #900",
       "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/954",
-      "updated_at": "2026-11-24T16:38:07Z"
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/901",
+      "updated_at": "2026-11-23T20:09:46Z"
     },
     {
       "id": "github-pr-925",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T18:26:08Z"
+      "updated_at": "2026-11-24T21:57:21Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-5e7f4dc5617e",
+      "title": "YOS TAXI: render before Notion sync and serialize WebView startup",
+      "completed_at": "2026-11-24T21:57:26Z",
+      "result": "GitHub mainへ反映（5e7f4dc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5e7f4dc5617eed1779ce745dc47d2230d5e8b701"
+    },
+    {
       "id": "github-commit-961bc590ee46",
       "title": "Merge pull request #949 from yskn0008-bot/feat/common-installer-2-20261124",
       "completed_at": "2026-11-24T18:26:04Z",
@@ -241,13 +248,6 @@
       "completed_at": "2026-11-24T15:32:04Z",
       "result": "GitHub mainへ反映（b5eb5d7）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b5eb5d7a6598ef82e7dd73a24bc4ed1a9f58ecaf"
-    },
-    {
-      "id": "github-commit-b76b6a7974c3",
-      "title": "Read independently refreshed LOOKS advice feed with freshness and photo validation",
-      "completed_at": "2026-11-24T15:20:06Z",
-      "result": "GitHub mainへ反映（b76b6a7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b76b6a7974c345d138c644b1ea7d6b60c86a452e"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-25T03:26:57+09:00",
+      "last_update": "2026-11-25T06:58:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 77件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 76件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-25T03:26:57+09:00",
+      "last_update": "2026-11-25T06:58:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-25T03:26:57+09:00",
+      "last_update": "2026-11-25T06:58:24+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "70330c71759fe54a1796e48ddaeb91c00d71263e186e6a3daca1ceba5038464a"
+  "github_snapshot_hash": "e9be4487dfb4bc5a33f6fe4dbce1c308576a002e6bc104963bb18721dd8114c2"
 }
