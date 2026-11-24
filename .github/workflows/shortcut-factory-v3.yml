@@ -315,6 +315,7 @@ jobs:
       - name: Validate compiled model, local backup and private handoff
         run: |
           python3 tools/shortcut-factory/validate_journal_research_candidate.py 'tools/shortcut-factory/artifacts/YOS-JOURNAL-RESEARCH-unsigned.shortcut'
+          python3 tools/shortcut-factory/patch_journal_draft_inbox.py 'tools/shortcut-factory/artifacts/YOS-JOURNAL-RESEARCH-unsigned.shortcut' --convert-to-clarity
 
       - name: Sign candidate through existing HubSign adapter
         shell: bash
