@@ -9,6 +9,12 @@ const end=src.indexOf('</script></body></html>'+String.fromCharCode(96))+'</scri
 assert.ok(end>10000);
 const html=new Function(src.slice(0,end)+'\nreturn html;')();
 assert.ok(!html.includes('\u0000'));
+// WKWebView cancels native bridge navigations synchronously in shouldAllowRequest.
+// HTTP 204 is not equivalent to that behavior in standalone WebKit.
+// Substitute only the native transport before the real startup code runs.
+const boundary='bindLightHoldButtons();renderTV();renderTVStudio();requestMode();';
+assert.equal(html.split(boundary).length,2);
+const browserHTML=html.replace(boundary,'window.sent=[];nativeAction=(device,action,label,slot="")=>window.sent.push({device,action,label,slot});'+boundary);
 const origin='https://yos-remote.local/';
 for(const [name,engine] of Object.entries({chromium,webkit})){
  const browser=await engine.launch({headless:true});
@@ -18,12 +24,14 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   page.on('pageerror',e=>errors.push(String(e)));
   await page.route('**/*',async route=>{
    const url=new URL(route.request().url());
-   if(url.href===origin)return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:html});
+   if(url.href===origin)return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:browserHTML});
    if(url.origin==='https://yos-remote.local'&&url.pathname==='/__action')return route.fulfill({status:204,body:''});
    return route.abort();
   });
-  await page.goto(origin,{waitUntil:'commit'});
-  await page.waitForFunction(()=>document.querySelectorAll('#tvGrid button').length===12);
+  await page.goto(origin,{waitUntil:'domcontentloaded'});
+  assert.deepEqual(errors,[],'startup JavaScript errors');
+  assert.equal(await page.locator('#tvGrid button').count(),12,'startup renders all keys');
+  assert.ok(await page.evaluate(()=>window.sent.some(x=>x.device==='picture'&&x.action==='probe')),'startup probes via native bridge');
   await page.evaluate(()=>{
    window.sent=[];
    nativeAction=(device,action,label,slot='')=>window.sent.push({device,action,label,slot});
