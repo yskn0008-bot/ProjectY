@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-25T01:07:42+09:00",
+  "updated_at": "2026-11-25T01:17:41+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,16 +13,6 @@
   },
   "inbox": [
     {
-      "id": "github-pr-952",
-      "title": "PR #952 Recognize exact legacy Scriptable installer export without final LF",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/952",
-      "updated_at": "2026-11-24T15:49:09Z"
-    },
-    {
       "id": "github-pr-857",
       "title": "PR #857 YOS JOURNAL｜一次資料照合の非公開プロトタイプと安全テスト",
       "type": "GitHub PR",
@@ -31,6 +21,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-24T14:31:06Z"
+    },
+    {
+      "id": "github-pr-930",
+      "title": "PR #930 YOS ファイル調査｜Siri対応・iCloud Drive読み取り専用棚卸し",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/930",
+      "updated_at": "2026-11-23T21:43:21Z"
     },
     {
       "id": "github-pr-931",
@@ -100,7 +100,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/951",
-      "updated_at": "2026-11-24T16:05:06Z"
+      "updated_at": "2026-11-24T16:15:55Z"
     },
     {
       "id": "github-pr-953",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/953",
-      "updated_at": "2026-11-24T16:06:56Z"
+      "updated_at": "2026-11-24T16:16:33Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T16:05:07Z"
+      "updated_at": "2026-11-24T16:07:12Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-36b109401b36",
+      "title": "Recognize exact legacy Scriptable installer export without final LF",
+      "completed_at": "2026-11-24T16:17:00Z",
+      "result": "GitHub mainへ反映（36b1094）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/36b109401b3629bc9c1b8634c94d4e5b406535d5"
+    },
+    {
       "id": "github-commit-b5eb5d7a6598",
       "title": "YOS TAXI: private iPhone app via existing common installer",
       "completed_at": "2026-11-24T15:32:04Z",
@@ -243,13 +250,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/eaeec7f8cf617070c82a172dd63abae28db51538"
     },
     {
-      "id": "github-commit-8824a5ff2061",
-      "title": "Publish standalone YOS LOOKS Widgy view without modifying existing apps",
-      "completed_at": "2026-11-24T14:50:41Z",
-      "result": "GitHub mainへ反映（8824a5f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8824a5ff2061094aa1e7d3d25ba1c7f1ca3b56ef"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -274,7 +274,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #952をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-25T01:07:42+09:00",
+      "last_update": "2026-11-25T01:17:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 79件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 78件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-25T01:07:42+09:00",
+      "last_update": "2026-11-25T01:17:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -379,7 +379,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #952をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-25T01:07:42+09:00",
+      "last_update": "2026-11-25T01:17:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "fad841cc9f2a8ec239f6df88239760b0b284b95752e07cd05205f16264046fb6"
+  "github_snapshot_hash": "782b7df259e312a43b361d5c84f0872d708a747e8bbd8b1367d98874c58d0312"
 }
