@@ -85,8 +85,13 @@ function scriptName(entry,code){
 }
 function validateCatalog(data){
   if(!data||data.schema!==1||!Array.isArray(data.targets)||data.targets.length<1||data.targets.length>30)throw Error('配布一覧が無効です');
+  // Preserve the legacy 30-entry list for installed v1 clients; newer clients also validate the extension.
+  const additional=data.additional_targets===undefined?[]:data.additional_targets;
+  if(!Array.isArray(additional)||additional.length>30)throw Error('追加配布一覧が無効です');
+  const targets=[...data.targets,...additional];
   const ids=new Set(),names=new Set();
-  for(const t of data.targets){
+  for(const t of targets){
+    if(!t||typeof t!=='object')throw Error('配布定義が無効です');
     if(typeof t.id!=='string'||!/^[a-z][a-z0-9-]{1,39}$/.test(t.id)||ids.has(t.id))throw Error('配布IDが無効です');
     if(typeof t.name!=='string'||!t.name||t.name.length>60||t.name===SELF||names.has(t.name)||/[\\/:*?"<>|\r\n]/.test(t.name))throw Error('配布名が無効です');
     if(typeof t.path!=='string'||!t.path.startsWith('ios-app/scriptable/')||!t.path.endsWith('.js')||/[\\?#%]/.test(t.path)||t.path.split('/').some(s=>!s||s==='.'||s==='..'))throw Error('配布先が無効です');
@@ -94,7 +99,7 @@ function validateCatalog(data){
     if((t.id===REMOTE_ID||t.name===REMOTE_NAME||t.path===REMOTE_PATH)&&!isRemoteEntry(t))throw Error('日本語リモコン配布定義が不正です');
     ids.add(t.id);names.add(t.name);
   }
-  return data.targets;
+  return targets;
 }
 async function get(url){
   const request=new Request(url);request.timeoutInterval=30;
