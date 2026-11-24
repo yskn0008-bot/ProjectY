@@ -24,10 +24,6 @@ def patch(shortcut, script_path):
     params=found[0]["WFWorkflowActionParameters"]
     if params.get("runInApp") is not True or params.get("ShowWhenRun") is not False:
         raise SystemExit("Unexpected foreground/prompt flags")
-    # This shortcut only opens the remote. Do not interpret any native intent parameter as a command.
-    marker="const REMOTE_LAUNCHER_ONLY=false;"
-    if source.count(marker)!=1: raise SystemExit("Launcher-only guard missing or ambiguous")
-    source=source.replace(marker,"const REMOTE_LAUNCHER_ONLY=true;",1)
     params["script"]={"Value":{"string":source},"WFSerializationType":"WFTextTokenString"}
     shortcut.write_bytes(plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False))
     verify=plistlib.loads(shortcut.read_bytes())
