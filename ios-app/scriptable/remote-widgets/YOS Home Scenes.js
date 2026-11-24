@@ -1,17 +1,18 @@
 // Variables used by Scriptable.
 // YOS_SCRIPT_NAME: YOS Home Scenes
-// YOS Home Scenes v1.1 — five independent power presets: 外出 / 帰宅 / 就寝 / 起床 / 夜.
-// Run without a parameter to edit. Shortcut parameter: one of the five scene names.
+// YOS Home Scenes v1.2 — nine-mode scene remote and editable independent power presets.
+// No parameter opens the scene remote; "設定"/"edit" opens the 9-scene editor.
+// "就寝" in the remote opens the EXISTING iPhone shortcut "おやすみマン".
 // Uses existing YOS Remote credentials and Tapo core; no existing script is changed.
 const PREF_KEY='yos.home-scenes.presets.v1';
-const MODES=['departure','arrival','sleep','wake','night'];
+const MODES=['departure','arrival','sleep','wake','night','movie','relax','clean','focus'];
 const LEGACY_MODES=['departure','arrival'];
 const DEVICES=['tv','light','ac','floor'];
 const CHOICES=['on','off','keep'];
 
 function blank(){
   const row=()=>({tv:'keep',light:'keep',ac:'keep',floor:'keep'});
-  return {schema:1,departure:row(),arrival:row(),sleep:row(),wake:row(),night:row()};
+  return {schema:1,departure:row(),arrival:row(),sleep:row(),wake:row(),night:row(),movie:row(),relax:row(),clean:row(),focus:row()};
 }
 function validated(value){
   if(!value||value.schema!==1||typeof value!=='object')throw Error('保存形式が不正です');
@@ -50,8 +51,13 @@ function modeFromInput(){
   if(raw==='就寝'||raw==='sleep'||raw==='bedtime')return 'sleep';
   if(raw==='起床'||raw==='wake'||raw==='morning')return 'wake';
   if(raw==='夜'||raw==='night')return 'night';
-  if(raw===''||raw==='edit'||raw==='設定')return null;
-  throw Error('指定は 外出 / 帰宅 / 就寝 / 起床 / 夜 / edit のいずれかです');
+  if(raw==='映画'||raw==='movie')return 'movie';
+  if(raw==='リラックス'||raw==='relax')return 'relax';
+  if(raw==='掃除'||raw==='clean'||raw==='cleaning')return 'clean';
+  if(raw==='集中'||raw==='focus')return 'focus';
+  if(raw===''||raw==='remote'||raw==='リモコン')return 'remote';
+  if(raw==='edit'||raw==='設定'||raw==='settings')return null;
+  throw Error('指定できないモードです（外出・帰宅・就寝・起床・夜・映画・リラックス・掃除・集中・リモコン・設定）');
 }
 function tapoCore(){
   let last=null;
@@ -166,7 +172,7 @@ async function execute(mode,prefs){
   }
   return results;
 }
-async function edit(prefs){
+async function edit(prefs,showRemote){
   const source=JSON.stringify(prefs).replace(/</g,'\\u003c');
   const html=`<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>
@@ -204,20 +210,93 @@ button{font:inherit;-webkit-tap-highlight-color:transparent;cursor:pointer}
 @media(max-height:550px){.screen{gap:7px;padding-bottom:7px}.tabs{flex-basis:47px}.save{flex-basis:47px}.device{padding-top:4px;padding-bottom:4px}.option{min-height:35px}}
 @media(max-height:380px){html,body{overflow:auto}.screen{height:auto;min-height:380px;overflow:visible}.panel{min-height:260px}}
 @media(prefers-reduced-motion:reduce){.tab,.option{transition:none}}
+
+/* Both screens keep the native Scriptable Close/Share toolbar clearance above. */
+[hidden]{display:none!important}
+.shell-view{min-height:0;flex:1;display:flex;flex-direction:column;gap:10px}
+.remote-view{justify-content:space-between}
+.remote-head{display:flex;align-items:center;gap:13px;flex:0 0 75px;padding:0 10px}
+.brand-mark{width:63px;height:63px;flex:0 0 63px;display:grid;place-items:center;border:1px solid rgba(199,218,255,.35);border-radius:19px;background:linear-gradient(145deg,rgba(154,190,255,.3),rgba(63,77,139,.23));box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+.brand-mark .ico{width:35px;height:35px;stroke:#badcff;stroke-width:1.6}
+.remote-title{margin:0;font-size:clamp(20px,5.2vw,27px);font-weight:750;white-space:nowrap;letter-spacing:-.035em}
+.remote-subtitle{color:#bdcbe6;font-size:14px;margin:5px 0 0}
+.scene-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:10px;flex:1 1 auto;min-height:0;max-height:475px}
+.scene-tile{min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;border:1px solid rgba(182,202,246,.34);border-radius:23px;background:linear-gradient(152deg,rgba(143,172,230,.15),rgba(27,39,78,.7));color:#f2f6ff;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 8px 22px rgba(1,6,24,.13);transition:transform .15s,background .15s}
+.scene-tile .ico{height:33px;width:33px;stroke:#d9e7ff;stroke-width:1.8}
+.scene-tile .tile-label{font-size:clamp(12px,3.8vw,17px);font-weight:700;letter-spacing:-.02em}
+.scene-tile.featured{background:linear-gradient(145deg,rgba(120,174,255,.67),rgba(146,121,242,.7));border:1.5px solid #c2d7ff;box-shadow:0 0 17px rgba(140,146,255,.23),inset 0 1px 0 rgba(255,255,255,.35)}
+.scene-tile:active{transform:scale(.96)}
+.scene-tile:disabled{opacity:.5;transform:none}
+.device-summary{border:1px solid rgba(181,204,252,.32);border-radius:20px;background:linear-gradient(145deg,rgba(145,180,239,.19),rgba(66,68,123,.22));padding:13px 14px;flex:0 0 auto}
+.summary-title{font-size:16px;font-weight:700}
+.summary-desc{margin:5px 0 11px;color:#c6d1e6;font-size:11px;line-height:1.45}
+.device-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.device-chip{min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid rgba(181,204,252,.22);border-radius:12px;background:rgba(121,147,201,.12);padding:8px 1px 7px;font-size:11px;font-weight:650}
+.device-chip .ico{width:22px;height:22px}
+.remote-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:0 0 51px}
+.remote-action{border:1px solid rgba(183,206,255,.37);border-radius:17px;background:linear-gradient(145deg,rgba(149,183,243,.21),rgba(111,102,190,.2));color:#f0f5ff;font-size:15px;font-weight:700}
+.remote-action .ico{vertical-align:middle;height:21px;width:21px;margin-right:5px}
+.settings-view .settings-back{flex:0 0 34px;border:0;background:transparent;color:#d8e9ff;text-align:left;font-weight:650;font-size:14px}
+.settings-view .tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));flex:0 0 119px;padding:4px;gap:3px}
+.settings-view .tab{font-size:12px;border-radius:10px}
+.settings-view .panel{max-height:none}
+.settings-view .save{margin-top:0}
+.scene-tile:focus-visible,.remote-action:focus-visible,.settings-back:focus-visible{outline:2px solid white;outline-offset:2px}
+@media(max-width:359px){.remote-head{flex-basis:62px}.brand-mark{width:50px;height:50px;flex-basis:50px}.scene-grid{gap:7px}.scene-tile{border-radius:17px;gap:7px}.scene-tile .ico{width:27px;height:27px}.device-summary{padding:9px}.summary-desc{margin-bottom:7px}.remote-actions{flex-basis:46px}}
+@media(max-height:740px){.remote-head{flex-basis:60px}.brand-mark{width:50px;height:50px;flex-basis:50px}.scene-grid{gap:7px}.scene-tile{gap:6px;border-radius:16px}.scene-tile .ico{width:27px;height:27px}.device-summary{padding:9px}.summary-desc{margin:2px 0 6px}.device-chip{padding:4px 1px;gap:2px}.remote-actions{flex-basis:45px}.settings-view .tabs{flex-basis:96px}.settings-view .settings-back{flex-basis:27px}.settings-view .panel{min-height:0}}
+@media(prefers-reduced-motion:reduce){.scene-tile{transition:none}}
 </style></head><body>
 <div class="screen">
-<nav class="tabs" role="tablist" aria-label="シーンの切り替え"><button type="button" class="tab active" role="tab" data-mode="departure" aria-selected="true">外出</button><button type="button" class="tab" role="tab" data-mode="arrival" aria-selected="false">帰宅</button><button type="button" class="tab" role="tab" data-mode="sleep" aria-selected="false">就寝</button><button type="button" class="tab" role="tab" data-mode="wake" aria-selected="false">起床</button><button type="button" class="tab" role="tab" data-mode="night" aria-selected="false">夜</button></nav>
+
+<section class="shell-view remote-view" id="remoteView">
+  <header class="remote-head"><div class="brand-mark"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrival"></use></svg></div><div><h1 class="remote-title">YOS Home Scenes</h1><p class="remote-subtitle">モードリモコン</p></div></header>
+  <main class="scene-grid" aria-label="生活モード9種類"><button type="button" class="scene-tile" data-scene="departure" aria-label="外出モードを実行"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-departure"></use></svg><span class="tile-label">外出</span></button><button type="button" class="scene-tile" data-scene="arrival" aria-label="帰宅モードを実行"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrival"></use></svg><span class="tile-label">帰宅</span></button><button type="button" class="scene-tile featured" data-scene="sleep" aria-label="就寝モードを実行"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-sleep"></use></svg><span class="tile-label">就寝</span></button><button type="button" class="scene-tile" data-scene="wake" aria-label="起床モードを実行"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-wake"></use></svg><span class="tile-label">起床</span></button><button type="button" class="scene-tile" data-scene="night" aria-label="夜モードを実行"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-night"></use></svg><span class="tile-label">夜</span></button><button type="button" class="scene-tile" data-scene="movie" aria-label="映画モードを実行"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-movie"></use></svg><span class="tile-label">映画</span></button><button type="button" class="scene-tile" data-scene="relax" aria-label="リラックスモードを実行"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-relax"></use></svg><span class="tile-label">リラックス</span></button><button type="button" class="scene-tile" data-scene="clean" aria-label="掃除モードを実行"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-clean"></use></svg><span class="tile-label">掃除</span></button><button type="button" class="scene-tile" data-scene="focus" aria-label="集中モードを実行"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-focus"></use></svg><span class="tile-label">集中</span></button></main>
+  <section class="device-summary"><div class="summary-title">対象家電</div><p class="summary-desc">設定した家電をまとめて操作します。未設定は維持します。</p><div class="device-chips"><div class="device-chip"><svg class="ico" viewBox="0 0 24 24"><use href="#icon-tv"></use></svg>テレビ</div><div class="device-chip"><svg class="ico" viewBox="0 0 24 24"><use href="#icon-light"></use></svg>照明</div><div class="device-chip"><svg class="ico" viewBox="0 0 24 24"><use href="#icon-ac"></use></svg>エアコン</div><div class="device-chip"><svg class="ico" viewBox="0 0 24 24"><use href="#icon-floor"></use></svg>ランプ</div></div></section>
+  <footer class="remote-actions"><button type="button" id="openSettings" class="remote-action"><svg class="ico" viewBox="0 0 24 24"><use href="#icon-gear"></use></svg>設定</button><button type="button" id="openShortcuts" class="remote-action"><svg class="ico" viewBox="0 0 24 24"><use href="#icon-stack"></use></svg>ショートカット</button></footer>
+</section>
+<section class="shell-view settings-view" id="settingsView" hidden>
+<button class="settings-back" type="button" id="backRemote">‹ モードリモコンへ戻る</button>
+<nav class="tabs" role="tablist" aria-label="シーンの切り替え"><button type="button" class="tab active" role="tab" data-mode="departure" aria-selected="true">外出</button><button type="button" class="tab" role="tab" data-mode="arrival" aria-selected="false">帰宅</button><button type="button" class="tab" role="tab" data-mode="sleep" aria-selected="false">就寝</button><button type="button" class="tab" role="tab" data-mode="wake" aria-selected="false">起床</button><button type="button" class="tab" role="tab" data-mode="night" aria-selected="false">夜</button><button type="button" class="tab" role="tab" data-mode="movie" aria-selected="false">映画</button><button type="button" class="tab" role="tab" data-mode="relax" aria-selected="false">リラックス</button><button type="button" class="tab" role="tab" data-mode="clean" aria-selected="false">掃除</button><button type="button" class="tab" role="tab" data-mode="focus" aria-selected="false">集中</button></nav>
 <main class="panel" id="devices" aria-label="家電4台の動作設定"></main>
 <button id="save" class="save" type="button">設定を保存</button>
+</section>
 <div id="notice" class="notice" role="status" aria-live="polite"></div>
 <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
 <symbol id="icon-tv" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol>
 <symbol id="icon-light" viewBox="0 0 24 24"><path d="M9 18h6m-6-3h6m-6-3a7 7 0 1 1 6 0l-1 3h-4l-1-3Z"/><path d="M10 21h4"/></symbol>
 <symbol id="icon-ac" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="10" rx="2"/><path d="M6 11h12m-12 8v-2m6 4v-4m6 2v-2"/></symbol>
-<symbol id="icon-floor" viewBox="0 0 24 24"><path d="M8 4h8l3 8H5zM12 12v9m-5 0h10"/></symbol>
+<symbol id="icon-floor" viewBox="0 0 24 24"><path d="M8 4h8l3 8H5zM12 12v9m-5 0h10"/></symbol><symbol id="icon-departure" viewBox="0 0 24 24"><path d="M5 20l4-6 3-3m-4-6a2 2 0 1 0 4 0 2 2 0 0 0-4 0m4 5 3 3 4 1m-9 1 4 2 2 5"/></symbol><symbol id="icon-arrival" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9H3zM9 20v-7h6v7"/></symbol><symbol id="icon-sleep" viewBox="0 0 24 24"><path d="M3 19V9m0 5h18v5M3 13h18v-2a3 3 0 0 0-3-3H7a4 4 0 0 0-4 4m8-7h3l-3 4h3M16 3h4l-4 5h4"/></symbol><symbol id="icon-wake" viewBox="0 0 24 24"><path d="M2 19h20M4 15h3m2-6 1 3m9-3-2 3m0 3h3M8 16a4 4 0 0 1 8 0M12 3v4"/></symbol><symbol id="icon-night" viewBox="0 0 24 24"><path d="M20 16a8 8 0 0 1-12-12 8 8 0 1 0 12 12Z"/></symbol><symbol id="icon-movie" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m10 0h4M3 15h4m10 0h4m-11-9 0 0m6 4-4 3V10l4 3Z"/></symbol><symbol id="icon-relax" viewBox="0 0 24 24"><path d="M4 10h15v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM19 11h2v4l-3 2M8 3c-3 2 2 3 0 5M13 3c-3 2 2 3 0 5"/></symbol><symbol id="icon-clean" viewBox="0 0 24 24"><path d="m12 2 2.1 5.9L20 10l-5.9 2.1L12 18l-2.1-5.9L4 10l5.9-2.1L12 2ZM20 16l1 2-1 2-1-2-2-2 3 0Z"/></symbol><symbol id="icon-focus" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 21h8m-4-5v5"/></symbol><symbol id="icon-gear" viewBox="0 0 24 24"><path d="m10 2-.4 2-2 1-2-.8-2 3 1.5 1.7v2.2L3.5 13l2 3 2-.8 2 1 .5 2h4l.4-2 2-1 2 .8 2-3-1.5-1.7V9l1.5-1.8-2-3-2 .8-2-1L14 2h-4Z"/><circle cx="12" cy="10" r="2"/></symbol><symbol id="icon-stack" viewBox="0 0 24 24"><path d="m12 2 9 6-9 6-9-6 9-6Zm-9 11 9 6 9-6m-18 4 9 5 9-5"/></symbol>
 </svg></div>
 <script>
 const data=__YOS_PREFS_JSON__;
+const initialView=__YOS_INITIAL_VIEW__;
+function activateView(target){
+document.getElementById("remoteView").hidden=target!=="remote";
+document.getElementById("settingsView").hidden=target!=="settings";
+document.getElementById("notice").textContent="";
+if(target==="settings")draw()
+}
+document.getElementById("openSettings").onclick=()=>activateView("settings");
+document.getElementById("backRemote").onclick=()=>activateView("remote");
+let running=false;
+window.yosRunResult=function(ok,message){
+running=false;
+document.querySelectorAll(".scene-tile").forEach(b=>b.disabled=false);
+document.getElementById("notice").textContent=message;
+};
+document.querySelectorAll(".scene-tile").forEach(b=>b.onclick=()=>{
+ if(running)return;
+ running=true;
+ document.querySelectorAll(".scene-tile").forEach(x=>x.disabled=true);
+ if(b.dataset.scene==="sleep"){
+   location.href="https://yos-scenes.local/__shortcut?name="+encodeURIComponent("おやすみマン");
+ }else{
+   document.getElementById("notice").textContent="家電に指示を送っています…";
+   location.href="https://yos-scenes.local/__run?mode="+encodeURIComponent(b.dataset.scene);
+ }
+});
+document.getElementById("openShortcuts").onclick=()=>{location.href="https://yos-scenes.local/__shortcuts"};
+
 const devices=[["tv","テレビ","BRAVIA"],["light","照明","Ceiling"],["ac","エアコン","SHARP"],["floor","フロアランプ","Tapo"]];
 const labels={on:"ON",off:"OFF",keep:"維持"};let mode="departure";
 function draw(){
@@ -235,13 +314,47 @@ el.append(identity,row);root.appendChild(el)
 })}
 document.querySelectorAll(".tab").forEach(x=>x.onclick=()=>{mode=x.dataset.mode;draw()});
 window.yosSaveResult=function(ok,msg){document.getElementById("save").disabled=false;document.getElementById("notice").textContent=msg};
-document.getElementById("save").onclick=function(){this.disabled=true;document.getElementById("notice").textContent="保存中…";location.href="https://yos-scenes.local/__save?value="+encodeURIComponent(JSON.stringify(data))};draw();
-</script></body></html>`.replace('__YOS_PREFS_JSON__',source);
+document.getElementById("save").onclick=function(){this.disabled=true;document.getElementById("notice").textContent="保存中…";location.href="https://yos-scenes.local/__save?value="+encodeURIComponent(JSON.stringify(data))};draw();activateView(initialView);
+</script></body></html>`.replace('__YOS_PREFS_JSON__',source).replace('__YOS_INITIAL_VIEW__',JSON.stringify(showRemote?'remote':'settings'));
   const web=new WebView();
   web.shouldAllowRequest=req=>{
     const url=String(req.url||'');
-    if(!url.startsWith('https://yos-scenes.local/__save?'))return true;
-    let ok=true,message='5シーンの設定を保存しました';
+
+    const base='https://yos-scenes.local/';
+    function report(ok,msg){Promise.resolve(web.evaluateJavaScript('window.yosRunResult('+JSON.stringify(ok)+','+JSON.stringify(msg)+')')).catch(()=>{});}
+    if(url.startsWith(base+'__run?')){
+      const match=url.match(/[?&]mode=([^&]+)/);
+      const mode=match?decodeURIComponent(match[1]):'';
+      if(!MODES.includes(mode)||mode==='sleep'){report(false,'実行モードが不正です');return false;}
+      Promise.resolve().then(()=>execute(mode,readPrefs())).then(results=>{
+        const failed=results.filter(r=>r.status==='エラー');
+        const changed=results.filter(r=>r.choice!=='keep');
+        const label=({departure:'外出',arrival:'帰宅',wake:'起床',night:'夜',movie:'映画',relax:'リラックス',clean:'掃除',focus:'集中'})[mode];
+        const msg=failed.length?label+'：'+failed.length+'件エラー（'+failed.map(r=>r.device+':'+r.detail).join(' / ')+'）':changed.length?label+'：'+changed.length+'件に操作指示を送信':label+'：家電がすべて「維持」です。設定で変更できます';
+        report(failed.length===0,msg);
+      }).catch(e=>report(false,'操作できません: '+String(e.message||e)));
+      return false;
+    }
+    if(url.startsWith(base+'__shortcut?')){
+      const name=url.match(/[?&]name=([^&]+)/);
+      if(!name||decodeURIComponent(name[1])!=='おやすみマン'){report(false,'登録されたショートカットではありません');return false;}
+      try{
+        if(typeof Safari==='undefined'||typeof Safari.open!=='function')throw Error('ショートカット起動機能を確認できません');
+        Safari.open('shortcuts://run-shortcut?name='+encodeURIComponent('おやすみマン'));
+        report(true,'「おやすみマン」を開きます');
+      }catch(e){report(false,'ショートカットを開けません: '+String(e.message||e));}
+      return false;
+    }
+    if(url===base+'__shortcuts'){
+      try{
+        if(typeof Safari==='undefined'||typeof Safari.open!=='function')throw Error('ショートカットアプリを開けません');
+        Safari.open('shortcuts://');
+        report(true,'ショートカットを開きます');
+      }catch(e){report(false,String(e.message||e))}
+      return false;
+    }
+    if(!url.startsWith(base+'__save?'))return true;
+    let ok=true,message='9シーンの設定を保存しました';
     try{
       const match=url.match(/[?&]value=([^&]+)/);
       if(!match)throw Error('保存する設定がありません');
@@ -256,7 +369,7 @@ document.getElementById("save").onclick=function(){this.disabled=true;document.g
 async function main(){
   const mode=modeFromInput();
   const prefs=readPrefs();
-  if(!mode){await edit(prefs);Script.complete();return}
+  if(mode==='remote'||mode===null){await edit(prefs,mode==='remote');Script.complete();return}
   const results=await execute(mode,prefs);
   const output={scene:mode,results};
   Script.setShortcutOutput(JSON.stringify(output));
