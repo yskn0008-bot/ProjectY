@@ -24,7 +24,7 @@ jobs:
       - run: test -f www/bravia.html && test -f www/bravia.js && test -f www/bravia-preferences.js
 
   remote-browser:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 12
     defaults:
       run:
