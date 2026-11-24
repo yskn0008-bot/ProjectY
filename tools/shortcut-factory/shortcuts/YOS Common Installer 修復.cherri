@@ -1,6 +1,6 @@
 #define name YOS Common Installer 修復
 #define color blue
-#define version 1
+#define version 18
 
 // Issue #900: ONE-TIME safe repair for the existing Common Installer.
 // Only a signed Shortcut Factory inline action. No new Scriptable script.
