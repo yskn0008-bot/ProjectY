@@ -36,3 +36,11 @@ test('Notion response errors and incomplete pagination never return partial edit
   const res=await h(new Request('https://example.test',{headers:{origin,authorization:'Bearer test-valid-token-1234'}}));assert.equal(res.status,503);assert.equal((await res.json()).edition,undefined);
  }
 });
+
+test('latest unique private edition is selected without deleting older data',()=>{
+ const older=fixture();older[0]=b('heading_2','YOS JOURNAL｜2026.11.23 MON');
+ const newest=fixture();const all=[...older,...newest];
+ assert.equal(parseReviewedEdition(all).issuedOn,'2026-11-24');
+ assert.equal(parseReviewedEdition([...newest,...older]).issuedOn,'2026-11-24');
+ assert.throws(()=>parseReviewedEdition([...newest,...newest]));
+});
