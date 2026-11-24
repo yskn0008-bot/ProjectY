@@ -352,7 +352,7 @@ test('default entry: approved one-screen UI and legacy recovery', async ({ page 
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('./index.html', {waitUntil:'domcontentloaded'});
   await expect(page).toHaveURL(/\/ui-v2\.html$/);
-  await expect(page.locator('#drop-btn')).toBeVisible();
+  await expect(page.locator('#drop-btn')).toHaveCount(0);
   await expect(page.locator('#photo-btn')).toBeVisible();
   await expect(page.locator('#sync-status')).toContainText('Notion未接続');
   const pageOverflow=await page.evaluate(() => document.documentElement.scrollHeight > innerHeight + 1);
@@ -379,7 +379,7 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
       return {
         periodRows:[...document.querySelectorAll('.period')].filter(visible).length,
         kpiCells:[...document.querySelectorAll('.kpis>div')].filter(visible).length,
-        dropFont:parseFloat(getComputedStyle(document.querySelector('#drop-btn .copy b')).fontSize),
+        dropFont:parseFloat(getComputedStyle(document.querySelector('#photo-btn .copy b')).fontSize),
         statusFont:parseFloat(getComputedStyle(document.querySelector('.status-label')).fontSize),
       };
     });
@@ -393,7 +393,8 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
       const active = element => {const style=getComputedStyle(element);return style.display!=='none' && style.visibility!=='hidden' && element.getBoundingClientRect().height>0};
       const bad=items.filter(active).filter(element=>element.scrollWidth>element.clientWidth+1 || element.scrollHeight>element.clientHeight+2).map(element=>element.textContent.trim());
       const main=document.querySelector('.view.active');
-      // The pace card and monthly entry intentionally make sales vertically scrollable.
+      if(main.scrollHeight>main.clientHeight+2)bad.push('sales main vertically overflowing');
+      if(document.querySelector('.app>.header').getBoundingClientRect().height>0)bad.push('unused header visible');
       if(main.scrollWidth>main.clientWidth+2)bad.push('sales main horizontally overflowing');
       return bad;
     });
@@ -446,7 +447,7 @@ test('M100: safe-stop checklist opens without changing ride records or viewport'
     await page.locator('#close-modal').click();
     await expect(page.locator('#modal')).not.toBeVisible();
     await page.locator('[data-page="sales"]').click();
-    await expect(page.locator('#drop-btn')).toBeVisible();
+    await expect(page.locator('#drop-btn')).toHaveCount(0);
     await expect(page.locator('#photo-btn')).toBeVisible();
     const after=await page.evaluate(() => localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
     expect(after,'M100 guidance must not mutate shift or ride records').toBe(before);
@@ -511,7 +512,7 @@ test('Dropoff result is persistent and clearly confirms success, retry and failu
   await page.clock.setFixedTime(new Date('2026-11-19T17:15:00+09:00'));
   const eventCount=()=>page.evaluate(()=>window.YOSTaxiPreview.debugState().events.filter(e=>e.type==='dropoff').length);
   await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
-  await page.locator('#drop-btn').click();
+  await page.evaluate(()=>window.YOSTaxiPreview.recordDropoff());
   await expect(page.locator('#modal.dropoff-result-error')).toBeVisible();
   await expect(page.locator('#modal-title')).toHaveText('降車は記録していません');
   await expect(page.locator('#dropoff-outcome-badge')).toHaveText('保存なし');
@@ -520,7 +521,7 @@ test('Dropoff result is persistent and clearly confirms success, retry and failu
   expect(await eventCount()).toBe(0);
   await page.goto('./ui-v2.html?yos_action=start',{waitUntil:'domcontentloaded'});
   await page.locator('#modal-actions .primary').click();
-  await page.locator('#drop-btn').click();
+  await page.evaluate(()=>window.YOSTaxiPreview.recordDropoff());
   await expect(page.locator('#modal.dropoff-result-success')).toBeVisible();
   await expect(page.locator('#modal-title')).toHaveText('降車を記録しました');
   await expect(page.locator('#dropoff-outcome-badge')).toHaveText('保存完了');
@@ -539,7 +540,7 @@ test('Dropoff result is persistent and clearly confirms success, retry and failu
   await expect(page.locator('#modal.dropoff-result-success')).toBeVisible();
   await page.locator('#modal-actions button').first().click();
   await expect(page.locator('#modal')).toBeHidden();
-  await page.locator('#drop-btn').click();
+  await page.evaluate(()=>window.YOSTaxiPreview.recordDropoff());
   await expect(page.locator('#modal.dropoff-result-duplicate')).toBeVisible();
   await expect(page.locator('#modal-title')).toContainText('追加なし');
   await expect(page.locator('#dropoff-outcome-count')).toHaveText('本日の降車記録 1件');
