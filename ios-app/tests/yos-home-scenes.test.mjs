@@ -6,10 +6,10 @@ import crypto from 'node:crypto';
 const source=fs.readFileSync(new URL('../scriptable/remote-widgets/YOS Home Scenes.js',import.meta.url),'utf8');
 const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
 const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
-const program=new AsyncFunction('args','Keychain','Script','Request','importModule','Timer','WebView',source);
+const program=new AsyncFunction('args','Keychain','Script','Request','importModule','Timer','WebView','Safari',source);
 const key='yos.home-scenes.presets.v1';
 const row=()=>({tv:'keep',light:'keep',ac:'keep',floor:'keep'});
-const blank=()=>({schema:1,departure:row(),arrival:row(),sleep:row(),wake:row(),night:row()});
+const blank=()=>({schema:1,departure:row(),arrival:row(),sleep:row(),wake:row(),night:row(),movie:row(),relax:row(),clean:row(),focus:row()});
 const legacyBlank=()=>({schema:1,departure:row(),arrival:row()});
 function harness(options={}){
   const data=new Map(),events=[],outputs=[],webs=[];
@@ -50,7 +50,8 @@ function harness(options={}){
     async evaluateJavaScript(code){this.resultCode=code}
   }
   const Timer={schedule:(seconds,repeats,resolve)=>{events.push({name:'timer',seconds});resolve()}};
-  const execute=async param=>program({shortcutParameter:param,queryParameters:{}},Keychain,Script,Request,()=>core,Timer,WebView);
+  const Safari={open:url=>events.push({name:'open',url})};
+  const execute=async param=>program({shortcutParameter:param,queryParameters:{}},Keychain,Script,Request,()=>core,Timer,WebView,Safari);
   return {execute,events,outputs,data,webs};
 }
 test('shared installer pins file, hash and canonical Scriptable name',()=>{
@@ -96,18 +97,23 @@ test('malformed settings fail closed without touching devices',async()=>{
   const h=harness({prefs:'{"schema":2}'});await assert.rejects(h.execute('外出'));
   assert.deepEqual(h.events,[]);
 });
-test('editor displays five scenes and saves without dispatching device commands',async()=>{
-  const h=harness();await h.execute('');
+test('editor displays nine scenes and saves without dispatching device commands',async()=>{
+  const h=harness();await h.execute('edit');
   assert.equal(h.webs.length,1);
-  for(const mode of ['外出','帰宅','就寝','起床','夜'])assert.match(h.webs[0].html,new RegExp('>'+mode+'<\\/button>'));
+  for(const mode of ['外出','帰宅','就寝','起床','夜','映画','リラックス','掃除','集中'])assert.match(h.webs[0].html,new RegExp('>'+mode+'<\\/button>'));
+  assert.match(h.webs[0].html,/const initialView="settings"/);
   assert.match(h.webs[0].html,/フロアランプ/);
-  const p=blank();p.departure.tv='off';p.arrival.ac='on';p.sleep.light='off';p.wake.floor='on';p.night.ac='keep';
+  const p=blank();p.departure.tv='off';p.arrival.ac='on';p.sleep.light='off';p.wake.floor='on';p.night.ac='keep';p.movie.tv='on';p.relax.floor='on';p.clean.light='on';p.focus.ac='off';
   const accepted=h.webs[0].shouldAllowRequest({url:'https://yos-scenes.local/__save?value='+encodeURIComponent(JSON.stringify(p))});
   assert.equal(accepted,false);
   assert.equal(JSON.parse(h.data.get(key)).departure.tv,'off');
   assert.equal(JSON.parse(h.data.get(key)).arrival.ac,'on');
   assert.equal(JSON.parse(h.data.get(key)).sleep.light,'off');
   assert.equal(JSON.parse(h.data.get(key)).wake.floor,'on');
+  assert.equal(JSON.parse(h.data.get(key)).movie.tv,'on');
+  assert.equal(JSON.parse(h.data.get(key)).relax.floor,'on');
+  assert.equal(JSON.parse(h.data.get(key)).clean.light,'on');
+  assert.equal(JSON.parse(h.data.get(key)).focus.ac,'off');
   assert.deepEqual(h.events,[]);
 });
 test('native Scriptable Close and Share toolbar cannot overlap scene tabs',async()=>{
@@ -124,10 +130,10 @@ test('native Scriptable Close and Share toolbar cannot overlap scene tabs',async
   assert.deepEqual(h.events,[],'opening the editor is read-only for appliances');
 });
 
-test('compact one-screen design has only mode, four appliance rows and save',async()=>{
+test('compact one-screen layout retains four appliance rows and save',async()=>{
   const h=harness();await h.execute('');
   const html=h.webs[0].html;
-  assert.doesNotMatch(html,/HOME AUTOMATION|Home Scenes|YOS Home|外出シーン|帰宅シーン|class="hero"|class="scenehead"/);
+  assert.doesNotMatch(html,/HOME AUTOMATION|外出シーン|帰宅シーン|class="hero"|class="scenehead"/);
   assert.match(html,/height:100dvh/);
   assert.match(html,/overflow:hidden/);
   assert.match(html,/grid-template-rows:repeat\(4,minmax\(0,1fr\)\)/);
@@ -137,7 +143,7 @@ test('compact one-screen design has only mode, four appliance rows and save',asy
   assert.match(html,/>就寝<\/button>/);
   assert.match(html,/>起床<\/button>/);
   assert.match(html,/>夜<\/button>/);
-  assert.equal((html.match(/data-mode="(?:departure|arrival|sleep|wake|night)"/g)||[]).length,5);
+  assert.equal((html.match(/data-mode="(?:departure|arrival|sleep|wake|night|movie|relax|clean|focus)"/g)||[]).length,9);
   assert.match(html,/id="devices"/);
   assert.match(html,/aria-label="家電4台の動作設定"/);
   assert.match(html,/>設定を保存<\/button>/);
@@ -157,8 +163,8 @@ test('compact one-screen design has only mode, four appliance rows and save',asy
   assert.deepEqual(h.events,[]);
 });
 
-test('all five scene names and aliases route to independent plans',async()=>{
-  const names=[['外出','departure'],['departure','departure'],['帰宅','arrival'],['return','arrival'],['就寝','sleep'],['bedtime','sleep'],['起床','wake'],['morning','wake'],['夜','night'],['night','night']];
+test('all nine scene names and aliases route to independent plans',async()=>{
+  const names=[['外出','departure'],['departure','departure'],['帰宅','arrival'],['return','arrival'],['就寝','sleep'],['bedtime','sleep'],['起床','wake'],['morning','wake'],['夜','night'],['night','night'],['映画','movie'],['movie','movie'],['リラックス','relax'],['relax','relax'],['掃除','clean'],['cleaning','clean'],['集中','focus'],['focus','focus']];
   for(const [alias,mode] of names){
     const p=blank();p[mode].tv='off';
     const h=harness({prefs:p,tvStatus:'active'});
@@ -168,15 +174,15 @@ test('all five scene names and aliases route to independent plans',async()=>{
     assert.equal(h.events.filter(e=>e.name==='ac'||e.name==='light'||e.name==='tapo').length,0);
   }
 });
-test('newly added sleep, wake and night start all-keep, with no appliance commands',async()=>{
-  for(const mode of ['就寝','起床','夜']){
+test('newly added seven scenes start all-keep, with no appliance commands',async()=>{
+  for(const mode of ['就寝','起床','夜','映画','リラックス','掃除','集中']){
     const h=harness();
     await h.execute(mode);
     assert.deepEqual(h.events,[]);
     assert.deepEqual(h.outputs[0].results.map(x=>x.status),['維持','維持','維持','維持']);
   }
 });
-test('legacy two-scene settings are read without mutation, then explicitly saved with five scenes',async()=>{
+test('legacy two-scene settings are read without mutation, then explicitly saved with nine scenes',async()=>{
   const old=legacyBlank();old.departure.tv='off';old.arrival.ac='on';
   const h=harness({prefs:old,tvStatus:'active'});
   const exactOriginal=h.data.get(key);
@@ -187,7 +193,7 @@ test('legacy two-scene settings are read without mutation, then explicitly saved
   assert.equal(h.events.filter(x=>x.name==='tv'&&x.method==='setPowerStatus').length,1);
   await h.execute('');
   const html=h.webs.at(-1).html;
-  for(const mode of ['departure','arrival','sleep','wake','night'])assert.match(html,new RegExp('"'+mode+'":\\{'));
+  for(const mode of ['departure','arrival','sleep','wake','night','movie','relax','clean','focus'])assert.match(html,new RegExp('"'+mode+'":\\{'));
   const newPrefs=blank();newPrefs.departure.tv='off';newPrefs.arrival.ac='on';newPrefs.sleep.light='off';
   h.webs.at(-1).shouldAllowRequest({url:'https://yos-scenes.local/__save?value='+encodeURIComponent(JSON.stringify(newPrefs))});
   const saved=JSON.parse(h.data.get(key));
@@ -195,6 +201,8 @@ test('legacy two-scene settings are read without mutation, then explicitly saved
   assert.equal(saved.arrival.ac,'on');
   assert.equal(saved.sleep.light,'off');
   assert.equal(saved.wake.floor,'keep');
+  assert.equal(saved.movie.tv,'keep');
+  assert.equal(saved.relax.floor,'keep');
 });
 test('different sleep, wake and night settings never leak between scenes',async()=>{
   const p=blank();p.sleep.tv='off';p.wake.floor='on';p.night.light='on';
@@ -218,10 +226,66 @@ test('unrecognized parameter and invalid new-mode setting fail closed without se
   await assert.rejects(badLegacy.execute('夜'));
   assert.deepEqual(badLegacy.events,[]);
 });
-test('editor does not execute appliance commands even if all five scenes contain on/off',async()=>{
-  const p=blank();for(const mode of ['departure','arrival','sleep','wake','night'])for(const device of ['tv','light','ac','floor'])p[mode][device]='on';
+test('editor does not execute appliance commands even if all nine scenes contain on/off',async()=>{
+  const p=blank();for(const mode of ['departure','arrival','sleep','wake','night','movie','relax','clean','focus'])for(const device of ['tv','light','ac','floor'])p[mode][device]='on';
   const h=harness({prefs:p});await h.execute('edit');
   assert.deepEqual(h.events,[]);
   assert.equal(h.webs.length,1);
   assert.match(h.webs[0].html,/aria-label="シーンの切り替え"/);
+});
+
+test('default entry opens remote with 9 scene buttons without touching appliances',async()=>{
+  const h=harness({prefs:blank()});await h.execute('');
+  assert.equal(h.webs.length,1);
+  const html=h.webs[0].html;
+  assert.match(html,/const initialView="remote"/);
+  assert.match(html,/>YOS Home Scenes<\/h1>/);
+  assert.match(html,/>モードリモコン<\/p>/);
+  for(const id of ['departure','arrival','sleep','wake','night','movie','relax','clean','focus'])assert.match(html,new RegExp('data-scene="'+id+'"'));
+  assert.equal((html.match(/class="scene-tile(?: featured)?"/g)||[]).length,9);
+  assert.match(html,/id="openSettings"/);
+  assert.match(html,/id="openShortcuts"/);
+  assert.match(html,/id="settingsView" hidden/);
+  assert.deepEqual(h.events,[]);
+});
+test('remote runs configured non-sleep scene and reports commands sent',async()=>{
+  const p=blank();p.movie.tv='off';
+  const h=harness({prefs:p,tvStatus:'active'});await h.execute('');
+  assert.equal(h.webs[0].shouldAllowRequest({url:'https://yos-scenes.local/__run?mode=movie'}),false);
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.events.filter(x=>x.name==='tv'&&x.method==='setPowerStatus').length,1);
+  assert.equal(h.events.filter(x=>x.name==='ac'||x.name==='light'||x.name==='tapo').length,0);
+  assert.match(h.webs[0].resultCode,/window.yosRunResult\(true,/);
+});
+test('sleep tile launches existing おやすみマン shortcut exactly once',async()=>{
+  const p=blank();p.sleep.tv='off';const h=harness({prefs:p,tvStatus:'active'});
+  await h.execute('');
+  assert.equal(h.webs[0].shouldAllowRequest({url:'https://yos-scenes.local/__shortcut?name='+encodeURIComponent('おやすみマン')}),false);
+  assert.deepEqual(h.events,[{name:'open',url:'shortcuts://run-shortcut?name='+encodeURIComponent('おやすみマン')}]);
+  assert.equal(h.webs[0].shouldAllowRequest({url:'https://yos-scenes.local/__run?mode=sleep'}),false);
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.events.length,1,'no duplicate appliance scene');
+});
+test('shortcuts app entry opens native Shortcuts; unexpected request is rejected',async()=>{
+  const h=harness();await h.execute('');
+  assert.equal(h.webs[0].shouldAllowRequest({url:'https://yos-scenes.local/__shortcuts'}),false);
+  assert.deepEqual(h.events,[{name:'open',url:'shortcuts://'}]);
+  assert.equal(h.webs[0].shouldAllowRequest({url:'https://yos-scenes.local/__run?mode=unknown'}),false);
+  assert.equal(h.webs[0].shouldAllowRequest({url:'https://yos-scenes.local/__shortcut?name=Untrusted'}),false);
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.events.length,1);
+});
+test('five-scene legacy record survives remote visit and gains four all-keep modes only on save',async()=>{
+  const old=blank();for(const k of ['movie','relax','clean','focus'])delete old[k];
+  old.departure.tv='off';old.arrival.ac='on';old.sleep.light='off';old.wake.floor='on';
+  const h=harness({prefs:old,tvStatus:'active'}),previous=h.data.get(key);
+  await h.execute('映画');assert.deepEqual(h.events,[]);
+  await h.execute('リモコン');assert.equal(h.data.get(key),previous);
+  await h.execute('設定');assert.match(h.webs.at(-1).html,/const initialView="settings"/);
+  assert.equal(h.data.get(key),previous);
+  const next=blank();Object.assign(next,old);next.clean.tv='off';
+  h.webs.at(-1).shouldAllowRequest({url:'https://yos-scenes.local/__save?value='+encodeURIComponent(JSON.stringify(next))});
+  assert.equal(JSON.parse(h.data.get(key)).sleep.light,'off');
+  assert.equal(JSON.parse(h.data.get(key)).wake.floor,'on');
+  assert.equal(JSON.parse(h.data.get(key)).clean.tv,'off');
 });
