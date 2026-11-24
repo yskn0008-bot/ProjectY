@@ -26,6 +26,9 @@ for expected in ('async function pictureSingle(target)', 'async function runProb
                  'yos.remote.power-toggle.lock.v1.tv', 'height:48px',
                  'grid-auto-columns:calc((100% - 10px)/3)'):
     assert expected in source, expected
+assert source.count("const REMOTE_LAUNCHER_ONLY=true;")==1
+assert "const REMOTE_LAUNCHER_ONLY=false;" not in source
+assert "const directInput=resolveRemoteInput(args);" in source
 assert "ntn_" not in source and "sk-proj-" not in source
 assert not any(a.get("WFWorkflowActionIdentifier") in (
     "is.workflow.actions.deletefile","is.workflow.actions.file.delete") for a in actions)
