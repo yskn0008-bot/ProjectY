@@ -1191,7 +1191,8 @@ async function readFloor(){
   return floorData(await client.query({method:"get_device_info",params:null}))
 }
 async function configureFloor(){
-  const alert=new Alert();alert.title="フロアランプ接続";alert.message="Tapoアプリのフロアランプ → 設定 → デバイス情報で確認できる自宅LANのIPアドレスを入力。既存のTapo認証情報を使います。";alert.addTextField("例: 192.168.1.20",floorHost());alert.addAction("接続テストして保存");alert.addCancelAction("キャンセル")
+  if(typeof config!=="undefined"&&config.runsWithSiri)throw Error("フロアランプの接続設定はScriptableアプリ内で開いてください。設定は変更していません");
+ const alert=new Alert();alert.title="フロアランプ接続";alert.message="Tapoアプリのフロアランプ → 設定 → デバイス情報で確認できる自宅LANのIPアドレスを入力。既存のTapo認証情報を使います。";alert.addTextField("例: 192.168.1.20",floorHost());alert.addAction("接続テストして保存");alert.addCancelAction("キャンセル")
   if(await alert.presentAlert()<0)return{ok:true,floor:floorHost()?await readFloor():{ready:false}}
   const newHost=validateFloorHost(alert.textFieldValue(0).trim())
   const oldHost=floorHost();Keychain.set(FLOOR_HOST_KEY,newHost);floorClient=null;floorConnectedHost=""
@@ -1224,6 +1225,17 @@ async function tvShortcutPower(action){
  const after=await read();
  if((after==="active")!==desired)throw Error("電源切替要求後の状態未確認");
  return after==="active"?"テレビ ON 確認":"テレビ OFF 確認";
+}
+// The signed launcher is UI-only regardless of the native intent's parameter shape.
+const REMOTE_LAUNCHER_ONLY=false;
+function resolveRemoteInput(input,launcherOnly=REMOTE_LAUNCHER_ONLY){
+ if(launcherOnly)return "";
+ const raw=input?.shortcutParameter??input?.queryParameters?.action??"";
+ if(typeof raw==="string")return raw.trim();
+ // Scriptable/Shortcuts can represent a missing input as an empty collection.
+ if(Array.isArray(raw)&&raw.length===0)return "";
+ if(raw&&Object.getPrototypeOf(raw)===Object.prototype&&Object.keys(raw).length===0)return "";
+ throw Error("操作入力が文字列ではありません。家電へ送信していません");
 }
 function parseTVShortcut(raw){
  if(typeof raw!=="string"||raw.length>150)throw Error("入力形式：tv on / tv off / tv toggle / tv home / tv input / tv pictureoff / tv hdmi3 / tv pictureMode standard / tv brightness +5 / tv contrast 50 / tv app Netflix");
@@ -1283,7 +1295,7 @@ async function runProbeLane(){
  if(!webClosed)runProbeLane();
 }
 async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();activeQueueItem=item;let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvApps"){result=await yosTVMediaAction(item.action,item.slot)}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else throw new Error("不明なデバイスです")}catch(error){result={ok:false,device:item.device,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}if(item.device==="picture"&&["set","load"].includes(item.action))probePending.add("picture");activeQueueItem=null;runProbeLane()}running=false;runProbeLane()}
-const directInput=args.shortcutParameter??args.queryParameters?.action??"";
+const directInput=resolveRemoteInput(args);
 if(directInput!==""&&directInput!==null){
  // Validate before any lock or device communication; do not auto-retry uncertain writes.
  parseTVShortcut(directInput);
