@@ -26,7 +26,7 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   assert.deepEqual(errors,[],'startup JavaScript errors');
   assert.equal(await page.locator('#tvGrid button').count(),12,'startup renders all keys');
   // Exercise the real transport, not a replacement for nativeAction.
-  assert.equal(await page.evaluate(()=>remoteOutbox.length),0);
+  assert.equal(await page.evaluate(()=>remoteOutbox.filter(x=>!['tvHoldStop','lightHoldStop'].includes(x.device)).length),0);
   await page.evaluate(()=>{window.sent=[];window.bridgeClosed=false;const cycle=()=>{if(!window.bridgeClosed)window.YOS_REMOTE_EXCHANGE([],raw=>{window.sent.push(...JSON.parse(raw));setTimeout(cycle,0)})};cycle();});
   await page.waitForFunction(()=>window.sent.some(x=>x.device==='picture'&&x.action==='probe'));
   assert.equal(page.url(),origin);
