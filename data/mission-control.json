@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T18:10:36+09:00",
+  "updated_at": "2026-11-24T18:17:32+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -53,6 +53,16 @@
       "updated_at": "2026-11-23T20:09:46Z"
     },
     {
+      "id": "github-pr-902",
+      "title": "PR #902 DAYSTREAM｜保存エラーでもNotionタスクを安全に表示",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/902",
+      "updated_at": "2026-11-23T14:59:27Z"
+    },
+    {
       "id": "github-pr-914",
       "title": "PR #914 YOS Lists｜淡すぎないパステル配色へ微調整",
       "type": "GitHub PR",
@@ -93,16 +103,6 @@
       "updated_at": "2026-11-24T01:04:30Z"
     },
     {
-      "id": "github-pr-932",
-      "title": "PR #932 fix(taxi): 営業画面1画面化・カレンダー明示",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/932",
-      "updated_at": "2026-11-24T08:18:38Z"
-    },
-    {
       "id": "github-pr-935",
       "title": "PR #935 fix(daystream): deliver direct drop to Scriptable and compact overlap feedback",
       "type": "GitHub PR",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T09:09:49Z"
+      "updated_at": "2026-11-24T09:16:54Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-9f6f11a84f96",
+      "title": "fix(taxi): 営業画面1画面化・カレンダー明示 (#932)",
+      "completed_at": "2026-11-24T09:16:37Z",
+      "result": "GitHub mainへ反映（9f6f11a）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9f6f11a84f960f3dbf6c9a2d458cd8d178a3de92"
+    },
+    {
       "id": "github-commit-472d89b29398",
       "title": "Merge PR #937: YOS Home Scenes nine-mode consolidated remote",
       "completed_at": "2026-11-24T08:15:03Z",
@@ -241,13 +248,6 @@
       "completed_at": "2026-11-24T08:12:08Z",
       "result": "GitHub mainへ反映（aea74f6）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aea74f66f0ed40cc47ac65d9edf8f697f34a072e"
-    },
-    {
-      "id": "github-commit-f7797354a14f",
-      "title": "Merge PR #936: Picture Off receipt audit compatible with legacy installer",
-      "completed_at": "2026-11-24T07:56:40Z",
-      "result": "GitHub mainへ反映（f779735）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f7797354a14f6379c418243086551854c6a6bec8"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T18:10:36+09:00",
+      "last_update": "2026-11-24T18:17:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 75件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T18:10:36+09:00",
+      "last_update": "2026-11-24T18:17:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T18:10:36+09:00",
+      "last_update": "2026-11-24T18:17:32+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c6686257005ecc9e15b717a13bb278cce0607b5ed6ccf748c3ae2b048a82303e"
+  "github_snapshot_hash": "263f42af30d713b951e076ee4a627865979fa787e19607ede3eb4571b115f7ee"
 }
