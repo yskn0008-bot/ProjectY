@@ -332,6 +332,30 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 .confirmed-revenue-form button{min-height:46px;border:0;border-radius:11px;background:#217dc6;color:white;font-size:15px;font-weight:900}
 .confirmed-revenue-form .revenue-note{font-size:12px;color:#516c8e;line-height:1.45}
 .confirmed-revenue-form #revenue-status{font-size:12px;color:#8e4d23;white-space:pre-wrap}
+
+/* Compact sales cockpit: preserve every existing record and shortcut route. */
+.app>.header{display:none}
+.view.sales{padding:calc(5px + var(--safe-top)) 10px 4px;gap:5px;justify-content:space-between;overflow-y:auto}
+.view.sales .status-card{flex:0 0 44px;min-height:44px}
+.view.sales .sales-card{flex:0 0 clamp(66px,12dvh,94px);min-height:0;padding:7px 11px}
+.view.sales .pace-card{padding:7px 10px}
+.pace-heading #monthly-open{min-height:44px;padding:4px 8px}
+.pace-grid{gap:4px;margin-top:3px}
+.pace-grid>div{padding:4px 8px;border-radius:9px}
+.pace-grid strong{margin-top:2px;font-size:16px;line-height:1.1}
+.pace-grid small{font-size:10px}
+.pace-card p{margin:4px 0 0;font-size:10px;line-height:1.2}
+.view.sales .quick{grid-template-columns:1fr;flex:0 0 48px;min-height:48px}
+.quick .photo .copy b{font-size:16px}
+.view.sales .decision{flex:0 0 58px;min-height:58px;padding:4px 9px;gap:2px}
+.view.sales .decision strong{font-size:15px;line-height:1.15}
+.view.sales .decision small,.view.sales .decision span{font-size:11px;line-height:1.1}
+.view.sales .periods{flex:0 0 44px;min-height:44px;padding:2px 5px}
+.view.sales .kpis{flex:0 0 44px;min-height:44px;padding:3px}
+.view.sales .footer-card{flex:0 0 23px;min-height:23px;font-size:10px}
+.nav{flex-basis:calc(55px + var(--safe-bottom));height:calc(55px + var(--safe-bottom));padding:3px 6px calc(3px + var(--safe-bottom))}
+@media(max-height:650px){.view.sales{gap:3px;padding-left:8px;padding-right:8px}.view.sales .pace-card{padding:4px 8px}.pace-grid>div{padding:3px 6px}.pace-card p{font-size:9px}.view.sales .decision{flex-basis:53px;min-height:53px}.view.sales .kpis{flex-basis:40px;min-height:40px}.view.sales .footer-card{flex-basis:20px;min-height:20px}}
+
 </style>
 </head>
 <body>
@@ -360,7 +384,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 <main class="view active sales" id="sales-view" aria-label="営業・売上画面">
 <button class="panel status-card" id="status-btn" type="button" aria-label="営業状態・営業開始終了を操作"><span class="status-dot off" id="status-dot"></span><strong class="status-label"><span id="status-label">営業前</span>・<span id="current-clock">--:--</span></strong><span class="status-divider"></span><span class="status-note" id="report-clock">日報未反映</span></button>
 <section class="panel sales-card" aria-label="売上と目標"><div class="metrics"><div><span>本日の売上</span><strong class="main-value" id="sales-value">—</strong></div><div><span>目標</span><strong id="target-value">—</strong></div><div><span>達成率</span><strong class="gold" id="progress-value">—</strong></div></div><div class="bar"><b id="progress-bar"></b></div></section>
-<section class="panel pace-card" aria-label="売上ペース管理"><div class="pace-heading">本日の営業ペース <button type="button" id="monthly-open" aria-label="月次カレンダーを開く">月次を見る ›</button></div><div class="pace-grid"><div><small>残り営業可能時間</small><strong id="remaining-shift">未確認</strong></div><div><small>目標まで</small><strong id="remaining-target">未確認</strong></div><div><small>必要売上時給</small><strong id="required-hourly">算出不可</strong></div><div><small>現在の売上時給</small><strong id="confirmed-hourly">算出不可</strong></div></div><p>終了時刻・休憩・日次目標・累積売上を確認後に計算します。推測値は表示しません。</p></section><div class="quick"><button type="button" id="drop-btn"><svg><use href="#icon-car"/></svg><span class="copy"><b>降車を記録</b><small>時刻を保存</small></span><svg class="arrow"><use href="#icon-arrow"/></svg></button><button type="button" class="photo" id="photo-btn"><svg><use href="#icon-camera"/></svg><span class="copy"><b>経過日報を送る</b><small>写真を選択・共有（未同期）</small></span><svg class="arrow"><use href="#icon-arrow"/></svg></button></div>
+<section class="panel pace-card" aria-label="売上ペース管理"><div class="pace-heading">本日の営業ペース <button type="button" id="monthly-open" aria-label="月次カレンダーを開く">カレンダー ›</button></div><div class="pace-grid"><div><small>残り営業可能時間</small><strong id="remaining-shift">未確認</strong></div><div><small>目標まで</small><strong id="remaining-target">未確認</strong></div><div><small>必要売上時給</small><strong id="required-hourly">算出不可</strong></div><div><small>現在の売上時給</small><strong id="confirmed-hourly">算出不可</strong></div></div><p>終了時刻・休憩・日次目標・累積売上を確認後に計算します。推測値は表示しません。</p></section><div class="quick"><button type="button" class="photo" id="photo-btn"><svg><use href="#icon-camera"/></svg><span class="copy"><b>経過日報を送る</b><small>写真を選択・共有（未同期）</small></span><svg class="arrow"><use href="#icon-arrow"/></svg></button></div>
 <input id="photo-input" type="file" accept="image/*" hidden>
 <button type="button" class="decision" id="decision-btn"><small>◎ 次の判断（仮説）</small><strong id="decision-text">那覇中心部の需要を確認</strong><span id="decision-sub">同一待機は15分を目安に再評価</span></button>
 <section class="panel periods" aria-label="時間帯別営業プラン"><button class="period" type="button" data-band="0"><time>17–22</time><b>久茂地・牧志</b><small>回転を重視</small><svg><use href="#icon-arrow"/></svg></button><button class="period" type="button" data-band="1"><time>22–02</time><b>松山・久茂地</b><small>重点（仮説）</small><svg><use href="#icon-arrow"/></svg></button><button class="period" type="button" data-band="2"><time>02–05</time><b>降車先・帰庫動線</b><small>残存需要</small><svg><use href="#icon-arrow"/></svg></button></section>
@@ -1050,7 +1074,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
  }
  $('strategy-research-load').addEventListener('click',loadStrategyResearch);
  $('revenue-paste-ocr').addEventListener('click',pasteRevenueOcr);
- $('monthly-open').addEventListener('click',()=>{renderMonthly();navigate('monthly')});$('status-btn').addEventListener('click',changeShift);$('drop-btn').addEventListener('click',()=>stampDropoff());$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
+ $('monthly-open').addEventListener('click',()=>{renderMonthly();navigate('monthly')});$('status-btn').addEventListener('click',changeShift);$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
  renderMonthly();render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait();renderYosSend();if(strategyResearchFeed)renderStrategyResearch()},15000);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderWait();renderYosSend()}});
  addEventListener('pageshow',()=>{renderWait();renderYosSend()});
