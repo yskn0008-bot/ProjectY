@@ -1,3 +1,6 @@
+// Variables used by Scriptable.
+// icon-color: blue; icon-glyph: tv;
+// YOS_SCRIPT_NAME: YOS Remote Hub Quick TEST
 // YOS Remote Hub — integrated isolated TEST; v6.6 four-device core retained
 // YOS Remote Hub v6.6 — tap-first adaptive cross + reliable center gesture + top quick actions + user layout editor.
 // Reliability rule: a center tap must always win over gesture convenience.

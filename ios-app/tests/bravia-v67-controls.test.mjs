@@ -118,3 +118,9 @@ test('isolated remote test target is pinned and does not replace the existing re
  assert.equal(new Set(catalog.targets.map(x=>x.id)).size,catalog.targets.length);
  assert.equal(new Set(catalog.targets.map(x=>x.name)).size,catalog.targets.length);
 });
+
+
+test('quick remote includes the required legacy and current Scriptable installer source header',()=>{
+ assert.ok(src.startsWith('// Variables used by Scriptable.\n'));
+ assert.match(src.split('\n').slice(0,20).join('\n'),/^\/\/ YOS_SCRIPT_NAME: YOS Remote Hub Quick TEST$/m);
+});
