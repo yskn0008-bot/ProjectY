@@ -152,10 +152,12 @@ async function main(){
     const seen=new Set();
     const choose=rows=>rows.find(r=>!seen.has(r.doi.toLowerCase()));
     const selected=primary.map(rows=>{const r=choose(rows);if(r)seen.add(r.doi.toLowerCase());return r;});
-    const fallback=await Promise.all(topics.map((t,i)=>selected[i]?Promise.resolve([]):fetchCrossref(t).catch(()=>[])));
+    const [fallback,feeds]=await Promise.all([
+      Promise.all(topics.map((t,i)=>selected[i]?Promise.resolve([]):fetchCrossref(t).catch(()=>[]))),
+      selected.every(Boolean)?Promise.resolve([]):Promise.all(FEEDS.map(f=>fetchEditorialFeed(f).catch(()=>[])))
+    ]);
     for(let i=0;i<selected.length;i++)if(!selected[i]){const r=choose(fallback[i]);if(r){seen.add(r.doi.toLowerCase());selected[i]=r;}}
     if(selected.filter(Boolean).length!==3){
-      const feeds=await Promise.all(FEEDS.map(f=>fetchEditorialFeed(f).catch(()=>[])));
       const used=new Set(selected.filter(Boolean).map(x=>x.url));
       for(let i=0;i<selected.length;i++)if(!selected[i]){
         const row=feeds.flat().find(x=>!used.has(x.url));
