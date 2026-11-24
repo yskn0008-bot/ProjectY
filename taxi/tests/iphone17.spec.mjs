@@ -1040,7 +1040,7 @@ test('YOS field consultation requires explicit tap and keeps the recommendation 
 test.describe('isolated research feed mocks (no service worker)',()=>{
   test.use({serviceWorkers:'block'});
 
-test('strategy research displays only fresh official-source evidence, never taxi-demand recommendations',async({page})=>{
+test('strategy research displays fresh facts and requests specialist advice only on explicit tap',async({page})=>{
   await page.clock.setFixedTime(new Date('2026-11-24T12:00:00+09:00'));
   let requests=0;
   await page.route('**/research-feed.json?*',async route=>{
@@ -1049,7 +1049,7 @@ test('strategy research displays only fresh official-source evidence, never taxi
       schema:1,generatedAt:'2026-11-24T11:30:00+09:00',sources:[
         {id:'jma',name:'気象庁｜沖縄本島中南部',status:'ok',summary:'くもり、時々雨'},
         {id:'naha_rss',name:'那覇市｜公式更新',status:'ok',summary:'対象見出し0件'},
-        {id:'cruise_catalog',name:'沖縄県｜クルーズ',status:'ok',summary:'寄港予約1件',items:[{title:'那覇港寄港予約｜テスト船',eventAt:'2026-11-24T18:00:00+09:00'}]}
+        {id:'cruise_catalog',name:'沖縄県｜クルーズ',status:'ok',summary:'寄港予約1件',items:[{title:'11/24 18:00 那覇港寄港予約 テスト船／出港予定 11/24 22:00',eventAt:'2026-11-24T18:00:00+09:00',departureAt:'2026-11-24T22:00:00+09:00'}]}
       ]})});
   });
   await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
@@ -1058,9 +1058,31 @@ test('strategy research displays only fresh official-source evidence, never taxi
   await expect(page.locator('#strategy-research-status')).toContainText('公式情報源 3/3件取得');
   await expect(page.locator('#strategy-main')).toContainText('未判定');
   await expect(page.locator('#strategy-research-brief')).toContainText('くもり、時々雨');
-  await expect(page.locator('#strategy-research-brief')).toContainText('営業上の仮説');
   await expect(page.locator('#strategy-research-brief')).toContainText('テスト船');
-  await expect(page.locator('#strategy-research-brief')).toContainText('移動先を決めることはできません');
+  const brief=await page.locator('#strategy-research-brief').innerText();
+  expect(brief.match(/11\/24 18:00/g)).toHaveLength(1);
+  expect(brief.match(/11\/24 22:00/g)).toHaveLength(1);
+  await expect(page.locator('#strategy-advice-load')).toBeVisible();
+  await page.evaluate(()=>{
+    window.__researchCalls=[];
+    window.YOS_AI_BASE_URL='https://project-y-yos-ai.vercel.app';
+    window.YOS_AUTH={getGoogleIdToken:async()=>'ephemeral'};
+    window.YosAiClient=class{async chat(input){window.__researchCalls.push(input);return {answer:'雨が降り始めたら短距離の配車反応を比べ、空車時間に応じて待機を見直す。'};}};
+  });
+  expect(await page.evaluate(()=>window.__researchCalls.length)).toBe(0);
+  await page.locator('#strategy-advice-load').click();
+  await expect(page.locator('#strategy-advice-answer')).toContainText('短距離の配車反応');
+  const calls=await page.evaluate(()=>window.__researchCalls);
+  expect(calls).toHaveLength(1);
+  expect(calls[0].userText).toContain('空車回送の機会費用');
+  expect(calls[0].userText).toContain('テスト船');
+  expect(calls[0].userText).toContain('現在地、実車状況、競合台数、個人売上は未確認');
+  expect(Object.keys(calls[0])).toEqual(['userText']);
+  expect(await page.evaluate(()=>JSON.stringify({...localStorage}))).not.toContain('短距離の配車反応');
+  await page.evaluate(()=>{window.YosAiClient=class{async chat(){throw Object.assign(Error('limited'),{status:429})}}});
+  await page.locator('#strategy-advice-load').click();
+  await expect(page.locator('#strategy-advice-status')).toContainText('AI分析は未取得');
+  await expect(page.locator('#strategy-advice-answer')).toBeHidden();
   await expect(page.locator('#strategy-research-sources')).toBeHidden();
   await page.locator('.strategy-research details summary').click();
   await expect(page.locator('#strategy-research-sources')).toBeVisible();
@@ -1080,6 +1102,8 @@ test('strategy research displays only fresh official-source evidence, never taxi
   await expect(page.locator('#strategy-research-status')).toContainText('配信が古い');
   await expect(page.locator('#strategy-research-sources>div')).toHaveCount(0);
   await expect(page.locator('#strategy-research-brief>p')).toHaveCount(0);
+  await expect(page.locator('#strategy-advice-load')).toBeHidden();
+  await expect(page.locator('#strategy-advice-answer')).toBeHidden();
 });
 
 test('strategy research fails closed on malformed or unavailable official feed',async({page})=>{
@@ -1089,6 +1113,8 @@ test('strategy research fails closed on malformed or unavailable official feed',
   await page.locator('[data-page="strategy"]').click();
   await page.locator('#strategy-research-load').click();
   await expect(page.locator('#strategy-research-status')).toContainText('取得失敗');
+  await expect(page.locator('#strategy-advice-load')).toBeHidden();
+  await expect(page.locator('#strategy-advice-answer')).toBeHidden();
   await expect(page.locator('#strategy-main')).toContainText('未判定');
   expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
 });
