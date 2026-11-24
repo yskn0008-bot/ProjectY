@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f1f6ff">
+<meta name="theme-color" content="#0b1425">
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -356,6 +356,39 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 .nav{flex-basis:calc(55px + var(--safe-bottom));height:calc(55px + var(--safe-bottom));padding:3px 6px calc(3px + var(--safe-bottom))}
 @media(max-height:650px){.view.sales{gap:3px;padding-left:8px;padding-right:8px}.view.sales .pace-card{padding:4px 8px}.pace-grid>div{padding:3px 6px}.pace-card p{font-size:9px}.view.sales .decision{flex-basis:53px;min-height:53px}.view.sales .kpis{flex-basis:40px;min-height:40px}.view.sales .footer-card{flex-basis:20px;min-height:20px}}
 
+
+/* Approved dark cockpit, five persistent destinations. Existing record DOM stays intact. */
+html,body{background:#0b1425}
+.app{background:radial-gradient(ellipse at 15% 42%,#15334c 0%,transparent 60%),linear-gradient(150deg,#101827,#091628);box-shadow:none}
+.app>.header{display:none}
+.view{padding-top:calc(8px + var(--safe-top))}
+.view.sales{color-scheme:dark;color:#f4f8ff;justify-content:flex-start;gap:clamp(6px,1.25dvh,12px);padding:calc(8px + var(--safe-top)) 12px 6px;overflow-y:auto}
+.view.sales .panel{border:1px solid #456586;background:linear-gradient(145deg,#243b57,#14233d);box-shadow:inset 0 1px #ffffff18,0 4px 12px #0002;border-radius:17px}
+.view.sales .status-card{flex:0 0 48px;min-height:48px;color:#f4f8ff;background:transparent;border:0;box-shadow:none;padding:6px 8px}
+.status-note{font-size:10px;color:#c5d7eb;background:#20344e;border-color:#4b6685}
+.status-divider{border-color:#3b536f}
+.view.sales .sales-card{flex:0 0 clamp(80px,14dvh,110px);padding:10px 12px;background:linear-gradient(120deg,#087d91,#123d80 55%,#5045a6);border:1px solid #6898cd;box-shadow:inset 0 1px #ffffff33,0 4px 12px #0003}
+.sales-card .bar{background:#ffffff38}.sales-card .bar b{background:#66e2e3}
+.view.sales .pace-card{padding:12px}
+.pace-heading{color:#f5f8ff;font-size:16px}
+.pace-grid{gap:6px;margin-top:8px;grid-auto-rows:minmax(0,auto)}
+.pace-grid>div{background:#ffffff0c;padding:7px 8px;border-radius:9px}
+.pace-grid small{color:#d1dfef;font-size:11px}
+.pace-grid strong{color:#f5f8ff;font-size:17px;margin-top:4px}
+.pace-card p{color:#b7c8dc;font-size:10px;margin-top:7px;line-height:1.35}
+.view.sales .quick{grid-template-columns:1fr;flex:0 0 clamp(56px,10dvh,76px);min-height:56px}
+.quick .photo{background:linear-gradient(115deg,#27c9bd,#176acb 55%,#6559db);border:1px solid #83c9ef;color:white;box-shadow:inset 0 1px #ffffff44,0 4px 12px #0003}
+.quick .photo .copy b{font-size:clamp(16px,4.8vw,20px)}
+.view.sales .decision{flex:0 0 clamp(65px,11dvh,85px);min-height:65px;background:linear-gradient(115deg,#1c4055,#192a49);border-color:#4c7898;color:white;padding:8px 12px}
+.decision:after{display:none}.decision small,.decision span{color:#c5d9eb}.decision strong{color:#f5f8ff;font-size:15px}
+.view.sales .periods,.view.sales .kpis,.view.sales .footer-card{display:none}
+.nav{grid-template-columns:repeat(5,minmax(0,1fr));flex:0 0 calc(62px + var(--safe-bottom));height:calc(62px + var(--safe-bottom));padding:4px 4px calc(4px + var(--safe-bottom));gap:2px;background:linear-gradient(150deg,#1a304b,#101d34);border:1px solid #354e70;box-shadow:none;margin:0 8px 4px;border-radius:18px}
+.nav button{color:#c7d8ea;font-size:clamp(10px,3vw,12px);gap:4px;min-width:0;white-space:nowrap}
+.nav button.active{color:#fff;background:linear-gradient(155deg,#285b87,#153b65);border-radius:13px;box-shadow:inset 0 -2px #52d9ec}
+.nav button svg{width:23px;height:23px}
+.view.monthly{color:#eef5ff}.view.monthly .panel{background:#1b3049;border-color:#456586;box-shadow:none}.monthly-head span,.monthly-summary small,.monthly-notice,.month-weekday{color:#c7d8ea}.month-day{background:#233d57;color:#f4f8ff;border-color:#41617f}.month-day small{color:#c3d5e8}.monthly-summary>div+div{border-color:#456586}
+@media(max-height:650px){.view.sales{gap:5px;padding-top:calc(4px + var(--safe-top))}.view.sales .status-card{flex-basis:44px;min-height:44px}.view.sales .pace-card{padding:8px}.pace-grid{margin-top:4px;gap:4px}.pace-grid>div{padding:4px 6px}.pace-card p{margin-top:4px}.nav{flex-basis:calc(54px + var(--safe-bottom));height:calc(54px + var(--safe-bottom))}}
+
 </style>
 </head>
 <body>
@@ -384,7 +417,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 <main class="view active sales" id="sales-view" aria-label="営業・売上画面">
 <button class="panel status-card" id="status-btn" type="button" aria-label="営業状態・営業開始終了を操作"><span class="status-dot off" id="status-dot"></span><strong class="status-label"><span id="status-label">営業前</span>・<span id="current-clock">--:--</span></strong><span class="status-divider"></span><span class="status-note" id="report-clock">日報未反映</span></button>
 <section class="panel sales-card" aria-label="売上と目標"><div class="metrics"><div><span>本日の売上</span><strong class="main-value" id="sales-value">—</strong></div><div><span>目標</span><strong id="target-value">—</strong></div><div><span>達成率</span><strong class="gold" id="progress-value">—</strong></div></div><div class="bar"><b id="progress-bar"></b></div></section>
-<section class="panel pace-card" aria-label="売上ペース管理"><div class="pace-heading">本日の営業ペース <button type="button" id="monthly-open" aria-label="月次カレンダーを開く">カレンダー ›</button></div><div class="pace-grid"><div><small>残り営業可能時間</small><strong id="remaining-shift">未確認</strong></div><div><small>目標まで</small><strong id="remaining-target">未確認</strong></div><div><small>必要売上時給</small><strong id="required-hourly">算出不可</strong></div><div><small>現在の売上時給</small><strong id="confirmed-hourly">算出不可</strong></div></div><p>終了時刻・休憩・日次目標・累積売上を確認後に計算します。推測値は表示しません。</p></section><div class="quick"><button type="button" class="photo" id="photo-btn"><svg><use href="#icon-camera"/></svg><span class="copy"><b>経過日報を送る</b><small>写真を選択・共有（未同期）</small></span><svg class="arrow"><use href="#icon-arrow"/></svg></button></div>
+<section class="panel pace-card" aria-label="売上ペース管理"><div class="pace-heading">本日の営業ペース </div><div class="pace-grid"><div><small>残り営業可能時間</small><strong id="remaining-shift">未確認</strong></div><div><small>目標まで</small><strong id="remaining-target">未確認</strong></div><div><small>必要売上時給</small><strong id="required-hourly">算出不可</strong></div><div><small>現在の売上時給</small><strong id="confirmed-hourly">算出不可</strong></div></div><p>終了時刻・休憩・日次目標・累積売上を確認後に計算します。推測値は表示しません。</p></section><div class="quick"><button type="button" class="photo" id="photo-btn"><svg><use href="#icon-camera"/></svg><span class="copy"><b>経過日報を送る</b><small>写真を選択・共有（未同期）</small></span><svg class="arrow"><use href="#icon-arrow"/></svg></button></div>
 <input id="photo-input" type="file" accept="image/*" hidden>
 <button type="button" class="decision" id="decision-btn"><small>◎ 次の判断（仮説）</small><strong id="decision-text">那覇中心部の需要を確認</strong><span id="decision-sub">同一待機は15分を目安に再評価</span></button>
 <section class="panel periods" aria-label="時間帯別営業プラン"><button class="period" type="button" data-band="0"><time>17–22</time><b>久茂地・牧志</b><small>回転を重視</small><svg><use href="#icon-arrow"/></svg></button><button class="period" type="button" data-band="1"><time>22–02</time><b>松山・久茂地</b><small>重点（仮説）</small><svg><use href="#icon-arrow"/></svg></button><button class="period" type="button" data-band="2"><time>02–05</time><b>降車先・帰庫動線</b><small>残存需要</small><svg><use href="#icon-arrow"/></svg></button></section>
@@ -422,7 +455,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
 </main>
 <main class="view monthly" id="monthly-view" aria-label="月次売上画面"><section class="panel monthly-head"><h2 id="monthly-title">2026年11月</h2><span>確認済み日報のみを集計</span></section><section class="panel monthly-calendar" id="monthly-calendar" aria-label="月間カレンダー"></section><section class="panel monthly-summary"><div><small id="monthly-sum-label">確認済み日報の累積</small><strong id="monthly-sum-value">未登録</strong></div><div><small>月商目標（参考）</small><strong id="monthly-goal-value">¥1,000,000</strong></div><div><small>確認済み比率（暫定）</small><strong id="monthly-progress-value">—</strong></div></section><section class="panel monthly-notice" id="monthly-notice">日報の確認額は未登録です。勤務時間・給与予測・Notion同期は未接続です。</section></main><main class="view history" id="history-view" aria-label="記録履歴画面"><div class="section-head">端末内｜降車・乗務記録</div><div class="panel history-sub">本画面は端末内の降車時刻を保存します。日報との自動照合・Notion保存は未接続。旧UIの記録は保持しています。</div><div id="history-list" class="history-list"></div><div class="history-controls"><button class="secondary-btn" id="export-btn">JSONバックアップを保存</button><button class="secondary-btn" id="history-info-btn">旧UIの記録を開く</button></div><div class="footer-card"><svg><use href="#icon-info"/></svg>保存先：この端末内のみ。Notion未連携</div></main>
 <main class="view analysis" id="analysis-view" aria-label="営業分析画面"><div class="section-head">確認できる数値だけを表示</div><div class="statgrid"><div class="stat"><small>降車ボタン記録</small><strong id="analysis-drops">0件</strong></div><div class="stat"><small>当営業日の日報確認額</small><strong id="analysis-sales">未登録</strong></div><div class="stat"><small>実車時間率</small><strong>未計測</strong></div><div class="stat"><small>空車時間</small><strong>未計測</strong></div></div><div class="panel analysis-note"><p id="analysis-revenue-note">写真確認額は端末内の記録だけを表示します。Notion未同期。</p>過去の紙日報に降車時刻がない場合、正確な空車時間は算出できません。新しい降車タップと、日報から得る乗車時刻・乗車番号を照合できたものだけ分析に利用します。</div><div class="panel analysis-memo">計画中：<br>① 日報写真と前回写真の差分読取<br>② 降車時刻との一意な照合<br>③ Notion正本へ認証付きの安全な登録<br>④ 30乗務の実績で那覇戦略の再校正</div><div class="footer-card"><svg><use href="#icon-info"/></svg>未確認情報を実績・確定売上として扱わない</div></main>
-<nav class="nav" aria-label="画面切替"><button type="button" class="active" data-page="sales"><svg><use href="#icon-car"/></svg>営業</button><button type="button" data-page="strategy"><svg><use href="#icon-pin"/></svg>戦略</button><button type="button" data-page="history"><svg><use href="#icon-note"/></svg>履歴</button><button type="button" data-page="analysis"><svg><use href="#icon-bars"/></svg>分析</button></nav>
+<nav class="nav" aria-label="画面切替"><button type="button" class="active" data-page="sales"><svg><use href="#icon-car"/></svg>営業</button><button type="button" data-page="strategy"><svg><use href="#icon-pin"/></svg>戦略</button><button type="button" id="monthly-open" data-page="monthly" aria-label="カレンダー"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 10h18M8 14h1m3 0h1m3 0h1M8 17h1m3 0h1"/></svg>カレンダー</button><button type="button" data-page="history"><svg><use href="#icon-note"/></svg>履歴</button><button type="button" data-page="analysis"><svg><use href="#icon-bars"/></svg>分析</button></nav>
 <div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="操作確認"><div class="sheet"><button class="close" type="button" id="close-modal" aria-label="閉じる">×</button><h2 id="modal-title">確認</h2><div id="dropoff-outcome" class="dropoff-outcome" hidden><span id="dropoff-outcome-badge"></span><strong id="dropoff-outcome-time"></strong><span id="dropoff-outcome-count"></span></div><div id="modal-body"></div>
 <form id="revenue-form" class="confirmed-revenue-form" hidden>
 <img id="revenue-preview" alt="選択した日報写真。必ず総収入欄を見比べてください。">
@@ -860,7 +893,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
      notice.textContent='確認済み日報の登録はありません。勤務時間・給与予測・Notion同期は未接続です。';
    }
  }
- function navigate(page){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===page+'-view'));document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page));if(page==='strategy'&&!strategyResearchRequested){strategyResearchRequested=true;void loadStrategyResearch()}}
+ function navigate(page){if(page==='monthly')renderMonthly();document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===page+'-view'));document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page));if(page==='strategy'&&!strategyResearchRequested){strategyResearchRequested=true;void loadStrategyResearch()}}
  function openSheet(title,body,actions=[]){revenueFormEpoch++;revenueSubmissionPending=false;$('revenue-save-btn').disabled=false;$('revenue-save-btn').textContent='確認済み累積売上を記録';$('revenue-form').hidden=true;releaseRevenuePreview();$('modal').classList.remove('dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true;$('modal-title').textContent=title;$('modal-body').textContent=body;const area=$('modal-actions');area.replaceChildren();const cancel=document.createElement('button');cancel.textContent='閉じる';cancel.addEventListener('click',closeSheet);area.append(cancel);actions.forEach(a=>{const btn=document.createElement('button');btn.textContent=a.text;btn.classList.toggle('primary',a.primary===true);btn.addEventListener('click',()=>{closeSheet();a.run()});area.append(btn)});$('modal').classList.add('open')}
  function closeSheet(){revenueFormEpoch++;revenueSubmissionPending=false;$('revenue-save-btn').disabled=false;$('revenue-save-btn').textContent='確認済み累積売上を記録';releaseRevenuePreview();$('revenue-form').hidden=true;$('modal').classList.remove('open','m100-open','dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true}
 
@@ -1074,7 +1107,7 @@ html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(
  }
  $('strategy-research-load').addEventListener('click',loadStrategyResearch);
  $('revenue-paste-ocr').addEventListener('click',pasteRevenueOcr);
- $('monthly-open').addEventListener('click',()=>{renderMonthly();navigate('monthly')});$('status-btn').addEventListener('click',changeShift);$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
+ $('status-btn').addEventListener('click',changeShift);$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
  renderMonthly();render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait();renderYosSend();if(strategyResearchFeed)renderStrategyResearch()},15000);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderWait();renderYosSend()}});
  addEventListener('pageshow',()=>{renderWait();renderYosSend()});
