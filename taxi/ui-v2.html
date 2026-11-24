@@ -429,6 +429,84 @@ html,body,.app{background:#141516;color:#f1efeb}
 .view.strategy .strategy-research-head strong,.view.strategy .wait-card,.view.strategy .wait-card strong{color:#efece7}.view.strategy .strategy-research-head button,.view.strategy #wait-toggle,.view .field-yos-send,.view .secondary-btn{background:#373632;border:1px solid #6a6459;color:#f0e9dc}.view.strategy #strategy-research-sources>div{background:#303132;color:#dedbd4}.view.strategy .strat-row.selected{background:#454038;border-color:#c9b89b}.view.strategy .strat-row.selected time,.view.strategy .strat-row.selected b{color:#f4e8d3}
 @media(max-height:650px){.view.sales{gap:3px;justify-content:space-between;padding-top:calc(3px + var(--safe-top))}.view.sales .status-card{min-height:34px;flex-basis:34px}.view.sales .pace-card{padding:5px 7px}.pace-grid>div{padding:3px 5px}.pace-card p{margin-top:3px}.view.sales .cockpit-tile{padding:4px 6px;gap:2px}.view.sales .cockpit-consult{min-height:40px;flex-basis:40px}.nav{flex-basis:calc(48px + var(--safe-bottom));height:calc(48px + var(--safe-bottom))}}
 
+
+/* 2026-11-24 physical iPhone feedback: fixed gaps, sales-first hierarchy, readable matte theme. */
+:root{color-scheme:dark;--white:#f5f2ec;--dim:#d0ccc4}
+.view.sales{justify-content:flex-start;gap:5px}
+.view.sales .status-card{min-height:44px;flex:0 0 44px}
+.view.sales .status-note{font-size:12px;color:#e2ddd4}
+.view.sales .sales-card{flex:3 0 153px;min-height:153px;max-height:210px;padding:12px 14px;gap:10px;justify-content:center}
+.view.sales .sales-card .metrics{grid-template-columns:1fr 1fr;gap:8px 0}
+.view.sales .sales-card .metrics>div:first-child{grid-column:1/-1}
+.view.sales .sales-card .metrics>div:nth-child(2){border:0;padding:0}
+.view.sales .sales-card .metrics>div:nth-child(3){padding-left:12px}
+.view.sales .sales-card .metrics span{font-size:14px;color:#e1ddd5}
+.view.sales .sales-card .metrics strong{font-size:clamp(20px,5.8vw,27px);line-height:1.12;margin-top:3px;white-space:normal;overflow-wrap:anywhere}
+.view.sales .sales-card .metrics .main-value{font-size:clamp(36px,12vw,52px);font-variant-numeric:tabular-nums;letter-spacing:-.035em}
+.view.sales .sales-card .metrics .gold{color:#e8d3a9}
+.view.sales .sales-card .bar{flex:0 0 7px}
+.view.sales .pace-card{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;padding:9px}
+.view.sales .pace-grid small{font-size:13px;color:#e0dcd5}
+.view.sales .pace-grid strong{font-size:clamp(17px,5vw,23px)}
+.view.sales .pace-card p{font-size:13px;color:#d7d3cb;line-height:1.4;overflow-wrap:anywhere}
+.view.sales .quick{flex:1 0 55px;max-height:76px}
+.view.sales .quick .photo .copy small{font-size:12px}
+.view.sales .cockpit-actions{flex:1 0 auto}
+.view.sales .cockpit-tile{padding:9px;gap:4px}
+.view.sales .cockpit-tile small,.view.sales .cockpit-tile span{font-size:13px;color:#e1ddd5;overflow-wrap:anywhere}
+.view.sales .cockpit-tile strong{font-size:clamp(16px,4.7vw,23px);white-space:normal}
+.view.sales #cockpit-wait-toggle{min-height:44px;font-size:14px}
+.view.sales .cockpit-consult{flex:0 0 44px;min-height:44px;font-size:16px}
+.nav button{font-size:clamp(11px,3vw,13px);color:#d5d1ca}
+.view.strategy,.view.history,.view.analysis,.view.monthly{overflow-y:auto;overflow-x:hidden;justify-content:flex-start}
+.view.strategy .strategy-action,.view.strategy .wait-card,.view.strategy .strategy-evidence,.view.strategy .strat-row,.view.strategy .strategy-foot,.view.strategy .strategy-research,.view.strategy .field-open,.view.strategy .field-yos-response,.view.strategy #googleSignIn{background:#262729;color:#f5f2ec;border:1px solid #55524e;box-shadow:none}
+.view.strategy .strategy-action strong,.view.strategy .decision-kicker{color:#e8d3a9}
+.view.strategy .strategy-action p,.view.strategy .wait-card p,.view.strategy .wait-caption,.view.strategy #wait-started,.view.strategy .strategy-evidence,.view.strategy .strategy-foot span,.view.strategy .strat-row small,.view.strategy .field-open span,.view.strategy .field-yos-response small,.view.strategy .strategy-research p{color:#dedad2;font-size:15px;line-height:1.5}
+.view.strategy .strategy-evidence summary,.view.strategy .strat-row b,.view.strategy .strategy-foot strong,.view.strategy .strategy-research-head strong,.view.strategy .field-yos-response p{color:#f5f2ec;font-size:17px;line-height:1.45}
+.view.strategy .strategy-evidence .evidence-body{font-size:15px;color:#e1ddd5}
+.view.strategy .strat-row time{color:#e3d6bd;font-size:15px}
+.view.strategy .strat-row.selected{background:#454038;border-color:#d6c4a5}
+.view.strategy .strat-row.selected time,.view.strategy .strat-row.selected b{color:#fff0d4}
+.view.strategy #wait-toggle:disabled,.view.sales #cockpit-wait-toggle:disabled,.view.strategy .field-yos-send:disabled,.field-sheet .field-undo:disabled,.view.strategy #strategy-research-load:disabled{opacity:1;background:#303132;color:#bfbab2;border-color:#55524e}
+.view.strategy .section-head,.view.history .section-head,.view.analysis .section-head{font-size:16px;flex:0 0 auto;min-height:24px;color:#f5f2ec}
+.view.strategy .strategy-research-head{flex-wrap:wrap}
+.view.strategy #strategy-research-load{min-height:44px}
+.view.strategy .strategy-research #strategy-research-brief{display:grid;gap:8px}
+.view.strategy #strategy-research-brief p{color:#f5f2ec;font-size:16px;line-height:1.6;overflow-wrap:anywhere}
+.view.strategy .strategy-research details{border-top:1px solid #55524e}
+.view.strategy .strategy-research details summary{min-height:44px;padding:12px 0;color:#e8d3a9;font-size:14px;cursor:pointer}
+.view.strategy #strategy-research-sources>div{background:#303132;color:#e1ddd5;font-size:14px;line-height:1.5}
+.view.strategy .strategy-research a{color:#e8d3a9;font-size:14px;min-height:44px}
+.field-sheet{background:#262729;color:#f5f2ec}
+.field-sheet .field-close,.field-sheet .field-choice,.field-sheet .field-undo,.field-sheet .field-previous{background:#353638;color:#f5f2ec;border:1px solid #68635a}
+.field-sheet .field-choice:active{background:#565047;color:#fff0d4}
+.field-sheet .field-hint,.field-sheet .field-subtitle,.field-sheet .field-previous span,.field-sheet .field-disclaimer{color:#dedad2;font-size:14px}
+.field-sheet .field-choice{font-size:16px}
+.view.history .history-sub,.view.analysis .analysis-note,.view.analysis .analysis-memo{font-size:16px;color:#dedad2;flex:0 0 auto}
+.view.history .history-list{min-height:100px}
+.view.history .log b,.view.analysis .weekday-panel>strong{font-size:17px}
+.view.history .log small,.view.history .log .badge,.view.analysis .stat small,.view.analysis .weekday-panel>small{font-size:14px;color:#dedad2}
+.view.history .log.voided{opacity:1;border-style:dashed}
+.view.history .history-controls{flex:0 0 auto}
+.view.history .secondary-btn{min-height:44px;font-size:14px}
+.view .footer-card{background:#262729;color:#d7d3cb;border-color:#55524e}
+.view.monthly .monthly-notice,.view.monthly .monthly-extra small,.view.monthly .monthly-summary small{font-size:13px;color:#dedad2}
+.view.monthly .month-filters{font-size:14px}
+.view.monthly .month-filters label,.view.monthly .month-nav button,.view.monthly .month-links a,.view.monthly .month-links button{min-height:44px}
+.view.monthly .month-links{font-size:14px}
+.view.monthly .month-day small.below-target{color:#ffaaa4}
+.sheet{background:#262729;color:#f5f2ec;border-color:#68635a}
+.sheet p,.sheet .sheet-quiet{color:#dedad2;font-size:16px}
+.sheet .close{min-width:44px;min-height:44px;color:#f5f2ec}
+.sheet .buttonrow button{background:#393a3c;border-color:#68635a;color:#f5f2ec}
+.sheet .buttonrow button.primary{background:#d6c4a5;color:#171818;border-color:#e8d3a9}
+.confirmed-revenue-form{background:#303132;color:#f5f2ec;border-color:#68635a}
+.confirmed-revenue-form input:not([type="checkbox"]),.confirmed-revenue-form select,.confirmed-revenue-form textarea{background:#202123;color:#f5f2ec;border-color:#68635a}
+.confirmed-revenue-form .revenue-note,.confirmed-revenue-form #revenue-status{color:#e8d3a9}
+.confirmed-revenue-form button{background:#d6c4a5;color:#171818}
+@media(max-height:760px){.view.sales .sales-card{flex:3 0 133px;min-height:133px;padding:8px 10px;gap:5px}.view.sales .sales-card .metrics .main-value{font-size:clamp(32px,10vw,45px)}.view.sales .pace-card{padding:6px 8px}.view.sales .cockpit-tile{padding:5px 7px}.view.sales .quick{flex:1 0 48px}.view.sales .pace-card p{font-size:12px}}
+@media(max-height:650px){.view.sales .sales-card{flex:0 0 123px;min-height:123px}.view.sales .pace-card,.view.sales .cockpit-actions{flex:0 0 auto}.view.sales .quick{flex:0 0 48px}.view.sales .pace-grid small,.view.sales .cockpit-tile small,.view.sales .cockpit-tile span{font-size:12px}}
+
 </style>
 </head>
 <body>
@@ -486,7 +564,8 @@ html,body,.app{background:#141516;color:#f1efeb}
 <section class="panel strategy-research" aria-label="公式営業リサーチ">
 <div class="strategy-research-head"><strong>公式リサーチ｜需要は未検証</strong><button type="button" id="strategy-research-load">情報を確認</button></div>
 <p id="strategy-research-status" role="status" aria-live="polite">未取得。停車中に公式情報を確認してください。</p>
-<div id="strategy-research-sources"></div>
+<div id="strategy-research-brief" aria-live="polite"></div>
+<details><summary>取得件数・公式原文・発表時刻</summary><div id="strategy-research-sources"></div></details>
 <a href="./research.html?phase=during" target="_blank" rel="noopener noreferrer">出典・更新時刻・交通情報の詳細を見る</a>
 </section>
 <div class="section-head"><svg><use href="#icon-clock"/></svg>17:00〜05:00｜時間帯別の仮説</div>
@@ -844,8 +923,8 @@ html,body,.app{background:#141516;color:#f1efeb}
  // Read-only official-source briefing; never feeds the decision card or shift ledger.
  let strategyResearchFeed=null,strategyResearchRequested=false;
  function renderStrategyResearch(feed=strategyResearchFeed,now=Date.now()){
-   const status=$('strategy-research-status'),holder=$('strategy-research-sources');
-   holder.replaceChildren();
+   const status=$('strategy-research-status'),holder=$('strategy-research-sources'),brief=$('strategy-research-brief');
+   holder.replaceChildren();brief.replaceChildren();
    if(!feed){status.textContent='未取得。停車中に公式情報を確認してください。';$('cockpit-research-status').textContent='未取得';return}
    const published=Date.parse(feed.generatedAt),age=(now-published)/60000;
    if(feed.schema!==1||!Number.isFinite(published)||!Array.isArray(feed.sources)||age>150||age< -10){
@@ -856,10 +935,32 @@ html,body,.app{background:#141516;color:#f1efeb}
    const ok=sources.filter(s=>s.status==='ok').length;
    $('cockpit-research-status').textContent=ok?'公式情報源 '+ok+'/'+sources.length+'件':'未取得・要確認';
    status.textContent=ok?'公式情報源 '+ok+'/'+sources.length+'件取得（需要・推奨エリアは未検証）':'公式情報源は未取得・要確認（需要は未検証）';
+   const addBrief=text=>{const p=document.createElement('p');p.textContent=text;brief.append(p)};
+   const dateLabel=value=>{const stamp=Date.parse(value);return Number.isFinite(stamp)?new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(stamp)):'未確認'};
+   const weather=sources.find(x=>x.id==='jma'&&x.status==='ok'&&typeof x.summary==='string'&&x.summary.trim());
+   if(weather){
+     addBrief('天気｜気象庁の本島中南部の予報は「'+weather.summary.slice(0,170)+'」。'+(/雨|降水/.test(weather.summary)?'雨が降り始めた場合は、駅や飲食店周辺の配車反応に注目する余地があります（営業上の仮説）。':'実際の天候と配車反応を照らし合わせてください。')+' 降雨実況・需要は未確認です。');
+   }
+   const city=sources.find(x=>x.id==='naha_rss'&&x.status==='ok');
+   if(city){
+     const headlines=Array.isArray(city.items)?city.items.filter(x=>x&&typeof x.title==='string').slice(0,2):[];
+     addBrief(headlines.length?'那覇市｜公式更新に「'+headlines.map(x=>x.title.slice(0,100)).join('」「')+'」があります。開催・規制の詳細は原本で確認してください。':'那覇市｜対象の公式更新が確認できない場合も、イベントや需要がないとは判断できません。');
+   }
+   const cruise=sources.find(x=>x.id==='cruise_catalog'&&x.status==='ok');
+   if(cruise){
+     const upcoming=(Array.isArray(cruise.items)?cruise.items:[]).filter(x=>x&&typeof x.title==='string'&&Date.parse(x.eventAt)>=now&&Date.parse(x.eventAt)<=now+48*3600000).sort((a,b)=>Date.parse(a.eventAt)-Date.parse(b.eventAt)).slice(0,2);
+     for(const item of upcoming){addBrief('今後の予定｜'+dateLabel(item.eventAt)+' '+item.title.slice(0,110)+(Number.isFinite(Date.parse(item.departureAt))?'。出港予定 '+dateLabel(item.departureAt):'')+'。予約情報であり、実入港・下船・実際の需要は未確認です。');}
+     if(!upcoming.length)addBrief('寄港予定｜取得情報に今後48時間の確認できる予約はありません。実際の寄港・需要がないという意味ではありません。');
+   }
+   if(sources.some(x=>x.status!=='ok'))addBrief('一部の情報は未取得・鮮度不足です。確認できた情報だけを表示しています。');
+   if(!brief.childElementCount)addBrief('営業への影響を説明できる確認済み情報はありません。');
+   addBrief('営業判断｜停車中に現地の配車反応・空車の状況を確認してください。この情報だけで移動先を決めることはできません。');
+   const meta=document.createElement('div');meta.textContent='配信生成：'+dateLabel(feed.generatedAt);holder.append(meta);
    for(const source of sources){
      const row=document.createElement('div');
      const label=source.status==='ok'?'取得成功':source.status==='stale'?'原本が古い':source.status==='unknown'?'更新日不明':'未取得';
      row.textContent=source.name.slice(0,40)+'｜'+label+(source.status==='ok'&&typeof source.summary==='string'?'｜'+source.summary.slice(0,110):'');
+     row.textContent+='｜発表：'+dateLabel(source.publishedAt)+'｜取得：'+dateLabel(source.checkedAt);
      holder.append(row);
      // A reservation or official headline is evidence to check, NOT a demand signal.
      if(source.status==='ok'&&Array.isArray(source.items)){
@@ -887,7 +988,7 @@ html,body,.app{background:#141516;color:#f1efeb}
      if(parsed?.schema!==1||!Array.isArray(parsed.sources)||!Number.isFinite(Date.parse(parsed.generatedAt)))throw Error('schema');
      strategyResearchFeed=parsed;renderStrategyResearch();
    }catch{
-     strategyResearchFeed=null;$('strategy-research-sources').replaceChildren();
+     strategyResearchFeed=null;$('strategy-research-sources').replaceChildren();$('strategy-research-brief').replaceChildren();
      $('strategy-research-status').textContent='取得失敗。推測せず、詳細画面から公式原本を確認してください。';$('cockpit-research-status').textContent='取得失敗';
    }finally{clearTimeout(timer);btn.disabled=false}
  }
