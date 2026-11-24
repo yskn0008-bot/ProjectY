@@ -101,7 +101,7 @@ test('repeated run on same UTC day reuses public-only cache without another netw
   assert.equal(second.completed,1);
   assert.ok(!second.result.includes('非公開メモ'));
 });
-test('research request total timeout budget is limited to 7s and fails closed',async()=>{
+test('research request total timeout budget is limited to 10s and fails closed',async()=>{
   const r=await run({failure:true});
   assert.equal(r.result,'YOS_RESEARCH_HOLD_V1:THREE_VALID_SOURCES_UNAVAILABLE');
   assert.equal(r.completed,1);
@@ -115,6 +115,6 @@ test('tampered or malformed local source cache is ignored',async()=>{
   assert.equal(r.completed,1);
 });
 
-test('duplicate DOI across topics never produces three articles',async()=>{const r=await run({duplicate:true});assert.equal(r.result,'YOS_RESEARCH_HOLD_V1:THREE_VALID_SOURCES_UNAVAILABLE');});
+test('duplicate DOI across topics never produces three articles',async()=>{const r=await run({duplicate:true});assert.match(r.result,/^YOS_RESEARCH_HOLD_V1:THREE_VALID_SOURCES_UNAVAILABLE/);assert.match(r.result,/YOS_RESEARCH_PARTIAL_V1/);assert.doesNotMatch(r.result,/YOS_RESEARCH_ABSTRACT_V1/);});
 
 test('editorial RSS fallback works without academic DOI',async()=>{const r=await run({failure:true,editorial:true});assert.match(r.result,/YOS_RESEARCH_ABSTRACT_V1/);assert.equal((r.result.match(/^出典リンク: https:/gm)||[]).length,3);assert.match(r.result,/本文未確認/);});
