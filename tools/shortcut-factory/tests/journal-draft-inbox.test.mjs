@@ -136,3 +136,14 @@ test('source mismatch does not bypass secret guard or readback failure',async()=
  const bad=mock({input:input+'\nBearer fake-secret'});await bad.execute();assert.equal(bad.calls.length,0);assert.match(bad.outputs[0],/SENSITIVE_TOKEN_MARKER/);
  const pending=mock({input,readbackLoss:true});await pending.execute();assert.match(pending.outputs[0],/NOTION_PENDING:NOTION_READBACK_PENDING:THREE_SOURCE_PROVENANCE_MISMATCH_REVIEW_REQUIRED/);
 });
+
+test('duplicate Markdown autolink labels and Japanese punctuation do not invent source mismatches',async()=>{
+ const links=urls.map(u=>'（['+u+']('+u+')）').join('\n');
+ const t=mock({input:raw+'\n'+links+provenance.replaceAll('\n','\r\n')});await t.execute();
+ assert.match(t.outputs[0],/NOTION_VERIFIED:NOTION_INDEPENDENT_READBACK_MATCH$/);
+ assert.equal(t.calls.filter(c=>c.method==='PATCH').length,1);
+});
+test('unknown DOI in Markdown still flags review, without discarding the private draft',async()=>{
+ const t=mock({input:raw+'\n'+urls.map(u=>'['+u+']('+u+')').join('\n')+'\n[https://doi.org/10.1234/unknown](https://doi.org/10.1234/unknown)'+provenance});await t.execute();
+ assert.match(t.outputs[0],/THREE_SOURCE_PROVENANCE_MISMATCH_REVIEW_REQUIRED/);
+});
