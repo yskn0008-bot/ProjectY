@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'taxi/ui-v2.html'
+      - 'taxi/tests/ui-v2-wait-clock.test.mjs'
       - 'taxi/research.html'
       - 'taxi/build_research_feed.py'
       - 'taxi/test_research_feed.py'
@@ -21,6 +22,8 @@ jobs:
     timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
+      - name: Test YOS TAXI strategy and wait clock (Node)
+        run: node --test taxi/tests/ui-v2-wait-clock.test.mjs
       - name: Check fixed URLs, no duplicate ledger and native source code
         shell: bash
         run: |
