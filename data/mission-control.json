@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T16:51:47+09:00",
+  "updated_at": "2026-11-24T16:57:16+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -20,7 +20,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
-      "updated_at": "2026-11-24T07:50:41Z"
+      "updated_at": "2026-11-24T07:53:54Z"
     },
     {
       "id": "github-pr-857",
@@ -90,7 +90,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/932",
-      "updated_at": "2026-11-24T01:27:20Z"
+      "updated_at": "2026-11-24T07:56:39Z"
     },
     {
       "id": "github-pr-935",
@@ -103,14 +103,14 @@
       "updated_at": "2026-11-24T07:48:57Z"
     },
     {
-      "id": "github-pr-936",
-      "title": "PR #936 fix(bravia): receipt ownership compatibility and safe diagnostics for existing Picture Off recovery",
+      "id": "github-pr-937",
+      "title": "PR #937 YOS Home Scenes｜9モード統合リモコン（既存おやすみマン連携）",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/936",
-      "updated_at": "2026-11-24T07:49:31Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/937",
+      "updated_at": "2026-11-24T07:55:36Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T07:50:49Z"
+      "updated_at": "2026-11-24T07:56:40Z"
     },
     {
       "id": "github-issue-234",
@@ -210,44 +210,44 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/900",
-      "updated_at": "2026-11-24T07:22:27Z"
+      "updated_at": "2026-11-24T07:51:19Z"
     }
   ],
   "recently_completed": [
     {
-      "id": "github-commit-d63648718030",
-      "title": "Merge PR #934: BRAVIA Picture Off receipt-safe one-time recovery",
-      "completed_at": "2026-11-24T07:21:20Z",
-      "result": "GitHub mainへ反映（d636487）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d63648718030b1be2f387a80dfd4430bff864201"
+      "id": "github-commit-f7797354a14f",
+      "title": "Merge PR #936: Picture Off receipt audit compatible with legacy installer",
+      "completed_at": "2026-11-24T07:56:40Z",
+      "result": "GitHub mainへ反映（f779735）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f7797354a14f6379c418243086551854c6a6bec8"
     },
     {
-      "id": "github-commit-a58ea2d76a19",
-      "title": "merge latest main into Picture Off isolated recovery while preserving 27 existing installer pins",
-      "completed_at": "2026-11-24T07:19:19Z",
-      "result": "GitHub mainへ反映（a58ea2d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a58ea2d76a193d75f77e870aa0aa592e89526882"
+      "id": "github-commit-f715b24b9c4f",
+      "title": "merge latest main into BRAVIA receipt audit; preserve all 27 unrelated installer targets",
+      "completed_at": "2026-11-24T07:54:41Z",
+      "result": "GitHub mainへ反映（f715b24）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f715b24b9c4f2e420d1d758d668c2cd3435574f5"
     },
     {
-      "id": "github-commit-c310d2e59100",
-      "title": "test(bravia): validate final strict-receipt recovery commit pin",
-      "completed_at": "2026-11-24T05:50:26Z",
-      "result": "GitHub mainへ反映（c310d2e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c310d2e5910077bc0e7b91497011c156b2e91ad1"
+      "id": "github-commit-e17ac45a6de4",
+      "title": "merge latest main into BRAVIA receipt audit while preserving all catalog entries",
+      "completed_at": "2026-11-24T07:49:18Z",
+      "result": "GitHub mainへ反映（e17ac45）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e17ac45a6de472cc25150d580150af87eed7dd3f"
     },
     {
-      "id": "github-commit-a536bf9676a0",
-      "title": "chore(installer): pin final strict-receipt Picture Off recovery bytes",
-      "completed_at": "2026-11-24T05:50:17Z",
-      "result": "GitHub mainへ反映（a536bf9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a536bf9676a0064a9381a0b877d98f5e19196ada"
+      "id": "github-commit-b791521cf062",
+      "title": "test(bravia): pin revised official receipt audit release",
+      "completed_at": "2026-11-24T07:46:51Z",
+      "result": "GitHub mainへ反映（b791521）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/b791521cf0620f01fa8599c3ed77a903524634f8"
     },
     {
-      "id": "github-commit-e79ad57a19e1",
-      "title": "fix(bravia): require exact historical receipt commit before guarded recovery",
-      "completed_at": "2026-11-24T05:50:05Z",
-      "result": "GitHub mainへ反映（e79ad57）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e79ad57a19e111bd5e75359d282e1f2f2f1872d3"
+      "id": "github-commit-95bf6c060db4",
+      "title": "chore(installer): pin updated Picture Off receipt audit without changing existing 27 targets",
+      "completed_at": "2026-11-24T07:46:37Z",
+      "result": "GitHub mainへ反映（95bf6c0）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/95bf6c060db4668153077e63a4479eb5dd5ef18b"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T16:51:47+09:00",
+      "last_update": "2026-11-24T16:57:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -365,7 +365,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T16:51:47+09:00",
+      "last_update": "2026-11-24T16:57:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T16:51:47+09:00",
+      "last_update": "2026-11-24T16:57:16+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "927c085a96ea338299b533e3bbc9c258879056b7d5cce85ec0d3b45429b9d503"
+  "github_snapshot_hash": "e5a0a6008a1782ebc5d8db774561deb5fc7544e1db6678b2c3edf01fd149f8f3"
 }
