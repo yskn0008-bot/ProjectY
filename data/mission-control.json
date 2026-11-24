@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T19:13:41+09:00",
+  "updated_at": "2026-11-24T19:16:47+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-939",
-      "title": "PR #939 fix(bravia): 共通インストーラーで拒否された配布形式を修正",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/939",
-      "updated_at": "2026-11-24T10:12:55Z"
-    },
     {
       "id": "github-pr-830",
       "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
@@ -41,6 +31,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-24T09:35:36Z"
+    },
+    {
+      "id": "github-pr-892",
+      "title": "PR #892 Clarity｜入力専用ショートカット（履歴・写真OCR・音声）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/892",
+      "updated_at": "2026-11-23T06:27:05Z"
     },
     {
       "id": "github-pr-901",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T10:09:25Z"
+      "updated_at": "2026-11-24T10:13:20Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-7d23ca673daf",
+      "title": "Merge pull request #939 from yskn0008-bot/fix/bravia-quick-installer-header-20261124",
+      "completed_at": "2026-11-24T10:15:59Z",
+      "result": "GitHub mainへ反映（7d23ca6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7d23ca673dafb1f3e706c36116d81adacb079d17"
+    },
+    {
+      "id": "github-commit-e3562762a6f5",
+      "title": "test(bravia): reject missing installer source header",
+      "completed_at": "2026-11-24T10:12:32Z",
+      "result": "GitHub mainへ反映（e356276）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e3562762a6f5d11fb501bb2aa5528881809226e6"
+    },
+    {
+      "id": "github-commit-12a8339b2145",
+      "title": "fix(installer): pin corrected quick remote only",
+      "completed_at": "2026-11-24T10:12:30Z",
+      "result": "GitHub mainへ反映（12a8339）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/12a8339b2145a7bba71f066636137a966aa4d3b8"
+    },
+    {
+      "id": "github-commit-37d7c7f27593",
+      "title": "fix(bravia): add required Scriptable installer metadata",
+      "completed_at": "2026-11-24T10:12:27Z",
+      "result": "GitHub mainへ反映（37d7c7f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/37d7c7f27593d9db2c5e9d73bf47dfe526814b04"
+    },
+    {
       "id": "github-commit-f796b90fefb7",
       "title": "fix(taxi): 実機フィードバック反映・営業リサーチ自然文 (#938)",
       "completed_at": "2026-11-24T10:09:55Z",
       "result": "GitHub mainへ反映（f796b90）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f796b90fefb7166fbdbead653a96cac23a5b73ab"
-    },
-    {
-      "id": "github-commit-849fcfcd8efb",
-      "title": "Merge pull request #870 from yskn0008-bot/bravia/quick-media-controls-20261119",
-      "completed_at": "2026-11-24T10:07:38Z",
-      "result": "GitHub mainへ反映（849fcfc）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/849fcfcd8efbd74a34856c87588a266b6a0cf469"
-    },
-    {
-      "id": "github-commit-9f6f11a84f96",
-      "title": "fix(taxi): 営業画面1画面化・カレンダー明示 (#932)",
-      "completed_at": "2026-11-24T09:16:37Z",
-      "result": "GitHub mainへ反映（9f6f11a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9f6f11a84f960f3dbf6c9a2d458cd8d178a3de92"
-    },
-    {
-      "id": "github-commit-e302deb767dc",
-      "title": "Pin verified Shopping clock fix without changing other 27 original targets or remote candidate",
-      "completed_at": "2026-11-24T09:03:46Z",
-      "result": "GitHub mainへ反映（e302deb）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e302deb767dcd80dac6c381c12c8b873f089a294"
-    },
-    {
-      "id": "github-commit-983fd98c9511",
-      "title": "Fix existing shared Shopping contract blocker: assess listing age after fetch; deterministic clock regression",
-      "completed_at": "2026-11-24T09:02:35Z",
-      "result": "GitHub mainへ反映（983fd98）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/983fd98c9511ab68384e8cb765273de713d82bb4"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #939をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T19:13:41+09:00",
+      "last_update": "2026-11-24T19:16:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T19:13:41+09:00",
+      "last_update": "2026-11-24T19:16:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -379,7 +379,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #939をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T19:13:41+09:00",
+      "last_update": "2026-11-24T19:16:47+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6437bdd9ec00cc012d8ec0878df39967a63e2e30cff68ee4174fc64d01c620df"
+  "github_snapshot_hash": "abc2ed855c9b6eb308551d478e6691cffc8c71f70bf1b9757a851e7854fbe1f7"
 }
