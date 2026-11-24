@@ -3,7 +3,7 @@ const CACHE_PREFIX='yos-taxi-projecty-';
 const CACHE='yos-taxi-projecty-v149-revenue-goal';
 const VERSION='149';
 const STATIC=[
-  './','./index.html','./ui-v2.html','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
+  './','./index.html','./ui-v2.html','./verified-revenue-v1.js','./calendar.html','./settings.html','./manifest.webmanifest','./swipe-nav.js',
   './final-app-v131.css','./final-fix-v133.css','./final-app-v131.js',
   './report-sync-v43.js','./settings-v20.js','./projecty-live-sync-v1.js',
   './theme-v134.css','./theme-v134.js','./manage-layout-v136.css',
@@ -63,6 +63,10 @@ self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET')return;
   const url=new URL(event.request.url),sameOrigin=url.origin===self.location.origin,type=sameOrigin?pageType(url):'';
+  // Research is a time-sensitive public snapshot. Never serve a cached copy on outage.
+  if(sameOrigin&&url.pathname.endsWith('/taxi/research-feed.json')){
+    event.respondWith(fetch(event.request,{cache:'no-store'}));return;
+  }
   if(type){
     event.respondWith(fetch(event.request,{cache:'no-store'}).then(async response=>{const transformed=await inject(response,type);const copy=transformed.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));return transformed}).catch(()=>caches.match(event.request).then(hit=>hit||caches.match(type==='calendar'?'./calendar.html':type==='settings'?'./settings.html':'./index.html'))));
     return;

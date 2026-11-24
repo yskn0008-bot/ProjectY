@@ -9,7 +9,7 @@ const NAME='YOS Shopping';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
 const SOURCE='d0ed2cf0-c84e-4770-b77c-3a1a9e11bcfc';
 const VERSION='2026-03-11';
-const UI_REF='ad0caeff76496b2bf7f43686da7406ff15002585';
+const UI_REF='021c65b7b50e55668a595cd45e8a9eb28751acd7';
 const ASSETS='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+UI_REF+'/yos/shopping/';
 const CATEGORIES=new Set(['食品','洗濯','掃除','衛生','美容','家電','家具','その他']);
 const clean=(v,max=180)=>typeof v==='string'?v.replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max):'';
@@ -253,6 +253,18 @@ async function setLocalPhoto(token,q){
  if(!fm.fileExists(paths.path)||!fm.read(paths.path))throw Error('写真の保存確認に失敗しました');
  return 'photo';
 }
+
+function photoMissingReason(item,manifest){
+ if(/(?:商品名確認待ち|テスト商品|銘柄選定待ち|未確認)/.test(item.name))
+  return '商品特定待ち';
+ const entry=manifest.entries[item.id];
+ if(entry?.signature===pictureSignature(item)&&entry.resolverVersion===PHOTO_RESOLVER_VERSION&&entry.failedAt)
+  return '再検索予定';
+ if(representativeSearch(item))return '参考写真未取得';
+ if(item.imageUrl||trustedProductPage(item.url||''))return '商品写真未取得';
+ return '写真情報不足';
+}
+
 function attachLocalPhotos(rows){
  if(typeof FileManager==='undefined'||typeof Data==='undefined')return rows;
  try{
@@ -262,7 +274,7 @@ function attachLocalPhotos(rows){
    if(personal)return {...item,localPhotoData:personal,photoKind:'product',photoSourceUrl:null};
    const cached=currentAutoPhoto(fm,item,manifest);
    if(cached)return {...item,localPhotoData:cached.data,photoKind:cached.kind,photoSourceUrl:cached.sourceUrl};
-   return item;
+   return {...item,photoStatus:photoMissingReason(item,manifest)};
   });
  }catch{return rows}
 }
@@ -270,7 +282,8 @@ function attachLocalPhotos(rows){
 
 const AUTO_PHOTO_DIR='YOS Shopping Auto Photos';
 const PHOTO_MAX_NEW_PER_OPEN=8;
-const PHOTO_RETRY_MS=2*24*60*60*1000;
+const PHOTO_RETRY_MS=12*60*60*1000;
+const PHOTO_RESOLVER_VERSION=2;
 const ALLOWED_PRODUCT_HOSTS=[
  'muji.com','kao-kirei.com','shop.rohto.co.jp','matsukiyococokara-online.com',
  'shiseido.co.jp','nitori-net.jp','amazon.co.jp','rakuten.co.jp','yodobashi.com',
@@ -372,14 +385,47 @@ function titleMatchesProduct(item,title,html,sourceUrl){
  const t=normalizePictureText(title);
  if(t.length<6)return false;
  // Search result and list pages can contain a brand but not a matching product.
- const tokens=item.name.normalize('NFKC').split(/[\s　・\-－_／/（）()]+/).map(normalizePictureText).filter(x=>x.length>=3);
+ const tokens=item.name.normalize('NFKC').split(/[\s　・\-－_／/（）()]+/).map(normalizePictureText)
+  .filter(x=>x.length>=3&&!/^\d+(?:\.\d+)?(?:ml|g|kg|cm|枚|個|本|枚入)$/i.test(x));
+ // Barcode URL alone must not validate a different variant of the same brand.
  const matches=tokens.filter(x=>t.includes(x)).length;
- const sourceHasJan=/\d{12,14}/.test(sourceUrl);
- if(matches<(sourceHasJan?1:2))return false;
+ if(tokens.length===0||matches<Math.min(2,tokens.length))return false;
  const amount=item.name.normalize('NFKC').match(/(\d+(?:\.\d+)?)\s*(ml|g|kg|cm|枚|個|本|枚入)/i);
- if(amount&&!sourceHasJan&&!normalizePictureText(title+' '+html.slice(0,16000)).includes(normalizePictureText(amount[0])))return false;
+ if(amount&&!normalizePictureText(title+' '+html.slice(0,16000)).includes(normalizePictureText(amount[0])))return false;
  return true;
 }
+
+function extractProductJsonLD(html,item,sourceUrl){
+ // Product JSON-LD supplies images when generic og:image is merely a brand logo.
+ const scripts=html.match(/<script\b[^>]*type\s*=\s*["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi)||[];
+ const walk=(entry,depth,out)=>{
+  if(depth>5||out.length>24||!entry)return;
+  if(Array.isArray(entry)){for(const child of entry.slice(0,24))walk(child,depth+1,out);return}
+  if(typeof entry!=='object')return;
+  if(entry['@graph'])walk(entry['@graph'],depth+1,out);
+  const kind=entry['@type'];
+  if((typeof kind==='string'&&/(?:^|\/)Product$/i.test(kind))||(Array.isArray(kind)&&kind.includes('Product')))out.push(entry);
+  if(entry.mainEntity)walk(entry.mainEntity,depth+1,out);
+ };
+ for(const script of scripts.slice(0,10)){
+  const raw=(script.match(/>([\s\S]*?)<\/script>/i)||[])[1]||'';
+  if(!raw||raw.length>250000)continue;
+  let parsed;try{parsed=JSON.parse(raw.trim())}catch{continue}
+  const products=[];walk(parsed,0,products);
+  for(const itemData of products){
+   if(!titleMatchesProduct(item,String(itemData.name||''),html,sourceUrl))continue;
+   const data=itemData.image;
+   const images=typeof data==='string'?[data]:Array.isArray(data)?data:typeof data==='object'?[data]:[];
+   for(const img of images.slice(0,10)){
+    const raw=typeof img==='string'?img:typeof img?.url==='string'?img.url:typeof img?.contentUrl==='string'?img.contentUrl:'';
+    const candidate=resolvedImageLink(sourceUrl,raw);
+    if(candidate)return candidate;
+   }
+  }
+ }
+ return null;
+}
+
 async function findExactProductImage(item){
  if(!item.url||!trustedProductPage(item.url))return null;
  try{
@@ -390,9 +436,11 @@ async function findExactProductImage(item){
   const finalUrl=safeHttps(req.response?.url)||item.url;
   if(!trustedProductPage(finalUrl))return null;
   const title=ogValue(html,['og:title','twitter:title'])||decodedHTML((html.match(/<title[^>]*>([^<]+)<\/title>/i)||[])[1]||'');
-  if(!titleMatchesProduct(item,title,html,finalUrl))return null;
-  const raw=ogValue(html,['og:image:secure_url','og:image','twitter:image']);
-  const image=resolvedImageLink(finalUrl,raw);
+  const structuredImage=extractProductJsonLD(html,item,finalUrl);
+  const pageTitleMatches=titleMatchesProduct(item,title,html,finalUrl);
+  if(!pageTitleMatches&&!structuredImage)return null;
+  const raw=pageTitleMatches?ogValue(html,['og:image:secure_url','og:image','twitter:image']):'';
+  const image=structuredImage||resolvedImageLink(finalUrl,raw);
   if(!image)return null;
   return {image,kind:'product',sourceUrl:finalUrl,notionCover:true};
  }catch{return null}
@@ -491,7 +539,7 @@ async function enrichShoppingPhotos(items,token){
  const candidates=items.filter(item=>{
   if(isExistingManualPhoto(fm,item)||currentAutoPhoto(fm,item,manifest))return false;
   const entry=manifest.entries[item.id];
-  if(entry?.signature===pictureSignature(item)&&entry.failedAt&&now-entry.failedAt<PHOTO_RETRY_MS)return false;
+  if(entry?.signature===pictureSignature(item)&&entry.resolverVersion===PHOTO_RESOLVER_VERSION&&entry.failedAt&&now-entry.failedAt<PHOTO_RETRY_MS)return false;
   return Boolean(item.imageUrl||trustedProductPage(item.url||'')||representativeSearch(item));
  }).sort((a,b)=>Number(Boolean(b.imageUrl))-Number(Boolean(a.imageUrl))||
   Number(Boolean(trustedProductPage(b.url||'')))-Number(Boolean(trustedProductPage(a.url||''))));
@@ -509,11 +557,11 @@ async function enrichShoppingPhotos(items,token){
     if(!encodeLocalPicture(fm,path))throw Error('cache verify failed');
     manifest.entries[item.id]={
      signature:pictureSignature(item),kind:result.kind,
-     sourceUrl:result.sourceUrl,checkedAt:now
+     sourceUrl:result.sourceUrl,checkedAt:now,resolverVersion:PHOTO_RESOLVER_VERSION
     };
     if(result.coverUrl)pendingWrites.push({item,url:result.coverUrl});
-   }catch{manifest.entries[item.id]={signature:pictureSignature(item),failedAt:now}}
-  }else manifest.entries[item.id]={signature:pictureSignature(item),failedAt:now};
+   }catch{manifest.entries[item.id]={signature:pictureSignature(item),failedAt:now,resolverVersion:PHOTO_RESOLVER_VERSION}}
+  }else manifest.entries[item.id]={signature:pictureSignature(item),failedAt:now,resolverVersion:PHOTO_RESOLVER_VERSION};
  }
  try{savePictureManifest(fm,manifest)}catch{}
  // Only exact, publicly retrievable image URLs from matching product pages may
@@ -548,6 +596,137 @@ async function enrichShoppingPhotos(items,token){
   }catch{}
  }
  return items;
+}
+
+
+/* Read-only, source-linked public listing observations. These are NOT checkout
+   prices, verified discounts, or a replacement for Notion's manual records. */
+const PRICE_OBSERVATION_VERSION=1;
+const PRICE_OBSERVATION_LIMIT=4;
+const PRICE_OBSERVATION_TTL=24*60*60*1000;
+const PRICE_OBSERVATION_RETRY=12*60*60*1000;
+const PRICE_OBSERVATION_RETENTION=7*24*60*60*1000;
+function priceObservationFile(fm){
+ const dir=fm.joinPath(fm.libraryDirectory(),'YOS Shopping Price Observations');
+ return {dir,path:fm.joinPath(dir,'manifest-v1.json')};
+}
+function priceObservationSignature(item){
+ return [item.name,item.url||''].join('|');
+}
+function readPriceObservations(fm){
+ try{
+  const loc=priceObservationFile(fm);
+  if(!fm.fileExists(loc.path))return {version:PRICE_OBSERVATION_VERSION,entries:{}};
+  const obj=JSON.parse(fm.readString(loc.path));
+  if(obj.version===PRICE_OBSERVATION_VERSION&&obj.entries&&typeof obj.entries==='object')return obj;
+ }catch{}
+ return {version:PRICE_OBSERVATION_VERSION,entries:{}};
+}
+function savePriceObservations(fm,manifest){
+ const loc=priceObservationFile(fm);
+ if(!fm.fileExists(loc.dir))fm.createDirectory(loc.dir,true);
+ fm.writeString(loc.path,JSON.stringify(manifest));
+}
+function productJsonLdEntries(html){
+ const results=[];
+ const scripts=html.match(/<script\b[^>]*type\s*=\s*["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi)||[];
+ const walk=(value,depth)=>{
+  if(depth>5||results.length>=30||!value)return;
+  if(Array.isArray(value)){for(const x of value.slice(0,30))walk(x,depth+1);return}
+  if(typeof value!=='object')return;
+  const typ=value['@type'],types=Array.isArray(typ)?typ:[typ];
+  if(types.some(x=>typeof x==='string'&&/(?:^|\/)Product$/i.test(x)))results.push(value);
+  if(value['@graph'])walk(value['@graph'],depth+1);
+  if(value.mainEntity)walk(value.mainEntity,depth+1);
+ };
+ for(const script of scripts.slice(0,12)){
+  const raw=(script.match(/>([\s\S]*?)<\/script>/i)||[])[1]||'';
+  if(!raw||raw.length>250000)continue;
+  try{walk(JSON.parse(raw),0)}catch{}
+ }
+ return results;
+}
+function verifiedListingPrice(html,item,sourceUrl,checkedAt){
+ for(const product of productJsonLdEntries(html)){
+  if(!titleMatchesProduct(item,String(product.name||''),html,sourceUrl))continue;
+  const offers=Array.isArray(product.offers)?product.offers:[product.offers];
+  for(const offer of offers.slice(0,8)){
+   if(!offer||typeof offer!=='object')continue;
+   const type=Array.isArray(offer['@type'])?offer['@type']:[offer['@type']];
+   // AggregateOffer, lowPrice and priceRange are not a purchasable offer.
+   if(type.some(t=>typeof t==='string'&&/AggregateOffer/i.test(t))||
+      offer.lowPrice!==undefined||offer.highPrice!==undefined)continue;
+   const raw=offer.price;
+   const currency=String(offer.priceCurrency||'').toUpperCase();
+   if(currency!=='JPY'||typeof raw!=='string'&&typeof raw!=='number')continue;
+   const text=String(raw).trim();
+   if(!/^\d{1,8}(?:\.\d{1,2})?$/.test(text))continue;
+   const value=Number(text);
+   if(!Number.isFinite(value)||value<1||value>9999999)continue;
+   const until=offer.priceValidUntil;
+   if(until&&typeof until==='string'){
+    const end=Date.parse(until.length===10?until+'T23:59:59+09:00':until);
+    if(!Number.isFinite(end)||end<Date.parse(checkedAt))continue;
+   }
+   return {
+    webPrice:value,webPriceSourceUrl:sourceUrl,
+    webPriceCheckedAt:checkedAt,webPriceStatus:'public-listing',
+    webPriceAvailability:String(offer.availability||'').slice(0,160)
+   };
+  }
+ }
+ return null;
+}
+async function retrievePublicListingPrice(item){
+ if(!item.url||!trustedProductPage(item.url))return null;
+ try{
+  const req=new Request(item.url);req.timeoutInterval=6;
+  req.headers={'Accept':'text/html','User-Agent':'Mozilla/5.0 (compatible; YOSShopping/1.0)'};
+  const html=await req.loadString();
+  if(req.response?.statusCode!==200||html.length>1700000||html.length<100)return null;
+  const finalUrl=safeHttps(req.response?.url)||item.url;
+  if(!trustedProductPage(finalUrl))return null;
+  return verifiedListingPrice(html,item,finalUrl,new Date().toISOString());
+ }catch{return null}
+}
+function priceSnapshot(item,entry,now){
+ if(!entry||entry.signature!==priceObservationSignature(item)||!entry.observation)return item;
+ const info=entry.observation,age=now-Date.parse(info.webPriceCheckedAt);
+ if(!Number.isFinite(age)||age<0||age>PRICE_OBSERVATION_RETENTION||
+    !Number.isFinite(info.webPrice)||!safeHttps(info.webPriceSourceUrl))return item;
+ return {...item,...info,webPriceFresh:age<=PRICE_OBSERVATION_TTL};
+}
+async function enrichShoppingPrices(rows){
+ if(typeof FileManager==='undefined'||typeof Request==='undefined')return rows;
+ const fm=FileManager.local(),manifest=readPriceObservations(fm);
+ const now=Date.now();
+ const todo=rows.filter(item=>{
+  if(!trustedProductPage(item.url||''))return false;
+  const e=manifest.entries[item.id];
+  if(!e||e.signature!==priceObservationSignature(item))return true;
+  if(e.failedAt&&now-e.failedAt<PRICE_OBSERVATION_RETRY)return false;
+  if(e.observation){
+   const t=Date.parse(e.observation.webPriceCheckedAt);
+   return !Number.isFinite(t)||now-t>PRICE_OBSERVATION_TTL;
+  }
+  return true;
+ }).sort((a,b)=>Number(b.state==='購入候補')-Number(a.state==='購入候補')||
+  Number(!manifest.entries[a.id]?.observation)-Number(!manifest.entries[b.id]?.observation))
+  .slice(0,PRICE_OBSERVATION_LIMIT);
+ const results=await Promise.all(todo.map(async item=>({
+  item,observation:await retrievePublicListingPrice(item)
+ })));
+ for(const {item,observation} of results){
+  const original=manifest.entries[item.id];
+  manifest.entries[item.id]={
+   signature:priceObservationSignature(item),
+   ...(observation?{observation}:original?.signature===priceObservationSignature(item)&&
+      original.observation?{observation:original.observation}:{}),
+   ...(observation?{}:{failedAt:now})
+  };
+ }
+ try{savePriceObservations(fm,manifest)}catch{}
+ return rows.map(item=>priceSnapshot(item,manifest.entries[item.id],now));
 }
 
 async function asset(file,min,max,contains){
@@ -600,6 +779,7 @@ async function main(){
   }
  }
  rows=await enrichShoppingPhotos(rows,token);
+ rows=await enrichShoppingPrices(rows);
  const [html,css,js]=await Promise.all([
   asset('index.html',3500,25000,'id="productGrid"'),
   asset('shopping.css',7000,30000,'.product-grid'),

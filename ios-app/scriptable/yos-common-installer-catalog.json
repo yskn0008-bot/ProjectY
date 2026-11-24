@@ -52,6 +52,13 @@
       "sha256": "ee8959104a4d239b8b277fa368824a8810a03e682183a18d95b90dd99fd64d9b"
     },
     {
+      "id": "remote-power-toggle",
+      "name": "YOS Remote Power Toggle",
+      "path": "ios-app/scriptable/remote-widgets/YOS Remote Power Toggle.js",
+      "commit": "3aa2865dbb1c32c178477e8c8032f0d692f8b7ca",
+      "sha256": "88896201c7204b61f614ef47c6d3f50c6b6155676547b8f8bfbb23809b4547b3"
+    },
+    {
       "id": "tapo-h110-core",
       "name": "YOS Tapo H110 Core",
       "path": "ios-app/scriptable/remote-widgets/YOS Tapo H110 Core.js",
@@ -62,8 +69,8 @@
       "id": "sleep-scene",
       "name": "YOS Sleep Scene",
       "path": "ios-app/scriptable/remote-widgets/YOS Sleep Scene.js",
-      "commit": "808d9e797a5734a4f7326e0471d6a4474244bc38",
-      "sha256": "987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8"
+      "commit": "23b09502ea5b4fd854d4e055c393aaca804938a0",
+      "sha256": "7daf038a551ff9d01f2344a60509bcfd4640238b4f4942e4d0320bb204445357"
     },
     {
       "id": "journal-book",
@@ -104,8 +111,8 @@
       "id": "daystream-notion",
       "name": "YOS DAYSTREAM Notion",
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
-      "commit": "ba6941a59a90485f621a613c4a1122836de81ba3",
-      "sha256": "f53ebbd7763e81882d4fb6e70f608bdf6a500ec2bb938b79bc4994c84489ed39"
+      "commit": "f64fce41d32da4090bfe676e6af2155abb96622a",
+      "sha256": "8267bed790893febc7bcd9dca107a4ab9df58acd9b21bf894efdf41da3e7ad54"
     },
     {
       "id": "ikemen-magazine",
@@ -132,8 +139,8 @@
       "id": "bravia-picture-off",
       "name": "YOS BRAVIA Picture Off",
       "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Picture Off.js",
-      "commit": "cfae0db7be4e5d560242520ee9c99b04a8a08fd5",
-      "sha256": "402901e68dc2e21b6206dc0702d6d7cfdff0865b33fd0a49e589377140a6d2ce"
+      "commit": "4b1ede82c2e1282f8441119371a0802331838c1e",
+      "sha256": "a3fd9ef9193eb856ae3242626ae830d9020d8b4b2c2263cdc59d99fb8dc44a8d"
     },
     {
       "id": "remote-hub",
@@ -146,8 +153,8 @@
       "id": "shopping",
       "name": "YOS Shopping",
       "path": "ios-app/scriptable/YOS Shopping.js",
-      "commit": "cffc2d60af2bd01810e97fcab59f1f0fc058b87c",
-      "sha256": "d99ee9e51c382f4d121dcc378461b7b6d3d8c5a09bb5f4fec417985e87268bb8"
+      "commit": "873051d98eb9e0261820ff5789a3a74bf38276e4",
+      "sha256": "4c1a4e99a06ac593ef7a8a77ceeb1305aa8113eb3a7730171a58b1882389ab5b"
     },
     {
       "id": "scriptable-inventory",
@@ -162,6 +169,34 @@
       "path": "ios-app/scriptable/YOS BRAVIA 画質統合.js",
       "commit": "2b61b650314c3cd05b62287134971d3bfa12edfd",
       "sha256": "78056b332397e98d2351f093f7268593c471a9c0b01c14fbf838a2ba446f7ed2"
+    },
+    {
+      "id": "yos-lists",
+      "name": "YOS Lists",
+      "path": "ios-app/scriptable/YOS Lists.js",
+      "commit": "ed750c0487b6332dc38423d8b4adb68fd36d90b6",
+      "sha256": "44c72eaf539d20696835df8125657af7f3e2f7610eb6e7a30f30d4ff4e4fd3e1"
+    },
+    {
+      "id": "home-scenes",
+      "name": "YOS Home Scenes",
+      "path": "ios-app/scriptable/remote-widgets/YOS Home Scenes.js",
+      "commit": "d87ff1f6d67d4d3e6f0b9a2a9df2710b87287b5f",
+      "sha256": "88ab9e9bb79719168c4b52041c1dd219c43bde612b4ab398c51b2dcaa6d8aef3"
+    },
+    {
+      "id": "common-installer-repair",
+      "name": "YOS Common Installer 修復",
+      "path": "ios-app/scriptable/YOS Common Installer 修復.js",
+      "commit": "cc7a0f91c4e5b758b290f7098aae417b57c631c7",
+      "sha256": "c1ca6e8fe99b3ca33e8ec78aa478a1d707114c10c74bd068554845e3b227c620"
+    },
+    {
+      "id": "bravia-picture-off-repair",
+      "name": "YOS BRAVIA 消画安全復旧",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA 消画安全復旧.js",
+      "commit": "eb844731556779c4689b3fec7c41772ca98dba99",
+      "sha256": "7a923fa373b4675070b93cbea78bfa8bdc23c2725ca50a7683eecf52502e008e"
     }
   ]
 }

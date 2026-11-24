@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#04152a">
+<meta name="theme-color" content="#f1f6ff">
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>YOS TAXI｜那覇夜勤ダッシュボード（試作）</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>YOS TAXI｜営業・戦略・月次（開発版）</title>
 <style>
 :root{color-scheme:dark;--bg:#031020;--navy:#061c31;--panel:#071f35;--edge:#5da9cf;--gold:#ffcb32;--cyan:#27e6ee;--dim:#b4cde2;--white:#f4f8ff;--green:#4cf172;--unit:1;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020b18}body{color:var(--white);font:-apple-system-body;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;-webkit-font-smoothing:antialiased}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible{outline:2px solid #fff5a9;outline-offset:2px}svg{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.9}
@@ -235,6 +235,103 @@
 .strategy-foot{width:100%;text-align:left;font:inherit;cursor:pointer}
 .strategy-foot:focus-visible{outline:2px solid #fff5a9;outline-offset:2px}
 .modal.m100-open .sheet p{font-size:15px;line-height:1.7;white-space:pre-line}
+
+/* Strategy: legibility takes priority over the former no-scroll layout. */
+.view.strategy{overflow-y:auto;overflow-x:hidden;justify-content:flex-start;overscroll-behavior:contain;padding-bottom:calc(14px + var(--safe-bottom))}
+.view.strategy .strategy-action{--tone:#afc0cf;flex:0 0 auto;min-width:0;padding:15px;display:flex;flex-direction:column;gap:7px;border:1px solid var(--tone);border-radius:17px;background:linear-gradient(125deg,#1b3040,#0c1b2e)}
+.strategy-action[data-decision="wait"]{--tone:#51DDBC}.strategy-action[data-decision="cruise"]{--tone:#F4BC55}.strategy-action[data-decision="move"]{--tone:#85AFFC}
+.strategy-action .decision-kicker{color:var(--tone);font-size:clamp(13px,3.6vw,16px);font-weight:900}
+.view.strategy .strategy-action strong{color:var(--tone);font-size:clamp(26px,7.5vw,34px);line-height:1.2}
+.view.strategy .strategy-action p{margin:0;font-size:clamp(13px,3.6vw,16px);line-height:1.45;overflow-wrap:anywhere}
+.view.strategy .wait-card{flex:0 0 auto;min-width:0;padding:14px;display:flex;flex-direction:column;gap:8px}
+.wait-card .wait-caption{color:#cfe7fa;font-size:clamp(13px,3.6vw,16px);font-weight:900}
+.wait-card #wait-next{font-size:clamp(22px,6.5vw,30px);line-height:1.25;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.wait-card #wait-guidance{font-size:clamp(13px,3.5vw,15px);line-height:1.45;margin:0}
+.wait-card .wait-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.wait-card #wait-started{flex:1 1 150px;color:#bbd6e9;font-size:clamp(12px,3.3vw,14px)}
+.wait-card #wait-toggle{min-height:44px;min-width:126px;padding:8px 12px;border:1px solid #86c6e5;border-radius:11px;background:#174463;color:white;font-weight:900;font-size:clamp(13px,3.5vw,16px)}
+.wait-card #wait-toggle[data-running="true"]{background:#374b59;border-color:#afc0cd}
+.wait-card #wait-toggle:disabled{opacity:.5}
+.view.strategy .strategy-evidence{flex:0 0 auto;border:1px solid #395b75;border-radius:12px;background:#092238}
+.strategy-evidence summary{min-height:44px;padding:11px 13px;cursor:pointer;font-size:clamp(13px,3.6vw,15px);font-weight:850}
+.strategy-evidence .evidence-body{padding:0 13px 13px;font-size:clamp(12px,3.2vw,14px);line-height:1.6}
+.strategy-evidence .evidence-body p{margin:5px 0;overflow-wrap:anywhere}
+.view.strategy .section-head{flex:0 0 auto;min-height:25px;margin-top:5px}
+.view.strategy .strat-list{flex:0 0 auto;min-height:0;gap:5px}
+.view.strategy .strat-row{flex:0 0 auto;min-height:44px;padding:8px 10px}
+.view.strategy .strat-row b{font-size:clamp(14px,3.9vw,17px);white-space:normal;overflow:visible}
+.view.strategy .strat-row small{display:block;white-space:normal;line-height:1.4;font-size:clamp(11px,3.1vw,13px)}
+.view.strategy .strategy-foot{flex:0 0 auto;min-height:51px;padding:8px 12px}
+@media(max-width:350px){.view.strategy .strategy-action,.view.strategy .wait-card{padding:11px}.wait-card #wait-toggle{width:100%}}
+
+/* One-tap field report: accessible sheet, visually separate from action recommendation. */
+.field-open{min-height:54px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;border:1px solid #48657e;border-radius:14px;background:#172c40;color:#f3f8ff;text-align:left;padding:10px 14px}
+.field-open strong{font-size:clamp(15px,4vw,18px)}.field-open span{color:#b7cbdc;font-size:clamp(12px,3.2vw,14px);overflow-wrap:anywhere;text-align:right}
+.field-layer[hidden]{display:none!important}.toast{z-index:40}.field-layer{position:fixed;z-index:30;inset:0;display:flex;align-items:flex-end;justify-content:center;background:#06101cc9}
+.field-sheet{width:min(100%,460px);max-height:88dvh;overflow-y:auto;overscroll-behavior:contain;border-radius:24px 24px 0 0;padding:19px 17px calc(20px + var(--safe-bottom));background:#f1f3f6;color:#1c3044;box-shadow:0 -18px 50px #0006}
+.field-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.field-top h2{font-size:21px;line-height:1.3;margin:0;font-weight:900}
+.field-close{min-width:44px;min-height:44px;border:0;background:#e0e7ee;color:#284056;border-radius:50%;font-size:24px}
+.field-hint{color:#64788d;font-size:13px;line-height:1.5;margin:10px 0 14px}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.field-choice{min-height:54px;min-width:0;border:1px solid #d7e1eb;background:#fff;color:#22384d;border-radius:13px;padding:10px 11px;text-align:left;font-size:clamp(13px,3.7vw,16px);font-weight:850;line-height:1.35;white-space:normal}
+.field-choice:active{background:#e5f0f7}.field-subtitle{font-size:13px;font-weight:900;color:#566e84;margin:16px 0 8px}
+.field-previous{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px;border-radius:12px;background:#e4eaf0}
+.field-previous span{color:#30495f;font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+.field-undo{min-height:44px;flex:0 0 auto;padding:8px 11px;font-weight:800;font-size:12px;border:1px solid #bac9d8;border-radius:10px;background:white;color:#30495f}
+.field-undo:disabled{opacity:.45}.field-disclaimer{font-size:12px;line-height:1.5;color:#627589;margin:12px 0 0}
+@media(max-width:350px){.field-sheet{padding-left:12px;padding-right:12px}.field-choice{padding:9px 7px}.field-open{padding:9px 10px}}
+
+
+/* YOS consent-based handoff; the action card stays neutral until a separately verified decision engine exists. */
+.field-yos-send[hidden],.field-yos-response[hidden],#googleSignIn[hidden]{display:none!important}
+.field-yos-send{flex:0 0 auto;min-height:48px;width:100%;border:1px solid #567ca0;border-radius:13px;background:#102c44;color:#e5f3ff;font-weight:800;font-size:clamp(13px,3.6vw,16px);text-align:center;padding:9px 12px}
+.field-yos-send:disabled{opacity:.58}
+.field-yos-response{flex:0 0 auto;min-width:0;border:1px solid #69899f;border-radius:14px;padding:12px 14px;background:#142b3b;line-height:1.5}
+.field-yos-response strong{display:block;font-size:14px;color:#c9e4f5}
+.field-yos-response p{margin:7px 0 0;font-size:clamp(13px,3.5vw,15px);white-space:pre-wrap;overflow-wrap:anywhere;max-height:28dvh;overflow-y:auto}
+.field-yos-response small{display:block;margin-top:7px;color:#adbdcb;line-height:1.45}
+#googleSignIn{flex:0 0 auto;padding:12px;border-radius:14px;background:#f1f3f6;color:#273b50}
+#googleSignIn p{margin:0 0 9px;font-size:13px;line-height:1.5}
+#googleSignInButton{min-height:44px}
+
+/* YOS TAXI light UI preview — visual-only redesign; existing storage and records unchanged */
+:root{color-scheme:light;--bg:#f1f6ff;--navy:#e9f2ff;--panel:#fff;--edge:#bad3ef;--gold:#2369cf;--cyan:#15b6c9;--dim:#667c9e;--white:#162b50;--green:#1bbda4}
+html,body{background:#edf3fd}body{color:#162b50}.app{background:linear-gradient(160deg,#f8fbff 0%,#edf4ff 50%,#f6f1ff 100%);box-shadow:0 0 0 1px #d4e1f6}
+.header{min-height:calc(77px + var(--safe-top));padding:calc(10px + var(--safe-top)) 17px 7px}.header .mount,.header .slash{display:none}.branding h1{font-size:23px;font-style:normal;color:#12264a;text-shadow:none}.branding p{color:#5c7396;font-size:11px}.preview-id{background:#fff;color:#516c98;border-color:#cddbf2;font-size:10px;padding:7px 9px}
+.view{gap:9px;padding:7px 12px 3px}.view.sales{overflow-y:auto;overscroll-behavior:contain}.panel{background:linear-gradient(145deg,#fff,#edf4ff);border:1px solid #d7e5f8;box-shadow:0 5px 15px #4b6ca522,inset 0 1px #fff;border-radius:21px}
+.status-card{min-height:47px;flex:0 0 47px;color:#1a3a67}.status-note{background:#edf5ff;border-color:#c8dcf4;color:#41658e}.status-divider{border-color:#d4e2f5}
+.sales-card{flex:0 0 133px;min-height:133px;background:linear-gradient(120deg,#14b4ce,#2e7ee4 65%,#8a8df5);border:0;box-shadow:0 9px 20px #257dcc33}.sales-card .metrics span,.sales-card .metrics strong{color:white}.sales-card .metrics .main-value{font-size:32px}.sales-card .metrics>div+div{border-color:#ffffff66}.sales-card .bar{background:#ffffff5c}.sales-card .bar b{background:#4de5c8}
+.pace-card{flex:0 0 auto;padding:13px}.pace-heading{display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:900}.pace-heading #monthly-open{min-height:44px;border:1px solid #bad7f4;border-radius:11px;padding:5px 9px;background:#e9f4ff;color:#246aa6;font-size:12px;font-weight:800}.pace-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.pace-grid>div{padding:10px 12px;background:#f4f8ff;border-radius:13px}.pace-grid small{display:block;font-size:11px;color:#5a7090}.pace-grid strong{display:block;margin-top:6px;font-size:18px;color:#163d79}.pace-card p{margin:9px 2px 0;font-size:10px;color:#7286a4;line-height:1.5}
+.quick{flex:0 0 67px;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr)}.quick #drop-btn{background:#e9f3ff;border:1px solid #b8d8f3;color:#2466a1;box-shadow:none}.quick #drop-btn .copy b{font-size:16px;white-space:normal;overflow-wrap:anywhere;line-height:1.15}.quick #drop-btn .copy small{font-size:10px}.quick #drop-btn svg{width:21px;height:21px}.quick .photo{background:linear-gradient(115deg,#17c6c7,#46a4ed);border:0;color:#fff;box-shadow:0 6px 16px #25b6ce42}.quick .photo .copy b{font-size:18px;white-space:normal;overflow-wrap:anywhere;line-height:1.15}.quick .photo .copy small{font-size:11px;color:#f1ffff}
+.decision{flex:0 0 73px;min-height:73px;background:linear-gradient(115deg,#e5f9ff,#e9e8ff);border:1px solid #a9d8f4;box-shadow:none;color:#193e73}.decision small{color:#1985b5}.decision strong{color:#173a71}.decision span{color:#5d7197}.decision:after{opacity:.12}
+.periods{flex:0 0 135px;min-height:135px;background:#fff}.period{color:#1e416c}.period+.period{border-color:#e3ebf8}.period time{background:#e9f3ff;color:#2468a6}.period small{color:#657c9c}.period.selected{background:#edf9ff;outline-color:#70c7e8;color:#1466a7}.period.selected time{background:#cdeefe;color:#1466a7}.period.selected small{color:#567c9c}
+.kpis{flex:0 0 74px;min-height:74px}.kpi-value{font-size:17px}.kpis>div+div{border-color:#d6e3f5}.kpis .pending,.kpis .pending .kpi-label{color:#ae6c18}.footer-card{flex:0 0 30px;min-height:30px;background:#eaf2ff;border-color:#d4e1f2;color:#547094}.footer-card i{border-color:#c5d7ed}
+.nav{flex:0 0 calc(69px + var(--safe-bottom));height:calc(69px + var(--safe-bottom));background:#ffffffed;border-color:#e1e9f7;box-shadow:0 -4px 18px #6e8cc01a;margin-top:0}.nav button{color:#667d9e}.nav button.active{color:#147acb;background:#dcefff;border-radius:16px}.nav button.active:after{display:none}
+.view.strategy{overflow-y:auto;overscroll-behavior:contain}.view.strategy .strategy-action{background:linear-gradient(120deg,#d6f7fc,#e4edff);border:1px solid #a8dff3;box-shadow:0 5px 15px #5986c01c;color:#163e70}.view.strategy .decision-kicker{color:#197ca0}.view.strategy .strategy-action strong{color:#174777}.view.strategy .strategy-action p{color:#4b6c91}.view.strategy .wait-card{background:linear-gradient(140deg,#fff,#eaf5ff);color:#153b6b}.wait-card #wait-toggle{background:linear-gradient(100deg,#15b9c1,#4c99eb);border:0;color:white}.view.strategy .strategy-evidence{background:#fff;border-color:#d7e5f7}.view.strategy .strat-row{background:#fff;border-color:#d6e5f6;color:#1b3e6b}.view.strategy .strat-row time{color:#4d78a4}.view.strategy .strat-row small{color:#687e9a}.view.strategy .strat-row.selected{background:#e6f5ff;border-color:#76bde7}.view.strategy .strat-row.selected time,.view.strategy .strat-row.selected b{color:#1264b0}.view.strategy .strategy-foot{background:linear-gradient(110deg,#dff8ff,#e5edff);border-color:#b4d9f4}.view.strategy .strategy-foot span{color:#377e9c}.view.strategy .strategy-foot strong{color:#1b568e}
+.view.monthly{overflow-y:auto;gap:12px}.monthly-head{flex:0 0 auto;text-align:center;padding:13px}.monthly-head h2{margin:0;font-size:20px}.monthly-head span{display:block;font-size:11px;color:#7487a2;margin-top:5px}.monthly-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;padding:10px;flex:0 0 auto}.month-weekday{text-align:center;font-size:11px;font-weight:900;color:#6780a2}.month-weekday:first-child{color:#d65e75}.month-weekday:nth-child(7){color:#287dd2}.month-day{min-height:49px;border:1px solid #e0eafa;background:#f9fbff;border-radius:9px;text-align:center;padding:7px 1px}.month-day b{display:block;font-size:13px}.month-day small{display:block;font-size:11px;color:#a5b4c9;margin-top:3px}.monthly-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:15px 5px;gap:0}.monthly-summary>div{text-align:center;min-width:0}.monthly-summary>div+div{border-left:1px solid #d8e4f4}.monthly-summary small{display:block;font-size:10px;color:#667c9d}.monthly-summary strong{display:block;margin-top:7px;font-size:15px;color:#174c87}.monthly-notice{padding:16px;font-size:12px;line-height:1.7;color:#5d7393}.view.history .history-sub,.view.analysis .analysis-note,.view.analysis .analysis-memo{color:#476483}.log{background:#fff;color:#21456d;border-color:#d5e3f6}.log small{color:#69809f}.log .badge{color:#4d729e}.secondary-btn{background:#e9f4ff;color:#246aa6;border-color:#b5d5f4}
+@media(max-width:350px){.sales-card .metrics .main-value{font-size:26px}.pace-grid strong{font-size:15px}.branding h1{font-size:20px}.quick #drop-btn .copy b{font-size:12px}.quick .copy small{display:none}}
+
+/* Public, read-only official-source snapshots. Never treat forecasts as confirmed taxi demand. */
+.strategy-research{flex:0 0 auto;padding:12px;display:grid;gap:7px}
+.strategy-research-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.strategy-research-head strong{font-size:13px;color:#23456d}
+.strategy-research-head button{min-height:44px;padding:7px 12px;border-radius:11px;border:1px solid #bdd9f2;background:#edf6ff;color:#27699e;font-weight:800}
+.strategy-research p{margin:0;font-size:12px;color:#55718e;line-height:1.5}
+.strategy-research #strategy-research-sources{display:grid;gap:5px;font-size:12px;color:#335677}
+.strategy-research #strategy-research-sources>div{border-radius:9px;padding:7px;background:#f2f7ff;line-height:1.4;overflow-wrap:anywhere}
+.strategy-research a{font-size:12px;color:#246cb0;min-height:34px;display:flex;align-items:center}
+/* Local, manually verified report totals. A photograph is never automatically trusted or uploaded. */
+.confirmed-revenue-form[hidden]{display:none!important}
+.confirmed-revenue-form{display:grid;gap:9px;max-height:50dvh;overflow:auto;padding:14px;background:#f5f9ff;border:1px solid #c5dcf5;border-radius:14px;color:#254368}
+.confirmed-revenue-form img{width:100%;max-height:160px;object-fit:contain;background:#eef3fb;border-radius:12px}
+.confirmed-revenue-form label{display:grid;gap:4px;font-size:13px;line-height:1.4;font-weight:750}
+.confirmed-revenue-form input:not([type="checkbox"]),.confirmed-revenue-form select,.confirmed-revenue-form textarea{width:100%;box-sizing:border-box;padding:10px 11px;min-height:44px;background:#fff;border:1px solid #aac6e8;border-radius:10px;color:#1c385c;font:inherit;font-size:16px}
+.confirmed-revenue-form textarea{min-height:60px}
+.confirmed-revenue-form .revenue-check{display:flex;align-items:center;gap:9px;font-size:13px}
+.confirmed-revenue-form .revenue-check input{width:20px;height:20px;flex:none}
+.confirmed-revenue-form button{min-height:46px;border:0;border-radius:11px;background:#217dc6;color:white;font-size:15px;font-weight:900}
+.confirmed-revenue-form .revenue-note{font-size:12px;color:#516c8e;line-height:1.45}
+.confirmed-revenue-form #revenue-status{font-size:12px;color:#8e4d23;white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -258,12 +355,12 @@
 <div class="app" id="app">
 <header class="header">
 <svg viewBox="0 0 460 70" class="mount" preserveAspectRatio="none" aria-hidden="true"><path fill="#061e35" d="M0 63 20 59 46 63 78 48 101 55 128 45 147 52 174 46 205 54 230 42 255 57 287 49 318 31 350 42 378 21 411 31 433 25 460 33V70H0Z"/><path fill="#081d31" d="M0 67 47 58 91 65 134 52 175 60 228 52 274 63 327 44 386 52 429 44 460 47V70H0Z"/></svg>
-<div class="header-inner"><div class="slash"></div><div class="branding"><h1>YOS TAXI</h1><p>那覇・夜勤（17:00 – 05:00）</p></div><span class="preview-id">日報未同期</span></div>
+<div class="header-inner"><div class="slash"></div><div class="branding"><h1>YOS TAXI</h1><p>沖縄交通｜営業ダッシュボード</p></div><span class="preview-id">開発版・未同期</span></div>
 </header>
 <main class="view active sales" id="sales-view" aria-label="営業・売上画面">
 <button class="panel status-card" id="status-btn" type="button" aria-label="営業状態・営業開始終了を操作"><span class="status-dot off" id="status-dot"></span><strong class="status-label"><span id="status-label">営業前</span>・<span id="current-clock">--:--</span></strong><span class="status-divider"></span><span class="status-note" id="report-clock">日報未反映</span></button>
 <section class="panel sales-card" aria-label="売上と目標"><div class="metrics"><div><span>本日の売上</span><strong class="main-value" id="sales-value">—</strong></div><div><span>目標</span><strong id="target-value">—</strong></div><div><span>達成率</span><strong class="gold" id="progress-value">—</strong></div></div><div class="bar"><b id="progress-bar"></b></div></section>
-<div class="quick"><button type="button" id="drop-btn"><svg><use href="#icon-car"/></svg><span class="copy"><b>降車を記録</b><small>時刻を保存</small></span><svg class="arrow"><use href="#icon-arrow"/></svg></button><button type="button" class="photo" id="photo-btn"><svg><use href="#icon-camera"/></svg><span class="copy"><b>日報写真</b><small>選択・共有</small></span><svg class="arrow"><use href="#icon-arrow"/></svg></button></div>
+<section class="panel pace-card" aria-label="売上ペース管理"><div class="pace-heading">本日の営業ペース <button type="button" id="monthly-open" aria-label="月次カレンダーを開く">月次を見る ›</button></div><div class="pace-grid"><div><small>残り営業可能時間</small><strong id="remaining-shift">未確認</strong></div><div><small>目標まで</small><strong id="remaining-target">未確認</strong></div><div><small>必要売上時給</small><strong id="required-hourly">算出不可</strong></div><div><small>現在の売上時給</small><strong id="confirmed-hourly">算出不可</strong></div></div><p>終了時刻・休憩・日次目標・累積売上を確認後に計算します。推測値は表示しません。</p></section><div class="quick"><button type="button" id="drop-btn"><svg><use href="#icon-car"/></svg><span class="copy"><b>降車を記録</b><small>時刻を保存</small></span><svg class="arrow"><use href="#icon-arrow"/></svg></button><button type="button" class="photo" id="photo-btn"><svg><use href="#icon-camera"/></svg><span class="copy"><b>経過日報を送る</b><small>写真を選択・共有（未同期）</small></span><svg class="arrow"><use href="#icon-arrow"/></svg></button></div>
 <input id="photo-input" type="file" accept="image/*" hidden>
 <button type="button" class="decision" id="decision-btn"><small>◎ 次の判断（仮説）</small><strong id="decision-text">那覇中心部の需要を確認</strong><span id="decision-sub">同一待機は15分を目安に再評価</span></button>
 <section class="panel periods" aria-label="時間帯別営業プラン"><button class="period" type="button" data-band="0"><time>17–22</time><b>久茂地・牧志</b><small>回転を重視</small><svg><use href="#icon-arrow"/></svg></button><button class="period" type="button" data-band="1"><time>22–02</time><b>松山・久茂地</b><small>重点（仮説）</small><svg><use href="#icon-arrow"/></svg></button><button class="period" type="button" data-band="2"><time>02–05</time><b>降車先・帰庫動線</b><small>残存需要</small><svg><use href="#icon-arrow"/></svg></button></section>
@@ -271,20 +368,76 @@
 <div class="footer-card"><svg><use href="#icon-info"/></svg><span id="last-reflected">日報の最終反映：なし</span><i></i><svg><use href="#icon-link"/></svg><span id="sync-status">Notion未接続</span></div>
 </main>
 <main class="view strategy" id="strategy-view" aria-label="運行戦略画面">
-<section class="intro"><small>◎ 今夜の基本戦略・検証中</small><strong id="strategy-main">松山・久茂地の需要を検証</strong><p id="strategy-detail">降車後の次客を重視。現地需要は未確認。</p></section>
-<div class="section-head"><svg><use href="#icon-clock"/></svg>17:00〜05:00｜時間帯別の戦略</div>
+<section class="strategy-action" id="strategy-action" data-decision="unknown" aria-label="現在の判断">
+<span class="decision-kicker">◎ 現在の判断｜自動推薦は未接続</span><strong id="strategy-main">◌ 未判定</strong>
+<p id="strategy-detail">現在地・配車反応・人流の確認データはありません。待つ・流す・移動は停車中に比較してください。</p>
+</section>
+<section class="panel wait-card" aria-label="待機時計">
+<span class="wait-caption">◷ 次の再判断（暫定ルール）</span><strong id="wait-next">待機開始未記録</strong>
+<p id="wait-guidance">安全に停車してから待機開始を記録してください。降車時刻からは推定しません。</p>
+<div class="wait-actions"><span id="wait-started">正確な待機開始：未記録</span><button type="button" id="wait-toggle">待機を開始</button></div>
+</section>
+<button type="button" class="field-open" id="field-open" aria-haspopup="dialog" aria-controls="field-layer"><strong>現状を報告</strong><span id="field-summary" aria-live="polite">報告なし ›</span></button>
+
+<button class="field-yos-send" id="field-yos-send" type="button" hidden>YOSに現状を送って相談</button>
+<div id="googleSignIn" hidden><p>YOSへ送る前に、Googleで本人確認します。認証情報は端末に保存しません。</p><div id="googleSignInButton"></div></div>
+<section id="field-yos-response" class="field-yos-response" aria-live="polite" hidden><strong id="field-yos-status">端末内の報告は未送信</strong><p id="field-yos-answer" hidden></p><small id="field-yos-note">YOSの回答は参考情報です。根拠不足なら「未判定」のままです。</small></section>
+<details class="strategy-evidence"><summary>根拠・取得時刻・信頼度を確認</summary><div class="evidence-body">
+<p>推薦の元データ：未取得（現在地・GO／無線・人流・競合）</p><p>データ取得時刻：なし ／ 判断の信頼度：判定不可</p>
+<p>時間帯別エリア案と5・10・15・20・30分の節目は未検証の仮説です。移動を強制する指示ではありません。待機開始はこの端末で明示記録した時刻だけを使用します。</p>
+</div></details>
+<section class="panel strategy-research" aria-label="公式営業リサーチ">
+<div class="strategy-research-head"><strong>公式リサーチ｜需要は未検証</strong><button type="button" id="strategy-research-load">情報を確認</button></div>
+<p id="strategy-research-status" role="status" aria-live="polite">未取得。停車中に公式情報を確認してください。</p>
+<div id="strategy-research-sources"></div>
+<a href="./research.html?phase=during" target="_blank" rel="noopener noreferrer">出典・更新時刻・交通情報の詳細を見る</a>
+</section>
+<div class="section-head"><svg><use href="#icon-clock"/></svg>17:00〜05:00｜時間帯別の仮説</div>
 <div class="strat-list"><button class="strat-row" data-strat="0"><time>17–20</time><span class="strat-copy"><b>久茂地・泉崎・旭橋</b><small>退勤・ホテル・飲食／GO・無線</small></span></button><button class="strat-row" data-strat="1"><time>20–22</time><span class="strat-copy"><b>久茂地・牧志・安里</b><small>短中距離の回転と次客獲得を重視</small></span></button><button class="strat-row" data-strat="2"><time>22–00</time><span class="strat-copy"><b>松山・久茂地・前島</b><small>深夜割増・長い付け待ちは避ける</small></span></button><button class="strat-row" data-strat="3"><time>00–02</time><span class="strat-copy"><b>松山・久茂地・若狭</b><small>帰宅需要、空車の多さに注意</small></span></button><button class="strat-row" data-strat="4"><time>02–05</time><span class="strat-copy"><b>降車地・帰庫動線</b><small>残存需要と帰庫への回送を比較</small></span></button></div>
-<div class="section-head"><svg><use href="#icon-target"/></svg>判断ルール（停車中のみ）</div>
-<div class="panel rules"><span><svg><use href="#icon-target"/></svg>5〜10分観察 → 15分で見直し</span><span><svg><use href="#icon-target"/></svg>長距離後は次客・帰路を比較</span><span><svg><use href="#icon-target"/></svg>高額客より、次の乗車までの時間を最小化</span></div>
-<button type="button" class="strategy-foot" id="m100-rule-btn" aria-label="M100営業判断の6つのルールを停車中に確認"><span>◎ M100｜営業判断の型（仮説）</span><strong>待つ・流す・移動の3択を確認 ›</strong></button>
-<div class="footer-card"><svg><use href="#icon-info"/></svg>営業実績で未検証の初期仮説。15分は強制移動の条件ではありません。</div>
+<button type="button" class="strategy-foot" id="m100-rule-btn" aria-label="M100営業判断ルールを停車中に確認"><span>◎ M100｜営業判断の型（仮説）</span><strong>判断ルールの詳細を開く ›</strong></button>
 </main>
-<main class="view history" id="history-view" aria-label="記録履歴画面"><div class="section-head">端末内｜降車・乗務記録</div><div class="panel history-sub">本画面は端末内の降車時刻を保存します。日報との自動照合・Notion保存は未接続。旧UIの記録は保持しています。</div><div id="history-list" class="history-list"></div><div class="history-controls"><button class="secondary-btn" id="export-btn">JSONバックアップを保存</button><button class="secondary-btn" id="history-info-btn">旧UIの記録を開く</button></div><div class="footer-card"><svg><use href="#icon-info"/></svg>保存先：この端末内のみ。Notion未連携</div></main>
-<main class="view analysis" id="analysis-view" aria-label="営業分析画面"><div class="section-head">確認できる数値だけを表示</div><div class="statgrid"><div class="stat"><small>降車ボタン記録</small><strong id="analysis-drops">0件</strong></div><div class="stat"><small>日報の売上</small><strong>未接続</strong></div><div class="stat"><small>実車時間率</small><strong>未計測</strong></div><div class="stat"><small>空車時間</small><strong>未計測</strong></div></div><div class="panel analysis-note">過去の紙日報に降車時刻がない場合、正確な空車時間は算出できません。新しい降車タップと、日報から得る乗車時刻・乗車番号を照合できたものだけ分析に利用します。</div><div class="panel analysis-memo">計画中：<br>① 日報写真と前回写真の差分読取<br>② 降車時刻との一意な照合<br>③ Notion正本へ認証付きの安全な登録<br>④ 30乗務の実績で那覇戦略の再校正</div><div class="footer-card"><svg><use href="#icon-info"/></svg>未確認情報を実績・確定売上として扱わない</div></main>
+<main class="view monthly" id="monthly-view" aria-label="月次売上画面"><section class="panel monthly-head"><h2 id="monthly-title">2026年11月</h2><span>確認済み日報のみを集計</span></section><section class="panel monthly-calendar" id="monthly-calendar" aria-label="月間カレンダー"></section><section class="panel monthly-summary"><div><small id="monthly-sum-label">確認済み日報の累積</small><strong id="monthly-sum-value">未登録</strong></div><div><small>月商目標（参考）</small><strong id="monthly-goal-value">¥1,000,000</strong></div><div><small>確認済み比率（暫定）</small><strong id="monthly-progress-value">—</strong></div></section><section class="panel monthly-notice" id="monthly-notice">日報の確認額は未登録です。勤務時間・給与予測・Notion同期は未接続です。</section></main><main class="view history" id="history-view" aria-label="記録履歴画面"><div class="section-head">端末内｜降車・乗務記録</div><div class="panel history-sub">本画面は端末内の降車時刻を保存します。日報との自動照合・Notion保存は未接続。旧UIの記録は保持しています。</div><div id="history-list" class="history-list"></div><div class="history-controls"><button class="secondary-btn" id="export-btn">JSONバックアップを保存</button><button class="secondary-btn" id="history-info-btn">旧UIの記録を開く</button></div><div class="footer-card"><svg><use href="#icon-info"/></svg>保存先：この端末内のみ。Notion未連携</div></main>
+<main class="view analysis" id="analysis-view" aria-label="営業分析画面"><div class="section-head">確認できる数値だけを表示</div><div class="statgrid"><div class="stat"><small>降車ボタン記録</small><strong id="analysis-drops">0件</strong></div><div class="stat"><small>当営業日の日報確認額</small><strong id="analysis-sales">未登録</strong></div><div class="stat"><small>実車時間率</small><strong>未計測</strong></div><div class="stat"><small>空車時間</small><strong>未計測</strong></div></div><div class="panel analysis-note"><p id="analysis-revenue-note">写真確認額は端末内の記録だけを表示します。Notion未同期。</p>過去の紙日報に降車時刻がない場合、正確な空車時間は算出できません。新しい降車タップと、日報から得る乗車時刻・乗車番号を照合できたものだけ分析に利用します。</div><div class="panel analysis-memo">計画中：<br>① 日報写真と前回写真の差分読取<br>② 降車時刻との一意な照合<br>③ Notion正本へ認証付きの安全な登録<br>④ 30乗務の実績で那覇戦略の再校正</div><div class="footer-card"><svg><use href="#icon-info"/></svg>未確認情報を実績・確定売上として扱わない</div></main>
 <nav class="nav" aria-label="画面切替"><button type="button" class="active" data-page="sales"><svg><use href="#icon-car"/></svg>営業</button><button type="button" data-page="strategy"><svg><use href="#icon-pin"/></svg>戦略</button><button type="button" data-page="history"><svg><use href="#icon-note"/></svg>履歴</button><button type="button" data-page="analysis"><svg><use href="#icon-bars"/></svg>分析</button></nav>
-<div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="操作確認"><div class="sheet"><button class="close" type="button" id="close-modal" aria-label="閉じる">×</button><h2 id="modal-title">確認</h2><div id="dropoff-outcome" class="dropoff-outcome" hidden><span id="dropoff-outcome-badge"></span><strong id="dropoff-outcome-time"></strong><span id="dropoff-outcome-count"></span></div><p id="modal-body"></p><div id="modal-actions" class="buttonrow"></div></div></div>
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-label="操作確認"><div class="sheet"><button class="close" type="button" id="close-modal" aria-label="閉じる">×</button><h2 id="modal-title">確認</h2><div id="dropoff-outcome" class="dropoff-outcome" hidden><span id="dropoff-outcome-badge"></span><strong id="dropoff-outcome-time"></strong><span id="dropoff-outcome-count"></span></div><div id="modal-body"></div>
+<form id="revenue-form" class="confirmed-revenue-form" hidden>
+<img id="revenue-preview" alt="選択した日報写真。必ず総収入欄を見比べてください。">
+<label>営業日<input id="revenue-day" type="date" required></label>
+<label>日報の総収入（円）<input id="revenue-amount" type="text" inputmode="numeric" placeholder="例：21950" required></label>
+<label>金額の区分<select id="revenue-basis"><option value="unconfirmed">税込・税抜は未確認</option><option value="tax-included">税込と確認</option><option value="tax-excluded">税抜と確認</option></select></label>
+<label>日報に記載された時刻（あれば）<input id="revenue-clock" type="time"></label>
+<label>写真から読み取った文字（任意・自動確定しません）<textarea id="revenue-text" placeholder="写真の文字を貼り付けると、総収入候補を表示します"></textarea></label><button type="button" id="revenue-paste-ocr">iPhoneで認識した文字を貼り付け</button>
+<span id="revenue-extract" class="revenue-note">写真の文字は自動読取していません。</span>
+<label class="revenue-check"><input id="revenue-is-total" type="checkbox" required>これは個別乗車履歴ではなく、総収入欄のある日報です</label>
+<label class="revenue-check"><input id="revenue-checked" type="checkbox" required>写真を見比べ、営業日と金額を確認しました</label>
+<label class="revenue-check"><input id="revenue-correction" type="checkbox">この営業日の過去記録を訂正する（履歴は残す）</label>
+<p class="revenue-note">この端末内だけに金額と写真の識別情報を保存。写真本体・認証情報は保存・送信せず、Notionには自動同期しません。</p>
+<p id="revenue-status" role="status" aria-live="polite"></p>
+<button type="submit" id="revenue-save-btn">確認済み累積売上を記録</button>
+</form><div id="modal-actions" class="buttonrow"></div></div></div>
+<section class="field-layer" id="field-layer" role="dialog" aria-modal="true" aria-labelledby="field-title" hidden>
+<div class="field-sheet"><div class="field-top"><h2 id="field-title">現状を報告</h2><button id="field-close" class="field-close" type="button" aria-label="閉じる">×</button></div>
+<p class="field-hint">安全に停車中、確認できた事実をタップするだけ。入力や会話は不要です。</p>
+<div class="field-grid">
+<button class="field-choice" data-observation="go_none">GO反応なし</button>
+<button class="field-choice" data-observation="radio_none">無線反応なし</button>
+<button class="field-choice" data-observation="supply_many">空車が多い</button>
+<button class="field-choice" data-observation="queue_still">待機列が動かない</button>
+<button class="field-choice" data-observation="queue_moves">待機列が進んだ</button>
+<button class="field-choice" data-observation="go_yes">GO反応あり</button>
+<button class="field-choice" data-observation="radio_yes">無線反応あり</button>
+<button class="field-choice" data-observation="supply_few">空車が少ない</button>
+<button class="field-choice" data-observation="traffic_issue">周辺に異常</button>
+<button class="field-choice" data-observation="location_wrong">現在地の情報が違う</button>
+</div>
+<p class="field-subtitle">最後の報告</p><div class="field-previous"><span id="field-last">報告なし</span><button type="button" class="field-undo" id="field-undo" disabled>直前の報告を取消</button></div>
+<p class="field-disclaimer">これは本人の現場観測の記録です。GO・無線の公式データではありません。十分な根拠がない場合、YOSの判断は「未判定」のままです。</p>
+</div></section>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div>
+<script src="../yos/hj/yos-ai-client.js"></script>
+<script src="../yos/hj/yos-auth.js"></script>
+<script src="./verified-revenue-v1.js"></script>
 <script>
 'use strict';
 (()=>{
@@ -295,11 +448,251 @@
  const time=(s,seconds=false)=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',...(seconds?{second:'2-digit'}:{}),hour12:false}).format(new Date(s));
  const dateKey=(d=new Date())=>{const x=new Date(d.getTime()-CUTOVER*3600000);return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(x)};
  const empty=()=>({businessDate:dateKey(),shiftStart:null,shiftEnd:null,events:[],photos:[],version:1});
- const parse=()=>{try{const s=JSON.parse(localStorage.getItem(STORE)||'null');return s?.version===1&&Array.isArray(s.events)&&Array.isArray(s.photos)?s:empty()}catch{return empty()}};
- let state=parse(),selectedFile=null,toastHandle=null,modalAction=null;
+ let shiftLedgerError=false;
+ const parse=()=>{try{const raw=localStorage.getItem(STORE);if(raw===null)return empty();const s=JSON.parse(raw);if(s?.version===1&&Array.isArray(s.events)&&Array.isArray(s.photos))return s;shiftLedgerError=true;return empty()}catch{shiftLedgerError=true;return empty()}};
+ let state=parse(),selectedFile=null,toastHandle=null;
+
+ // Only explicitly tapped wait time is known. Separate schema protects the existing shift/photo/event ledger.
+ const WAIT_STORE='yos-taxi-wait-clock-v1';
+ function loadWait(){
+   try{
+     const raw=localStorage.getItem(WAIT_STORE);
+     if(raw===null)return {record:null,error:false};
+     const w=JSON.parse(raw);
+     if(!w||w.version!==1||typeof w.businessDate!=='string'||typeof w.shiftStart!=='string'
+       ||typeof w.startedAt!=='string'||(w.endedAt!==null&&typeof w.endedAt!=='string')
+       ||!Number.isFinite(Date.parse(w.shiftStart))||!Number.isFinite(Date.parse(w.startedAt))
+       ||(w.endedAt!==null&&!Number.isFinite(Date.parse(w.endedAt))))return {record:null,error:true};
+     return {record:w,error:false};
+   }catch{return {record:null,error:true}}
+ }
+ let waitData=loadWait();
+ const waitSteps=[
+   {at:5,label:'5分観察',note:'周囲の需要・配車反応・競合を観察（仮説）'},
+   {at:10,label:'10分点検',note:'同じ場所で待つ理由を点検（仮説）'},
+   {at:15,label:'15分再判定',note:'待機継続の根拠を再確認（仮説）'},
+   {at:20,label:'20分再検討',note:'流し・移動・撤退を比較。強制移動ではありません（仮説）'},
+   {at:30,label:'30分原因確認',note:'長期待機の原因と次の需要を確認（仮説）'}
+ ];
+ function confirmedWait(now=Date.now()){
+   const w=waitData.record;
+   if(waitData.error||!w||w.endedAt||!isActive()||w.businessDate!==state.businessDate||w.shiftStart!==state.shiftStart)return null;
+   const start=Date.parse(w.startedAt),shift=Date.parse(state.shiftStart);
+   if(!Number.isFinite(start)||!Number.isFinite(shift)||start<shift||start>now+30000)return null;
+   // A later dropoff makes uninterrupted waiting impossible; never count ride time as wait.
+   if(state.events.some(e=>e.type==='dropoff'&&!e.voidedAt&&Date.parse(e.at)>=start))return null;
+   return w;
+ }
+ function waitView(now=Date.now()){
+   const w=confirmedWait(now);
+   if(!w)return {running:false,next:'待機開始未記録',note:waitData.error?'待機記録を読めません。保存内容を確認してください。':'安全に停車してから待機開始を記録してください。降車時刻からは推定しません。'};
+   const elapsed=Math.max(0,(now-Date.parse(w.startedAt))/60000),step=waitSteps.find(a=>elapsed<a.at);
+   if(!step)return {running:true,next:'30分超｜原因を確認',note:'節目は仮説です。待つ・流す・移動を停車中に再検討してください。',startedAt:w.startedAt};
+   return {running:true,next:'あと'+Math.ceil(step.at-elapsed)+'分｜'+step.label,note:step.note+'。走行中の操作・注視は禁止。',startedAt:w.startedAt};
+ }
+ function writeWait(record){
+   try{localStorage.setItem(WAIT_STORE,JSON.stringify(record));waitData={record,error:false};return true}
+   catch{toast('待機時計の保存に失敗。開始・終了は記録されていません');return false}
+ }
+ function startWait(){
+   if(waitData.error){toast('待機記録の形式が不正です。保護のため新規保存しません');return false}
+   if(!isActive()){toast('この端末で営業中と確認できる場合のみ待機を記録します');return false}
+   if(confirmedWait()){renderWait();return false} // duplicate tap
+   const record={version:1,businessDate:state.businessDate,shiftStart:state.shiftStart,startedAt:instant(),endedAt:null};
+   if(!writeWait(record))return false;
+   renderWait();toast('待機開始を端末に記録しました');return true;
+ }
+ function finishWait(reason='manual'){
+   const w=waitData.record;
+   if(waitData.error||!w||w.endedAt||w.businessDate!==state.businessDate||w.shiftStart!==state.shiftStart)return false;
+   if(!writeWait({...w,endedAt:instant(),endedReason:reason}))return false;
+   renderWait();return true;
+ }
+ function renderWait(){
+   const view=waitView(),button=$('wait-toggle');
+   $('wait-next').textContent=view.next;$('wait-guidance').textContent=view.note;
+   $('wait-started').textContent=view.running?'開始 '+time(view.startedAt,true)+'（端末で記録）':'正確な待機開始：未記録';
+   button.disabled=waitData.error||(!view.running&&!isActive());
+   button.textContent=view.running?'待機を終了':isActive()?'待機を開始':'営業中に利用';
+   button.dataset.running=String(view.running);
+ }
+
+
+ // Manual field observations never imply automated demand or GO/dispatch telemetry.
+ const FIELD_STORE='yos-taxi-field-reports-v1';
+ const fieldLabels=Object.freeze({go_none:'GO反応なし',radio_none:'無線反応なし',supply_many:'空車が多い',queue_still:'待機列が動かない',queue_moves:'待機列が進んだ',go_yes:'GO反応あり',radio_yes:'無線反応あり',supply_few:'空車が少ない',traffic_issue:'周辺に異常',location_wrong:'現在地の情報が違う'});
+ function readField(){
+   try{
+     const raw=localStorage.getItem(FIELD_STORE);
+     if(raw===null)return {entries:[],error:false};
+     const value=JSON.parse(raw);
+     if(!value||value.version!==1||!Array.isArray(value.entries)||value.entries.some(e=>
+       !e||typeof e.id!=='string'||typeof e.businessDate!=='string'||typeof e.shiftStart!=='string'||
+       typeof e.at!=='string'||!Number.isFinite(Date.parse(e.at))||!Object.hasOwn(fieldLabels,e.kind)||
+       (e.voidedAt!==undefined&&(typeof e.voidedAt!=='string'||!Number.isFinite(Date.parse(e.voidedAt))))))return {entries:[],error:true};
+     return {entries:value.entries,error:false};
+   }catch{return {entries:[],error:true}}
+ }
+ let fieldData=readField();
+ const shiftFieldEntries=entries=>entries.filter(e=>e.businessDate===state.businessDate&&e.shiftStart===state.shiftStart);
+ const currentFields=()=>shiftFieldEntries(fieldData.entries).filter(e=>!e.voidedAt);
+ function renderField(){
+   const latest=currentFields().at(-1),mostRecent=shiftFieldEntries(fieldData.entries).at(-1);
+   const label=latest?fieldLabels[latest.kind]+' · '+time(latest.at):'報告なし';
+   $('field-summary').textContent=label+' ›';$('field-last').textContent=latest?label+'（端末内）':'報告なし';
+   $('field-undo').disabled=fieldData.error||!isActive()||!mostRecent||Boolean(mostRecent.voidedAt);
+   renderYosSend();
+ }
+ function openField(){fieldData=readField();renderField();$('field-layer').hidden=false;$('field-close').focus()}
+ function closeField(){$('field-layer').hidden=true;$('field-open').focus()}
+ function reportField(kind){
+   if(!Object.hasOwn(fieldLabels,kind)){toast('報告項目が不正です');return false}
+   if(!isActive()){toast('営業中の記録がないため、報告は保存しません');return false}
+   const latest=readField();
+   if(latest.error){fieldData=latest;renderField();toast('既存報告が読めないため保存しません');return false}
+   const at=instant(),last=latest.entries.at(-1);
+   if(last&&!last.voidedAt&&last.businessDate===state.businessDate&&last.shiftStart===state.shiftStart&&last.kind===kind&&Date.parse(at)-Date.parse(last.at)<4000){
+     fieldData=latest;renderField();toast('同じ報告を記録済みです');return false;
+   }
+   const entry={id:typeof crypto.randomUUID==='function'?crypto.randomUUID():'report-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
+     businessDate:state.businessDate,shiftStart:state.shiftStart,at,kind,source:'manual-tap',locationStatus:'unverified'};
+   const entries=[...latest.entries,entry];
+   try{localStorage.setItem(FIELD_STORE,JSON.stringify({version:1,entries}))}
+   catch{toast('保存失敗。報告は追加していません');return false}
+   fieldData={entries,error:false};renderField();closeField();
+   toast('現場報告を保存しました。自動判断は未接続です');return true;
+ }
+ function undoField(){
+   if(!isActive()){toast('営業中の報告のみ取り消せます');return false}
+   const latest=readField();
+   if(latest.error){fieldData=latest;renderField();toast('記録を読めないため取り消せません');return false}
+   const target=shiftFieldEntries(latest.entries).at(-1);
+   if(!target||target.voidedAt){toast('取り消せる直前の報告がありません');return false}
+   const entries=latest.entries.map(e=>e.id===target.id?{...e,voidedAt:instant()}:e);
+   try{localStorage.setItem(FIELD_STORE,JSON.stringify({version:1,entries}))}
+   catch{toast('保存失敗。取消は未反映です');return false}
+   fieldData={entries,error:false};renderField();toast('直前の報告を取り消しました。履歴は保持しています');return true;
+ }
+
+
+ // Prepare an authenticated YOS /api/yos/chat input. Never send automatically or synthesize a location.
+ function prepareYosFieldRequest(now=Date.now()){
+   const records=readField();
+   if(records.error)return {status:'storage-error',request:null,reason:'現場報告の保存内容が不正'};
+   if(!isActive())return {status:'shift-unconfirmed',request:null,reason:'営業中の本人記録がない'};
+   const shiftTime=Date.parse(state.shiftStart);
+   if(!Number.isFinite(shiftTime)||!Number.isFinite(now))return {status:'invalid-time',request:null,reason:'勤務時刻を確認できない'};
+   const maxAgeMs=30*60000;
+   const fresh=records.entries.filter(e=>{
+     const at=Date.parse(e.at);
+     return e.businessDate===state.businessDate&&e.shiftStart===state.shiftStart
+       &&!e.voidedAt&&e.source==='manual-tap'&&Object.hasOwn(fieldLabels,e.kind)
+       &&Number.isFinite(at)&&at>=shiftTime&&at<=now+30000&&now-at<=maxAgeMs;
+   }).sort((a,b)=>Date.parse(a.at)-Date.parse(b.at)).slice(-10);
+   if(!fresh.length)return {status:'no-fresh-facts',request:null,reason:'過去30分の有効な現場報告がない'};
+   const lines=fresh.map(e=>'・'+new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit'}).format(new Date(e.at))+'　'+fieldLabels[e.kind]);
+   const wait=confirmedWait(now);
+   const waitMinutes=wait?Math.floor(Math.max(0,now-Date.parse(wait.startedAt))/60000):null;
+   const prompt=[
+     '【YOS TAXI｜本人の定型タップ報告】',
+     '営業日：'+state.businessDate,
+     '報告元：本人による手動タップ（GO・無線の公式データではない）',
+     '現在地：未確認。エリア、需要、空車台数、配車結果を推測しない。',
+     '観測（過去30分の本人申告、最大10件）：',
+     ...lines,
+     waitMinutes===null?'正確な待機開始時刻：未確認':'端末で開始を記録した待機時間：'+waitMinutes+'分',
+     '依頼：事実・推測・未確認を区別。確認済み情報が足りなければ「未判定」と明示し、移動先や最適待機時間を断定しない。安全に停車中に確認できる、短い返答と次の確認項目だけ示す。'
+   ].join('\n');
+   // The existing YOS chat API accepts userText; transport and Google ID token are not configured here.
+   return {status:'prepared-not-sent',request:{userText:prompt},eventsUsed:fresh.map(e=>e.id),source:'manual-tap',sent:false};
+ }
+
+
+ let yosPending=false,yosAnsweredEventIds=null;
+ function renderYosSend(){
+   const prepared=prepareYosFieldRequest();
+   $('field-yos-send').hidden=prepared.status!=='prepared-not-sent';
+   $('field-yos-send').disabled=yosPending;
+   $('field-yos-send').textContent=yosPending?'YOSに確認中…':'YOSに現状を送って相談';
+   if(yosAnsweredEventIds&&(prepared.status!=='prepared-not-sent'
+     ||prepared.eventsUsed.join('|')!==yosAnsweredEventIds.join('|'))){
+     $('field-yos-status').textContent='報告が変更されたか古くなったため、前の回答は現在の判断ではありません。';
+     $('field-yos-answer').hidden=true;
+     $('field-yos-answer').textContent='';
+     yosAnsweredEventIds=null;
+   }
+ }
+ // Network call ONLY after direct user click; no automatic send and no token/AI answer in localStorage.
+ async function sendFieldToYos(){
+   if(yosPending)return false;
+   const prepared=prepareYosFieldRequest();
+   if(prepared.status!=='prepared-not-sent'){
+     $('field-yos-response').hidden=false;
+     $('field-yos-answer').hidden=true;
+     $('field-yos-status').textContent='送信できません：新しい現場報告と営業中の状態を確認してください。';
+     renderYosSend();return false;
+   }
+   $('field-yos-response').hidden=false;
+   $('field-yos-answer').hidden=true;
+   if(typeof window.YosAiClient!=='function'||typeof window.YOS_AUTH?.getGoogleIdToken!=='function'){
+     $('field-yos-status').textContent='接続機能が読み込まれていません。現場報告は端末に保存済みです。';
+     return false;
+   }
+   const baseUrl=String(window.YOS_AI_BASE_URL||'');
+   if(baseUrl!=='https://project-y-yos-ai.vercel.app'){
+     $('field-yos-status').textContent='YOSの公式接続先を確認できません。送信しません。';
+     return false;
+   }
+   yosPending=true;renderYosSend();
+   $('field-yos-status').textContent='Googleで本人確認し、YOSへ照会しています…';
+   try{
+     const client=new window.YosAiClient({baseUrl,getGoogleIdToken:window.YOS_AUTH.getGoogleIdToken});
+     const result=await client.chat(prepared.request);
+     const answer=typeof result?.answer==='string'?result.answer.trim():'';
+     if(!answer||answer.length>10000)throw Error('Unusable YOS response');
+     const nowPrepared=prepareYosFieldRequest();
+     if(nowPrepared.status!=='prepared-not-sent'
+       ||nowPrepared.eventsUsed.join('|')!==prepared.eventsUsed.join('|')){
+       $('field-yos-status').textContent='新しい報告があるため、返答を現在の判断としては表示しません。';
+       $('field-yos-answer').hidden=true;
+       yosAnsweredEventIds=null;
+       return false;
+     }
+     yosAnsweredEventIds=[...prepared.eventsUsed];
+     $('field-yos-status').textContent='YOSから参考回答を受信しました（確定指示ではありません）';
+     $('field-yos-answer').textContent=answer;
+     $('field-yos-answer').hidden=false;
+     return true;
+   }catch(error){
+     const code=Number(error?.status);
+     $('field-yos-status').textContent=code===401?'本人認証が完了しませんでした。端末内の報告は保持しています。'
+       :code===403?'この画面からのYOS接続許可が確認できません。送信は未完了です。'
+       :code===429?'YOSの利用回数制限中です。報告は端末内に保持しています。'
+       :'YOSへの照会は完了していません。端末内の報告は保持しています。';
+     $('field-yos-answer').hidden=true;
+     yosAnsweredEventIds=null;
+     return false;
+   }finally{
+     yosPending=false;renderYosSend();
+   }
+ }
+
  const money=n=>'¥'+Math.round(n).toLocaleString('ja-JP');
  const number=n=>typeof n==='number'&&Number.isFinite(n)?n:null;
- const save=s=>{try{localStorage.setItem(STORE,JSON.stringify(s));state=s;return true}catch{notify('保存失敗：端末内記録は更新されませんでした');return false}};
+ const save=s=>{
+   if(shiftLedgerError){notify('既存の乗務記録が読めません。上書きせず停止しました。JSONバックアップを保存してください。');return false}
+   try{
+     const raw=localStorage.getItem(STORE);
+     if(raw!==null){
+       let existing;
+       try{existing=JSON.parse(raw)}catch{shiftLedgerError=true}
+       if(!existing||existing.version!==1||!Array.isArray(existing.events)||!Array.isArray(existing.photos))
+         shiftLedgerError=true;
+       if(shiftLedgerError){notify('乗務記録の異常を検知しました。上書きせず停止しました。');return false}
+     }
+     localStorage.setItem(STORE,JSON.stringify(s));state=s;return true;
+   }catch{notify('保存失敗：端末内記録は更新されませんでした');return false}
+ }
  function toast(msg){const box=$('toast');box.textContent=msg;box.classList.add('show');clearTimeout(toastHandle);toastHandle=setTimeout(()=>box.classList.remove('show'),3000)}
  function notify(msg){toast(msg)}
  function dayEvents(){return state.events.filter(e=>e.businessDate===dateKey())}
@@ -330,6 +723,7 @@
    const last=[...dayEvents()].reverse().find(e=>e.type==='dropoff');
    if(last&&Date.parse(at)-Date.parse(last.at)<4000){showDropoffResult('duplicate','4秒以内の連続操作を防止しました。新しい記録は追加していません。',last.at);return false}
    if(withEvent('dropoff',at,token)){
+     finishWait('dropoff');
      render();
      showDropoffResult('success','この画面の端末内に保存しました。紙の日報・Notionとは未同期です。',at);
      return true;
@@ -337,29 +731,265 @@
    showDropoffResult('error','端末内に保存できませんでした。記録を追加していない可能性があります。安全な場所で営業履歴を確認してください。');
    return false;
  }
-  function changeShift(){const now=instant(),today=dateKey(new Date(now));if(state.businessDate!==today&&state.shiftStart&&!state.shiftEnd){toast('前回の営業が未終了です。履歴でご確認ください');return}
+  function changeShift(){if(shiftLedgerError){toast('乗務記録を読めません。上書きせず停止しました。履歴からJSONバックアップを保存してください。');return}const now=instant(),today=dateKey(new Date(now));if(state.businessDate!==today&&state.shiftStart&&!state.shiftEnd){toast('前回の営業が未終了です。履歴でご確認ください');return}
  const base=state.businessDate===today?structuredClone(state):{...structuredClone(state),businessDate:today,shiftStart:null,shiftEnd:null};
  if(!base.shiftStart){openSheet('営業を開始',`営業開始の時刻を端末に記録します。`,[{text:'開始する',primary:true,run:()=>{const s=structuredClone(base);s.shiftStart=instant();if(commitShift(s,'shift_start')){render();toast('営業開始を記録しました')}}}]);return}
  if(!base.shiftEnd){openSheet('営業終了',`営業終了時刻を記録します。降車ボタンの未照合件数：${drops().filter(x=>!x.matched).length}件。`,[{text:'終了する',primary:true,run:()=>{const s=structuredClone(base);s.shiftEnd=instant();if(commitShift(s,'shift_end')){render();toast('営業終了を記録しました')}}}]);return}toast('この営業日は終了済みです')}
- function commitShift(s,type){s.events.push({id:crypto.randomUUID?.()||`local-${Date.now()}`,businessDate:s.businessDate,type,at:type==='shift_start'?s.shiftStart:s.shiftEnd,matched:false});return save(s)}
+ function commitShift(s,type){s.events.push({id:crypto.randomUUID?.()||`local-${Date.now()}`,businessDate:s.businessDate,type,at:type==='shift_start'?s.shiftStart:s.shiftEnd,matched:false});const ok=save(s);if(ok&&type==='shift_end')finishWait('shift_end');return ok}
  function activeBand(d=new Date()){const h=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(d));if(h>=17&&h<22)return 0;if(h>=22||h<2)return 1;if(h>=2&&h<5)return 2;return -1}
  const advice=[['久茂地・牧志で回転','次客までの時間を重視'],['松山・久茂地の需要','同じ待ち方は15分で見直す'],['降車先の次客を確認','帰庫までの効率も比較']];
  const strategyDetail=['退勤・ホテル／GO・無線が中心','飲食移動は回転と次客の早さ','深夜割増。待機過多は避ける','帰宅需要を検証。供給過多に注意','降車後の再乗車と帰庫を比較'];
- function updatePlan(){const band=activeBand(),item=advice[band]||['次の営業に向けて需要を確認','時間帯による初期仮説・現地需要は未確認'];$('decision-text').textContent=item[0];$('decision-sub').textContent=item[1];$('strategy-main').textContent=item[0];document.querySelectorAll('[data-band]').forEach(x=>{const slot=Number(x.dataset.band);x.classList.toggle('selected',slot===band);x.classList.toggle('current',slot===(band<0?0:band))});const localHour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(new Date()));const stratSlot=localHour>=17&&localHour<20?0:localHour>=20&&localHour<22?1:localHour>=22?2:localHour<2?3:localHour>=2&&localHour<5?4:-1;document.querySelectorAll('[data-strat]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.strat)===stratSlot));$('strategy-detail').textContent=stratSlot<0?'営業時間外。次回の需要は未確認':strategyDetail[stratSlot]}
- function render(){const now=new Date();$('current-clock').textContent=time(now);const active=isActive(),ended=isEnded();$('status-label').textContent=active?'営業中':ended?'営業終了':'営業前';$('status-dot').className='status-dot '+(active?'':ended?'end':'off');const d=drops();$('ride-count').textContent=d.length+'件';$('pending-count').textContent=d.filter(e=>!e.matched).length+'件';$('analysis-drops').textContent=d.length+'件';$('report-clock').textContent='日報未反映';$('last-reflected').textContent='最終反映：なし（日報）';$('sync-status').textContent='Notion未接続';// Pending Notion integration: never infer a fare from a tap or metadata from a photograph.
- $('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';updatePlan();renderHistory()}
+ function updatePlan(){const band=activeBand(),item=advice[band]||['次の営業に向けて需要を確認','時間帯による初期仮説・現地需要は未確認'];$('decision-text').textContent=item[0];$('decision-sub').textContent=item[1];document.querySelectorAll('[data-band]').forEach(x=>{const slot=Number(x.dataset.band);x.classList.toggle('selected',slot===band);x.classList.toggle('current',slot===(band<0?0:band))});const localHour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tokyo',hour:'2-digit',hourCycle:'h23'}).format(new Date()));const stratSlot=localHour>=17&&localHour<20?0:localHour>=20&&localHour<22?1:localHour>=22?2:localHour<2?3:localHour>=2&&localHour<5?4:-1;document.querySelectorAll('[data-strat]').forEach(x=>x.classList.toggle('selected',Number(x.dataset.strat)===stratSlot));}
+ function render(){const now=new Date();$('current-clock').textContent=time(now);const active=isActive(),ended=isEnded();$('status-label').textContent=shiftLedgerError?'乗務記録読込エラー':active?'営業中':ended?'営業終了':'営業前';$('status-dot').className='status-dot '+(active?'':ended?'end':'off');const d=drops();$('ride-count').textContent=d.length+'件';$('pending-count').textContent=d.filter(e=>!e.matched).length+'件';$('analysis-drops').textContent=d.length+'件';$('report-clock').textContent='日報未反映';$('last-reflected').textContent='最終反映：なし（日報）';$('sync-status').textContent='Notion未接続';// Pending Notion integration: never infer a fare from a tap or metadata from a photograph.
+ $('remaining-shift').textContent='未確認';$('remaining-target').textContent='未確認';$('required-hourly').textContent='算出不可';$('confirmed-hourly').textContent='算出不可';$('sales-value').textContent='—';$('target-value').textContent='—';$('progress-value').textContent='—';$('progress-bar').style.width='0%';$('hourly-value').textContent='—';$('average-value').textContent='—';renderConfirmedRevenue();updatePlan();renderWait();renderField();renderHistory()}
  function renderHistory(){const list=$('history-list');list.replaceChildren();const events=dayEvents().slice().reverse();if(!events.length){const el=document.createElement('div');el.className='log';el.textContent='この営業日の記録はまだありません。';list.append(el)}events.forEach(e=>{const row=document.createElement(e.type==='dropoff'?'button':'div');if(e.type==='dropoff')row.type='button';row.className='log'+(e.voidedAt?' voided':'');const a=document.createElement('div');const title=document.createElement('b');title.textContent=e.type==='dropoff'?(e.voidedAt?'降車記録・取消済':'降車時刻'):e.type==='shift_start'?'営業開始':'営業終了';const caption=document.createElement('small');caption.textContent=' '+time(e.at,true)+' ・ '+(e.type==='dropoff'?(e.voidedAt?'取消履歴':'日報未照合'):'端末内記録');a.append(title,document.createElement('br'),caption);const b=document.createElement('span');b.className='badge';b.textContent=e.type==='dropoff'?'訂正':'端末内';row.append(a,b);if(e.type==='dropoff')row.addEventListener('click',()=>{openSheet(e.voidedAt?'降車記録を復帰':'降車記録を取り消す',`記録時刻 ${time(e.at,true)}。取り消しても履歴は削除しません。`,[{text:e.voidedAt?'取消を戻す':'記録を取消',primary:true,run:()=>{const s=structuredClone(state);const target=s.events.find(x=>x.id===e.id);if(!target)return;if(target.voidedAt)delete target.voidedAt;else target.voidedAt=instant();if(save(s)){render();toast('降車記録の状態を更新しました')}}}])});list.append(row)})}
- function navigate(page){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===page+'-view'));document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page))}
- function openSheet(title,body,actions=[]){$('modal').classList.remove('dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true;$('modal-title').textContent=title;$('modal-body').textContent=body;const area=$('modal-actions');area.replaceChildren();const cancel=document.createElement('button');cancel.textContent='閉じる';cancel.addEventListener('click',closeSheet);area.append(cancel);actions.forEach(a=>{const btn=document.createElement('button');btn.textContent=a.text;btn.classList.toggle('primary',a.primary===true);btn.addEventListener('click',()=>{closeSheet();a.run()});area.append(btn)});$('modal').classList.add('open')}
- function closeSheet(){$('modal').classList.remove('open','m100-open','dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true}
- function handleFile(file){if(!file)return;if(!file.type.startsWith('image/')){toast('画像ファイルを選んでください');return}selectedFile=file;openSheet('日報写真を選択しました',`${file.name}\n画像は現在未送信・未保存です。共有シートが使える場合は共有先のアプリを選んでください。Notionへの自動照合は未実装です。`,[{text:'共有シートを開く',primary:true,run:sharePhoto}])}
+ // Read-only official-source briefing; never feeds the decision card or shift ledger.
+ let strategyResearchFeed=null,strategyResearchRequested=false;
+ function renderStrategyResearch(feed=strategyResearchFeed,now=Date.now()){
+   const status=$('strategy-research-status'),holder=$('strategy-research-sources');
+   holder.replaceChildren();
+   if(!feed){status.textContent='未取得。停車中に公式情報を確認してください。';return}
+   const published=Date.parse(feed.generatedAt),age=(now-published)/60000;
+   if(feed.schema!==1||!Number.isFinite(published)||!Array.isArray(feed.sources)||age>150||age< -10){
+     status.textContent='配信が古いか不正です。営業判断に使用しないでください。';return;
+   }
+   const sources=feed.sources.filter(s=>s&&typeof s.name==='string'&&['ok','stale','unknown','error'].includes(s.status)).slice(0,5);
+   if(!sources.length){status.textContent='公式情報源を確認できません。営業判断に使用しないでください。';return}
+   const ok=sources.filter(s=>s.status==='ok').length;
+   status.textContent=ok?'公式情報源 '+ok+'/'+sources.length+'件取得（需要・推奨エリアは未検証）':'公式情報源は未取得・要確認（需要は未検証）';
+   for(const source of sources){
+     const row=document.createElement('div');
+     const label=source.status==='ok'?'取得成功':source.status==='stale'?'原本が古い':source.status==='unknown'?'更新日不明':'未取得';
+     row.textContent=source.name.slice(0,40)+'｜'+label+(source.status==='ok'&&typeof source.summary==='string'?'｜'+source.summary.slice(0,110):'');
+     holder.append(row);
+     // A reservation or official headline is evidence to check, NOT a demand signal.
+     if(source.status==='ok'&&Array.isArray(source.items)){
+       for(const item of source.items.slice(0,2)){
+         if(!item||typeof item.title!=='string')continue;
+         const itemRow=document.createElement('div');
+         const when=typeof item.eventAt==='string'?Date.parse(item.eventAt):NaN;
+         const timeLabel=Number.isFinite(when)&&when>=now-24*3600000&&when<=now+48*3600000
+           ?new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(when))+'｜':'';
+         itemRow.textContent='参考候補｜'+timeLabel+item.title.slice(0,110)+'（実際の需要は未確認）';
+         holder.append(itemRow);
+       }
+     }
+   }
+ }
+ async function loadStrategyResearch(){
+   const btn=$('strategy-research-load');if(btn.disabled)return;
+   btn.disabled=true;$('strategy-research-status').textContent='公式情報を取得中…';
+   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
+   try{
+     const res=await fetch('./research-feed.json?ts='+Date.now(),{cache:'no-store',signal:controller.signal});
+     if(!res.ok)throw Error('http');
+     const raw=await res.text();if(raw.length>150000)throw Error('too-large');
+     const parsed=JSON.parse(raw);
+     if(parsed?.schema!==1||!Array.isArray(parsed.sources)||!Number.isFinite(Date.parse(parsed.generatedAt)))throw Error('schema');
+     strategyResearchFeed=parsed;renderStrategyResearch();
+   }catch{
+     strategyResearchFeed=null;$('strategy-research-sources').replaceChildren();
+     $('strategy-research-status').textContent='取得失敗。推測せず、詳細画面から公式原本を確認してください。';
+   }finally{clearTimeout(timer);btn.disabled=false}
+ }
+ function renderMonthly(){
+   // A shift that crosses midnight belongs to its starting business day (08:00 JST cutover).
+   const monthKey=dateKey(new Date()).slice(0,7),year=Number(monthKey.slice(0,4)),month=Number(monthKey.slice(5,7));
+   $('monthly-title').textContent=year+'年'+month+'月';
+   const days=new Date(year,month,0).getDate(),offset=new Date(year,month-1,1).getDay(),cal=$('monthly-calendar');
+   const api=window.YosTaxiConfirmedRevenueV1;
+   const monthly=api?.monthSummary(monthKey)||{status:'no-data',dayCount:0};
+   cal.replaceChildren();
+   for(const name of ['日','月','火','水','木','金','土']){
+     const el=document.createElement('span');el.className='month-weekday';el.textContent=name;cal.append(el);
+   }
+   for(let i=0;i<offset;i++){
+     const el=document.createElement('span');el.className='month-blank';cal.append(el);
+   }
+   for(let d=1;d<=days;d++){
+     const el=document.createElement('div');el.className='month-day';
+     const date=document.createElement('b');date.textContent=String(d);
+     const val=document.createElement('small');
+     const record=monthly.status!=='corrupt-preserved'&&api?.latest(monthKey+'-'+String(d).padStart(2,'0'));
+     val.textContent=record?'¥'+record.amountYen.toLocaleString('ja-JP'):'—';
+     el.append(date,val);cal.append(el);
+   }
+   $('monthly-sum-label').textContent=monthly.dayCount?'確認済み '+monthly.dayCount+'日（暫定）':'確認済み日報の累積';
+   const value=$('monthly-sum-value'),notice=$('monthly-notice'),progress=$('monthly-progress-value');
+   // This ratio is informational only; the goal tax basis is not yet configured.
+   progress.textContent=monthly.status==='partial'&&Number.isSafeInteger(monthly.totalYen)
+     ?(monthly.totalYen/1000000*100).toFixed(1)+'%（参考）':'—';
+   if(monthly.status==='partial'){
+     value.textContent=money(monthly.totalYen);
+     notice.textContent=(monthly.taxBasis==='tax-included'?'税込':'税抜')+'で確認した各営業日の最新累積額だけを参考合計。100万円との比率は税区分の一致が未確認の参考値であり、目標達成の判定ではありません。勤務終了後の確定月商ではありません。Notion未同期・給与予測未計算。';
+   }else if(monthly.status==='mixed-basis'){
+     value.textContent='区分混在';
+     notice.textContent='税込・税抜・未確認の金額が混在しているため、誤った月商を作らないよう合計を表示しません。各日の日報で確認してください。';
+   }else if(monthly.status==='basis-unconfirmed'){
+     value.textContent='区分未確認';
+     notice.textContent='日別の確認額は表示しています。税込・税抜が未確定のため月間合計は表示しません。Notion未同期。';
+   }else if(monthly.status==='corrupt-preserved'){
+     value.textContent='読込エラー';
+     notice.textContent='端末の日報記録が読めません。古い記録を上書きせず保護しています。';
+   }else{
+     value.textContent='未登録';
+     notice.textContent='確認済み日報の登録はありません。勤務時間・給与予測・Notion同期は未接続です。';
+   }
+ }
+ function navigate(page){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===page+'-view'));document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page));if(page==='strategy'&&!strategyResearchRequested){strategyResearchRequested=true;void loadStrategyResearch()}}
+ function openSheet(title,body,actions=[]){revenueFormEpoch++;revenueSubmissionPending=false;$('revenue-save-btn').disabled=false;$('revenue-save-btn').textContent='確認済み累積売上を記録';$('revenue-form').hidden=true;releaseRevenuePreview();$('modal').classList.remove('dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true;$('modal-title').textContent=title;$('modal-body').textContent=body;const area=$('modal-actions');area.replaceChildren();const cancel=document.createElement('button');cancel.textContent='閉じる';cancel.addEventListener('click',closeSheet);area.append(cancel);actions.forEach(a=>{const btn=document.createElement('button');btn.textContent=a.text;btn.classList.toggle('primary',a.primary===true);btn.addEventListener('click',()=>{closeSheet();a.run()});area.append(btn)});$('modal').classList.add('open')}
+ function closeSheet(){revenueFormEpoch++;revenueSubmissionPending=false;$('revenue-save-btn').disabled=false;$('revenue-save-btn').textContent='確認済み累積売上を記録';releaseRevenuePreview();$('revenue-form').hidden=true;$('modal').classList.remove('open','m100-open','dropoff-result','dropoff-result-success','dropoff-result-error','dropoff-result-duplicate');$('dropoff-outcome').hidden=true}
+
+ let revenuePreviewUrl=null,revenueSubmissionPending=false,revenueFormEpoch=0;
+ function renderConfirmedRevenue(){
+   const api=window.YosTaxiConfirmedRevenueV1;
+   const ledger=api?.load(),analysis=$('analysis-sales'),note=$('analysis-revenue-note');
+   if(ledger?.error){
+     $('report-clock').textContent='日報記録を読めません';
+     analysis.textContent='読込エラー';
+     note.textContent='日報記録が壊れているため金額を表示しません。元データを上書きせず保護しています。';
+     return;
+   }
+   const confirmed=api?.latest(state.businessDate);
+   analysis.textContent=confirmed?money(confirmed.amountYen):'未登録';
+   note.textContent=confirmed?'営業日 '+confirmed.businessDate+' の写真を本人が確認した累積額（'+(confirmed.taxBasis==='tax-included'?'税込':confirmed.taxBasis==='tax-excluded'?'税抜':'税区分未確認')+'）。未確定・Notion未同期。':'写真で確認した日報はまだありません。Notion未同期。';
+   if(!confirmed)return;
+   $('sales-value').textContent=money(confirmed.amountYen);
+   $('report-clock').textContent='総収入を端末で確認・'+(confirmed.taxBasis==='unconfirmed'?'税込／税抜未確認':confirmed.taxBasis==='tax-included'?'税込':'税抜');
+   $('last-reflected').textContent='営業日 '+confirmed.businessDate+' の写真確認額・Notion未同期';
+ }
+ function releaseRevenuePreview(){
+   if(revenuePreviewUrl){URL.revokeObjectURL(revenuePreviewUrl);revenuePreviewUrl=null}
+   $('revenue-preview').removeAttribute?.('src');
+ }
+ function openRevenueConfirm(){
+   if(!selectedFile){toast('写真を選択してください');return}
+   const api=window.YosTaxiConfirmedRevenueV1;
+   if(!api){openSheet('記録できません','安全な保存機能を読み込めませんでした。既存データは変更していません。');return}
+   openSheet('紙日報の累積額を確認','写真の文字は「YOS TAXI 日報」ショートカットで端末内認識できます。必ず写真の総収入欄を確認して記録します。');
+   const form=$('revenue-form');form.reset();form.hidden=false;
+   $('revenue-day').value=state.businessDate;
+   $('revenue-extract').textContent='写真の文字は自動読取していません。';
+   $('revenue-status').textContent='';
+   releaseRevenuePreview();
+   revenuePreviewUrl=URL.createObjectURL(selectedFile);
+   $('revenue-preview').src=revenuePreviewUrl;
+ }
+ async function saveRevenueForm(ev){
+   ev.preventDefault();
+   if(revenueSubmissionPending)return; // In-flight SHA reads must never submit twice.
+   const api=window.YosTaxiConfirmedRevenueV1,file=selectedFile,form=$('revenue-form');
+   if(!api||!file||!/^image\//.test(file.type)||file.size>16*1024*1024){
+     $('revenue-status').textContent='画像を確認できません。保存していません。';return;
+   }
+   function readForm(){
+     return {businessDate:$('revenue-day').value,amountYen:$('revenue-amount').value,
+       reportClock:$('revenue-clock').value||null,taxBasis:$('revenue-basis').value,
+       correction:$('revenue-correction').checked,photoText:$('revenue-text').value,
+       isTotal:$('revenue-is-total').checked,checked:$('revenue-checked').checked};
+   }
+   const snapshot=readForm(),fingerprint=JSON.stringify(snapshot);
+   if(!snapshot.isTotal||!snapshot.checked){
+     $('revenue-status').textContent='日報と営業日・金額の確認が必要です。';return;
+   }
+   if(api.detectText(snapshot.photoText).kind==='ride-history'){
+     $('revenue-status').textContent='営業履歴の個別運賃は累積総収入として記録できません。紙日報を選んでください。';return;
+   }
+   if(!crypto.subtle?.digest){$('revenue-status').textContent='写真の重複検知が使えません。保存しません。';return}
+   const epoch=revenueFormEpoch,button=$('revenue-save-btn');
+   revenueSubmissionPending=true;button.disabled=true;button.textContent='写真を照合中…';
+   try{
+     const bytes=await file.arrayBuffer();
+     const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
+     // Closing the sheet, changing the selected file or editing a checked field cancels the save.
+     if(epoch!==revenueFormEpoch||file!==selectedFile||form.hidden)return;
+     if(JSON.stringify(readForm())!==fingerprint){
+       $('revenue-status').textContent='確認後に入力が変更されました。もう一度確認して保存してください。';
+       return;
+     }
+     const hash='sha256:'+Array.from(digest,b=>b.toString(16).padStart(2,'0')).join('');
+     const previous=api.latest(snapshot.businessDate);
+     const input={businessDate:snapshot.businessDate,amountYen:snapshot.amountYen,
+       reportClock:snapshot.reportClock,taxBasis:snapshot.taxBasis,
+       photoSha256:hash,photoKind:'paper-total'};
+     if(snapshot.correction&&previous)input.correctionOf=previous.id;
+     const result=api.confirm(input);
+     const reasons={
+       'invalid':'営業日・総収入・区分の形式を確認してください。',
+       'duplicate-photo':'同じ写真は記録済みです。二重加算しません。',
+       'duplicate-total':'同一の累積額です。追加していません。',
+       'needs-correction-confirmation':'同じ営業日の記録があります。時刻の確認か、訂正チェックが必要です。',
+       'stale-report':'前回より古い時刻の写真です。訂正する場合のみ明示してください。',
+       'decrease-needs-review':'前回より金額が少ないため、自動更新しません。訂正ならチェックしてください。',
+       'corrupt-preserved':'既存の記録が読めません。上書きせず停止しました。',
+       'storage-error':'端末の保存に失敗しました。既存データは保持しています。',
+       'stale-correction':'訂正先の記録が変わっています。再確認してください。'
+     };
+     if(result.status!=='saved'){$('revenue-status').textContent=reasons[result.status]||'保存できませんでした。';return}
+     selectedFile=null;closeSheet();render();renderMonthly();
+     toast('累積総収入を確認額で更新しました（端末内・Notion未同期）');
+   }catch{
+     if(epoch===revenueFormEpoch)$('revenue-status').textContent='写真の照合に失敗しました。保存は実行していません。';
+   }finally{
+     if(epoch===revenueFormEpoch){
+       revenueSubmissionPending=false;button.disabled=false;button.textContent='確認済み累積売上を記録';
+     }
+   }
+ }
+ async function pasteRevenueOcr(){
+   const output=$('revenue-status');
+   if(!navigator.clipboard?.readText){output.textContent='このブラウザーは貼り付けボタンに非対応です。テキスト欄を長押しして「ペースト」を選んでください。';return}
+   try{
+     const value=await navigator.clipboard.readText();
+     if(!value.trim()||value.length>12000){output.textContent='コピーされた文字がないか長すぎます。写真を確認し、必要な文字だけ貼り付けてください。';return}
+     if($('revenue-form').hidden)return;
+     $('revenue-text').value=value;
+     onRevenueText();
+     output.textContent='文字を貼り付けました。総収入候補を写真と照合してください。金額はまだ保存していません。';
+   }catch{
+     output.textContent='クリップボードを読めません。テキスト欄を長押しして「ペースト」を選んでください。';
+   }
+ }
+ function onRevenueText(){
+   const api=window.YosTaxiConfirmedRevenueV1;if(!api)return;
+   const found=api.detectText($('revenue-text').value);
+   if(found.kind==='ride-history'){$('revenue-extract').textContent='個別の営業履歴です。日報の累積売上には使えません。';return}
+   if(found.kind==='paper-total'&&found.grossYen!==null){
+     $('revenue-extract').textContent='総収入候補 '+money(found.grossYen)+'。必ず写真と照合してください。';
+     $('revenue-amount').value=String(found.grossYen);
+   }else{$('revenue-extract').textContent='総収入の候補を特定できません。写真を直接確認してください。'}
+ }
+
+ function handleFile(file){if(!file)return;if(!file.type.startsWith('image/')){toast('画像ファイルを選んでください');return}selectedFile=file;openSheet('日報写真を選択しました',`${file.name}\n画像は現在未送信・未保存です。金額の確認後に端末内へ記録できます。Notionへの自動照合は未実装です。`,[{text:'総収入を確認して記録',primary:true,run:openRevenueConfirm},{text:'共有シートを開く',run:sharePhoto}])}
  async function sharePhoto(){const file=selectedFile;if(!file){toast('写真を先に選択してください');return}try{if(navigator.canShare?.({files:[file]})&&navigator.share){await navigator.share({files:[file],title:'YOS Taxi｜手書き日報',text:'YOS Taxiの日報写真です。既存の乗務記録と差分を照合してください。'});toast('共有先での取り込み結果を確認してください（Notion連携なし）')}else{openSheet('写真の共有は未対応','この環境では写真共有シートを利用できません。写真をChatGPT等へ直接共有してください。')}}catch(e){if(e?.name!=='AbortError')toast('写真を共有できませんでした')}}
- function exportJson(){const data={disclaimer:'このファイルは新UIの端末内時刻記録です。Notion正本・紙日報の代替ではありません',state};const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`yos-taxi-local-${state.businessDate}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000)}
+ function exportJson(){
+   // Export exact bytes as well as parsed views: malformed records must never disappear
+   // behind parse()'s safe empty-state fallback. No writes, imports, or remote uploads.
+   const keys=[STORE,WAIT_STORE,FIELD_STORE,window.YosTaxiConfirmedRevenueV1?.KEY].filter(Boolean);
+   const rawLedgers={};
+   try{
+     for(const key of keys)rawLedgers[key]=localStorage.getItem(key);
+   }catch{
+     toast('端末の記録を読み取れず、バックアップを作成できませんでした。既存データは変更していません。');
+     return;
+   }
+   const revenueApi=window.YosTaxiConfirmedRevenueV1;
+   const loaded=revenueApi?.load();
+   const revenueBackup=!revenueApi?null:loaded.error
+     ?{status:'corrupt-preserved',raw:rawLedgers[revenueApi.KEY]}
+     :{version:1,records:loaded.records};
+   const data={formatVersion:2,exportedAt:instant(),
+     disclaimer:'端末内の乗務・待機・現場報告・確認済み日報の手動バックアップです。Notion正本・紙日報の代替ではなく、自動復元・自動同期はしません。',
+     state,confirmedRevenue:revenueBackup,rawLedgers};
+   const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+   const a=document.createElement('a');a.href=url;a.download=`yos-taxi-local-${state.businessDate}.json`;a.click();
+   setTimeout(()=>URL.revokeObjectURL(url),5000);
+ }
  // M100 is a safe-stop checklist, not an automatic revenue predictor.
  const m100Rules=[
   '1｜降車前：次の一手を仮決め。降車先の次客・帰庫動線を考慮。',
   '2｜空車時：安全な停車場所で「待つ・流す・移動」を比較。需要が未確認なら移動先を断定しない。',
-  '3｜5分で観察、10分で点検、15分で再判断、30分で原因確認。すべて暫定の見直し目安で、強制移動ではない。',
+  '3｜5分観察、10分点検、15分再判定、20分で流し・移動・撤退を再検討、30分原因確認。暫定目安で強制移動ではない。',
   '4｜移動は、回送時間を含めても改善が見込める場合のみ。人気エリアへの無根拠な回送を避ける。',
   '5｜1乗車ではなく次客獲得までの1サイクルで比較。ロング客も歓迎し、降車後の機会を含めて評価。',
   '6｜営業後：日報の実売上・乗車数・空車時間（確認できたものだけ）を比較。30乗務を初期観察の目安にする。',
@@ -367,7 +997,17 @@
   '【安全】走行中の画面操作・注視はしない。乗車拒否・違法待機・休憩削減は行わない。'
  ];
  function showM100(){openSheet('M100｜営業判断ルール',m100Rules.join('\n\n'));$('modal').classList.add('m100-open')}
+ $('field-open').addEventListener('click',openField);
+ $('field-close').addEventListener('click',closeField);
+ $('field-layer').addEventListener('click',e=>{if(e.target===$('field-layer'))closeField()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('field-layer').hidden)closeField()});
+ document.querySelectorAll('[data-observation]').forEach(b=>b.addEventListener('click',()=>reportField(b.dataset.observation)));
+ $('field-undo').addEventListener('click',undoField);
+ $('field-yos-send').addEventListener('click',sendFieldToYos);
  $('m100-rule-btn').addEventListener('click',showM100);
+ $('revenue-form').addEventListener('submit',saveRevenueForm);
+ $('revenue-text').addEventListener('input',onRevenueText);
+ $('wait-toggle').addEventListener('click',()=>{if(confirmedWait())finishWait();else startWait()});
  // Shortcut widget deep-link: the action runs ONLY in the storage container that opens this URL.
  // iOS standalone PWA storage is separate from Safari; never create a new shift silently.
  function handleShortcutLink(){
@@ -375,7 +1015,8 @@
    if(!action)return;
    const requestId=url.searchParams.get('yos_req');
    // Remove the action BEFORE doing anything; refresh/back must not re-run the operation.
-   url.searchParams.delete('yos_action');url.searchParams.delete('yos_req');
+   const ocrClipboard=action==='report'&&url.searchParams.get('yos_ocr')==='clipboard';
+   url.searchParams.delete('yos_action');url.searchParams.delete('yos_req');url.searchParams.delete('yos_ocr');
    history.replaceState(history.state,'',url.pathname+url.search+url.hash);
    if(action==='dropoff'){
      if(!requestId||!/^[A-Za-z0-9_-]{12,80}$/.test(requestId)){
@@ -402,14 +1043,18 @@
      if(!isActive()){openSheet('営業終了は記録していません','この画面の保存先に営業中の記録がありません。履歴と実際の勤務を確認してください。');return;}
      changeShift();return;
    }
-   if(action==='report'){navigate('sales');$('photo-btn').focus();toast('日報写真ボタンから写真を選択してください');return;}
+   if(action==='report'){navigate('sales');$('photo-btn').focus();toast(ocrClipboard?'OCR文字をコピー済み。同じ写真を選び、確認画面の「文字を貼り付け」を押してください':'日報写真ボタンから写真を選択してください');return;}
    if(action==='history'){navigate('history');return;}
    if(action==='analysis'){navigate('analysis');return;}
    if(action==='m100'){navigate('strategy');showM100();}
  }
- $('status-btn').addEventListener('click',changeShift);$('drop-btn').addEventListener('click',()=>stampDropoff());$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
- render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan()},30000);
- window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand};
+ $('strategy-research-load').addEventListener('click',loadStrategyResearch);
+ $('revenue-paste-ocr').addEventListener('click',pasteRevenueOcr);
+ $('monthly-open').addEventListener('click',()=>{renderMonthly();navigate('monthly')});$('status-btn').addEventListener('click',changeShift);$('drop-btn').addEventListener('click',()=>stampDropoff());$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
+ renderMonthly();render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait();renderYosSend();if(strategyResearchFeed)renderStrategyResearch()},15000);
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderWait();renderYosSend()}});
+ addEventListener('pageshow',()=>{renderWait();renderYosSend()});
+ window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand,waitClock:{get:()=>waitView(),start:startWait,stop:finishWait,refresh:renderWait},fieldReport:{list:()=>structuredClone(currentFields()),record:reportField,undo:undoField,refresh:renderField,prepareYosRequest:prepareYosFieldRequest,sendToYos:sendFieldToYos}};
  if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 })();
 </script>

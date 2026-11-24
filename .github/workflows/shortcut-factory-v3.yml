@@ -174,7 +174,6 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-
   # PR-only signed launcher; no automatic install or modification of Untitled Script 9.
   build-bravia-quick-test:
     if: github.event_name == 'pull_request'
@@ -188,7 +187,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check 'ios-app/scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js'
-          node --test ios-app/tests/bravia-quick-media.test.mjs
+          node --test ios-app/tests/bravia-quick-media.test.mjs ios-app/tests/bravia-v67-controls.test.mjs ios-app/tests/remote-v66-picture.test.mjs
           python3 tools/shortcut-factory/validate_secret_free.py 'tools/shortcut-factory/shortcuts/YOS BRAVIA クイック TEST.cherri'
 
       - name: Install existing pinned Cherri v2.3.0

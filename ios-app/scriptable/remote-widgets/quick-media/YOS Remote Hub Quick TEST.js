@@ -1,4 +1,4 @@
-// YOS Remote Hub v6.6 + BRAVIA picture integration + quick AV controls (ISOLATED TEST, NO ACTIVE UPDATE)
+// YOS Remote Hub — integrated isolated TEST; v6.6 four-device core retained
 // YOS Remote Hub v6.6 — tap-first adaptive cross + reliable center gesture + top quick actions + user layout editor.
 // Reliability rule: a center tap must always win over gesture convenience.
 // Navigation: Above/Left/Play/Right/Below => Up/Left/OK/Right/Down.
@@ -151,6 +151,28 @@ body{padding:0 8px}
 .label{font-size:11px;font-weight:700;white-space:nowrap}.alt-label{position:absolute;right:7px;bottom:5px;font-size:7px;font-weight:700;color:#777b83;line-height:1;white-space:nowrap}.brand{font-size:10px;color:#8d8f95}.ac-temp{font-size:17px;font-weight:800;color:#fff;min-width:34px;text-align:right}
 .picture-quick{display:grid;grid-template-columns:1.35fr 1.25fr 0.8fr;gap:5px;margin-top:6px}
 .picture-quick button{min-height:31px;border:1px solid #41464d;border-radius:10px;background:#181b21;color:#fff;font-size:11px;font-weight:650}
+
+/* Additive BRAVIA quick studio: no changes to the 12 TV buttons. */
+.tv-card{max-height:calc(100dvh - 133px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+.tv-card::-webkit-scrollbar{display:none}
+.tv-studio{margin-top:10px;border-top:1px solid #2a3441;padding-top:8px}
+.tv-studio h3{margin:0 0 7px;color:#b3c5da;font-size:11px;font-weight:600;letter-spacing:.12em}
+.tv-studio .scene-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:10px}
+.tv-studio button{border:1px solid #2d4054;border-radius:10px;background:#17212b;color:#e7f1fc;min-height:35px;font:500 12px -apple-system,BlinkMacSystemFont,sans-serif}
+.tv-studio button:disabled{opacity:.35}
+.tv-studio .compact-adjust{display:grid;grid-template-columns:78px minmax(0,1fr) 35px;align-items:center;gap:7px;margin:4px 0}
+.tv-studio .compact-adjust label{font-size:11px;color:#b0bfd1}
+.tv-studio .compact-adjust input{min-width:0;width:100%;accent-color:#70a9eb}
+.tv-studio .compact-adjust output{color:#b0c9e5;font-variant-numeric:tabular-nums;text-align:right;font-size:11px}
+.tv-studio .tv-app-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 15px)/4);gap:5px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:1px 0 7px;scrollbar-width:none}
+.tv-studio .tv-app-scroll button{scroll-snap-align:start;white-space:normal;overflow:hidden;text-overflow:ellipsis;min-height:44px;font-size:10px}
+.tv-studio .tv-text-entry{display:flex;gap:6px;margin-top:7px}
+.tv-studio .tv-text-entry input{min-width:0;flex:1;background:#121923;border:1px solid #3a4c60;border-radius:10px;color:#eef6ff;padding:8px;font-size:14px}
+.tv-studio .tv-text-entry button{flex:0 0 64px}
+.tv-studio .tv-studio-note{font-size:10px;color:#879bb2;line-height:1.4;margin:5px 0 0}
+.tv-studio .tv-extra-line{display:flex;gap:8px;align-items:center;margin-top:8px}
+.tv-studio .tv-extra-line button{padding:0 10px}
+.tv-studio .tv-extra-status{min-width:0;flex:1;font-size:10px;color:#879bb2;line-height:1.4;overflow-wrap:anywhere}
 .quick-modes{display:flex;gap:5px;overflow-x:auto;margin-top:5px;min-height:29px;scrollbar-width:none}
 .quick-modes button,.quick-action{padding:8px 9px;min-height:32px;white-space:nowrap;border-radius:10px;border:1px solid #414b58;background:#1d2631;color:#e4ecfa;font-size:11px;font-weight:650}
 .quick-modes button.selected,.quick-action.selected{background:#305a88;border-color:#82b4ed}
@@ -188,10 +210,21 @@ body{padding:0 8px}
 <section class="card tv-card remote-panel active" data-panel="tv"><div class="top-shortcuts"><button class="top-shortcut" onclick="sendTVShortcut(event,'input','入力')">↪︎ 入力</button><button class="top-shortcut" onclick="sendTVShortcut(event,'home','ホーム')">⌂ ホーム</button></div><div class="head"><div class="title" onclick="openRemote('tv')">BRAVIA</div><div class="tools"><span id="modeBadge" class="mode-badge">判定中</span><button class="tool" onclick="openPictureEditor(event)">画質</button><button class="tool" onclick="openLayoutEditor(event)">配置</button><button class="tool" onclick="sendMenu(event)">MENU</button></div></div><div id="tvGrid" class="grid grid-3"></div>
 <div class="picture-quick">
   <button onclick="openQuickEditor(event)">⚡ メディア</button>
-  <button onclick="openBrightnessBar(event)">☀ 明るさバー</button>
+  <button onclick="sendTVShortcut(event,'pictureOff','消画')">▣ 消画</button>
   <button onclick="openShortcuts(event)">☆ 保存画質</button>
 </div>
-<div id="quickPictureModes" class="quick-modes" aria-label="画質モード切替"><span class="pic-manual">画質モードを確認中…</span></div></section>
+<div id="quickPictureModes" class="quick-modes" aria-label="画質モード切替"><span class="pic-manual">画質モードを確認中…</span></div>
+<div class="tv-studio" aria-label="BRAVIA クイックスタジオ">
+ <h3>PICTURE · 画質プリセット</h3>
+ <div class="scene-picks"><button onclick="loadPicturePreset(event,'day')" id="tvPresetDay" disabled>昼</button><button onclick="loadPicturePreset(event,'night')" id="tvPresetNight" disabled>夜</button><button onclick="loadPicturePreset(event,'movie')" id="tvPresetMovie" disabled>映画</button></div>
+ <div class="compact-adjust"><label for="tvBrightness">明るさ</label><input id="tvBrightness" type="range" min="0" max="100" value="0" disabled oninput="previewTVCompact(event,'brightness')" onchange="commitTVCompact(event,'brightness')"><output id="tvBrightnessVal">--</output></div>
+ <div class="compact-adjust"><label for="tvContrast">コントラスト</label><input id="tvContrast" type="range" min="0" max="100" value="0" disabled oninput="previewTVCompact(event,'contrast')" onchange="commitTVCompact(event,'contrast')"><output id="tvContrastVal">--</output></div>
+ <h3 style="margin-top:11px">APPS · 左右スクロール</h3>
+ <button class="tool" onclick="nativeAction('tvApps','list','アプリ一覧')">一覧更新</button>
+ <div id="tvAppScroll" class="tv-app-scroll" aria-label="BRAVIAアプリを横スクロール"><button onclick="nativeAction('tvApps','list','アプリ一覧')">アプリ取得</button></div>
+ <div class="tv-text-entry"><input id="tvTextInput" type="text" maxlength="140" placeholder="テレビで入力欄を開いて文字入力" aria-label="BRAVIAへ送るテキスト"><button onclick="sendTVText(event)">送信</button></div>
+ <p class="tv-studio-note">文字はテレビの検索欄が開いているときのみ。パスワード等の機密情報は入力しないでください。</p>
+ <div class="tv-extra-line"><button onclick="openTVVPN(event)">VPNアプリ</button><span class="tv-extra-status" id="tvExtraStatus">VPNのON/OFFは接続アプリの対応確認後</span></div>
 <section class="card remote-panel" data-panel="light"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
 <section class="card remote-panel" data-panel="ac"><div class="head"><div class="title" onclick="openRemote('ac')">エアコン</div><div class="ac-meta"><span id="acTemp" class="ac-temp">--°</span><span class="brand">SHARP</span></div></div><div class="grid grid-4">${makeButtons("ac", AC_BUTTONS)}</div></section>
 <section class="card floor-card remote-panel" data-panel="floor">
@@ -624,15 +657,65 @@ function showPictureStatus(result){
   savedPresets=picture.saved||savedPresets
   if(status)status.textContent=picture.message||"現在値を取得しました"
   if(shortStatus)shortStatus.textContent=picture.message||"ショートカットを確認しました"
-  renderPictureMenu();renderBrightness();renderPicturePresets();quickModeButtons('quickPictureModes');quickModeButtons('quickPictureModesPanel')
+  renderPictureMenu();renderBrightness();renderPicturePresets();quickModeButtons('quickPictureModes');quickModeButtons('quickPictureModesPanel');renderTVStudio()
  }else if(result&&result.ok===false){
   const msg="実行できませんでした："+String(result.message||"通信に失敗しました")
   if(status)status.textContent=msg
   if(shortStatus)shortStatus.textContent=msg
   const txt=document.getElementById("brightnessValue");if(txt)txt.textContent=msg
-  if(!pictureConnected){renderPictureMenu();renderBrightness();renderPicturePresets()}
+  if(!pictureConnected){renderPictureMenu();renderBrightness();renderPicturePresets();renderTVStudio()}
  }
 }
+
+function renderTVStudio(){
+ for(const [target,id,out] of [['brightness','tvBrightness','tvBrightnessVal'],['contrast','tvContrast','tvContrastVal']]){
+  const range=document.getElementById(id),value=document.getElementById(out),entry=pictureEntry(target);
+  if(!range||!value)continue;
+  const ok=!!(entry&&entry.available&&Number.isFinite(+entry.min)&&Number.isFinite(+entry.max)&&+entry.max>+entry.min&&+entry.step>0);
+  range.disabled=!ok;
+  if(ok){range.min=entry.min;range.max=entry.max;range.step=entry.step;range.value=entry.value;value.textContent=entry.value}
+  else value.textContent='--';
+ }
+ for(const [key,id] of [['day','tvPresetDay'],['night','tvPresetNight'],['movie','tvPresetMovie']]){
+  const button=document.getElementById(id);if(button)button.disabled=!pictureConnected||!savedPresets[key];
+ }
+}
+function previewTVCompact(e,target){const id=target==='brightness'?'tvBrightnessVal':'tvContrastVal';document.getElementById(id).textContent=e.target.value}
+function commitTVCompact(e,target){
+ if(!['brightness','contrast'].includes(target))return;
+ const entry=pictureEntry(target);if(!entry||!entry.available)return;
+ nativeAction('picture','set',target,JSON.stringify({target,value:String(e.target.value)}));
+}
+function showTVExtra(message){
+ const status=document.getElementById('tvExtraStatus');
+ if(status)status.textContent=String(message||'').slice(0,100);
+}
+function displayTVApps(apps){
+ const root=document.getElementById('tvAppScroll');if(!root)return;
+ root.replaceChildren();
+ if(!Array.isArray(apps)||apps.length===0){
+  const b=document.createElement('button');b.disabled=true;b.textContent='対応アプリ未取得';root.append(b);return;
+ }
+ const ranking=['youtube','netflix','prime video','amazon','disney','spotify'];
+ const order=[...apps].sort((a,b)=>{
+  const score=x=>{const n=String(x.title||'').toLowerCase();const i=ranking.findIndex(k=>n.includes(k));return i<0?100:i};
+  return score(a)-score(b)||String(a.title||'').localeCompare(String(b.title||''),'ja');
+ });
+ for(const app of order.slice(0,80)){
+  const b=document.createElement('button');b.textContent=app.title;b.title=app.title;
+  b.addEventListener('click',()=>{showTVExtra('「'+app.title+'」の起動要求を送信中…');nativeAction('tvApps','launch','アプリ起動',String(app.index))});
+  root.append(b);
+ }
+}
+function sendTVText(e){
+ if(e){e.preventDefault();e.stopPropagation()}
+ const el=document.getElementById('tvTextInput'),value=String(el?.value||'');
+ if(!value.trim()||value.length>140||/[\u0000-\u001f\u007f]/.test(value)){showTVExtra('空欄・制御文字は送れません');return}
+ showTVExtra('テレビの入力欄へ送信中…');
+ nativeAction('tvApps','text','キーボード入力',value);
+}
+function openTVVPN(e){if(e){e.preventDefault();e.stopPropagation()}showTVExtra('VPNアプリの起動を確認中…');nativeAction('tvApps','vpnOpen','VPNアプリ起動')}
+
 function setACState(s){const el=document.getElementById("acTemp"),fan=document.getElementById("acFanLabel");if(!s){if(el)el.textContent="--°";if(fan)fan.textContent="風量 --";return}if(el)el.textContent=s.dry?"—":(Number.isFinite(Number(s.temp))?Math.round(Number(s.temp))+"°":"--°");if(fan)fan.textContent="風量 "+(s.fan||"--")}
 function setFloorState(s){
   const status=document.getElementById("floorStatus"),brightness=document.getElementById("floorBrightness"),label=document.getElementById("floorBrightnessLabel"),hue=document.getElementById("floorHue")
@@ -645,6 +728,9 @@ function setFloorState(s){
 function nativeResult(result){
   showPictureStatus(result)
   showQuickStatus(result)
+  if(result&&Array.isArray(result.apps))displayTVApps(result.apps)
+  if(result&&result.tvExtra)showTVExtra(result.tvExtra)
+  if(result&&result.ok===false)showTVExtra('操作失敗：'+String(result.message||'未対応'))
   const badge=document.getElementById("modeBadge")
   if(result&&result.ok===false){if(badge)badge.textContent="エラー";if(activePanel==="floor")document.getElementById("floorStatus").textContent="操作失敗："+(result.message||"接続を確認してください");return}
   if(result&&result.mode)setMode(result.mode)
@@ -691,7 +777,7 @@ function bindLightHoldButtons(){
   })
 }
 function openRemote(device){window.location.href=REMOTES[device]}
-bindLightHoldButtons();renderTV();requestMode();requestAC();try{setPanel(localStorage.getItem(PANEL_KEY)||"tv")}catch(_){setPanel("tv")}pollTimer=setInterval(requestMode,1600);acTimer=setInterval(requestAC,30000);window.addEventListener("beforeunload",()=>{if(pollTimer)clearInterval(pollTimer);if(acTimer)clearInterval(acTimer)})
+bindLightHoldButtons();renderTV();renderTVStudio();requestMode();requestAC();try{setPanel(localStorage.getItem(PANEL_KEY)||"tv")}catch(_){setPanel("tv")}nativeAction("tvApps","list","アプリ一覧");if(activePanel==="tv")probePictureScene();pollTimer=setInterval(requestMode,1600);acTimer=setInterval(requestAC,30000);window.addEventListener("beforeunload",()=>{if(pollTimer)clearInterval(pollTimer);if(acTimer)clearInterval(acTimer)})
 </script></body></html>`
 
 function secure(key){return Keychain.contains(key)?Keychain.get(key):""}
@@ -728,7 +814,7 @@ async function pictureAll(){
  }catch(error){aggregateError=error}
  // Consumer BRAVIA firmware can provide a specific target even if the aggregate query fails.
  // The mode was verified on this user's real television; brightness must remain read-only until valid.
- for(const target of ["pictureMode","brightness"]){
+ for(const target of ["pictureMode","brightness","contrast"]){
   if(seen.has(target))continue
   try{
    const data=await sonyVideoJSON("getPictureQualitySettings",[{target}])
@@ -950,6 +1036,57 @@ async function quickAction(action,slot){
  }
  throw Error("不明なクイック操作")
 }
+
+const yosTVApps=[];
+async function yosTVAppJSON(method,params=[]){
+ const r=new Request('http://'+sonyHost()+'/sony/appControl');r.method='POST';r.timeoutInterval=8;
+ r.headers={'Content-Type':'application/json','X-Auth-PSK':sonyPSK()};
+ r.body=JSON.stringify({method,params,id:1,version:'1.0'});
+ const data=JSON.parse(await r.loadString());
+ if(r.response?.statusCode!==200||data?.error||!Array.isArray(data?.result))throw Error('BRAVIAアプリ/入力APIが応答しません');
+ return data.result;
+}
+async function yosTVGetApps(){
+ const result=await yosTVAppJSON('getApplicationList');
+ const entries=Array.isArray(result[0])?result[0]:[];
+ if(entries.length>250)throw Error('BRAVIAアプリ件数が多いため取得できません');
+ yosTVApps.length=0;
+ for(const e of entries){
+  const name=String(e?.title||'').trim().slice(0,60),uri=String(e?.uri||'');
+  if(name&&uri&&uri.length<=380&&/^[a-z0-9.+:/?=_&%-]+$/i.test(uri))yosTVApps.push({title:name,uri});
+ }
+ return yosTVApps.map((v,index)=>({index,title:v.title}));
+}
+async function yosTVMediaAction(action,slot){
+ if(action==='list')return {ok:true,apps:await yosTVGetApps(),tvExtra:'テレビからアプリ一覧を取得しました'};
+ if(action==='launch'){
+  const index=Number(slot);
+  if(!Number.isSafeInteger(index)||index<0||index>=yosTVApps.length)throw Error('アプリ選択が不正です');
+  await yosTVAppJSON('setActiveApp',[{uri:yosTVApps[index].uri}]);
+  return {ok:true,tvExtra:'「'+yosTVApps[index].title+'」の起動要求を送信しました（起動結果は未確認）'};
+ }
+ if(action==='vpnOpen'){
+  if(!yosTVApps.length)await yosTVGetApps();
+  const matches=yosTVApps.filter(x=>/\b(vpn|nord|surfshark|proton|expressvpn|mullvad|windscribe|cyberghost|pia|private internet access)\b/i.test(x.title));
+  if(matches.length===0)throw Error('VPNアプリが見つかりません。テレビで使用中のVPN名を確認してください');
+  if(matches.length>1)throw Error('VPNアプリが複数あります。アプリ一覧から選択してください');
+  await yosTVAppJSON('setActiveApp',[{uri:matches[0].uri}]);
+  return {ok:true,tvExtra:'VPNアプリを開く要求を送信しました。接続/切断はアプリ内で行ってください'};
+ }
+ if(action==='text'){
+  const text=String(slot||'');
+  if(!text.trim()||text.length>140||/[\u0000-\u001f\u007f]/.test(text))throw Error('入力文字を確認してください');
+  const statuses=await yosTVAppJSON('getApplicationStatusList');
+  const entries=Array.isArray(statuses[0])?statuses[0]:[];
+  const active=entries.some(x=>x?.name==='textInput'&&x?.status==='on');
+  if(!active)throw Error('テレビで検索欄を開いてから文字を入力してください');
+  // v1.0 transmits over private LAN HTTP, never type secrets or passwords.
+  await yosTVAppJSON('setTextForm',[text]);
+  return {ok:true,tvExtra:'文字入力要求を送信しました（テレビの入力結果は未確認）'};
+ }
+ throw Error('未対応のTV補助操作です');
+}
+
 async function discoverSony(){if(commandIndex)return;const data=await sonyJSON("system","getRemoteControllerInfo"),commands=data&&data.result&&data.result[1];if(!Array.isArray(commands))throw new Error("BRAVIAコマンド取得失敗");commandIndex=new Map();commands.forEach(item=>{if(item&&item.name&&item.value)commandIndex.set(String(item.name).toLowerCase(),String(item.value))})}
 function xmlEscape(v){return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;")}
 async function sonyAction(action,trackMode=true){await discoverSony();if(trackMode)noteAction(action);let code=null;if(action==="quick"&&Keychain.contains(STORAGE.quick)){const saved=String(Keychain.get(STORAGE.quick)).toLowerCase();if(commandIndex.has(saved))code=commandIndex.get(saved)}for(const alias of ALIASES[action]||[]){if(!code&&commandIndex.has(alias.toLowerCase()))code=commandIndex.get(alias.toLowerCase())}if(!code)throw new Error("BRAVIA未対応："+action);const r=new Request("http://"+sonyHost()+"/sony/ircc");r.method="POST";r.headers={"Content-Type":"text/xml; charset=UTF-8","X-Auth-PSK":sonyPSK(),SOAPACTION:'"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC"'};r.body='<?xml version="1.0"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1"><IRCCCode>'+xmlEscape(code)+'</IRCCCode></u:X_SendIRCC></s:Body></s:Envelope>';await r.loadString()}
@@ -1060,6 +1197,6 @@ async function controlFloor(action,value){
   return{ok:true,floor:await readFloor()}
 }
 const queue=[];let running=false,web=null
-async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
+async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvApps"){result=await yosTVMediaAction(item.action,item.slot)}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
 web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);if(query.device==="tvHoldStart"){startTVHold(query.action);return false}if(query.device==="tvHoldHeartbeat"){renewTVHold(query.action);return false}if(query.device==="tvHoldStop"){stopTVHold();return false}if(query.device==="lightHoldStart"){startLightHold(query.action);return false}if(query.device==="lightHoldHeartbeat"){renewLightHold(query.action);return false}if(query.device==="lightHoldStop"){stopLightHold();return false}queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
 await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setTimeout(()=>probePictureScene(),250)") }catch(_){}try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);Script.complete()

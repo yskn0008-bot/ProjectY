@@ -1,0 +1,150 @@
+name: YOS Shopping native Shortcut
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/shortcut-factory/shortcuts/YOS Shopping 起動.cherri'
+      - 'tools/shortcut-factory/shopping/**'
+      - '.github/workflows/yos-shopping-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-sign-shopping-launcher:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate secret-free native-only source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/shortcut-factory/validate_secret_free.py 'tools/shortcut-factory/shortcuts/YOS Shopping 起動.cherri'
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('tools/shortcut-factory/shortcuts/YOS Shopping 起動.cherri').read_text()
+          assert '#define name YOS Shopping 起動' in s
+          assert 'dk.simonbs.Scriptable.ParameterizedRunScriptIntent' in s
+          assert '"fileName": "YOS Shopping"' in s
+          assert '"runInApp": true' in s
+          assert s.count('rawAction(')==1
+          for forbidden in ('scriptable:///run','open.scriptable.app','openURL(','getContentsOfURL','api.notion.com','YOS_NOTION_INTEGRATION_TOKEN'):
+              assert forbidden not in s, forbidden
+          print('Shopping native-only, no URL and secret-free: PASS')
+          PY
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile one-action Scriptable native Shortcut
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/shortcut-factory/shortcuts
+          rm -f 'YOS Shopping 起動_unsigned.shortcut' 'YOS Shopping 起動.plist'
+          cherri 'YOS Shopping 起動.cherri' --skip-sign --debug
+          test -f 'YOS Shopping 起動_unsigned.shortcut'
+          mkdir -p ../shopping/artifacts
+          cp 'YOS Shopping 起動_unsigned.shortcut' '../shopping/artifacts/YOS_Shopping_Launch_unsigned.plist'
+          cd ../../..
+          python3 tools/shortcut-factory/shopping/validate_launcher.py tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Launch_unsigned.plist
+
+      - name: Sign using existing ProjectY HubSign adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Launch_unsigned.plist \
+            --output tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Launch.shortcut \
+            --name 'YOS Shopping 起動'
+
+      - name: Verify signed shortcut is AEA1 and still runs Scriptable in app
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check --quiet lzfse
+          python3 - <<'PY'
+          import plistlib,lzfse
+          from pathlib import Path
+          p=Path('tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Launch.shortcut')
+          raw=p.read_bytes()
+          assert raw.startswith(b'AEA1') and len(raw)>500
+          cert_len=int.from_bytes(raw[8:12],'little')
+          compressed=raw.find(b'bvx',12+cert_len)
+          assert compressed>=0
+          plain=lzfse.decompress(raw[compressed:])
+          start=plain.find(b'bplist00')
+          assert start>=0
+          signed=plistlib.loads(plain[start:])
+          actions=signed['WFWorkflowActions']
+          assert len(actions)==1, actions
+          a=actions[0]
+          assert a.get('WFWorkflowActionIdentifier')=='dk.simonbs.Scriptable.ParameterizedRunScriptIntent'
+          params=a.get('WFWorkflowActionParameters',{})
+          name=params.get('fileName')
+          if isinstance(name,dict):name=name.get('Value',{}).get('string')
+          assert name=='YOS Shopping',name
+          assert params.get('runInApp') is True,params
+          assert params.get('ShowWhenRun',False) is False
+          print('Signed YOS Shopping native shortcut: PASS',len(raw),'bytes')
+          PY
+
+      - name: Upload signed install file and structure evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-shopping-native-shortcut
+          path: |
+            tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Launch.shortcut
+            tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Launch_unsigned.plist
+          if-no-files-found: error
+          retention-days: 21
+
+      - name: Publish signed file on this isolated review branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'feat/yos-shopping-native-shortcut-20261120'
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
+          TARGET_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          set -euo pipefail
+          test "$TARGET_REPO" = "$GITHUB_REPOSITORY"
+          test "$TARGET_BRANCH" = 'feat/yos-shopping-native-shortcut-20261120'
+          cp tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Launch.shortcut /tmp/YOS_Shopping_Launch.shortcut
+          git fetch origin "$TARGET_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+          mkdir -p downloads/yos-shopping
+          cp /tmp/YOS_Shopping_Launch.shortcut downloads/yos-shopping/YOS_Shopping_Launch.shortcut
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('downloads/yos-shopping/YOS_Shopping_Launch.shortcut')
+          d=p.read_bytes()
+          assert d.startswith(b'AEA1') and len(d)>500
+          print('Signed Shopping install artifact staged:',len(d),'bytes')
+          PY
+          git add downloads/yos-shopping/YOS_Shopping_Launch.shortcut
+          if git diff --cached --quiet; then
+            echo 'Signed binary already present'
+          else
+            git -c user.name='github-actions[bot]' \
+                -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'build(shopping): attach signed native shortcut [skip ci]'
+            git push origin HEAD:"$TARGET_BRANCH"
+          fi

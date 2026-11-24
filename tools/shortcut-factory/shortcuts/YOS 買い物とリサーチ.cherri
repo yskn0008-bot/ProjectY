@@ -1,0 +1,35 @@
+#define name YOS 買い物とリサーチ
+#define color purple
+
+#include 'actions/text'
+#include 'actions/device'
+#include 'actions/sharing'
+#include 'actions/web'
+
+// Preserve existing Notion database YOS Shopping as the only shopping SSOT.
+// Use Pricey for research only; no unsafe Notion write/scraping/automatic sync.
+// __PRICEY_BUNDLE_ID__ is patched ONLY during the signed build using App Store
+// lookup ID 1535699847, then compiled/verified as an Apple "Open App" action.
+@actions: array
+@actions += "買い物リスト｜Notion"
+@actions += "商品リサーチ｜プライシー"
+
+const selected = chooseFromList(@actions, "YOS｜買い物とリサーチ")
+if !selected {
+    stop()
+}
+const actionName = getText(selected)
+
+if actionName == "買い物リスト｜Notion" {
+    openURL("https://app.notion.com/p/33e8d09b97d54f399e00fbcdc8a30475")
+    stop()
+}
+if actionName == "商品リサーチ｜プライシー" {
+    const item = prompt("リサーチする商品名・型番・URL", "Text", "")
+    if !item {
+        stop()
+    }
+    setClipboard(item)
+    openApp("__PRICEY_BUNDLE_ID__")
+    stop()
+}

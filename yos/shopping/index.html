@@ -29,24 +29,25 @@
   </header>
   <div id="searchWrap" class="search-wrap" hidden><label for="searchInput" class="sr-only">商品名・カテゴリ・販売店で検索</label><input id="searchInput" type="search" placeholder="商品名・カテゴリ・販売店で検索" autocomplete="off"><button id="clearSearch" type="button">クリア</button></div>
   <div id="connectionState" class="connection-state" role="status">商品リストを読み込んでいます</div>
+  <div id="dataHealth" class="data-health" aria-live="polite" aria-label="商品情報の確認状況"></div>
   <div id="authPanel" class="auth-panel" hidden><p id="authMessage">既存YOS Shoppingのデータを見るには本人確認が必要です。</p><div id="authButton"></div></div>
 
   <section class="overview" aria-label="買い物サマリー">
     <button class="recommend" type="button" data-filter="recommended">
       <span class="recommend-icon" aria-hidden="true">✦</span>
-      <span class="recommend-copy"><strong>今日のおすすめ <em id="recCount">—</em></strong><small id="recommendReason">購入候補も含みます。価格確認は別途必要です</small></span>
+      <span class="recommend-copy"><strong>確認する商品 <em id="recCount">—</em></strong><small id="recommendReason">登録済みの候補・補充・価格差です。実売価格は別途確認</small></span>
       <span class="recommend-chevron">›</span>
     </button>
     <div class="metric-row">
-      <button class="metric metric-sale" type="button" data-filter="sale"><span>◆ 値引き中</span><b id="saleCount">—</b><small>件</small></button>
-      <button class="metric metric-buy" type="button" data-filter="buy"><span>🛒 買い時</span><b id="buyCount">—</b><small>件</small></button>
+      <button class="metric metric-sale" type="button" data-filter="sale"><span>◆ 登録価格差</span><b id="saleCount">—</b><small>件</small></button>
+      <button class="metric metric-buy" type="button" data-filter="buy"><span>🛒 目標以下</span><b id="buyCount">—</b><small>件</small></button>
       <button class="metric metric-stock" type="button" data-filter="stock"><span>▣ 補充候補</span><b id="stockCount">—</b><small>件</small></button>
     </div>
   </section>
   <nav class="chips" aria-label="商品絞り込み">
     <button type="button" class="chip selected" data-filter="all"><span>▦</span> すべて <b id="allCount">0</b></button>
-    <button type="button" class="chip" data-filter="sale"><span class="chip-pink">◆</span> 値引き中 <b id="chipSaleCount">0</b></button>
-    <button type="button" class="chip" data-filter="buy"><span class="chip-blue">🛒</span> 買い時 <b id="chipBuyCount">0</b></button>
+    <button type="button" class="chip" data-filter="sale"><span class="chip-pink">◆</span> 価格差 <b id="chipSaleCount">0</b></button>
+    <button type="button" class="chip" data-filter="buy"><span class="chip-blue">🛒</span> 目標以下 <b id="chipBuyCount">0</b></button>
     <button type="button" class="chip" data-filter="stock"><span class="chip-orange">▣</span> 補充 <b id="chipStockCount">0</b></button>
     <button type="button" class="chip" data-filter="selected"><span class="chip-blue">★</span> 購入候補 <b id="chipSelectedCount">0</b></button>
     <button type="button" class="chip" data-filter="daily">♙ 日用品</button>
@@ -70,7 +71,7 @@
     </div>
   </div>
   <section id="productGrid" class="product-grid" aria-label="商品リスト" aria-live="polite"></section>
-  <p id="footerNote" class="footer-note">値引き率は登録された参考価格との比較です。実際の販売価格・送料・在庫は購入前に確認してください。</p>
+  <p id="footerNote" class="footer-note">参考価格は過去の登録値。Web掲載価格は公開ページの記載であり、税込総額・沖縄への配送・送料・在庫は未確認。登録価格差は現在のセールを保証しません。</p>
 </main>
 
 <nav class="bottom-nav" aria-label="Shoppingメニュー">

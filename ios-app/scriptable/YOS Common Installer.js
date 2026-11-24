@@ -19,6 +19,16 @@ const REMOTE_PRIOR_HASHES=new Set([
  '06366b88e0c2781dc7703952003074af538a7e3edbc504f9f7a15e715eb0ca66',
  '76088d615ab1add60ae0d41b591f55e631efa94ee79d8b320abee963e8abb90b'
 ]);
+// A single verified historical sleep script from ProjectY commit 97a46cb9.
+// This list is never a blanket bypass for unknown edits or forged receipts.
+const SLEEP_PRIOR_ID='sleep-scene',SLEEP_PRIOR_NAME='YOS Sleep Scene';
+const SLEEP_PRIOR_PATH='ios-app/scriptable/remote-widgets/YOS Sleep Scene.js';
+const SLEEP_PRIOR_HASH='987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8';
+const SLEEP_KNOWN_RECEIPT_HASHES=new Set([
+ SLEEP_PRIOR_HASH,
+ '5db5b1e0278e9ab0da3c25f2a74a0a5d8682962ad9ac2de3cfd29c8dc98ac47f',
+ '7daf038a551ff9d01f2344a60509bcfd4640238b4f4942e4d0320bb204445357'
+]);
 const REMOTE_NAME_MAP=[
  ['YOS Remote Hub','リモコン'],['YOS BRAVIA Remote','テレビリモコン'],
  ['YOS BRAVIA Widget','テレビウィジェット'],['YOS AC Remote','エアコンリモコン'],
@@ -142,6 +152,23 @@ function writeChecked(fm,path,content){
   fm.writeString(path,content);
   if(fm.readString(path)!==content)throw Error('保存後の読戻しに失敗しました');
 }
+
+// Scriptable adds an icon metadata banner on editing/opening scripts.
+// Permit an update ONLY when removing this exact generated header restores
+// a byte-for-byte match to the recorded, previously trusted script SHA-256.
+// Never strip arbitrary edits, and always back up the original raw file.
+function hasOnlyScriptableIconHeader(source,expectedHash){
+  if(typeof source!=='string'||typeof expectedHash!=='string')return false;
+  const header=/^\/\/ Variables used by Scriptable\.\n\/\/ These must be at the very top of the file\. Do not edit\.\n\/\/ icon-color: [a-z0-9-]+; icon-glyph: [a-z0-9-]+;\n(?=\/\/ Variables used by Scriptable\.)/;
+  const match=source.match(header);
+  return !!match&&digest(source.slice(match[0].length))===expectedHash;
+}
+function isVerifiedLegacySleep(entry,source,receipt,kind){
+  if(!entry||entry.id!==SLEEP_PRIOR_ID||entry.name!==SLEEP_PRIOR_NAME||entry.path!==SLEEP_PRIOR_PATH||typeof source!=='string')return false;
+  const exact=digest(source)===SLEEP_PRIOR_HASH||hasOnlyScriptableIconHeader(source,SLEEP_PRIOR_HASH);
+  if(!exact)return false;
+  return receipt===null||(receiptMatches(receipt,entry,kind)&&SLEEP_KNOWN_RECEIPT_HASHES.has(receipt.sha256));
+}
 function receiptFor(entry,hash,kind){return {schema:1,name:entry.name,id:entry.id,path:entry.path,sha256:hash,storage:kind,commit:entry.commit}}
 function receiptMatches(receipt,entry,kind){
   return !!receipt&&receipt.schema===1&&receipt.name===entry.name&&receipt.id===entry.id&&receipt.path===entry.path&&receipt.storage===kind&&typeof receipt.sha256==='string'&&/^[0-9a-f]{64}$/.test(receipt.sha256);
@@ -177,12 +204,13 @@ async function recoverPending(fm,target,markerFile,receiptFile,name){
     const originalUnmanaged=name===REMOTE_NAME&&p.oldReceipt===null&&REMOTE_PRIOR_HASHES.has(p.oldHash);
     if(!/^[0-9a-f]{64}$/.test(p.oldHash)||typeof p.backup!=='string'||p.backup!==fm.joinPath(fm.joinPath(basePath(fm),'backups'),encodeURIComponent(name)+'-'+p.oldHash+'.txt')||!fm.fileExists(p.backup)||(!originalUnmanaged&&typeof p.oldReceipt!=='string'))throw Error('復旧用バックアップを特定できません');
     const before=await readable(fm,p.backup),previous=originalUnmanaged?null:JSON.parse(p.oldReceipt);
-    const allowedReceiptHashes=originalUnmanaged?[null,p.newHash]:[p.oldHash,p.newHash];
-    if(digest(before)!==p.oldHash||(previous&&(previous.sha256!==p.oldHash||previous.name!==name))||![p.oldHash,p.newHash].includes(liveHash)||!allowedReceiptHashes.includes(receiptHash))throw Error('復旧記録とファイルに矛盾があります。変更しません');
+    const oldReceiptHash=originalUnmanaged?p.oldHash:previous.sha256;
+    const allowedReceiptHashes=originalUnmanaged?[null,p.newHash]:[oldReceiptHash,p.newHash];
+    if(digest(before)!==p.oldHash||(previous&&(!((previous.sha256===p.oldHash)||hasOnlyScriptableIconHeader(before,previous.sha256))||previous.name!==name))||![p.oldHash,p.newHash].includes(liveHash)||!allowedReceiptHashes.includes(receiptHash))throw Error('復旧記録とファイルに矛盾があります。変更しません');
     if(liveHash!==p.oldHash)writeChecked(fm,target,before);
     if(originalUnmanaged){if(receiptHash===p.newHash)fm.remove(receiptFile);}
     else if(receiptHash!==p.oldHash)writeChecked(fm,receiptFile,p.oldReceipt);
-    if(digest(await readable(fm,target))!==p.oldHash||(originalUnmanaged?fm.fileExists(receiptFile):JSON.parse(await readable(fm,receiptFile)).sha256!==p.oldHash))throw Error('復旧の確認に失敗しました');
+    if(digest(await readable(fm,target))!==p.oldHash||(originalUnmanaged?fm.fileExists(receiptFile):JSON.parse(await readable(fm,receiptFile)).sha256!==oldReceiptHash))throw Error('復旧の確認に失敗しました');
   }else{
     if(p.oldHash!==null||p.backup!==null||p.oldReceipt!==null||![null,p.newHash].includes(liveHash)||![null,p.newHash].includes(receiptHash))throw Error('初回登録の中断状態が不明です。変更しません');
     if(liveHash===p.newHash)fm.remove(target);
@@ -249,7 +277,7 @@ async function install(entry){
   const current=existing.length?await readable(fm,target):null;
   const currentHash=current===null?null:digest(current);
   const previous=await readJSON(fm,receiptFile);
-  if(currentHash===desiredHash){
+  if(currentHash===desiredHash||(current!==null&&hasOnlyScriptableIconHeader(current,desiredHash))){
     if(previous&&!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous,desiredHash);return;}
     // Identical existing code is never overwritten or automatically adopted.
     await inform('登録済み','「'+name+'」は既に同じコードです。既存ファイルは変更していません。',name);
@@ -257,10 +285,12 @@ async function install(entry){
   }
   if(current!==null){
     const trustedPrior=isRemoteEntry(entry)&&previous===null&&REMOTE_PRIOR_HASHES.has(currentHash);
-    if(!trustedPrior&&!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous,desiredHash);return;}
-    if(!trustedPrior&&previous.sha256!==currentHash)throw Error('Scriptable内で変更されたコードです。上書きしません');
-    const approved=await confirm(trustedPrior?'既存リモコンの安全更新':'更新の確認',
+    const trustedSleepPrior=isVerifiedLegacySleep(entry,current,previous,chosen.kind);
+    if(!trustedPrior&&!trustedSleepPrior&&!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous,desiredHash);return;}
+    if(!trustedPrior&&!trustedSleepPrior&&previous.sha256!==currentHash&&!hasOnlyScriptableIconHeader(current,previous.sha256))throw Error('Scriptable内で変更されたコードです。上書きしません');
+    const approved=await confirm(trustedPrior?'既存リモコンの安全更新':trustedSleepPrior?'YOS Sleep Scene｜旧正式版の安全更新':'更新の確認',
       trustedPrior?'既知の旧版「リモコン」と完全一致しました。現在の本体をバックアップし、テレビ・照明・エアコンを保持した新しい画質機能付きリモコンに更新しますか？':
+      trustedSleepPrior?'現在のYOS Sleep SceneはGitHub公開済みの初期版と完全一致します。管理記録が異なる場合も、元のコードをバックアップし、確認された配布版へ更新しますか？ 他のスクリプトは変更しません。':
       '「'+name+'」をGitHub検証済みの版へ更新します。現在のコードをバックアップしてから変更します。','バックアップして更新');
     if(!approved)return;
   }else if(previous){

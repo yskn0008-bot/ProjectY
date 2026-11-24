@@ -49,6 +49,7 @@
   return inflight;
  }
  async function complete(item){
+  if(context?.readOnly)return {ok:false,reason:'YOS Tasksの完了はNotionで操作してください'};
   if(!currentToken)return {ok:false,reason:'タスクタブの「YOS Tasksを更新」から本人確認してください'};
   if(!item||!/^notion-[a-f0-9]{32}$/.test(item.id)||!item.lastEditedAt||item.habitCycle||item.timing==='fixed')return {ok:false,reason:'原本または習慣の実施回を確認できないため、Notionでは完了にしません'};
   if(completing)return {ok:false,reason:'別のタスクを保存中です。完了の確認後にもう一度押してください'};
@@ -65,12 +66,16 @@
    return {ok:true,item:updated};
   }catch(e){return {ok:false,reason:e instanceof Error?e.message:'結果不明です。Notionを再取得して確認してください'}}finally{completing=false}
  }
- function setup({host,status,save,includeCalendarMoney=false}){
-  if(initialized){if(currentToken)return refresh();return Promise.resolve(true)}
+ function setup({host,status,save,includeCalendarMoney=false,readOnly=false}){
+  if(initialized){
+   if(currentToken)return refresh();
+   set(status,'Googleで本人確認してYOS Tasksを同期します');
+   return Promise.resolve(true);
+  }
   if(initializing)return initializing;
   if(location.origin!==SITE){set(status,'YOS正規サイト以外では本人確認を開始しません');return Promise.resolve(false)}
   if(!host||typeof save!=='function'){set(status,'認証画面の準備ができません');return Promise.resolve(false)}
-  context={status,save,includeCalendarMoney};
+  context={status,save,includeCalendarMoney,readOnly};
   set(status,'Google本人確認を準備しています');
   initializing=Promise.all([
    timedFetch(API+'/api/yos/public-config',{headers:{Accept:'application/json'}}).then(async response=>{
