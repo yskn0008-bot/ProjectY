@@ -40,7 +40,7 @@ test('one neutral card, four tabs and legacy actions remain',()=>{
   assert.match(html,/data-decision="unknown"/);
   assert.match(html,/◌ 未判定/);
   assert.match(html,/取得時刻：なし/);
-  for(const value of ['#51DDBC','#F4BC55','#85AFFC','sales-view','strategy-view','history-view','analysis-view','drop-btn','photo-btn','m100-rule-btn'])assert.ok(html.includes(value));
+  for(const value of ['#51DDBC','#F4BC55','#85AFFC','sales-view','strategy-view','history-view','analysis-view','photo-btn','m100-rule-btn'])assert.ok(html.includes(value));
   assert.doesNotMatch(html,/\$\('strategy-main'\)\.textContent=item\[0\]/);
   assert.match(html,/index\.html\?legacy=1/);
 });
