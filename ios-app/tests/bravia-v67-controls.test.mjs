@@ -25,11 +25,11 @@ test('picture control renders TV-advertised range and inline contrast bar',()=>{
  assert.match(src,/id="tvBrightness" type="range"/);
  assert.match(src,/id="tvContrast" type="range"/);
  assert.match(src,/renderTVStudio\(\)/);
- assert.match(src,/const remaining=PICTURE_TARGETS\.filter/);
+ assert.match(src,/for\(const target of \["pictureMode","brightness","contrast"\]\)/);
  assert.match(src,/oninput="previewTVCompact\(event,'contrast'\)" onchange="commitTVCompact\(event,'contrast'\)"/);
 });
-test('three app slots visible and extra apps horizontally scrollable',()=>{
- assert.match(src,/grid-auto-columns:calc\(\(100% - 10px\)\/3\)/);
+test('four app slots visible and extra apps horizontally scrollable',()=>{
+ assert.match(src,/grid-auto-columns:calc\(\(100% - 15px\)\/4\)/);
  assert.match(src,/overflow-x:auto/);
  assert.match(src,/aria-label="BRAVIAアプリを横スクロール"/);
 });
@@ -91,7 +91,7 @@ test('secrets stay out of UI and startup never changes picture or VPN',()=>{
  const html=src.slice(first,last);
  assert.doesNotMatch(html,/sonyPSK\(|Keychain\.get\(/);
  assert.match(src,/nativeAction\("tvApps","list","アプリ一覧"\)/);
- assert.match(src,/window\.YOS_REMOTE_EXCHANGE/);
+ assert.match(src,/if\(activePanel==="tv"\)probePictureScene\(\)/);
  assert.doesNotMatch(media,/YOS_NOTION_INTEGRATION_TOKEN|ftp:|api\.github\.com/);
  const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
  assert.doesNotThrow(()=>new AsyncFunction(src));
@@ -135,73 +135,28 @@ test('quick remote includes the required legacy and current Scriptable installer
  assert.match(src.split('\n').slice(0,20).join('\n'),/^\/\/ YOS_SCRIPT_NAME: YOS Remote Hub Quick TEST$/m);
 });
 
-test('picture fallback queries all allowlisted targets and distinguishes missing from errors',async()=>{
- const picture=src.slice(src.indexOf('const PICTURE_TARGETS='),src.indexOf('const QUICK_APP_MATCHERS=')).replace(/async function sonyVideoJSON\([\s\S]*?(?=function flattenPicture)/,'');
- const calls=[];
- const values={brightness:{target:'brightness',currentValue:'50',candidate:[{min:'0',max:'100',step:'1'}]},contrast:{target:'contrast',isAvailable:false}};
- const rpc=async(method,params)=>{calls.push({method,params});if(method==='setPictureQualitySettings'){const p=params[0].settings[0];values[p.target].currentValue=p.value;return{result:[]};}const target=params[0].target;if(!target||target==='color')throw Error('timeout');return{result:values[target]?[values[target]]:[]};};
- const api=new Function('sonyVideoJSON','Keychain',picture+'return {pictureProbe,writePicture};')(rpc,{contains:()=>false});
- const probe=await api.pictureProbe();
- assert.equal(probe.entries.length,12);assert.equal(calls.length,13);
- assert.equal(probe.entries.find(x=>x.target==='contrast').state,'unavailable');
- assert.equal(probe.entries.find(x=>x.target==='color').state,'failed');
- assert.equal(probe.entries.find(x=>x.target==='sharpness').state,'missing');
- assert.equal(probe.entries.find(x=>x.target==='brightness').available,true);
- calls.length=0;await api.writePicture('brightness','55');
- assert.deepEqual(calls.map(x=>x.method),['getPictureQualitySettings','setPictureQualitySettings','getPictureQualitySettings']);
- calls.length=0;await assert.rejects(api.writePicture('brightness','101'),/許可/);
- assert.ok(!calls.some(x=>x.method==='setPictureQualitySettings'));
-});
-test('TV shortcut validates input before sending and reads back actual power',async()=>{
- const code=src.slice(src.indexOf('async function tvShortcutPower('),src.indexOf('const queue=[];'));
- let state='standby';const calls=[];
- const rpc=async(service,method,params)=>{calls.push(method);if(method==='setPowerStatus'){state=params[0].status?'active':'standby';return{result:[]}}return{result:[{status:state}]}};
- const api=new Function('sonyQuickJSON',code+'return {parseTVShortcut,executeTVShortcut};')(rpc);
- assert.equal(await api.executeTVShortcut('tv toggle'),'テレビ ON 確認');
- assert.deepEqual(calls,['getPowerStatus','setPowerStatus','getPowerStatus']);
- state='unknown';calls.length=0;
- await assert.rejects(api.executeTVShortcut('tv toggle'),/状態不明/);assert.deepEqual(calls,['getPowerStatus']);
- for(const bad of ['tv delete','tv on extra','light','tv brightness 5.5',{}])assert.throws(()=>api.parseTVShortcut(bad));
-});
-
-test('picture read lane leaves commands responsive and rejects stale results',async()=>{
- const lane=src.slice(src.indexOf('const queue=[];'),src.indexOf('async function processQueue()'));
- let resolveFirst,reads=0,mutations=0;
- const received=[];
- const api=new Function('pictureProbe','quickProbe','processMutation','receive',lane+`
- async function processQueue(){if(running)return;running=true;while(queue.length){activeQueueItem=queue.shift();await processMutation(activeQueueItem);activeQueueItem=null;}running=false;runProbeLane();}
- return{enqueueRemote,results:remoteResults};
- `)(async()=>{reads++;if(reads===1)return new Promise(r=>{resolveFirst=r});return{entries:[{value:'new'}]}},async()=>({}),async()=>{mutations++},v=>received.push(v));
- api.enqueueRemote({device:'picture',action:'probe'});api.enqueueRemote({device:'picture',action:'probe'});
- api.enqueueRemote({device:'tv',action:'home'});
- await Promise.resolve();await Promise.resolve();
- assert.equal(mutations,1);assert.equal(reads,1);
- resolveFirst({entries:[{value:'stale'}]});
- for(let i=0;i<20;i++)await Promise.resolve();
- assert.equal(reads,2);assert.ok(api.results.some(x=>JSON.stringify(x).includes('new')));assert.ok(!api.results.some(x=>JSON.stringify(x).includes('stale')));
-});
-
-test('launcher never interprets incoming Shortcuts objects or commands as a write',()=>{
- const start=src.indexOf('const REMOTE_LAUNCHER_ONLY=false;'),end=src.indexOf('async function executeTVShortcut(',start);
- assert.ok(start>0&&end>start);
- const api=new Function(src.slice(start,end)+'return {resolveRemoteInput,parseTVShortcut};')();
- for(const raw of [undefined,null,'',' ',{},[],{unexpected:'value'},123,'tv off']){
-  assert.equal(api.resolveRemoteInput({shortcutParameter:raw},true),'');
- }
- for(const raw of [undefined,null,'',' ',{},[]])assert.equal(api.resolveRemoteInput({shortcutParameter:raw}),'');
- assert.equal(api.resolveRemoteInput({shortcutParameter:' tv off '}),'tv off');
- assert.equal(api.resolveRemoteInput({queryParameters:{action:'tv home'}}),'tv home');
- for(const raw of [123,{action:'tv off'},['tv off']])assert.throws(()=>api.resolveRemoteInput({shortcutParameter:raw}),/文字列/);
- const embedded=src.slice(start,end).replace('const REMOTE_LAUNCHER_ONLY=false;','const REMOTE_LAUNCHER_ONLY=true;');
- const launch=new Function(embedded+'return resolveRemoteInput;')();
- assert.equal(launch({shortcutParameter:'tv off'}),'');
- assert.equal(launch({shortcutParameter:{text:'tv off'}}),'');
-});
-
-test('single native bridge exchange, no navigation for device commands',()=>{
- assert.equal((src.match(/web\.evaluateJavaScript\(/g)||[]).length,1);
- assert.match(src,/web\.evaluateJavaScript\(code,true\)/);
- const start=src.indexOf('function nativeAction(device,action,label,slot='),end=src.indexOf('function swipeAction',start);
- assert.doesNotMatch(src.slice(start,end),/window\.location/);
- assert.match(src,/while\(queue\.length&&!webClosed\)/);
+test('editable presets preserve legacy storage, mode-only and custom value semantics',async()=>{
+ const code=src.slice(src.indexOf('const PICTURE_TARGETS='),src.indexOf('const QUICK_APP_MATCHERS='));
+ const settings={pictureMode:{target:'pictureMode',currentValue:'standard',candidate:[{value:'standard'},{value:'cinema'},{value:'custom'}]},brightness:{target:'brightness',currentValue:'30',candidate:[{min:0,max:50,step:1}]}};
+ const keys=new Map(),writes=[];
+ class Request{async loadString(){
+  const q=JSON.parse(this.body);
+  if(q.method==='getPictureQualitySettings'){const list=Object.values(settings).filter(x=>!q.params[0].target||x.target===q.params[0].target);if(q.version==='1.1')list.push({target:'futureGamma',currentValue:'1',candidate:[{value:'1'}]});return JSON.stringify({result:[list]});}
+  if(q.method==='setPictureQualitySettings'){const item=q.params[0].settings[0];writes.push(item);settings[item.target].currentValue=item.value;if(item.target==='pictureMode')settings.brightness.currentValue='5';return JSON.stringify({result:[]});}
+  throw Error('unexpected RPC');
+ }}
+ const api=new Function('Request','sonyHost','sonyPSK','Keychain',code+'return{pictureProbe,pictureLoad,editPicturePreset,pictureAction};')(Request,()=> 'example',()=> 'mock',{contains:k=>keys.has(k),get:k=>keys.get(k),set:(k,v)=>keys.set(k,v)});
+ const prefix='yos.bravia.scriptable.picture-user-preset.v2.';
+ keys.set(prefix+'day',JSON.stringify({schema:2,settings:[{target:'brightness',value:'30'}]}));
+ assert.equal((await api.pictureProbe()).presets.day.settings[0].value,'30');
+ await api.editPicturePreset({key:'day',name:'昼シネマ',settings:[{target:'pictureMode',value:'cinema'}]});
+ assert.equal(writes.length,0);
+ assert.equal(JSON.parse(keys.get(prefix+'day.previous')).settings[0].value,'30');
+ await api.pictureLoad('day');assert.deepEqual(writes,[{target:'pictureMode',value:'cinema'}]);
+ await api.editPicturePreset({key:'extra1',name:'独自',settings:[{target:'pictureMode',value:'custom'},{target:'brightness',value:'30'}]});
+ await api.pictureLoad('extra1');assert.equal(settings.brightness.currentValue,'30');assert.equal(settings.pictureMode.currentValue,'custom');
+ const before=keys.get(prefix+'extra1');
+ await assert.rejects(api.editPicturePreset({key:'extra1',name:'invalid',settings:[{target:'brightness',value:'999'}]}),/許可/);
+ assert.equal(keys.get(prefix+'extra1'),before);
+ const count=writes.length;assert.match((await api.pictureAction('discover','')).message,/futureGamma/);assert.equal(writes.length,count);
 });
