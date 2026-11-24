@@ -563,14 +563,17 @@ jobs:
           assert sum(x.endswith("askllm") for x in ids)==1
           print("DISCOVERY public diagnostic boundary PASS")
           PY
-      - name: Sign public-only diagnostic with user-selected Shortcuty
+      - name: Sign public-only diagnostic with existing HubSign recovery
         shell: bash
         run: |
           set -euo pipefail
           dir="$RUNNER_TEMP/discovery-output"
-          curl --fail --show-error --silent --connect-timeout 15 --max-time 120 \
-            -F "file=@$dir/YOS-DISCOVERY-PREFLIGHT-unsigned.shortcut" \
-            'https://sign.shortcuty.app/api/v1/sign' -o "$dir/signed.tmp"
+          # Shortcuty refused the same public-only request (HTTP 403 on run 45435063596).
+          # Reuse the already-authorized existing Factory signer; no retry of the denial.
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input "$dir/YOS-DISCOVERY-PREFLIGHT-unsigned.shortcut" \
+            --output "$dir/signed.tmp" \
+            --name 'YOS DISCOVERY 実行検証 TEST'
           python3 -m pip install --disable-pip-version-check --quiet lzfse
           python3 - <<'PY'
           import os, plistlib, lzfse
@@ -588,7 +591,7 @@ jobs:
           original=plistlib.loads((d/"YOS-DISCOVERY-PREFLIGHT-unsigned.shortcut").read_bytes())
           assert signed["WFWorkflowActions"]==original["WFWorkflowActions"], "signed actions differ"
           (d/"signed.tmp").rename(d/"YOS-DISCOVERY-PREFLIGHT-signed.shortcut")
-          print("Shortcuty signed envelope and exact workflow actions PASS")
+          print("HubSign signed envelope and exact workflow actions PASS")
           PY
       - name: Retain diagnostic artifacts
         if: always()
