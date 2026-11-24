@@ -21,8 +21,8 @@
   const valid=r=>r&&typeof r==='object'&&typeof r.id==='string'&&r.id.length>0&&
     isDay(r.businessDate)&&Number.isSafeInteger(r.amountYen)&&r.amountYen>=0&&r.amountYen<=99999999&&
     ['tax-included','tax-excluded','unconfirmed'].includes(r.taxBasis)&&
-    isClock(r.reportClock)&&isHash(r.photoSha256)&&typeof r.confirmedAt==='string'&&
-    Number.isFinite(Date.parse(r.confirmedAt))&&r.source==='photo-manually-verified'&&
+    isClock(r.reportClock)&&typeof r.confirmedAt==='string'&&
+    Number.isFinite(Date.parse(r.confirmedAt))&&((r.source==='photo-manually-verified'&&isHash(r.photoSha256))||(r.source==='notion-recorded-total'&&r.photoSha256===null&&r.reportClock===null&&r.taxBasis==='unconfirmed'&&r.supersedesId===null&&/^notion:[0-9a-f]{32}$/.test(r.id)))&&
     (r.supersedesId===null||typeof r.supersedesId==='string');
   const load=(storage=root.localStorage)=>{
     try{
@@ -56,7 +56,7 @@
     const bases=new Set(days.map(record=>record.taxBasis));
     if(bases.size!==1)return {status:'mixed-basis',dayCount,totalYen:null,taxBasis:null};
     const taxBasis=days[0].taxBasis;
-    if(taxBasis==='unconfirmed')return {status:'basis-unconfirmed',dayCount,totalYen:null,taxBasis};
+    if(taxBasis==='unconfirmed')return {status:'basis-unconfirmed',dayCount,totalYen:null,taxBasis,...(days.every(r=>r.source==='notion-recorded-total')?{recordedTotalYen:days.reduce((sum,r)=>sum+r.amountYen,0)}:{})};
     return {status:'partial',dayCount,taxBasis,
       totalYen:days.reduce((sum,record)=>sum+record.amountYen,0)};
   }
@@ -75,7 +75,7 @@
       ||toYen(input.amountYen)===null)return {status:'invalid'};
     const current=load(storage);if(current.error)return {status:'corrupt-preserved'};
     if(current.records.some(x=>x.photoSha256===input.photoSha256))return {status:'duplicate-photo'};
-    const sameDay=current.records.filter(x=>x.businessDate===input.businessDate),prev=sameDay.at(-1);
+    const sameDay=current.records.filter(x=>x.businessDate===input.businessDate&&x.source==='photo-manually-verified'),prev=sameDay.at(-1);
     const amount=toYen(input.amountYen);
     if(prev&&prev.amountYen===amount&&prev.taxBasis===input.taxBasis)return {status:'duplicate-total'};
     if(prev&&(!input.reportClock||!prev.reportClock)&&input.correctionOf!==prev.id)return {status:'needs-correction-confirmation'};
@@ -92,5 +92,20 @@
     catch{return {status:'storage-error'}}
     return {status:'saved',record:{...entry}};
   }
-  root.YosTaxiConfirmedRevenueV1=Object.freeze({KEY,toYen,detectText,load,list,latest,monthSummary,confirm});
+  // Import explicit private Notion snapshots only. No photo proof is fabricated.
+  function importNotion(rows,storage=root.localStorage){
+    if(!Array.isArray(rows)||rows.length<1||rows.length>62||rows.some(r=>!r||!isDay(r.businessDate)||!Number.isSafeInteger(r.amountYen)||toYen(r.amountYen)===null||typeof r.sourceId!=='string'||!/^[0-9a-f]{32}$/.test(r.sourceId)))return {status:'invalid'};
+    if(new Set(rows.map(r=>r.businessDate)).size!==rows.length||new Set(rows.map(r=>r.sourceId)).size!==rows.length)return {status:'invalid'};
+    const current=load(storage);if(current.error)return {status:'corrupt-preserved'};
+    const records=[...current.records];let added=0,skipped=0,conflicts=0;
+    for(const row of rows){
+      const id='notion:'+row.sourceId;
+      const existing=records.find(r=>r.businessDate===row.businessDate||r.id===id);
+      if(existing){if(existing.businessDate===row.businessDate&&existing.amountYen===row.amountYen)skipped++;else conflicts++;continue}
+      records.push({id,businessDate:row.businessDate,amountYen:row.amountYen,taxBasis:'unconfirmed',reportClock:null,photoSha256:null,confirmedAt:new Date().toISOString(),source:'notion-recorded-total',supersedesId:null});added++;
+    }
+    if(added){try{storage.setItem(KEY,JSON.stringify({version:1,records}))}catch{return {status:'storage-error'}}}
+    return {status:'saved',added,skipped,conflicts};
+  }
+  root.YosTaxiConfirmedRevenueV1=Object.freeze({KEY,toYen,detectText,load,list,latest,monthSummary,confirm,importNotion});
 })(window);
