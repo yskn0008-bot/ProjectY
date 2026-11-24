@@ -1,11 +1,37 @@
 name: YOS JOURNAL GPT editorial candidate safety
 
 on:
+  workflow_dispatch: # Read-only owner-run private Inbox acceptance; never auto-publishes
   pull_request:
     paths:
+      - 'journal/build-reviewed-release-bundle.mjs'
+      - 'journal/tests/build-reviewed-release-bundle.test.mjs'
+      - 'journal/private-to-public-review-bridge.mjs'
+      - 'journal/tests/private-notion-to-reader.e2e.test.mjs'
+      - 'journal/tests/private-to-public-review-bridge.test.mjs'
+      - 'ios-app/scriptable/YOS Clarity Inbox Bridge.js'
+      - 'ios-app/tests/clarity-inbox-bridge.test.mjs'
+      - 'journal/notion-private-draft-readback.mjs'
+      - 'journal/tests/notion-private-draft-readback.test.mjs'
       - 'journal/gpt-editorial-gate.mjs'
       - 'journal/tests/gpt-editorial-gate.test.mjs'
       - 'journal/GPT_EDITORIAL.md'
+      - 'journal-v2/index.html'
+      - 'journal/tests/reader-single-feature.test.mjs'
+      - 'journal/tests/three-story-consumers.test.mjs'
+      - 'ios-app/scriptable/YOS JOURNAL.js'
+      - 'scripts/journal_voicevox_demo.py'
+      - 'journal/build-offline-reader-preview.mjs'
+      - 'journal/tests/build-offline-reader-preview.test.mjs'
+      - 'journal/preview-reviewed-candidate.mjs'
+      - 'journal/tests/preview-reviewed-candidate.test.mjs'
+      - 'journal/reviewed-evidence-gate.mjs'
+      - 'journal/tests/reviewed-evidence-gate.test.mjs'
+      - 'journal/reviewed-evidence/*.public.json'
+      - 'journal/source-evidence-audit.mjs'
+      - 'journal/tests/source-evidence-audit.test.mjs'
+      - 'journal/tests/fixtures/evidence-live-sample.public.json'
+      - 'journal/SOURCE_EVIDENCE_AUDIT_PROTOTYPE.md'
       - 'journal/editorial-candidates/*.json'
       - '.github/workflows/journal-gpt-editorial-gate.yml'
 
@@ -25,6 +51,76 @@ jobs:
           node-version: '22'
       - name: Check GPT candidate parser syntax
         run: node --check journal/gpt-editorial-gate.mjs
+      - name: Check private research evidence module syntax
+        run: node --check journal/source-evidence-audit.mjs
+      - name: Test offline research retrieval, evidence matching and fail-closed safety
+        run: node --test journal/tests/source-evidence-audit.test.mjs
+      - name: Live research source smoke (non-blocking source availability, NO publication)
+        shell: bash
+        run: |
+          set -euo pipefail
+          node journal/source-evidence-audit.mjs --input journal/tests/fixtures/evidence-live-sample.public.json --output /tmp/yos-live-research-audit.json
+          node -e "const a=require('/tmp/yos-live-research-audit.json');console.log(JSON.stringify({sources:a.sources.map(s=>({id:s.id,status:s.status,reason:s.reason||null})),claims:a.claims.map(c=>({id:c.id,status:c.status})),publicationAllowed:a.publicationAllowed,verifiedClaims:a.checks.verifiedClaims}))"
+      - name: Validate independent original-source review dossier structure
+        run: |
+          node --check journal/reviewed-evidence-gate.mjs
+          node --test journal/tests/reviewed-evidence-gate.test.mjs
+          node journal/reviewed-evidence-gate.mjs --dossier journal/reviewed-evidence/2026-11-20-first-impressions.public.json
+      - name: Preview reviewed public feature safely (no issue writes)
+        run: |
+          node --check journal/preview-reviewed-candidate.mjs
+          node --test journal/tests/preview-reviewed-candidate.test.mjs
+      - name: Preview the real JOURNAL reader with a reviewed public candidate (no publication)
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check journal/build-offline-reader-preview.mjs
+          node --test journal/tests/build-offline-reader-preview.test.mjs
+          mkdir -p /tmp/yos-journal-reader-preview
+          node journal/build-offline-reader-preview.mjs \
+            --candidate journal/editorial-candidates/2026-11-20-first-impressions.public.json \
+            --reader journal-v2/index.html \
+            --output /tmp/yos-journal-reader-preview/YOS-JOURNAL-PREVIEW.html
+      - name: Upload private PR-only reader preview for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-journal-reviewed-reader-preview
+          path: /tmp/yos-journal-reader-preview/YOS-JOURNAL-PREVIEW.html
+          if-no-files-found: error
+          retention-days: 7
+      - name: Test existing Clarity Inbox transport with private JOURNAL draft inputs (mocked API)
+        run: |
+          node --check 'ios-app/scriptable/YOS Clarity Inbox Bridge.js'
+          node --test ios-app/tests/clarity-inbox-bridge.test.mjs
+      - name: Test private Notion draft receipt readback (mocked API, zero content logs)
+        run: |
+          node --check journal/notion-private-draft-readback.mjs
+          node --test journal/tests/notion-private-draft-readback.test.mjs
+      - name: Test Notion-private-to-public candidate source provenance without publication
+        run: |
+          node --check journal/private-to-public-review-bridge.mjs
+          node --test journal/tests/private-to-public-review-bridge.test.mjs
+      - name: Read existing private Notion Inbox receipts (manual only, no content output)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          YOS_NOTION_API_TOKEN: ${{ secrets.YOS_NOTION_API_TOKEN }}
+        shell: bash
+        run: |
+          if [ -z "${YOS_NOTION_API_TOKEN:-}" ]; then
+            echo 'Existing Notion token not configured for this workflow; no private data accessed.'
+            exit 1
+          fi
+          node journal/notion-private-draft-readback.mjs --dry-run-private-readback
+      - name: Check synthetic Notion-to-JOURNAL reader end-to-end without public writes
+        run: node --test journal/tests/private-notion-to-reader.e2e.test.mjs
+      - name: Validate isolated issue bundle ready for review, never public writes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check journal/build-reviewed-release-bundle.mjs
+          node --test journal/tests/build-reviewed-release-bundle.test.mjs
+      - name: Verify existing reader does not repeat its only story
+        run: node --test journal/tests/reader-single-feature.test.mjs journal/tests/three-story-consumers.test.mjs
       - name: Test privacy, sources, dates, existing edition preservation
         run: node --test journal/tests/gpt-editorial-gate.test.mjs
       - name: Check added or modified GPT candidate JSON from this PR

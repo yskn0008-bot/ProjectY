@@ -78,3 +78,25 @@
 - 研究特集「写真だけで魅力を決められるか？」：フローズン・フェイス効果（2012）、写真と動的評価のメタ分析（2023）、姿勢と初対面の印象（2016）を、賛成の証拠だけでなく限界も含めて扱う。
 - 原典： https://pmc.ncbi.nlm.nih.gov/articles/PMC3282501/ ／ https://pubmed.ncbi.nlm.nih.gov/40951796/ ／ https://pubmed.ncbi.nlm.nih.gov/27035937/
 - **これは編集候補であり、本人の読後評価・写真権利・本番公開・iPhone実機は未確認。**
+
+
+## 2026-11-24｜JOURNAL原稿の既存Clarity Inbox保存方式への統合（Draft PR #857・iPhone未導入）
+
+Clarity Nextは入力の意味判断・操作の司令塔であり、既存 `NEXT_NOTION` はYOSホームを開くだけ。記事原稿の実保存は **既存** `ios-app/scriptable/YOS Clarity Inbox Bridge.js` のRaw保存・Notion送信・読戻しを使う。JOURNAL側の調査・編集・原典審査・公開ゲートは変更しない。
+
+**既存「JOURNAL制作」の編集済み全文を、既存Scriptable「YOS Clarity Inbox Bridge」の「Run Script with Parameter」へ渡す接続契約**：
+
+```json
+{
+  "source": "journal",
+  "rawText": "<非公開の編集済み全文。YOS_EDITORIAL_DRAFT_V1、【資料と照合状況】、公開不可・要審査を含む>",
+  "captureId": "journal:edition-20261124-001",
+  "routeMode": "raw-only"
+}
+```
+
+- `captureId` は**号ごとに一度決め、同じ号の再試行でも変えない**。同じIDで本文が変わった場合は停止し、無断上書きしない。記事の再生成時は編集版管理を先に確認する。
+- 返答の先頭が `Notion Inbox保存確認済み` のときのみ、既存Inboxへの書込・読戻し成功と扱う。`Notion未保存` や返答が空のときは未確認のまま停止し、送信成功アラートを出さない。Scriptableの実機返答・「Run In App」の挙動は未検証。
+- Bridgeは既存のScriptableローカル受領証へ原文を保存してから送信し、1500文字単位で既存YOS Inboxへ追記して読み戻す。`source:'journal'` は最大36,000文字、Clarityの通常入力は従来12,000文字のまま。JOURNALはTask/Shopping/Calendarへの自動振り分け対象外。
+- 既存の `journal/notion-private-draft-readback.mjs` は旧JOURNALレシートと新しいJOURNAL専用Bridge受領証の双方を読み取る。読戻した原稿は非公開・未検証のままで、原典の独立照合と3記事発行ゲートを通過するまで公開しない。
+- **本番未反映**：GitHub Draft PR内のコードを更新しただけでは、iPhoneのScriptableや既存「JOURNAL制作」は変わらない。既存共通インストーラーの安全な配布経路・実機アクションへの接続・iPhone保存読戻しは未完了。別のインストーラー・DB・ショートカットを増やさない。元のClarity Nextや公開済み2026-11-20号は変更しない。

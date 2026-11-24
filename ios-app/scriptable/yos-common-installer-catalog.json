@@ -13,8 +13,8 @@
       "id": "journal",
       "name": "YOS JOURNAL",
       "path": "ios-app/scriptable/YOS JOURNAL.js",
-      "commit": "230975fcc61370e0de3fc0fc9161a047a849b8ff",
-      "sha256": "1e7e625c70901fbcd843b193858671cf2614e9ce837cdd8faa714a7fb22c7571"
+      "commit": "c85b9a346de2c364af04248be082e8f99d2d8eae",
+      "sha256": "0d9590eea650aceb083af13573eb284bc256a7e5fa66f726dc38f2b56a3f67eb"
     },
     {
       "id": "daystream-preview",
@@ -104,8 +104,8 @@
       "id": "clarity-inbox-bridge",
       "name": "YOS Clarity Inbox Bridge",
       "path": "ios-app/scriptable/YOS Clarity Inbox Bridge.js",
-      "commit": "82e287cc48cd486b60867caa14d8c8fb00615914",
-      "sha256": "dab381d8dfa18b9bc0b89e855c69673abe021d7a349c18d0bf84340e58af227f"
+      "commit": "eef480b98df270a4c0b08e7fda7b85a13bcc0409",
+      "sha256": "473c6d5cba79aaa0066f3db9422116a7876dbebcda0f65c50a71d91f80b6b61f"
     },
     {
       "id": "daystream-notion",

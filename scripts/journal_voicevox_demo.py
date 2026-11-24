@@ -73,6 +73,15 @@ def make_chunks(article: dict) -> list[str]:
     return chunks
 
 
+def validate_issue_articles(date: str, articles: object) -> None:
+    if not isinstance(articles, list) or not articles or len(articles) > 8:
+        raise RuntimeError("Invalid issue length")
+    if date >= "2026-11-23" and len(articles) != 3:
+        raise RuntimeError("Future issues require exactly three articles for narration")
+    if any(not isinstance(a, dict) or not a.get("title") for a in articles):
+        raise RuntimeError("Issue has an incomplete article")
+
+
 def main() -> None:
     # Only dated public editions are eligible. Personal/Notion data is never read.
     issues = sorted(EDITION_DIR.glob("????-??-??.json"))
@@ -84,8 +93,7 @@ def main() -> None:
     if data.get("issuedOn") != date:
         raise RuntimeError("Issue date disagrees with filename")
     articles = data.get("articles")
-    if not isinstance(articles, list) or not 1 <= len(articles) <= 8:
-        raise RuntimeError("Invalid issue length")
+    validate_issue_articles(date, articles)
     pending = [(i, article, AUDIO_DIR / date / f"article-{i}.mp3")
                for i, article in enumerate(articles)
                if not (AUDIO_DIR / date / f"article-{i}.mp3").is_file()]

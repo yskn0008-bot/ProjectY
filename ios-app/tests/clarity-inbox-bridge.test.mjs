@@ -314,3 +314,114 @@ test('Raw-only calendar capture with missing Notion credentials is held locally 
   assert.equal(m.counts.routed,0);
   assert.match(m.files.get('/docs/YOS Clarity Inbox Bridge Receipts.json'),/calendar-offline-001/);
 });
+
+
+test('JOURNAL private draft reuses verified Inbox transport without Clarity routing',async()=>{
+  const m=mocked();
+  const x={rawText:'## 【YOS_EDITORIAL_DRAFT_V1】\n### 【資料と照合状況】\n- DOI:10.1038/s41598-017-00526-9\n### 【公開不可・要審査】',
+    source:'journal',captureId:'journal:edition-20261124-001'};
+  const result=await m.run(x);
+  assert.match(result,/Notion Inbox保存確認済み/);
+  assert.match(m.blocks[0].paragraph.rich_text[0].text.content,/YOS JOURNAL Draft · journal:edition-20261124-001/);
+  assert.equal(m.blocks[1].paragraph.rich_text[0].text.content,x.rawText);
+  assert.equal(m.counts.writes,1);
+  assert.equal(m.counts.readback,3);
+  assert.equal(m.counts.routed,0,'private draft never becomes a Task, Shopping or public issue');
+  assert.match(await m.run(x),/保存確認済み/);
+  assert.equal(m.counts.writes,1,'same edition ID never appends twice');
+  assert.equal(m.counts.routed,0);
+  assert.match(await m.run({...x,rawText:'改変された別の原稿'}),/Notion未保存/);
+  assert.equal(m.counts.writes,1,'same ID with different content fails closed');
+});
+
+test('JOURNAL long drafts are chunked and read back while Clarity length limit stays unchanged',async()=>{
+  const m=mocked();
+  const draft='【YOS_EDITORIAL_DRAFT_V1】\n【資料と照合状況】\n公開不可・要審査\n'+'研究原稿'.repeat(3800);
+  const x={rawText:draft,source:'journal',captureId:'journal:long-draft-0001'};
+  assert.ok(draft.length>12000&&draft.length<36000);
+  assert.match(await m.run(x),/Notion Inbox保存確認済み/);
+  assert.equal(m.counts.writes,1);
+  assert.equal(m.counts.routed,0);
+  assert.equal(m.blocks.slice(1,-1).map(b=>b.paragraph.rich_text[0].text.content).join(''),draft);
+  const over='あ'.repeat(36001);
+  assert.match(await m.run({rawText:over,source:'journal',captureId:'journal:too-long-0001'}),/Notion未保存/);
+  assert.equal(m.counts.writes,1);
+  assert.match(await m.run({rawText:draft,source:'text',captureId:'clarity:too-long-0001'}),/Notion未保存/);
+  assert.equal(m.counts.writes,1);
+});
+
+
+test('JOURNAL rejects absent edition ID and non-editorial input before any writes',async()=>{
+ const m=mocked();
+ const valid='【YOS_EDITORIAL_DRAFT_V1】\n【資料と照合状況】\n公開不可・要審査\n研究記事の下書き';
+ assert.match(await m.run({rawText:valid,source:'journal'}),/Notion未保存/);
+ assert.match(await m.run({rawText:valid,source:'journal',captureId:'clarity:wrong-namespace-001'}),/Notion未保存/);
+ assert.match(await m.run({rawText:'通常のClarityメモ',source:'journal',captureId:'journal:invalid-draft-001'}),/Notion未保存/);
+ assert.equal(m.counts.writes,0);
+ assert.equal(m.files.size,0,'rejected JOURNAL input must not mutate local Clarity receipts');
+});
+
+
+test('JOURNAL Shortcuts Dictionary and JSON-string handoff share one stable private receipt',async()=>{
+  const m=mocked();
+  const draft='【YOS_EDITORIAL_DRAFT_V1】\n【資料と照合状況】\n公開不可・要審査\n'+('編集済みの研究原稿'.repeat(25));
+  const payload={source:'journal',rawText:draft,captureId:'journal:edition-20261124-002',routeMode:'raw-only'};
+  assert.match(await m.run(JSON.stringify(payload)),/Notion Inbox保存確認済み/);
+  assert.match(m.blocks[0].paragraph.rich_text[0].text.content,/YOS JOURNAL Draft · journal:edition-20261124-002/);
+  assert.equal(m.blocks[1].paragraph.rich_text[0].text.content,draft);
+  assert.match(await m.run(payload),/保存確認済み/);
+  assert.equal(m.counts.writes,1,'JSON and Dictionary retry must never create two receipts');
+  assert.equal(m.counts.routed,0,'JOURNAL must never be auto-routed to Tasks');
+});
+
+test('malformed JOURNAL JSON string is held without writing to Clarity or Notion',async()=>{
+  const m=mocked();
+  const invalid='{"source":"journal","captureId":"journal:edition-20261124-002","rawText":';
+  assert.match(await m.run(invalid),/Notion未保存/);
+  assert.equal(m.counts.writes,0);
+  assert.equal(m.files.size,0,'malformed JOURNAL input must not be stored as a Clarity voice');
+});
+
+test('JOURNAL emoji at Notion chunk boundary remains intact after splitting',async()=>{
+  const m=mocked();
+  const header='【YOS_EDITORIAL_DRAFT_V1】\n【資料と照合状況】\n公開不可・要審査\n';
+  const draft=header+'a'.repeat(1499-header.length)+'😀'+'b'.repeat(180);
+  assert.equal(draft.charCodeAt(1499)>=0xD800,true,'test places high surrogate at original 1500-char cut');
+  assert.match(await m.run({source:'journal',rawText:draft,captureId:'journal:edition-20261124-emoji'}),/Notion Inbox保存確認済み/);
+  const chunks=m.blocks.slice(1,-1).map(x=>x.paragraph.rich_text[0].text.content);
+  assert.equal(chunks.join(''),draft);
+  assert.equal(chunks[0].length,1499);
+  assert.equal(chunks[1].startsWith('😀'),true);
+  assert.equal(m.counts.routed,0);
+});
+
+test('Explicit JOURNAL auto-ID from named Shortcut bridge is stable, long and private',async()=>{
+ const m=mocked();
+ const rawText='【YOS_EDITORIAL_DRAFT_V1】\n【資料と照合状況】\n公開不可・要審査\n'+'研究原稿'.repeat(4000);
+ const packet={source:'journal',captureId:'journal:auto',routeMode:'raw-only',rawText};
+ assert.match(await m.run(packet),/Notion Inbox保存確認済み/);
+ assert.match(m.blocks[0].paragraph.rich_text[0].text.content,/YOS JOURNAL Draft · journal:[a-f0-9]{16}-\d+/);
+ assert.match(await m.run(JSON.stringify(packet)),/保存済み/);
+ assert.equal(m.counts.writes,1);
+ assert.equal(m.counts.routed,0);
+ assert.match(await m.run({...packet,routeMode:'auto'}),/Notion未保存/);
+ assert.match(await m.run({...packet,rawText:rawText+' Bearer mock-secret'}),/認証情報/);
+ assert.equal(m.counts.writes,1);
+});
+
+test('signed JOURNAL Shortcut only recognizes a verified Clarity receipt',async()=>{
+ const m=mocked();
+ const rawText='【YOS_EDITORIAL_DRAFT_V1】\n【資料と照合状況】\n公開不可・要審査\n'+'研究原稿'.repeat(100);
+ const packet={source:'journal',captureId:'journal:auto',routeMode:'raw-only',rawText};
+ const marker=/YOS_JOURNAL_NOTION_VERIFIED:/;
+ assert.match(await m.run(packet),marker);
+ assert.match(await m.run(JSON.stringify(packet)),marker);
+ assert.equal(m.counts.writes,1);
+ assert.doesNotMatch(await m.run({...packet,captureId:'bad'}),marker);
+ assert.doesNotMatch(await m.run({...packet,rawText:'YOS_JOURNAL_NOTION_VERIFIED: invalid draft'}),marker);
+ const noKey=mocked({token:false});
+ assert.doesNotMatch(await noKey.run(packet),marker);
+ assert.equal(noKey.counts.writes,0);
+ const ordinary=mocked();
+ assert.doesNotMatch(await ordinary.run({source:'text',captureId:'clarity:receipt-regression-001',routeMode:'raw-only',rawText:'普通のメモ'}),marker);
+});
