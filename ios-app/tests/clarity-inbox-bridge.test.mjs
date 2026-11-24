@@ -394,3 +394,17 @@ test('JOURNAL emoji at Notion chunk boundary remains intact after splitting',asy
   assert.equal(chunks[1].startsWith('😀'),true);
   assert.equal(m.counts.routed,0);
 });
+
+test('Explicit JOURNAL auto-ID from named Shortcut bridge is stable, long and private',async()=>{
+ const m=mocked();
+ const rawText='【YOS_EDITORIAL_DRAFT_V1】\n【資料と照合状況】\n公開不可・要審査\n'+'研究原稿'.repeat(4000);
+ const packet={source:'journal',captureId:'journal:auto',routeMode:'raw-only',rawText};
+ assert.match(await m.run(packet),/Notion Inbox保存確認済み/);
+ assert.match(m.blocks[0].paragraph.rich_text[0].text.content,/YOS JOURNAL Draft · journal:[a-f0-9]{16}-\d+/);
+ assert.match(await m.run(JSON.stringify(packet)),/保存済み/);
+ assert.equal(m.counts.writes,1);
+ assert.equal(m.counts.routed,0);
+ assert.match(await m.run({...packet,routeMode:'auto'}),/Notion未保存/);
+ assert.match(await m.run({...packet,rawText:rawText+' Bearer mock-secret'}),/認証情報/);
+ assert.equal(m.counts.writes,1);
+});
