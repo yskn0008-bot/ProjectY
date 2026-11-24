@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T22:21:43+09:00",
+  "updated_at": "2026-11-24T22:24:40+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-945",
+      "title": "PR #945 Fix Self installer rejection: Scriptable metadata header",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/945",
+      "updated_at": "2026-11-24T13:23:59Z"
+    },
     {
       "id": "github-pr-830",
       "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
@@ -31,16 +41,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-24T11:13:29Z"
-    },
-    {
-      "id": "github-pr-892",
-      "title": "PR #892 Clarity｜入力専用ショートカット（履歴・写真OCR・音声）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/892",
-      "updated_at": "2026-11-23T06:27:05Z"
     },
     {
       "id": "github-pr-901",
@@ -274,7 +274,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #945をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T22:21:43+09:00",
+      "last_update": "2026-11-24T22:24:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T22:21:43+09:00",
+      "last_update": "2026-11-24T22:24:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -379,7 +379,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #945をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T22:21:43+09:00",
+      "last_update": "2026-11-24T22:24:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "614a074e64c791034f852f80ebc3df8ebdb421b50e8385311e4b88df1ff1c5f7"
+  "github_snapshot_hash": "ecd149e0745dc7900e40cfcd73669fec18a2bc3b78e17ff76920807f6fa1059d"
 }
