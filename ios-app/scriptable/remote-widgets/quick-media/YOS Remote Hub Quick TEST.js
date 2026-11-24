@@ -161,13 +161,16 @@ body{padding:0 8px}
 .tv-studio{margin-top:10px;border-top:1px solid #2a3441;padding-top:8px}
 .tv-studio h3{margin:0 0 7px;color:#b3c5da;font-size:11px;font-weight:600;letter-spacing:.12em}
 .tv-studio .scene-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:10px}
-.tv-studio button{border:1px solid #2d4054;border-radius:10px;background:#17212b;color:#e7f1fc;min-height:35px;font:500 12px -apple-system,BlinkMacSystemFont,sans-serif}
+.tv-studio button{border:1px solid #2d4054;border-radius:10px;background:#17212b;color:#e7f1fc;min-height:44px;font:500 12px -apple-system,BlinkMacSystemFont,sans-serif}
 .tv-studio button:disabled{opacity:.35}
 .tv-studio .compact-adjust{display:grid;grid-template-columns:78px minmax(0,1fr) 35px;align-items:center;gap:7px;margin:4px 0}
 .tv-studio .compact-adjust label{font-size:11px;color:#b0bfd1}
-.tv-studio .compact-adjust input{min-width:0;width:100%;accent-color:#70a9eb}
+.tv-studio .compact-adjust input,.pic-slider-wrap input[type=range],.pic-big-bar{min-width:0;width:100%;height:48px;appearance:none;-webkit-appearance:none;background:transparent;accent-color:#70a9eb;touch-action:pan-y}
+.tv-studio .compact-adjust input::-webkit-slider-runnable-track,.pic-slider-wrap input[type=range]::-webkit-slider-runnable-track,.pic-big-bar::-webkit-slider-runnable-track{height:12px;border-radius:12px;background:#3b526a}
+.tv-studio .compact-adjust input::-webkit-slider-thumb,.pic-slider-wrap input[type=range]::-webkit-slider-thumb,.pic-big-bar::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-7px;border:1px solid #bcd6f7;border-radius:50%;background:#e0ecfb;box-shadow:0 2px 6px #0008}
+.tv-studio .compact-adjust input:disabled,.pic-slider-wrap input[type=range]:disabled,.pic-big-bar:disabled{opacity:.4}
 .tv-studio .compact-adjust output{color:#b0c9e5;font-variant-numeric:tabular-nums;text-align:right;font-size:11px}
-.tv-studio .tv-app-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 15px)/4);gap:5px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:1px 0 7px;scrollbar-width:none}
+.tv-studio .tv-app-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 10px)/3);gap:5px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:1px 0 7px;scrollbar-width:none}
 .tv-studio .tv-app-scroll button{scroll-snap-align:start;white-space:normal;overflow:hidden;text-overflow:ellipsis;min-height:44px;font-size:10px}
 .tv-studio .tv-text-entry{display:flex;gap:6px;margin-top:7px}
 .tv-studio .tv-text-entry input{min-width:0;flex:1;background:#121923;border:1px solid #3a4c60;border-radius:10px;color:#eef6ff;padding:8px;font-size:14px}
@@ -177,7 +180,7 @@ body{padding:0 8px}
 .tv-studio .tv-extra-line button{padding:0 10px}
 .tv-studio .tv-extra-status{min-width:0;flex:1;font-size:10px;color:#879bb2;line-height:1.4;overflow-wrap:anywhere}
 .quick-modes{display:flex;gap:5px;overflow-x:auto;margin-top:5px;min-height:29px;scrollbar-width:none}
-.quick-modes button,.quick-action{padding:8px 9px;min-height:32px;white-space:nowrap;border-radius:10px;border:1px solid #414b58;background:#1d2631;color:#e4ecfa;font-size:11px;font-weight:650}
+.quick-modes button,.quick-action{padding:8px 9px;min-height:44px;white-space:nowrap;border-radius:10px;border:1px solid #414b58;background:#1d2631;color:#e4ecfa;font-size:11px;font-weight:650}
 .quick-modes button.selected,.quick-action.selected{background:#305a88;border-color:#82b4ed}
 .quick-modes button:disabled,.quick-action:disabled{opacity:.35}
 .quick-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:8px 0}
@@ -191,7 +194,7 @@ body{padding:0 8px}
 .pic-name{font-size:13px;min-width:110px;flex:1;color:#e4e8ee}
 .pic-manual{color:#747c87;font-size:11px}
 .pic-slider-wrap{display:flex;align-items:center;gap:8px;width:100%}
-.pic-slider-wrap input[type=range]{width:100%;height:30px;accent-color:#6b9fff;flex:1}
+.pic-slider-wrap input[type=range]{width:100%;height:48px;accent-color:#6b9fff;flex:1}
 .pic-slider-wrap output{min-width:44px;text-align:right;font-size:13px;color:#a5c2ff}
 .pic-enum{min-width:145px;max-width:200px;padding:9px 6px;background:#202832;border:1px solid #414854;border-radius:10px;color:#eef1f7}
 .pic-preset{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:7px;padding:10px 0;border-top:1px solid #2e3138}
@@ -603,7 +606,7 @@ function renderPictureMenu(){
        html+='<select class="pic-enum" aria-label="'+pictureEscape(name)+'" onchange="commitPictureSelect(event,&quot;'+target+'&quot;)">'
        for(const option of info.options)html+='<option value="'+pictureEscape(option)+'"'+(String(option)===String(info.value)?' selected':'')+'>'+pictureEscape(pictureOptionLabel(target,option))+'</option>'
        html+='</select>'
-     }else html+='<span class="pic-manual">テレビで設定</span>'
+     }else html+='<span class="pic-manual">'+pictureEscape(!target?"テレビで設定":!info?"取得中":({unavailable:"現在の入力では利用不可",missing:"直接操作未確認",failed:"取得失敗・再取得",invalid:"許可値未確認"}[info.state]||"テレビで設定"))+'</span>'
      html+='</div>'
    }
    html+='</section>'
@@ -630,7 +633,7 @@ function renderBrightness(){
  const okay=data&&data.available&&Number.isFinite(Number(data.min))&&Number.isFinite(Number(data.max))&&Number(data.max)>Number(data.min)&&Number(data.step)>0
  input.disabled=!okay
  if(okay){input.min=data.min;input.max=data.max;input.step=data.step;input.value=data.value;v.textContent="現在の明るさ "+data.value}
- else v.textContent="明るさの直接操作は未対応。テレビのクイック設定で調整してください。"
+ else v.textContent=!data?"明るさを取得中":data.state==="unavailable"?"現在の入力では利用不可":data.state==="failed"?"取得失敗・再取得":"直接操作未確認・テレビで設定"
 }
 function renderPicturePresets(){
  const root=document.getElementById("picturePresets");if(!root)return
@@ -667,7 +670,7 @@ function showPictureStatus(result){
   if(status)status.textContent=msg
   if(shortStatus)shortStatus.textContent=msg
   const txt=document.getElementById("brightnessValue");if(txt)txt.textContent=msg
-  if(!pictureConnected){renderPictureMenu();renderBrightness();renderPicturePresets();renderTVStudio()}
+  pictureConnected=false;pictureMap={};renderPictureMenu();renderBrightness();renderPicturePresets();renderTVStudio();quickModeButtons('quickPictureModes');quickModeButtons('quickPictureModesPanel')
  }
 }
 
@@ -805,33 +808,33 @@ async function sonyVideoJSON(method,params){
  return data
 }
 function flattenPicture(v,out=[]){if(Array.isArray(v)){for(const x of v)flattenPicture(x,out)}else if(v&&typeof v==="object"&&typeof v.target==="string"){out.push(v)}return out}
+async function pictureSingle(target){
+ if(!PICTURE_TARGETS.includes(target))throw Error("未許可の画質項目");
+ const data=await sonyVideoJSON("getPictureQualitySettings",[{target}]);
+ return flattenPicture(data.result).find(entry=>entry.target===target)||null;
+}
 async function pictureAll(){
- const all=new Map(),seen=new Set()
- let aggregateError=null
- try{
-  const data=await sonyVideoJSON("getPictureQualitySettings",[{target:""}])
-  for(const entry of flattenPicture(data.result)){
-   if(!PICTURE_TARGETS.includes(entry.target))continue
-   seen.add(entry.target)
-   if(entry.isAvailable!==false&&!all.has(entry.target))all.set(entry.target,entry)
-  }
- }catch(error){aggregateError=error}
- // Consumer BRAVIA firmware can provide a specific target even if the aggregate query fails.
- // The mode was verified on this user's real television; brightness must remain read-only until valid.
- for(const target of ["pictureMode","brightness","contrast"]){
-  if(seen.has(target))continue
-  try{
-   const data=await sonyVideoJSON("getPictureQualitySettings",[{target}])
-   for(const entry of flattenPicture(data.result)){
-    if(entry.target!==target)continue
-    seen.add(target)
-    if(entry.isAvailable!==false)all.set(target,entry)
-    break
-   }
-  }catch(_){}
+ const all=new Map(),states=new Map();
+ function ingest(entry){
+  if(!PICTURE_TARGETS.includes(entry.target))return;
+  if(entry.isAvailable===false){if(!all.has(entry.target))states.set(entry.target,"unavailable");return;}
+  if(!all.has(entry.target)||!validPictureValue(all.get(entry.target),all.get(entry.target).currentValue))all.set(entry.target,entry);
+  states.set(entry.target,validPictureValue(all.get(entry.target),all.get(entry.target).currentValue)?"ready":"invalid");
  }
- if(!all.size&&aggregateError)throw aggregateError
- return all
+ try{
+  const data=await sonyVideoJSON("getPictureQualitySettings",[{target:""}]);
+  for(const entry of flattenPicture(data.result))ingest(entry);
+ }catch(_){}
+ const remaining=PICTURE_TARGETS.filter(target=>!["ready","unavailable"].includes(states.get(target)));
+ // Limit read-only concurrency; never retry a write here.
+ for(let i=0;i<remaining.length;i+=3){
+  await Promise.all(remaining.slice(i,i+3).map(async target=>{
+   try{const entry=await pictureSingle(target);if(entry)ingest(entry);else states.set(target,"missing");}
+   catch(_){states.set(target,"failed");}
+  }));
+ }
+ all.states=states;
+ return all;
 }
 function pictureOptions(entry){return entry&&Array.isArray(entry.candidate)?entry.candidate.filter(x=>x&&typeof x.value==="string"&&x.value!=="").map(x=>x.value):[]}
 function pictureRange(entry){
@@ -859,16 +862,20 @@ function picturePublic(entry){
 function pictureSavedFlags(){return Object.fromEntries(PICTURE_PRESET_KEYS.map(k=>[k,Keychain.contains(PICTURE_PRESET_PREFIX+k)]))}
 async function pictureProbe(message){
  const map=await pictureAll()
- const entries=PICTURE_TARGETS.filter(t=>map.has(t)).map(t=>picturePublic(map.get(t)))
- return{entries,saved:pictureSavedFlags(),message:message||("BRAVIAから"+entries.length+"項目を取得。調整できない項目はテレビのクイック設定を使用してください。")}
+ const entries=PICTURE_TARGETS.map(t=>{
+  const state=map.states.get(t)||"missing",entry=map.get(t);
+  return state==="ready"&&entry?{...picturePublic(entry),state}:{target:t,value:"",available:false,min:null,max:null,step:null,options:[],state};
+ });
+ const count=entries.filter(e=>e.available).length;
+ return{entries,saved:pictureSavedFlags(),message:message||("BRAVIA："+count+"項目を操作可能。未取得項目は再取得またはテレビで確認。")}
 }
 async function writePicture(target,value){
  if(!PICTURE_TARGETS.includes(target))throw Error("この画質項目は安全な直接操作に非対応です")
- const settings=await pictureAll(),entry=settings.get(target)
+ const entry=await pictureSingle(target)
  if(!validPictureValue(entry,value))throw Error("テレビが許可していない設定値です："+target)
  if(String(entry.currentValue)===String(value))return
  await sonyVideoJSON("setPictureQualitySettings",[{settings:[{target,value:String(value)}]}])
- const checked=(await pictureAll()).get(target)
+ const checked=await pictureSingle(target)
  if(!checked||(String(checked.currentValue)!==String(value)&&!(Number.isFinite(Number(value))&&Number(checked.currentValue)===Number(value))))throw Error("テレビ側で反映確認できませんでした："+target)
 }
 async function pictureSave(key){
