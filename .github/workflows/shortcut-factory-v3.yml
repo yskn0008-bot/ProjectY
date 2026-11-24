@@ -173,3 +173,107 @@ jobs:
             tools/shortcut-factory/artifacts/stash-hubsign.log
           if-no-files-found: error
           retention-days: 14
+
+
+  # Issue #900 one-time bridge. Does NOT replace or modify the existing STASH
+  # job, existing Common Installer runtime, or any permanent Scriptable script.
+  build-common-installer-repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test one-shot Scriptable backup and safe-stop behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check tools/shortcut-factory/inline/common-installer-repair.js
+          node --test tools/shortcut-factory/tests/common-installer-repair.test.mjs
+          python3 tools/shortcut-factory/validate_secret_free.py \
+            'tools/shortcut-factory/inline/common-installer-repair.js' \
+            'tools/shortcut-factory/shortcuts/YOS Common Installer 修復.cherri'
+
+      - name: Install existing pinned Cherri 2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile exact one-action Shortcut and inject reviewed Scriptable source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/shortcut-factory/shortcuts
+          cherri 'YOS Common Installer 修復.cherri' --skip-sign --debug
+          cd ../../..
+          unsigned='tools/shortcut-factory/shortcuts/YOS Common Installer 修復_unsigned.shortcut'
+          test -s "$unsigned"
+          python3 tools/shortcut-factory/patch_common_installer_repair_inline.py "$unsigned"
+          mkdir -p tools/shortcut-factory/artifacts
+          cp "$unsigned" 'tools/shortcut-factory/artifacts/Common-Installer-Repair-unsigned.shortcut'
+
+      - name: Sign with the existing Shortcut Factory HubSign adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/shortcut-factory/artifacts/Common-Installer-Repair-unsigned.shortcut' \
+            --output 'tools/shortcut-factory/artifacts/YOS Common Installer 修復.shortcut' \
+            --name 'YOS Common Installer 修復'
+
+      - name: Verify signed shortcut AEA1 and single inline Scriptable action
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check --quiet lzfse
+          python3 - <<'PY'
+          from pathlib import Path
+          import plistlib
+          import lzfse
+          unsigned=Path('tools/shortcut-factory/artifacts/Common-Installer-Repair-unsigned.shortcut')
+          signed=Path('tools/shortcut-factory/artifacts/YOS Common Installer 修復.shortcut')
+          assert signed.exists() and signed.stat().st_size>500
+          data=signed.read_bytes()
+          assert data.startswith(b'AEA1'), 'unsigned or invalid signature envelope'
+          cert_len=int.from_bytes(data[8:12],'little')
+          pos=data.find(b'bvx',12+cert_len)
+          assert pos>=0, 'signed LZFSE payload not found'
+          raw=lzfse.decompress(data[pos:])
+          bplist=raw.find(b'bplist00')
+          assert bplist>=0, 'signed binary plist not found'
+          workflow=plistlib.loads(raw[bplist:])
+          unsigned_actions=plistlib.loads(unsigned.read_bytes())['WFWorkflowActions']
+          signed_actions=workflow['WFWorkflowActions']
+          expected='dk.simonbs.Scriptable.RunScriptInlineIntent'
+          assert len(unsigned_actions)==len(signed_actions)==1
+          assert signed_actions[0]['WFWorkflowActionIdentifier']==expected
+          params=signed_actions[0]['WFWorkflowActionParameters']
+          assert params['runInApp'] is True
+          inline=params['script']['Value']['string']
+          assert len(inline)>8000
+          assert '8bb289519b0f4f6c907b27f336a623bc5669e669' in inline
+          assert 'bootstrap-backups' in inline
+          assert 'Script.complete()' in inline
+          assert '__YOS_COMMON_INSTALLER_REPAIR_INLINE__' not in inline
+          assert all(a['WFWorkflowActionIdentifier']==expected for a in signed_actions)
+          print('Common Installer signed inline Shortcut: AEA1 + one-action + pinned safety checks PASS')
+          PY
+
+      - name: Upload private iPhone test artifact without publishing a new installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: common-installer-repair-iphone-test
+          path: |
+            tools/shortcut-factory/artifacts/YOS Common Installer 修復.shortcut
+            tools/shortcut-factory/artifacts/Common-Installer-Repair-unsigned.shortcut
+          if-no-files-found: error
+          retention-days: 14
