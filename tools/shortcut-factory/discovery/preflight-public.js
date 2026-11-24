@@ -6,14 +6,16 @@ const prefix = "YOS DISCOVERY Preflight ";
 const stamp = Date.now().toString(36)+"-"+Math.floor(Math.random()*1e12).toString(36);
 const request = async (url, json) => {
   const r = new Request(url);
-  r.timeoutInterval = 12;
+  r.timeoutInterval = 5;
   const value = json ? await r.loadJSON() : await r.loadString();
   if(r.response?.statusCode!==200) throw Error("PUBLIC_HTTP");
   return value;
 };
 try {
   const now = Date.now();
-  const data = await collectPublicPapers("sleep",{requestJson:u=>request(u,true),requestText:u=>request(u,false),now});
+  // Diagnostic only: at most one search and one article request.
+  let articleRequests = 0;
+  const data = await collectPublicPapers("sleep",{requestJson:u=>request(u,true),requestText:u=>{if(articleRequests++>=1)throw Error("PREFLIGHT_REQUEST_BUDGET");return request(u,false)},now});
   if(!data.evidence.length) throw Error("NO_FULLTEXT");
   const e=data.evidence[0];
   const meta={runId:stamp,evidenceId:e.id,createdAt:now};
