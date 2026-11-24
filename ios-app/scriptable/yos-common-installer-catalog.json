@@ -181,8 +181,8 @@
       "id": "home-scenes",
       "name": "YOS Home Scenes",
       "path": "ios-app/scriptable/remote-widgets/YOS Home Scenes.js",
-      "commit": "6d857f498e1476413147591332b8830ade6065cb",
-      "sha256": "ceac93791f532f3725c4c93ab5acd10539d94a0c15588a77ab89e003aa58e8ef"
+      "commit": "d87ff1f6d67d4d3e6f0b9a2a9df2710b87287b5f",
+      "sha256": "88ab9e9bb79719168c4b52041c1dd219c43bde612b4ab398c51b2dcaa6d8aef3"
     },
     {
       "id": "common-installer-repair",
@@ -195,8 +195,8 @@
       "id": "bravia-picture-off-repair",
       "name": "YOS BRAVIA 消画安全復旧",
       "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA 消画安全復旧.js",
-      "commit": "e79ad57a19e111bd5e75359d282e1f2f2f1872d3",
-      "sha256": "8c56fbdd7802f88e4c9998be0857ab12bc767e777ff9a08970af72b9b655dab0"
+      "commit": "eb844731556779c4689b3fec7c41772ca98dba99",
+      "sha256": "7a923fa373b4675070b93cbea78bfa8bdc23c2725ca50a7683eecf52502e008e"
     }
   ]
 }
