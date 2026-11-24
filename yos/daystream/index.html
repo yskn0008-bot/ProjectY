@@ -382,7 +382,7 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
 .timeline .card.short-row .task-meta{flex:0 0 auto;white-space:nowrap}
 .timeline .card.short-row .task-meta small,.timeline .card.short-row .task-copy small{font-size:10px;line-height:1.1;white-space:nowrap}
 .timeline .card.short-row .task-drag-grip{flex-basis:38px;min-width:38px;margin:0;padding:0;font-size:15px;border:0;opacity:.65}
-.timeline .card.drag-neighbor{z-index:9;will-change:transform;transition:transform 190ms cubic-bezier(.22,.82,.25,1),filter 190ms ease;filter:saturate(.94)}
+.timeline .card.drag-neighbor{z-index:9;will-change:transform;transition:transform 95ms cubic-bezier(.2,.75,.25,1)}
 .timeline .card.drag-neighbor.yos-backdrop{z-index:4}
 @media(prefers-reduced-motion:reduce){.timeline .card.drag-neighbor{transition:none}.timeline .card.drag-preview{filter:none}}
 .timeline .card.drag-preview[data-placement]{outline-color:var(--placement-ink);box-shadow:inset 3px 0 var(--placement-ink),0 12px 26px #55468335}
@@ -1847,23 +1847,17 @@ function wireTaskGestures(el,item){
   const snapped=Math.round(minuteAtY(yFor(item.s)+offset())/5)*5;
   return Math.max(0,Math.min(1440-item.d,snapped));
  };
+ let neighborGeometry=[];
  const reactToNeighbors=()=>{
-  const top=el.offsetTop+offset(),bottom=top+el.offsetHeight,center=(top+bottom)/2;
-  for(const other of tl.querySelectorAll('.card:not(.drag-preview)')){
-   if(other===el)continue;
-   const y=other.offsetTop,height=other.offsetHeight;
-   const gap=Math.max(0,y-bottom,top-(y+height));
-   const near=gap<65;
-   if(!near){
-    if(other.classList.contains('drag-neighbor'))other.style.transform='translate3d(0,0,0)';
-    continue;
-   }
-   const strength=1-gap/65,side=(y+height/2)<center?-1:1;
-   const backdrop=other.classList.contains('yos-backdrop');
-   const push=backdrop?Math.min(7,5*strength):Math.min(29,(9+20*strength));
-   const x=backdrop?Math.round(4*strength):Math.round(8*strength);
-   other.classList.add('drag-neighbor');
-   other.style.transform='translate3d('+x+'px,'+(side*push)+'px,0)';
+  const top=gesture.cardTop+offset(),bottom=top+gesture.cardHeight,center=(top+bottom)/2;
+  for(const {other,y,height,backdrop} of neighborGeometry){
+   const gap=Math.max(0,y-bottom,top-y-height);
+   const strength=1-Math.min(1,gap/72);
+   const side=y+height/2<center?-1:1;
+   const push=backdrop?6*strength:Math.min(52,gesture.cardHeight*.55+8)*strength*strength;
+   const shift=side*push;
+   if(strength>0)other.classList.add('drag-neighbor');
+   if(other.classList.contains('drag-neighbor'))other.style.transform='translate3d(0,'+shift.toFixed(2)+'px,0)';
   }
  };
  const clearNeighbors=()=>{
@@ -1895,7 +1889,7 @@ function wireTaskGestures(el,item){
    lastCandidate=at;
    label.textContent=fmt(at)+'–'+fmt(at+item.d);
    const {level,overlaps}=placementAt(item,at);
-   dragHint.hidden=false;
+   dragHint.hidden=true;
    dragHint.dataset.level=el.dataset.placement=level;
    dragHint.firstElementChild.textContent=fmt(at)+'–'+fmt(at+item.d);
    dragHint.lastElementChild.textContent='';
@@ -1924,8 +1918,7 @@ function wireTaskGestures(el,item){
   editTimer=setTimeout(()=>{
    if(!gesture||gesture.mode!=='armed')return;
    finish(true);
-   if(item.source==='YOS Tasks')openMoveDialog(item,item.s,null);
-   else beginLocalEdit(item);
+   if(item.source!=='YOS Tasks')beginLocalEdit(item);
   },holdToEdit);
  };
  const move=(x,y,event)=>{
@@ -1940,6 +1933,8 @@ function wireTaskGestures(el,item){
     clearTimers();el.classList.remove('press-armed');
     if(ay>=ax){
      gesture.mode='drag';
+     gesture.cardTop=el.offsetTop;gesture.cardHeight=el.offsetHeight;
+     neighborGeometry=Array.from(tl.querySelectorAll('.card')).filter(other=>other!==el).map(other=>({other,y:other.offsetTop,height:other.offsetHeight,backdrop:other.classList.contains('yos-backdrop')}));
      el.classList.add('drag-preview');
     }else gesture.mode='ignored';
    }
@@ -1972,7 +1967,7 @@ function wireTaskGestures(el,item){
   if(cancelled){clearNeighbors();return}
   if(mode==='swipe'&&x-startX< -45){clearNeighbors();showSwipeDelete(item);return}
   if(mode==='tap'){clearNeighbors();showFocusFor(item);return}
-  if(mode==='armed'&&fromGrip){clearNeighbors();openMoveDialog(item,item.s,null);return}
+  if(mode==='armed'&&fromGrip){clearNeighbors();return}
   if(next!==item.s){
    // Drop is the confirmation: no blocking placement-advice modal.
    // FLIP animates all neighboring cards from their reactive positions.
