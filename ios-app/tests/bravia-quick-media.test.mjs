@@ -166,15 +166,10 @@ test('ACTUAL rendered Scriptable WebView script parses and starts the remote but
   const localStorage={getItem(){return null},setItem(){}};
   const launch=new Function('window','document','localStorage','setInterval','clearInterval','setTimeout','clearTimeout',
     runtime+'; return {showQuickStatus,quickModeButtons,quickAppButtons};');
-  const timers=[];const ui=launch(window,document,localStorage,()=>1,()=>{},fn=>{timers.push(fn);return timers.length},()=>{});
+  const ui=launch(window,document,localStorage,()=>1,()=>{},()=>1,()=>{});
   assert.ok(nodes.get('tvGrid').children.length>=2,'navigation buttons must render');
   assert.equal(nodes.get('modeBadge').textContent,'カーソル','mode must not stay 判定中');
-  assert.equal(window.location.href,'','initial render must not navigate');
-  let events=[];const receive=raw=>{events.push(...JSON.parse(raw))};
-  window.YOS_REMOTE_EXCHANGE([],receive);
-  timers.shift()();
-  window.YOS_REMOTE_EXCHANGE([],receive);
-  assert.ok(events.some(x=>x.device==='system'&&x.action==='refreshMode'),'status request after bridge opens');
+  assert.ok(window.location.href.includes('__action?'),'initial status request expected');
   ui.showQuickStatus({ok:true,quick:{
     picture:{entries:[{target:'pictureMode',value:'custom',available:true,
       options:['custom','standard'],min:null,max:null,step:null}],saved:{day:false},message:'読取成功'},
@@ -194,9 +189,8 @@ test('ACTUAL rendered Scriptable WebView script parses and starts the remote but
   nodes.get('quickPictureModes').children[1].handlers.click({
     preventDefault(){},stopPropagation(){}
   });
-  window.YOS_REMOTE_EXCHANGE([],receive);
-  assert.equal(window.location.href,'','picture click must not navigate');
-  assert.ok(events.some(x=>x.device==='picture'&&x.action==='set'&&JSON.parse(x.slot).target==='pictureMode'),'picture click must preserve target');
+  assert.ok(window.location.href.includes('device=picture'),'picture click must dispatch native action');
+  assert.ok(window.location.href.includes('pictureMode'),'picture click must preserve target');
 });
 
 test('existing 12-key adaptive cursor/playback switching remains BYTE-FOR-BYTE identical to v6.6',()=>{
