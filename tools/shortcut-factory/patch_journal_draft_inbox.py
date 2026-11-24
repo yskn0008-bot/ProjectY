@@ -95,7 +95,10 @@ def diagnostic(path:Path,out:Path):
     probe="let x=args.shortcutParameter;if(Array.isArray(x)&&x.length===1)x=x[0];Script.setShortcutOutput(x==="+json.dumps(expected)+"?'受け渡し成功：原稿と資料の完全一致':'受け渡し失敗：'+(x===null?'NULL':typeof x));Script.complete();"
     intent['WFWorkflowActionParameters']['script']['Value']['string']=probe
     output=intent['WFWorkflowActionParameters']['UUID']
-    root['WFWorkflowActions']=inputs+[bound,intent,{'WFWorkflowActionIdentifier':'is.workflow.actions.showresult','WFWorkflowActionParameters':{'Text':{'WFSerializationType':'WFTextTokenString','Value':{'string':'\\ufffc','attachmentsByRange':{'{0, 1}':{'Type':'ActionOutput','OutputUUID':output}}}}}}]
+    root['WFWorkflowActions']=inputs+[bound,intent,{'WFWorkflowActionIdentifier':'is.workflow.actions.showresult','WFWorkflowActionParameters':{'Text':{'WFSerializationType':'WFTextTokenString','Value':{'string':'\ufffc','attachmentsByRange':{'{0, 1}':{'Type':'ActionOutput','OutputUUID':output}}}}}}]
+    result_text=root['WFWorkflowActions'][-1]['WFWorkflowActionParameters']['Text']['Value']
+    assert result_text['string']==chr(0xfffc)
+    assert result_text['attachmentsByRange']['{0, 1}']['OutputUUID']==output
     out.write_bytes(plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False))
     assert 'api.notion.com' not in repr(root['WFWorkflowActions'])
     print('JOURNAL no-network parameter diagnostic PASS')
