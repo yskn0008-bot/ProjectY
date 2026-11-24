@@ -118,3 +118,6 @@ test('missing or invented DOI prevents transfer',async()=>{
 test('editorial source URLs are accepted only when present in research backup',async()=>{const links=['https://www.theguardian.com/science/test-a','https://www.bbc.com/news/test-b',urls[2]];const p=provenance.replaceAll(urls[0],links[0]).replaceAll(urls[1],links[1]);const t=mock({input:raw+'\n'+links.join('\n')+p});await t.execute();assert.match(t.outputs[0],/NOTION_VERIFIED/);});
 
 test('Markdown citations match exact research URL without closing delimiter',async()=>{const t=mock({input:raw+'\n'+urls.map(u=>'[出典]('+u+')').join('\n')+provenance});await t.execute();assert.match(t.outputs[0],/NOTION_VERIFIED/);});
+
+test('single text list from Shortcuts preserves exact draft',async()=>{const t=mock({input:[raw]});await t.execute();assert.match(t.outputs[0],/NOTION_VERIFIED/);});
+test('null and ambiguous list inputs fail closed with type-only diagnostic',async()=>{for(const input of [null,[raw,raw],{text:raw}]){const t=mock({input});await t.execute();assert.match(t.outputs[0],/NO_TEXT_INPUT_(NULL|ARRAY|OBJECT)/);assert.equal(t.calls.length,0);}});
