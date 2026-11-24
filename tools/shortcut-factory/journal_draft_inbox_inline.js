@@ -93,7 +93,8 @@ function validProvenance(raw){
     (research.match(/^資料[123]｜/gm)||[]).length===3;
 }
 async function transfer(input){
-  if(typeof input!=='string')return {status:'held',reason:'NO_TEXT_INPUT'};
+  if(Array.isArray(input)&&input.length===1&&typeof input[0]==='string')input=input[0];
+  if(typeof input!=='string')return {status:'held',reason:'NO_TEXT_INPUT_'+(input===null?'NULL':Array.isArray(input)?'ARRAY':typeof input).toUpperCase()};
   const raw=input.trim();
   if(raw.length<150||raw.length>J.maxLength)return {status:'held',reason:'LENGTH_OUT_OF_RANGE'};
   if(!raw.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1')||!raw.includes('公開不可・要審査'))return {status:'held',reason:'NOT_A_REVIEW_DRAFT'};
