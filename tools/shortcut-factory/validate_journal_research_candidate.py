@@ -53,8 +53,13 @@ def validate(path):
         raise AssertionError('research backup not from actual public source output')
     if p1['WFInput'].get('Value',{}).get('OutputName')!='writerText' or p2['WFInput'].get('Value',{}).get('OutputName')!='draftText':
         raise AssertionError("backups don't preserve original model outputs")
-    if actions[inline[1]]['WFWorkflowActionParameters']['parameter']!=provenance_parameter(actions,p2['WFInput']):
-        raise AssertionError("Notion private handoff must bind exact editor and research backups")
+    bound=actions[inline[1]-1]
+    bp=bound['WFWorkflowActionParameters']
+    if bound['WFWorkflowActionIdentifier']!='is.workflow.actions.gettext' or bp.get('WFTextActionText')!=provenance_parameter(actions,p2['WFInput']):
+        raise AssertionError("Notion handoff must materialize exact editor and research backups")
+    param=actions[inline[1]]['WFWorkflowActionParameters']['parameter']
+    if not bp.get('UUID') or param!={'WFSerializationType':'WFTextTokenAttachment','Value':{'Type':'ActionOutput','OutputUUID':bp['UUID'],'OutputName':'journalBoundText'}}:
+        raise AssertionError("Notion handoff must reference native Text output")
     researchUUID=actions[inline[0]].get('WFWorkflowActionParameters',{}).get('UUID')
     # Use text/gettext output chain; because rawAction is currently not guaranteed
     # to be inferred as an ActionOutput by the compiler, compiler checks only.
