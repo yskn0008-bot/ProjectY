@@ -1,0 +1,10 @@
+#define name YOS Common Installer 2 導入
+#define color blue
+#define version 18
+
+rawAction("dk.simonbs.Scriptable.RunScriptInlineIntent", {
+    "script": "__YOS_INSTALLER_2_BOOTSTRAP__",
+    "parameter": "",
+    "runInApp": true,
+    "ShowWhenRun": true
+})
