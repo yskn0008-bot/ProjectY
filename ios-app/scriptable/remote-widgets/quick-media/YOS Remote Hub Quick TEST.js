@@ -117,7 +117,7 @@ body{padding:0 8px}
 .device-tab.active{background:#24384f;border-color:#548deb;color:white}
 .remote-panel{display:none;min-height:0}
 .remote-panel.active{display:block}
-.tv-card:before{display:none}.tv-card .top-shortcuts{position:relative;top:auto;left:auto;right:auto;height:44px;margin-bottom:4px}
+.tv-card:before{display:none}.tv-card .top-shortcuts{position:relative;top:auto;left:auto;right:auto;height:32px;margin-bottom:8px}
 .floor-card{padding:13px}
 .floor-power{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
 .floor-power button,.floor-temp button{border:1px solid #373d48;border-radius:14px;background:#1b1f24;color:white;min-height:49px;font-weight:750;font-size:13px}
@@ -153,39 +153,31 @@ body{padding:0 8px}
 .icon{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;font-size:23px;font-weight:500;line-height:1;color:#438eff;font-variant-emoji:text}
 .label{font-size:11px;font-weight:700;white-space:nowrap}.alt-label{position:absolute;right:7px;bottom:5px;font-size:7px;font-weight:700;color:#777b83;line-height:1;white-space:nowrap}.brand{font-size:10px;color:#8d8f95}.ac-temp{font-size:17px;font-weight:800;color:#fff;min-width:34px;text-align:right}
 .picture-quick{display:grid;grid-template-columns:1.35fr 1.25fr 0.8fr;gap:5px;margin-top:6px}
-.picture-quick button{min-height:44px;border:1px solid #41464d;border-radius:10px;background:#181b21;color:#fff;font-size:11px;font-weight:650}
+.picture-quick button{min-height:31px;border:1px solid #41464d;border-radius:10px;background:#181b21;color:#fff;font-size:11px;font-weight:650}
 
 /* Additive BRAVIA quick studio: no changes to the 12 TV buttons. */
 .tv-card{max-height:calc(100dvh - 133px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
 .tv-card::-webkit-scrollbar{display:none}
-.tv-card #tvGrid{gap:5px}
-.tv-card #tvGrid .key{height:52px}
-.tv-studio{margin-top:5px;border-top:1px solid #2a3441;padding-top:6px}
+.tv-studio{margin-top:10px;border-top:1px solid #2a3441;padding-top:8px}
 .tv-studio h3{margin:0 0 7px;color:#b3c5da;font-size:11px;font-weight:600;letter-spacing:.12em}
-.tv-studio .scene-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:4px}
-.tv-studio button{border:1px solid #2d4054;border-radius:10px;background:#17212b;color:#e7f1fc;min-height:44px;font:500 12px -apple-system,BlinkMacSystemFont,sans-serif}
+.tv-studio .scene-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:10px}
+.tv-studio button{border:1px solid #2d4054;border-radius:10px;background:#17212b;color:#e7f1fc;min-height:35px;font:500 12px -apple-system,BlinkMacSystemFont,sans-serif}
 .tv-studio button:disabled{opacity:.35}
-.tv-studio .compact-adjust{display:grid;grid-template-columns:78px minmax(0,1fr) 35px;align-items:center;gap:7px;margin:0}
+.tv-studio .compact-adjust{display:grid;grid-template-columns:78px minmax(0,1fr) 35px;align-items:center;gap:7px;margin:4px 0}
 .tv-studio .compact-adjust label{font-size:11px;color:#b0bfd1}
-.tv-studio .compact-adjust input,.pic-slider-wrap input[type=range],.pic-big-bar{min-width:0;width:100%;height:48px;appearance:none;-webkit-appearance:none;background:transparent;accent-color:#70a9eb;touch-action:pan-y}
-.tv-studio .compact-adjust input::-webkit-slider-runnable-track,.pic-slider-wrap input[type=range]::-webkit-slider-runnable-track,.pic-big-bar::-webkit-slider-runnable-track{height:12px;border-radius:12px;background:#3b526a}
-.tv-studio .compact-adjust input::-webkit-slider-thumb,.pic-slider-wrap input[type=range]::-webkit-slider-thumb,.pic-big-bar::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-7px;border:1px solid #bcd6f7;border-radius:50%;background:#e0ecfb;box-shadow:0 2px 6px #0008}
-.tv-studio .compact-adjust input:disabled,.pic-slider-wrap input[type=range]:disabled,.pic-big-bar:disabled{opacity:.4}
+.tv-studio .compact-adjust input{min-width:0;width:100%;accent-color:#70a9eb}
 .tv-studio .compact-adjust output{color:#b0c9e5;font-variant-numeric:tabular-nums;text-align:right;font-size:11px}
-.tv-studio .tv-app-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 10px)/3);gap:5px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:1px 0 7px;scrollbar-width:none}
+.tv-studio .tv-app-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 15px)/4);gap:5px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:1px 0 7px;scrollbar-width:none}
 .tv-studio .tv-app-scroll button{scroll-snap-align:start;white-space:normal;overflow:hidden;text-overflow:ellipsis;min-height:44px;font-size:10px}
-.tv-app-head{display:flex;align-items:center;justify-content:space-between;margin:0}
-.tv-app-head h3{margin:0;letter-spacing:.04em}
-.tv-app-head .tool{height:44px;width:44px;min-height:44px;padding:0;font-size:19px}
-.tv-studio .tv-text-entry,.quick-section .tv-text-entry{display:flex;gap:6px;margin-top:7px}
-.tv-studio .tv-text-entry input,.quick-section .tv-text-entry input{min-width:0;flex:1;background:#121923;border:1px solid #3a4c60;border-radius:10px;color:#eef6ff;padding:8px;font-size:14px}
-.tv-studio .tv-text-entry button,.quick-section .tv-text-entry button{flex:0 0 64px}
-.tv-studio .tv-studio-note,.quick-section .tv-studio-note{font-size:10px;color:#879bb2;line-height:1.4;margin:5px 0 0}
-.tv-studio .tv-extra-line,.quick-section .tv-extra-line{display:flex;gap:8px;align-items:center;margin-top:8px}
-.tv-studio .tv-extra-line button,.quick-section .tv-extra-line button{padding:0 10px}
+.tv-studio .tv-text-entry{display:flex;gap:6px;margin-top:7px}
+.tv-studio .tv-text-entry input{min-width:0;flex:1;background:#121923;border:1px solid #3a4c60;border-radius:10px;color:#eef6ff;padding:8px;font-size:14px}
+.tv-studio .tv-text-entry button{flex:0 0 64px}
+.tv-studio .tv-studio-note{font-size:10px;color:#879bb2;line-height:1.4;margin:5px 0 0}
+.tv-studio .tv-extra-line{display:flex;gap:8px;align-items:center;margin-top:8px}
+.tv-studio .tv-extra-line button{padding:0 10px}
 .tv-studio .tv-extra-status{min-width:0;flex:1;font-size:10px;color:#879bb2;line-height:1.4;overflow-wrap:anywhere}
 .quick-modes{display:flex;gap:5px;overflow-x:auto;margin-top:5px;min-height:29px;scrollbar-width:none}
-.quick-modes button,.quick-action{padding:8px 9px;min-height:44px;white-space:nowrap;border-radius:10px;border:1px solid #414b58;background:#1d2631;color:#e4ecfa;font-size:11px;font-weight:650}
+.quick-modes button,.quick-action{padding:8px 9px;min-height:32px;white-space:nowrap;border-radius:10px;border:1px solid #414b58;background:#1d2631;color:#e4ecfa;font-size:11px;font-weight:650}
 .quick-modes button.selected,.quick-action.selected{background:#305a88;border-color:#82b4ed}
 .quick-modes button:disabled,.quick-action:disabled{opacity:.35}
 .quick-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:8px 0}
@@ -199,12 +191,25 @@ body{padding:0 8px}
 .pic-name{font-size:13px;min-width:110px;flex:1;color:#e4e8ee}
 .pic-manual{color:#747c87;font-size:11px}
 .pic-slider-wrap{display:flex;align-items:center;gap:8px;width:100%}
-.pic-slider-wrap input[type=range]{width:100%;height:48px;accent-color:#6b9fff;flex:1}
+.pic-slider-wrap input[type=range]{width:100%;height:30px;accent-color:#6b9fff;flex:1}
 .pic-slider-wrap output{min-width:44px;text-align:right;font-size:13px;color:#a5c2ff}
 .pic-enum{min-width:145px;max-width:200px;padding:9px 6px;background:#202832;border:1px solid #414854;border-radius:10px;color:#eef1f7}
-.pic-preset{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:7px;padding:10px 0;border-top:1px solid #2e3138}
+.pic-preset{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:7px;padding:10px 0;border-top:1px solid #2e3138}
 .pic-preset button{border:1px solid #464d58;color:#fff;background:#151c26;border-radius:10px;padding:10px 11px}
 .pic-preset button:disabled{opacity:.35}
+#presetEditor{border-top:1px solid #394451;padding:12px 0}
+#presetEditor input[type=text],#presetEditor input[type=number],#presetEditor select,#remoteAppearance select{width:100%;min-width:0;padding:9px;color:#eaf1fa;background:#202832;border:1px solid #404b5a;border-radius:9px;font-size:14px}
+.preset-edit-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid #30353c}
+.preset-edit-row label{display:flex;align-items:center;gap:8px;font-size:13px}
+#presetHome{display:grid;grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:calc((100% - 10px)/3);gap:5px;overflow-x:auto;scroll-snap-type:x proximity}
+#presetHome button{min-height:44px;scroll-snap-align:start;white-space:normal;color:#e7f1fc;background:#17212b;border:1px solid #2d4054;border-radius:10px}
+#presetHome button:disabled{opacity:.35}
+#tvGrid[data-size=compact] .key{height:48px}
+#tvGrid[data-size=large] .key{height:76px}
+#remoteAppearance{display:grid;gap:8px;margin:12px 0}
+.tv-studio .compact-adjust input,.pic-slider-wrap input[type=range],.pic-big-bar{min-height:44px;appearance:none;-webkit-appearance:none;background:transparent}
+.tv-studio .compact-adjust input::-webkit-slider-runnable-track,.pic-slider-wrap input[type=range]::-webkit-slider-runnable-track,.pic-big-bar::-webkit-slider-runnable-track{height:10px;border-radius:10px;background:#53677f}
+.tv-studio .compact-adjust input::-webkit-slider-thumb,.pic-slider-wrap input[type=range]::-webkit-slider-thumb,.pic-big-bar::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-8px;background:#dbe9fa;border-radius:50%;border:1px solid #9ab7d9}
 .pic-status{font-size:12px;line-height:1.6;color:#9db0c7;white-space:pre-line;padding:10px;background:#121924;border-radius:10px;margin:10px 0}
 .pic-big-bar{width:100%;height:52px;accent-color:#7aa5ff}
 .config-layer{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.94);padding:max(58px,calc(env(safe-area-inset-top) + 4px)) 10px max(12px,env(safe-area-inset-bottom));overflow:auto}
@@ -226,12 +231,16 @@ body{padding:0 8px}
 </div>
 <div id="quickPictureModes" class="quick-modes" aria-label="画質モード切替"><span class="pic-manual">画質モードを確認中…</span></div>
 <div class="tv-studio" aria-label="BRAVIA クイックスタジオ">
-  <div class="scene-picks"><button onclick="loadPicturePreset(event,'day')" id="tvPresetDay" disabled>昼</button><button onclick="loadPicturePreset(event,'night')" id="tvPresetNight" disabled>夜</button><button onclick="loadPicturePreset(event,'movie')" id="tvPresetMovie" disabled>映画</button></div>
+ <h3>PICTURE · 画質プリセット</h3>
+ <div class="scene-picks" id="presetHome"><button onclick="loadPicturePreset(event,'day')" id="tvPresetDay" disabled>昼</button><button onclick="loadPicturePreset(event,'night')" id="tvPresetNight" disabled>夜</button><button onclick="loadPicturePreset(event,'movie')" id="tvPresetMovie" disabled>映画</button></div>
  <div class="compact-adjust"><label for="tvBrightness">明るさ</label><input id="tvBrightness" type="range" min="0" max="100" value="0" disabled oninput="previewTVCompact(event,'brightness')" onchange="commitTVCompact(event,'brightness')"><output id="tvBrightnessVal">--</output></div>
  <div class="compact-adjust"><label for="tvContrast">コントラスト</label><input id="tvContrast" type="range" min="0" max="100" value="0" disabled oninput="previewTVCompact(event,'contrast')" onchange="commitTVCompact(event,'contrast')"><output id="tvContrastVal">--</output></div>
- <div class="tv-app-head"><h3>アプリ</h3><button class="tool" aria-label="アプリ一覧更新" onclick="nativeAction('tvApps','list','アプリ一覧')">↻</button></div>
+ <h3 style="margin-top:11px">APPS · 左右スクロール</h3>
+ <button class="tool" onclick="nativeAction('tvApps','list','アプリ一覧')">一覧更新</button>
  <div id="tvAppScroll" class="tv-app-scroll" aria-label="BRAVIAアプリを横スクロール"><button onclick="nativeAction('tvApps','list','アプリ一覧')">アプリ取得</button></div>
- <div class="tv-extra-status" id="bridgeStatus" role="status">操作接続中…</div><div class="tv-extra-status" id="tvExtraStatus" role="status" aria-live="polite"></div>
+ <div class="tv-text-entry"><input id="tvTextInput" type="text" maxlength="140" placeholder="テレビで入力欄を開いて文字入力" aria-label="BRAVIAへ送るテキスト"><button onclick="sendTVText(event)">送信</button></div>
+ <p class="tv-studio-note">文字はテレビの検索欄が開いているときのみ。パスワード等の機密情報は入力しないでください。</p>
+ <div class="tv-extra-line"><button onclick="openTVVPN(event)">VPNアプリ</button><span class="tv-extra-status" id="tvExtraStatus">VPNのON/OFFは接続アプリの対応確認後</span></div>
 </div></section>
 <section class="card remote-panel" data-panel="light"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
 <section class="card remote-panel" data-panel="ac"><div class="head"><div class="title" onclick="openRemote('ac')">エアコン</div><div class="ac-meta"><span id="acTemp" class="ac-temp">--°</span><span class="brand">SHARP</span></div></div><div class="grid grid-4">${makeButtons("ac", AC_BUTTONS)}</div></section>
@@ -257,7 +266,7 @@ body{padding:0 8px}
 <p class="floor-footnote">色・調光は自宅Wi-Fiで直接操作。エフェクト・自動バイオリズムはTapoアプリで設定してください。Matter対応だけではScriptableへの直接接続はできません。</p>
 </section>
 </div>
-<div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」で入れ替え。再生位置が自動カーソルの中心。中央キーはタップ最優先で決定、24px以上動かした時だけスワイプとして上下左右へ移動します。切替中の長押しは元機能です。</p><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
+<div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」で入れ替え。再生位置が自動カーソルの中心。中央キーはタップ最優先で決定、24px以上動かした時だけスワイプとして上下左右へ移動します。切替中の長押しは元機能です。</p><div id="remoteAppearance"><label>操作ボタンの大きさ<select id="remoteSize" onchange="changeRemoteAppearance()"><option value="standard">標準</option><option value="compact">コンパクト</option><option value="large">大きめ</option></select></label><label>画質プリセットの位置<select id="presetPosition" onchange="changeRemoteAppearance()"><option value="below">12キーの下</option><option value="above">12キーの上</option></select></label></div><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
 <div id="quickLayer" class="config-layer" role="dialog" aria-modal="true" aria-label="BRAVIAワンタップ操作"><div class="config-card">
   <div class="config-head"><div class="config-title">BRAVIA クイック操作</div><button class="tool" onclick="closeQuickEditor(event)">閉じる</button></div>
   <p class="quick-info">テレビから取得できた設定のみ直接変更。各操作は本人が押したときだけ送信します。</p>
@@ -274,11 +283,6 @@ body{padding:0 8px}
     </div>
     <p class="quick-info">DMM.comはHDMI3に切り替えてFire TV側で起動。Proton VPNもテレビ内のアプリを開きます。VPN接続・解除の直接操作はまだ非対応です。</p>
   </div>
-  <div class="quick-section"><h3>文字入力・VPN</h3>
- <div class="tv-text-entry"><input id="tvTextInput" type="text" maxlength="140" placeholder="テレビで入力欄を開いて文字入力" aria-label="BRAVIAへ送るテキスト"><button class="quick-action" onclick="sendTVText(event)">送信</button></div>
- <p class="tv-studio-note">テレビの検索欄が開いているときのみ。パスワード等は入力しないでください。</p>
- <button class="quick-action" onclick="openTVVPN(event)">VPNアプリ</button>
- </div>
   <p class="pic-status" id="quickStatus">接続と対応状況を確認中…</p>
   <button class="tool" onclick="probeQuickEditor(event)">テレビから再取得</button>
 </div></div>
@@ -299,8 +303,8 @@ body{padding:0 8px}
 </div></div>
 <div id="shortcutsLayer" class="config-layer" role="dialog" aria-modal="true" aria-label="BRAVIA画質ショートカット"><div class="config-card">
   <div class="config-head"><div class="config-title">画質ショートカット</div><button class="tool" onclick="closeShortcuts(event)">閉じる</button></div>
-  <p class="config-help">テレビで好きな画質に調整して「保存」。保存対象は今の映像入力でAPIから取得できた項目だけです。明るさが未取得なら保存・復元できません。YOSが数値を勝手に決めることはありません。</p>
-  <div id="picturePresets"></div>
+  <p class="config-help">昼・夜・映画は自由登録です。「編集」で名前、モード、適用項目を指定。「現在を保存」で今の画質を登録。保存だけではテレビを変更しません。</p>
+  <div id="picturePresets"></div><div id="presetEditor" hidden></div>
   <p id="shortcutsStatus" class="pic-status" aria-live="polite">設定を確認中</p>
   <button class="tool" onclick="probePictureScene(event)">登録状況を再取得</button>
 </div></div>
@@ -310,7 +314,7 @@ const LAYOUT_KEY="yos.remote.tv.buttons.v52"
 let mode="navigation",nonce=0,pollTimer=null,acTimer=null,selectedSlot=null,gestureSuppressUntil=0
 const PANEL_KEY="yos.remote.selected-panel.v1"
 let activePanel="tv"
-function setPanel(name){if(!["tv","light","ac","floor"].includes(name))return;stopActiveHolds();activePanel=name;document.querySelectorAll(".remote-panel").forEach(el=>el.classList.toggle("active",el.dataset.panel===name));document.querySelectorAll(".device-tab").forEach(el=>{const active=el.dataset.tab===name;el.classList.toggle("active",active);el.setAttribute("aria-selected",active?"true":"false")});try{localStorage.setItem(PANEL_KEY,name)}catch(_){}if(name==="floor")nativeAction("floor","refresh","状態取得");if(name==="ac")requestAC()}
+function setPanel(name){if(!["tv","light","ac","floor"].includes(name))return;stopActiveHolds();activePanel=name;document.querySelectorAll(".remote-panel").forEach(el=>el.classList.toggle("active",el.dataset.panel===name));document.querySelectorAll(".device-tab").forEach(el=>{const active=el.dataset.tab===name;el.classList.toggle("active",active);el.setAttribute("aria-selected",active?"true":"false")});try{localStorage.setItem(PANEL_KEY,name)}catch(_){}if(name==="floor")nativeAction("floor","refresh","状態取得")}
 function sendFloor(action,value=""){nativeAction("floor",action,String(value))}
 function stopActiveHolds(){nativeAction("tvHoldStop","","");nativeAction("lightHoldStop","","")}
 function meta(action){return ACTIONS.find(item=>item.action===action)}
@@ -336,21 +340,7 @@ function displayAction(index,baseAction){
   if(mode==="hybrid"&&(role==="up"||role==="down"))return CROSS_NAV[role]
   return baseAction
 }
-const remoteOutbox=[];let remoteWake=null,remoteBridgeReady=false;
-function nativeAction(device,action,label,slot=""){
- const item={device,action:action||"",label:label||"",slot:slot||"",n:++nonce};
- const read=device==="system"||((device==="picture"||device==="quick")&&action==="probe")||(device==="tvApps"&&action==="list");
- if(read&&remoteOutbox.some(x=>x.device===device&&x.action===action))return;
- remoteOutbox.push(item);
- if(remoteWake)remoteWake();
-}
-window.YOS_REMOTE_EXCHANGE=function(results,done){
- for(const result of results||[]){try{nativeResult(result)}catch(_){}}
- if(!remoteBridgeReady){remoteBridgeReady=true;document.getElementById("bridgeStatus").textContent="操作受付中";setTimeout(()=>{if(activePanel==="tv"){requestMode();nativeAction("tvApps","list","アプリ一覧");probePictureScene()}},350);}
- let timer=null,finished=false;
- const finish=()=>{if(finished)return;finished=true;if(timer!==null)clearTimeout(timer);remoteWake=null;done(JSON.stringify(remoteOutbox.splice(0,32)));};
- remoteWake=finish;if(remoteOutbox.length)finish();else timer=setTimeout(finish,160);
-};
+function nativeAction(device,action,label,slot=""){nonce++;window.location.href="/__action?device="+encodeURIComponent(device)+"&action="+encodeURIComponent(action||"")+"&label="+encodeURIComponent(label||"")+"&slot="+encodeURIComponent(slot||"")+"&n="+nonce}
 function swipeAction(dx,dy){
   if(Math.max(Math.abs(dx),Math.abs(dy))<SWIPE_THRESHOLD)return null
   return Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy>0?"down":"up")
@@ -495,7 +485,19 @@ function renderConfig(){
     palette.appendChild(b)
   })
 }
-function openLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=null;document.getElementById("configLayer").classList.add("open");renderConfig()}
+const REMOTE_APPEARANCE_KEY="yos.remote.tv.appearance.v1"
+function applyRemoteAppearance(){
+ let pref={};try{pref=JSON.parse(localStorage.getItem(REMOTE_APPEARANCE_KEY))||{}}catch(_){}
+ const size=["standard","compact","large"].includes(pref.size)?pref.size:"standard",position=pref.position==="above"?"above":"below";
+ const grid=document.getElementById("tvGrid"),home=document.getElementById("presetHome"),sizeInput=document.getElementById("remoteSize"),posInput=document.getElementById("presetPosition");
+ if(sizeInput)sizeInput.value=size;if(posInput)posInput.value=position;
+ if(!grid||!home||!home.parentNode||!grid.parentNode)return;
+ grid.dataset.size=size;
+ if(position==="above")grid.parentNode.insertBefore(home,grid);
+ else {const studio=document.querySelector(".tv-studio");if(studio&&studio.children[0]&&home!==studio.children[0].nextSibling)studio.insertBefore(home,studio.children[0].nextSibling);}
+}
+function changeRemoteAppearance(){const size=document.getElementById("remoteSize").value,position=document.getElementById("presetPosition").value;try{localStorage.setItem(REMOTE_APPEARANCE_KEY,JSON.stringify({size,position}))}catch(_){}applyRemoteAppearance()}
+function openLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=null;document.getElementById("configLayer").classList.add("open");applyRemoteAppearance();renderConfig()}
 function closeLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=null;document.getElementById("configLayer").classList.remove("open");renderTV()}
 function resetLayout(e){if(e){e.preventDefault();e.stopPropagation()}layout=DEFAULT.slice();selectedSlot=null;saveLayout();renderTV();renderConfig()}
 const PICTURE_MENU=[
@@ -507,8 +509,8 @@ const PICTURE_MENU=[
  ["映像信号",[["HDRモード","hdrMode"],["HDMIビデオレンジ",null]]],
  ["色詳細設定",[["色温度詳細設定：ベーシック",null],["色温度詳細設定：マルチポイント",null],["各色詳細設定",null]]]
 ]
-const PIC_PRESET_IDS=["day","night","movie"],PIC_PRESET_NAMES={day:"昼",night:"夜",movie:"映画"}
-let pictureMap={},savedPresets={day:false,night:false,movie:false},pictureConnected=false
+const PIC_PRESET_IDS=["day","night","movie","extra1","extra2","extra3","extra4","extra5"],PIC_PRESET_NAMES={day:"昼",night:"夜",movie:"映画",extra1:"追加1",extra2:"追加2",extra3:"追加3",extra4:"追加4",extra5:"追加5"}
+let pictureMap={},savedPresets={day:false,night:false,movie:false},pictureConnected=false,presetDetails={},editingPreset=null
 function pictureEscape(t){return String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
 
 const QUICK_APPS=[["youtube","YouTube"],["netflix","Netflix"],["prime","Amazonプライム"],["unext","U-NEXT"],["proton","Proton VPNを開く"]]
@@ -537,7 +539,7 @@ function quickSoundButtons(id,target){
  const box=document.getElementById(id);if(!box)return
  const data=quickSound[target],opts=data&&data.available&&Array.isArray(data.options)?data.options:[]
  box.innerHTML=""
- if(!opts.length){box.textContent=!data?"音声を取得中":({unavailable:"現在の入力では利用不可",missing:"直接操作未確認",failed:"取得失敗・再取得",invalid:"許可値未確認"}[data.state]||"音声を再取得してください");return}
+ if(!opts.length){box.textContent="テレビから操作可能な音声項目を取得できません";return}
  for(const value of opts){
   const button=document.createElement("button")
   button.className="quick-action"+(String(value)===String(data.value)?" selected":"")
@@ -626,7 +628,7 @@ function renderPictureMenu(){
        html+='<select class="pic-enum" aria-label="'+pictureEscape(name)+'" onchange="commitPictureSelect(event,&quot;'+target+'&quot;)">'
        for(const option of info.options)html+='<option value="'+pictureEscape(option)+'"'+(String(option)===String(info.value)?' selected':'')+'>'+pictureEscape(pictureOptionLabel(target,option))+'</option>'
        html+='</select>'
-     }else html+='<span class="pic-manual">'+pictureEscape(!target?"テレビで設定":!info?"取得中":({unavailable:"現在の入力では利用不可",missing:"直接操作未確認",failed:"取得失敗・再取得",invalid:"許可値未確認"}[info.state]||"テレビで設定"))+'</span>'
+     }else html+='<span class="pic-manual">テレビで設定</span>'
      html+='</div>'
    }
    html+='</section>'
@@ -653,13 +655,45 @@ function renderBrightness(){
  const okay=data&&data.available&&Number.isFinite(Number(data.min))&&Number.isFinite(Number(data.max))&&Number(data.max)>Number(data.min)&&Number(data.step)>0
  input.disabled=!okay
  if(okay){input.min=data.min;input.max=data.max;input.step=data.step;input.value=data.value;v.textContent="現在の明るさ "+data.value}
- else v.textContent=!data?"明るさを取得中":data.state==="unavailable"?"現在の入力では利用不可":data.state==="failed"?"取得失敗・再取得":"直接操作未確認・テレビで設定"
+ else v.textContent="明るさの直接操作は未対応。テレビのクイック設定で調整してください。"
+}
+function presetName(key){return presetDetails[key]?.name||PIC_PRESET_NAMES[key]}
+function renderPresetEditor(key){
+ editingPreset=key;
+ const editor=document.getElementById("presetEditor");if(!editor)return;
+ editor.hidden=false;
+ const prior=presetDetails[key],values=Object.fromEntries((prior?.settings||[]).map(x=>[x.target,x.value]));
+ let markup='<h3>画質ショートカット編集</h3><label>名前<input type="text" maxlength="24" id="presetName" value="'+pictureEscape(presetName(key))+'"></label><p class="pic-manual">適用したい項目だけにチェック。画質モードだけでも登録できます。</p>';
+ const labels=Object.fromEntries(PICTURE_MENU.flatMap(g=>g[1].filter(x=>x[1]).map(x=>[x[1],x[0]])));
+ for(const [target,info] of Object.entries(pictureMap)){
+  if(!info.available)continue;
+  const chosen=Object.prototype.hasOwnProperty.call(values,target),value=chosen?values[target]:info.value,enabled=prior?chosen:target==="pictureMode";
+  markup+='<div class="preset-edit-row"><label><input type="checkbox" data-preset-check="'+target+'" '+(enabled?'checked':'')+'>'+pictureEscape(labels[target]||target)+'</label>';
+  if(info.min!==null&&info.max!==null&&info.step>0)markup+='<input type="number" data-preset-value="'+target+'" min="'+info.min+'" max="'+info.max+'" step="'+info.step+'" value="'+pictureEscape(value)+'">';
+  else {markup+='<select data-preset-value="'+target+'">';for(const option of info.options||[])markup+='<option value="'+pictureEscape(option)+'"'+(String(option)===String(value)?' selected':'')+'>'+pictureEscape(pictureOptionLabel(target,option))+'</option>';markup+='</select>'}
+  markup+='</div>';
+ }
+ if(prior&&prior.settings.some(x=>!pictureMap[x.target]?.available))markup+='<p class="pic-manual">未取得の既存設定を保護します。再取得してください。</p>';
+ markup+='<div class="quick-buttons"><button class="tool" onclick="commitPresetEditor(event)">'+(prior?'上書き保存':'登録')+'</button><button class="tool" onclick="cancelPresetEditor()">閉じる</button></div>';
+ editor.innerHTML=markup;
+}
+function cancelPresetEditor(){editingPreset=null;const editor=document.getElementById("presetEditor");if(editor){editor.hidden=true;editor.innerHTML=""}}
+function commitPresetEditor(e){
+ e.preventDefault();if(!editingPreset||!pictureConnected)return;
+ const key=editingPreset,prior=presetDetails[key],status=document.getElementById("shortcutsStatus");
+ if(prior&&prior.settings.some(x=>!pictureMap[x.target]?.available)){status.textContent="既存設定を保護しました。未取得項目があります。";return}
+ const name=document.getElementById("presetName").value.trim(),settings=[];
+ document.querySelectorAll("[data-preset-check]").forEach(el=>{if(el.checked){const target=el.dataset.presetCheck,input=document.querySelector('[data-preset-value="'+target+'"]');if(input)settings.push({target,value:String(input.value)})}});
+ if(!name||!settings.length){status.textContent="名前と適用項目を指定してください";return}
+ status.textContent="登録内容を検証中…";
+ nativeAction("picture","edit","画質プリセット登録",JSON.stringify({key,name,settings}));
 }
 function renderPicturePresets(){
- const root=document.getElementById("picturePresets");if(!root)return
+ const root=document.getElementById("picturePresets");if(!root)return;
  root.innerHTML=PIC_PRESET_IDS.map(key=>{
- const isSaved=Boolean(savedPresets[key])
- return '<div class="pic-preset"><div><strong>'+PIC_PRESET_NAMES[key]+'</strong><div class="pic-manual">'+(isSaved?'登録済み':'未登録')+'</div></div><button '+(!pictureConnected?'disabled':'')+' onclick="savePicturePreset(event,&quot;'+key+'&quot;)">保存</button><button '+(!pictureConnected||!isSaved?'disabled':'')+' onclick="loadPicturePreset(event,&quot;'+key+'&quot;)">呼出</button></div>'
+  const isSaved=Boolean(savedPresets[key]),prior=presetDetails[key],mode=prior?.settings?.find(x=>x.target==="pictureMode")?.value;
+  const detail=isSaved?(mode?pictureOptionLabel("pictureMode",mode)+" / ":"")+(prior?prior.settings.length+"項目":"登録済み"):"未登録";
+  return '<div class="pic-preset"><div><strong>'+pictureEscape(presetName(key))+'</strong><div class="pic-manual">'+pictureEscape(detail)+'</div></div><button '+(!pictureConnected?'disabled':'')+' onclick="renderPresetEditor(&quot;'+key+'&quot;)">編集</button><button '+(!pictureConnected?'disabled':'')+' onclick="savePicturePreset(event,&quot;'+key+'&quot;)">現在を保存</button><button '+(!pictureConnected||!isSaved?'disabled':'')+' onclick="loadPicturePreset(event,&quot;'+key+'&quot;)">呼出</button></div>'
  }).join("")
 }
 function savePicturePreset(e,key){
@@ -680,17 +714,17 @@ function showPictureStatus(result){
  if(result&&result.picture){
   pictureConnected=true
   const picture=result.picture
-  if(!picture.partial)pictureMap={};for(const item of picture.entries||[])pictureMap[item.target]=item
-  savedPresets=picture.saved||savedPresets
+  pictureMap={};for(const item of picture.entries||[])pictureMap[item.target]=item
+  savedPresets=picture.saved||savedPresets;presetDetails=picture.presets||presetDetails;if(picture.edited===editingPreset)cancelPresetEditor()
   if(status)status.textContent=picture.message||"現在値を取得しました"
   if(shortStatus)shortStatus.textContent=picture.message||"ショートカットを確認しました"
   renderPictureMenu();renderBrightness();renderPicturePresets();quickModeButtons('quickPictureModes');quickModeButtons('quickPictureModesPanel');renderTVStudio()
- }else if(result&&result.ok===false&&result.device==="picture"){
+ }else if(result&&result.ok===false){
   const msg="実行できませんでした："+String(result.message||"通信に失敗しました")
   if(status)status.textContent=msg
   if(shortStatus)shortStatus.textContent=msg
   const txt=document.getElementById("brightnessValue");if(txt)txt.textContent=msg
-  pictureConnected=false;pictureMap={};renderPictureMenu();renderBrightness();renderPicturePresets();renderTVStudio();quickModeButtons('quickPictureModes');quickModeButtons('quickPictureModesPanel')
+  if(!pictureConnected){renderPictureMenu();renderBrightness();renderPicturePresets();renderTVStudio()}
  }
 }
 
@@ -703,9 +737,8 @@ function renderTVStudio(){
   if(ok){range.min=entry.min;range.max=entry.max;range.step=entry.step;range.value=entry.value;value.textContent=entry.value}
   else value.textContent='--';
  }
- for(const [key,id] of [['day','tvPresetDay'],['night','tvPresetNight'],['movie','tvPresetMovie']]){
-  const button=document.getElementById(id);if(button)button.disabled=!pictureConnected||!savedPresets[key];
- }
+ const home=document.getElementById("presetHome");
+ if(home)home.innerHTML=PIC_PRESET_IDS.filter((key,i)=>i<3||savedPresets[key]).map(key=>'<button '+(!pictureConnected||!savedPresets[key]?'disabled':'')+' onclick="loadPicturePreset(event,&quot;'+key+'&quot;)">'+pictureEscape(presetName(key))+'</button>').join("");
 }
 function previewTVCompact(e,target){const id=target==='brightness'?'tvBrightnessVal':'tvContrastVal';document.getElementById(id).textContent=e.target.value}
 function commitTVCompact(e,target){
@@ -716,7 +749,6 @@ function commitTVCompact(e,target){
 function showTVExtra(message){
  const status=document.getElementById('tvExtraStatus');
  if(status)status.textContent=String(message||'').slice(0,100);
- const quickStatus=document.getElementById('quickStatus');if(quickStatus&&document.getElementById('quickLayer').classList.contains('open'))quickStatus.textContent=String(message||'').slice(0,100);
 }
 function displayTVApps(apps){
  const root=document.getElementById('tvAppScroll');if(!root)return;
@@ -804,8 +836,8 @@ function bindLightHoldButtons(){
     document.addEventListener("visibilitychange",()=>{if(document.hidden)stop()})
   })
 }
-function openRemote(device){nativeAction("openRemote",device,"個別リモコン")}
-bindLightHoldButtons();renderTV();renderTVStudio();try{setPanel(localStorage.getItem(PANEL_KEY)||"tv")}catch(_){setPanel("tv")}pollTimer=setInterval(()=>{if(remoteBridgeReady&&activePanel==="tv")requestMode()},8000);acTimer=setInterval(()=>{if(remoteBridgeReady&&activePanel==="ac")requestAC()},30000);window.addEventListener("beforeunload",()=>{if(pollTimer)clearInterval(pollTimer);if(acTimer)clearInterval(acTimer)})
+function openRemote(device){window.location.href=REMOTES[device]}
+bindLightHoldButtons();renderTV();renderTVStudio();try{applyRemoteAppearance()}catch(_){}requestMode();requestAC();try{setPanel(localStorage.getItem(PANEL_KEY)||"tv")}catch(_){setPanel("tv")}nativeAction("tvApps","list","アプリ一覧");if(activePanel==="tv")probePictureScene();pollTimer=setInterval(requestMode,1600);acTimer=setInterval(requestAC,30000);window.addEventListener("beforeunload",()=>{if(pollTimer)clearInterval(pollTimer);if(acTimer)clearInterval(acTimer)})
 </script></body></html>`
 
 function secure(key){return Keychain.contains(key)?Keychain.get(key):""}
@@ -815,9 +847,9 @@ function loadMode(){try{if(Keychain.contains(STORAGE.mode)){const value=JSON.par
 let modeState=loadMode(),commandIndex=null
 function rememberMode(mode,action){const now=Date.now();modeState={mode,navigationUntil:mode==="navigation"?now+NAVIGATION_GRACE_MS:0,lastAction:action||"",updatedAt:now};Keychain.set(STORAGE.mode,JSON.stringify(modeState));return mode}
 function noteAction(action){if(action==="pause"){rememberMode("hybrid",action);return}if(action==="play"){rememberMode("media",action);return}if(action==="stop"){rememberMode("navigation",action);return}if(modeState.mode==="hybrid"&&HYBRID_KEEP_ACTIONS.has(action)){rememberMode("hybrid",action);return}if(NAV_ACTIONS.has(action))rememberMode("navigation",action);else if(MEDIA_ACTIONS.has(action))rememberMode("media",action)}
-async function sonyJSON(service,method){const r=new Request("http://"+sonyHost()+"/sony/"+service);r.method="POST";r.timeoutInterval=5;r.headers={"Content-Type":"application/json","X-Auth-PSK":sonyPSK()};r.body=JSON.stringify({method,params:[],id:1,version:"1.0"});return JSON.parse(await r.loadString())}
+async function sonyJSON(service,method){const r=new Request("http://"+sonyHost()+"/sony/"+service);r.method="POST";r.headers={"Content-Type":"application/json","X-Auth-PSK":sonyPSK()};r.body=JSON.stringify({method,params:[],id:1,version:"1.0"});return JSON.parse(await r.loadString())}
 const PICTURE_TARGETS=["pictureMode","autoPictureMode","lightSensor","brightness","contrast","autoLocalDimming","xtendedDynamicRange","color","colorTemperature","colorSpace","sharpness","hdrMode"]
-const PICTURE_PRESET_KEYS=["day","night","movie"]
+const PICTURE_PRESET_KEYS=["day","night","movie","extra1","extra2","extra3","extra4","extra5"]
 const PICTURE_PRESET_PREFIX="yos.bravia.scriptable.picture-user-preset.v2."
 async function sonyVideoJSON(method,params){
  const r=new Request("http://"+sonyHost()+"/sony/video");r.method="POST";r.timeoutInterval=8
@@ -829,33 +861,33 @@ async function sonyVideoJSON(method,params){
  return data
 }
 function flattenPicture(v,out=[]){if(Array.isArray(v)){for(const x of v)flattenPicture(x,out)}else if(v&&typeof v==="object"&&typeof v.target==="string"){out.push(v)}return out}
-async function pictureSingle(target){
- if(!PICTURE_TARGETS.includes(target))throw Error("未許可の画質項目");
- const data=await sonyVideoJSON("getPictureQualitySettings",[{target}]);
- return flattenPicture(data.result).find(entry=>entry.target===target)||null;
-}
 async function pictureAll(){
- const all=new Map(),states=new Map();
- function ingest(entry){
-  if(!PICTURE_TARGETS.includes(entry.target))return;
-  if(entry.isAvailable===false){if(!all.has(entry.target))states.set(entry.target,"unavailable");return;}
-  if(!all.has(entry.target)||!validPictureValue(all.get(entry.target),all.get(entry.target).currentValue))all.set(entry.target,entry);
-  states.set(entry.target,validPictureValue(all.get(entry.target),all.get(entry.target).currentValue)?"ready":"invalid");
- }
+ const all=new Map(),seen=new Set()
+ let aggregateError=null
  try{
-  const data=await sonyVideoJSON("getPictureQualitySettings",[{target:""}]);
-  for(const entry of flattenPicture(data.result))ingest(entry);
- }catch(_){}
- const remaining=PICTURE_TARGETS.filter(target=>!["ready","unavailable"].includes(states.get(target)));
- // Limit read-only concurrency; never retry a write here.
- for(let i=0;i<remaining.length;i+=3){
-  await Promise.all(remaining.slice(i,i+3).map(async target=>{
-   try{const entry=await pictureSingle(target);if(entry)ingest(entry);else states.set(target,"missing");}
-   catch(_){states.set(target,"failed");}
-  }));
+  const data=await sonyVideoJSON("getPictureQualitySettings",[{target:""}])
+  for(const entry of flattenPicture(data.result)){
+   if(!PICTURE_TARGETS.includes(entry.target))continue
+   seen.add(entry.target)
+   if(entry.isAvailable!==false&&!all.has(entry.target))all.set(entry.target,entry)
+  }
+ }catch(error){aggregateError=error}
+ // Consumer BRAVIA firmware can provide a specific target even if the aggregate query fails.
+ // The mode was verified on this user's real television; brightness must remain read-only until valid.
+ for(const target of ["pictureMode","brightness","contrast"]){
+  if(seen.has(target))continue
+  try{
+   const data=await sonyVideoJSON("getPictureQualitySettings",[{target}])
+   for(const entry of flattenPicture(data.result)){
+    if(entry.target!==target)continue
+    seen.add(target)
+    if(entry.isAvailable!==false)all.set(target,entry)
+    break
+   }
+  }catch(_){}
  }
- all.states=states;
- return all;
+ if(!all.size&&aggregateError)throw aggregateError
+ return all
 }
 function pictureOptions(entry){return entry&&Array.isArray(entry.candidate)?entry.candidate.filter(x=>x&&typeof x.value==="string"&&x.value!=="").map(x=>x.value):[]}
 function pictureRange(entry){
@@ -880,25 +912,41 @@ function picturePublic(entry){
  return{target:entry.target,value:String(entry.currentValue??""),available:valid,
   min:range?range.min:null,max:range?range.max:null,step:range?range.step:null,options:range?[]:opts}
 }
+function readPicturePreset(key){
+ if(!PICTURE_PRESET_KEYS.includes(key)||!Keychain.contains(PICTURE_PRESET_PREFIX+key))return null;
+ try{const p=JSON.parse(Keychain.get(PICTURE_PRESET_PREFIX+key));if(p?.schema!==2||!Array.isArray(p.settings)||!p.settings.length||p.settings.length>PICTURE_TARGETS.length||p.settings.some(x=>!x||!PICTURE_TARGETS.includes(x.target)||typeof x.value!=="string")||new Set(p.settings.map(x=>x.target)).size!==p.settings.length)return null;return {name:typeof p.name==="string"?p.name.slice(0,24):"",settings:p.settings}}catch(_){return null}
+}
+function picturePresetDetails(){return Object.fromEntries(PICTURE_PRESET_KEYS.map(k=>[k,readPicturePreset(k)]))}
 function pictureSavedFlags(){return Object.fromEntries(PICTURE_PRESET_KEYS.map(k=>[k,Keychain.contains(PICTURE_PRESET_PREFIX+k)]))}
 async function pictureProbe(message){
  const map=await pictureAll()
- const entries=PICTURE_TARGETS.map(t=>{
-  const state=map.states.get(t)||"missing",entry=map.get(t);
-  return state==="ready"&&entry?{...picturePublic(entry),state}:{target:t,value:"",available:false,min:null,max:null,step:null,options:[],state};
- });
- const count=entries.filter(e=>e.available).length;
- return{entries,saved:pictureSavedFlags(),message:message||("BRAVIA："+count+"項目を操作可能。未取得項目は再取得またはテレビで確認。")}
+ const entries=PICTURE_TARGETS.filter(t=>map.has(t)).map(t=>picturePublic(map.get(t)))
+ return{entries,saved:pictureSavedFlags(),presets:picturePresetDetails(),message:message||("BRAVIAから"+entries.length+"項目を取得。調整できない項目はテレビのクイック設定を使用してください。")}
 }
 async function writePicture(target,value){
  if(!PICTURE_TARGETS.includes(target))throw Error("この画質項目は安全な直接操作に非対応です")
- const entry=await pictureSingle(target)
+ const settings=await pictureAll(),entry=settings.get(target)
  if(!validPictureValue(entry,value))throw Error("テレビが許可していない設定値です："+target)
- if(String(entry.currentValue)===String(value))return entry
+ if(String(entry.currentValue)===String(value))return
  await sonyVideoJSON("setPictureQualitySettings",[{settings:[{target,value:String(value)}]}])
- const checked=await pictureSingle(target)
- if(!checked||!validPictureValue(checked,checked.currentValue)||(String(checked.currentValue)!==String(value)&&!(Number.isFinite(Number(value))&&Number(checked.currentValue)===Number(value))))throw Error("テレビ側で反映確認できませんでした："+target)
- return checked
+ const checked=(await pictureAll()).get(target)
+ if(!checked||(String(checked.currentValue)!==String(value)&&!(Number.isFinite(Number(value))&&Number(checked.currentValue)===Number(value))))throw Error("テレビ側で反映確認できませんでした："+target)
+}
+async function editPicturePreset(payload){
+ if(!payload||!PICTURE_PRESET_KEYS.includes(payload.key)||typeof payload.name!=="string"||!payload.name.trim()||payload.name.trim().length>24||!Array.isArray(payload.settings)||!payload.settings.length||payload.settings.length>PICTURE_TARGETS.length)throw Error("登録内容が不正です");
+ const prior=readPicturePreset(payload.key),supported=await pictureAll(),seen=new Set(),settings=[];
+ if(Keychain.contains(PICTURE_PRESET_PREFIX+payload.key)&&!prior)throw Error("既存設定の形式が不明なため保護しました");
+ if(prior&&prior.settings.some(x=>!validPictureValue(supported.get(x.target),x.value)))throw Error("既存の保存項目が現在利用できないため保護しました");
+ for(const item of payload.settings){
+  if(!item||typeof item.value!=="string"||seen.has(item.target)||!validPictureValue(supported.get(item.target),item.value))throw Error("テレビが許可していない登録値です");
+  seen.add(item.target);settings.push({target:item.target,value:item.value});
+ }
+ const record=JSON.stringify({schema:2,name:payload.name.trim(),created:new Date().toISOString(),settings});
+ const storage=PICTURE_PRESET_PREFIX+payload.key;
+ if(Keychain.contains(storage))Keychain.set(storage+".previous",Keychain.get(storage));
+ Keychain.set(storage,record);
+ if(Keychain.get(storage)!==record)throw Error("登録の読戻しに失敗しました");
+ return {...await pictureProbe("画質ショートカットを登録しました。テレビは変更していません。"),edited:payload.key};
 }
 async function pictureSave(key){
  if(!PICTURE_PRESET_KEYS.includes(key))throw Error("保存先が不明です")
@@ -908,8 +956,9 @@ async function pictureSave(key){
   if(e&&validPictureValue(e,e.currentValue))saved.push({target,value:String(e.currentValue)})
  }
  if(!saved.length)throw Error("保存可能な画質項目を取得できません。保存を行いません")
- Keychain.set(PICTURE_PRESET_PREFIX+key,JSON.stringify({schema:2,created:new Date().toISOString(),settings:saved}))
- return pictureProbe("現在の画質"+saved.length+"項目を「"+({day:"昼",night:"夜",movie:"映画"}[key])+"」に保存しました。設定変更はしていません。")
+ const storage=PICTURE_PRESET_PREFIX+key,prior=readPicturePreset(key);if(Keychain.contains(storage)){if(!prior)throw Error("既存設定を保護しました");if(prior.settings.some(x=>!saved.some(y=>x.target===y.target)))throw Error("既存設定の一部が未取得のため上書きしません");Keychain.set(storage+".previous",Keychain.get(storage))}
+ Keychain.set(storage,JSON.stringify({schema:2,name:prior?.name||"",created:new Date().toISOString(),settings:saved}))
+ return pictureProbe("現在の画質"+saved.length+"項目を「"+(readPicturePreset(key)?.name||({day:"昼",night:"夜",movie:"映画"}[key])||key)+"」に保存しました。設定変更はしていません。")
 }
 async function pictureLoad(key){
  if(!PICTURE_PRESET_KEYS.includes(key)||!Keychain.contains(PICTURE_PRESET_PREFIX+key))throw Error("保存済み設定がありません")
@@ -926,9 +975,9 @@ async function pictureLoad(key){
  }
  list.sort((a,b)=>Number(b.target==="pictureMode")-Number(a.target==="pictureMode"))
  let changed=0
- try{for(const item of list){if(String(supported.get(item.target).currentValue)===item.value)continue;await writePicture(item.target,item.value);changed++}}
+ try{for(const item of list){const current=(await pictureAll()).get(item.target);if(String(current?.currentValue)===item.value)continue;await writePicture(item.target,item.value);changed++}}
  catch(e){throw Error("画質の一部だけ変更された可能性があります（"+changed+"件確認済み）。"+String(e.message||e))}
- return pictureProbe("保存済み「"+({day:"昼",night:"夜",movie:"映画"}[key])+"」を呼び出しました。"+changed+"項目を変更・読戻し確認しました。")
+ return pictureProbe("保存済み「"+(readPicturePreset(key)?.name||({day:"昼",night:"夜",movie:"映画"}[key])||key)+"」を呼び出しました。"+changed+"項目を変更・読戻し確認しました。")
 }
 async function pictureAction(action,slot){
  if(action==="probe")return pictureProbe()
@@ -936,9 +985,10 @@ async function pictureAction(action,slot){
   let payload
   try{payload=JSON.parse(String(slot||""))}catch(_){throw Error("設定内容が不正です")}
   if(!payload||typeof payload.target!=="string"||typeof payload.value!=="string")throw Error("設定内容が不正です")
-  const checked=await writePicture(payload.target,payload.value);
-  return {entries:[{...picturePublic(checked),state:"ready"}],partial:payload.target!=="pictureMode",saved:pictureSavedFlags(),message:"「"+payload.target+"」を変更し、テレビの値を確認しました"}
+  await writePicture(payload.target,payload.value)
+  return pictureProbe("「"+payload.target+"」を変更し、テレビの値を確認しました")
  }
+ if(action==="edit"){let payload;try{payload=JSON.parse(String(slot))}catch(_){throw Error("登録内容が不正です")}return editPicturePreset(payload)}
  if(action==="save")return pictureSave(slot)
  if(action==="load")return pictureLoad(slot)
  throw Error("不明な画質操作です")
@@ -977,7 +1027,7 @@ async function sonyQuickJSON(service,method,params=[],version="1.0"){
  r.headers={"Content-Type":"application/json","X-Auth-PSK":sonyPSK()}
  r.body=JSON.stringify({method,params,id:1,version})
  const data=JSON.parse(await r.loadString())
- if(data&&Array.isArray(data.error))throw Error("テレビが操作を拒否（"+String(data.error[0])+"）")
+ if(data&&Array.isArray(data.error))throw Error("テレビがこの操作に非対応（"+String(data.error[0])+"）")
  if(!data||!Array.isArray(data.result))throw Error("BRAVIAの応答形式が不正です")
  return data
 }
@@ -998,27 +1048,26 @@ async function quickLaunchApp(id){
  await sonyQuickJSON("appControl","setActiveApp",[{uri:selected.uri}],"1.0")
  return {message:"テレビへアプリ起動要求を送りました（表示は実機で確認）。",apps:Object.fromEntries(Object.keys(QUICK_APP_MATCHERS).map(k=>[k,Boolean(quickAppPick(list,k))]))}
 }
-async function quickAudioRead(details=false){
- const sound={},states={},targets=["soundMode","outputTerminal"];
- const ingest=(data,expected=null)=>{
+async function quickAudioRead(){
+ const sound={},found=new Set()
+ const ingest=data=>{
    for(const r of quickSoundFlatten(data.result)){
-     if(!targets.includes(r.target)||(expected&&r.target!==expected))continue;
-     if(r.isAvailable===false){states[r.target]="unavailable";delete sound[r.target];continue;}
-     const options=Array.isArray(r.candidate)?r.candidate.filter(c=>c&&typeof c.value==="string"&&c.value!=="").map(c=>c.value):[];
-     const current=String(r.currentValue??r.value??"");
-     if(!options.includes(current)){states[r.target]="invalid";continue;}
-     sound[r.target]={target:r.target,value:current,options,available:true,state:"ready"};
-     states[r.target]="ready";
+     if(!["soundMode","outputTerminal"].includes(r.target))continue
+     const options=Array.isArray(r.candidate)?r.candidate.filter(c=>c&&typeof c.value==="string").map(c=>c.value):[]
+     const current=String(r.currentValue??r.value??"")
+     if(!options.includes(current))continue
+     sound[r.target]={target:r.target,value:current,options,available:true}
+     found.add(r.target)
    }
- };
+ }
  try{ingest(await sonyQuickJSON("audio","getSoundSettings",[{target:""}],"1.1"))}catch(_){}
- const missing=targets.filter(target=>!["ready","unavailable"].includes(states[target]));
- await Promise.all(missing.map(async target=>{
-   try{ingest(await sonyQuickJSON("audio","getSoundSettings",[{target}],"1.1"),target);if(!states[target])states[target]="missing";}
-   catch(_){states[target]="failed";}
- }));
- if(details)for(const target of targets)if(!sound[target])sound[target]={target,available:false,options:[],value:"",state:states[target]||"missing"};
- return sound;
+ // Some BRAVIA firmware rejects aggregate target="", but supports individual targets.
+ const targets=["soundMode","outputTerminal"].filter(target=>!found.has(target))
+ if(targets.length){
+   const replies=await Promise.allSettled(targets.map(target=>sonyQuickJSON("audio","getSoundSettings",[{target}],"1.1")))
+   for(const response of replies)if(response.status==="fulfilled")ingest(response.value)
+ }
+ return sound
 }
 async function quickAudioWrite(payload){
  if(!payload||!["soundMode","outputTerminal"].includes(payload.target)||typeof payload.value!=="string")throw Error("未対応の音声変更")
@@ -1054,9 +1103,9 @@ async function quickTVTuner(){
  return {message:"テレビ放送の切替コマンドを送信しました"}
 }
 async function quickProbe(){
- const values=await Promise.allSettled([pictureProbe(),quickAudioRead(true),quickInstalledApps()])
+ const values=await Promise.allSettled([pictureProbe(),quickAudioRead(),quickInstalledApps()])
  return {picture:values[0].status==="fulfilled"?values[0].value:null,sound:values[1].status==="fulfilled"?values[1].value:{},apps:values[2].status==="fulfilled"?values[2].value:{},
-   message:values[2].status==="rejected"?"アプリ一覧の取得に失敗しました。再取得してください。":"利用可能な設定を取得しました。未取得・非対応は各項目に表示します。"}
+   message:"利用できる項目だけ表示します。音質・アプリが取得できなければテレビ側で変更してください。"}
 }
 async function quickAction(action,slot){
  if(action==="probe")return quickProbe()
@@ -1123,7 +1172,7 @@ async function yosTVMediaAction(action,slot){
 
 async function discoverSony(){if(commandIndex)return;const data=await sonyJSON("system","getRemoteControllerInfo"),commands=data&&data.result&&data.result[1];if(!Array.isArray(commands))throw new Error("BRAVIAコマンド取得失敗");commandIndex=new Map();commands.forEach(item=>{if(item&&item.name&&item.value)commandIndex.set(String(item.name).toLowerCase(),String(item.value))})}
 function xmlEscape(v){return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;")}
-async function sonyAction(action,trackMode=true){await discoverSony();if(trackMode)noteAction(action);let code=null;if(action==="quick"&&Keychain.contains(STORAGE.quick)){const saved=String(Keychain.get(STORAGE.quick)).toLowerCase();if(commandIndex.has(saved))code=commandIndex.get(saved)}for(const alias of ALIASES[action]||[]){if(!code&&commandIndex.has(alias.toLowerCase()))code=commandIndex.get(alias.toLowerCase())}if(!code)throw new Error("BRAVIA未対応："+action);const r=new Request("http://"+sonyHost()+"/sony/ircc");r.method="POST";r.timeoutInterval=5;r.headers={"Content-Type":"text/xml; charset=UTF-8","X-Auth-PSK":sonyPSK(),SOAPACTION:'"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC"'};r.body='<?xml version="1.0"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1"><IRCCCode>'+xmlEscape(code)+'</IRCCCode></u:X_SendIRCC></s:Body></s:Envelope>';await r.loadString()}
+async function sonyAction(action,trackMode=true){await discoverSony();if(trackMode)noteAction(action);let code=null;if(action==="quick"&&Keychain.contains(STORAGE.quick)){const saved=String(Keychain.get(STORAGE.quick)).toLowerCase();if(commandIndex.has(saved))code=commandIndex.get(saved)}for(const alias of ALIASES[action]||[]){if(!code&&commandIndex.has(alias.toLowerCase()))code=commandIndex.get(alias.toLowerCase())}if(!code)throw new Error("BRAVIA未対応："+action);const r=new Request("http://"+sonyHost()+"/sony/ircc");r.method="POST";r.headers={"Content-Type":"text/xml; charset=UTF-8","X-Auth-PSK":sonyPSK(),SOAPACTION:'"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC"'};r.body='<?xml version="1.0"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1"><IRCCCode>'+xmlEscape(code)+'</IRCCCode></u:X_SendIRCC></s:Body></s:Envelope>';await r.loadString()}
 function hasNavigationStatus(data){const list=data&&data.result&&data.result[0];return Array.isArray(list)&&list.some(item=>item&&["cursorDisplay","textInput","webBrowse"].includes(String(item.name||""))&&String(item.status||"").toLowerCase()==="on")}
 function hasPlaybackInfo(data){const info=data&&data.result&&data.result[0];return Boolean(info&&typeof info==="object"&&(info.uri||info.source||info.title||info.programTitle))}
 async function inferMode(){const now=Date.now();if(modeState.mode==="navigation"&&now<Number(modeState.navigationUntil||0))return "navigation";let nav=false,playback=false;try{nav=hasNavigationStatus(await sonyJSON("appControl","getApplicationStatusList"))}catch(_){}try{playback=hasPlaybackInfo(await sonyJSON("avContent","getPlayingContentInfo"))}catch(_){}const recentMedia=["media","hybrid"].includes(modeState.mode)&&now-Number(modeState.updatedAt||0)<RECENT_MEDIA_MS;if(nav){if(playback||recentMedia)return rememberMode("hybrid","status");return rememberMode("navigation","status")}if(playback)return rememberMode("media","status");return modeState.mode}
@@ -1152,7 +1201,7 @@ function startTVHold(action){
       // SOAP requests are serialized, and each response already paces the loop.
       // No artificial 150-ms gap: stop/release is checked before each new request.
     }
-  }catch(error){if(token===tvHoldToken)stopTVHold();postRemoteResult({ok:false,message:String(error&&error.message||error)});}finally{if(token===tvHoldToken)stopTVHold()}})()
+  }catch(error){if(token===tvHoldToken)stopTVHold();try{await web.evaluateJavaScript("nativeResult("+JSON.stringify({ok:false,message:String(error&&error.message||error)})+")")}catch(_){}}finally{if(token===tvHoldToken)stopTVHold()}})()
 }
 const LIGHT_HOLD_LEASE_MS=600
 const LIGHT_HOLD_BURST=2
@@ -1174,7 +1223,7 @@ function renewLightHold(action){if(lightHoldAction===action)lightHoldLeaseUntil=
 function startLightHold(action){
   if(!LIGHT_HOLD_KEYS[action])return
   stopLightHold();lightHoldAction=action;lightHoldLeaseUntil=Date.now()+LIGHT_HOLD_LEASE_MS;const token=lightHoldToken
-  lightHoldPromise=(async()=>{let first=true;try{const transport=await getLightHoldTransport();while(lightHoldAction===action&&token===lightHoldToken&&Date.now()<lightHoldLeaseUntil){const key=transport.keys[action];await transport.client.fireBurst(transport.remote.device_id,key.name,first?1:LIGHT_HOLD_BURST);first=false;if(lightHoldAction!==action||token!==lightHoldToken)break}}catch(error){lightHoldTransport=null;if(token===lightHoldToken)stopLightHold();postRemoteResult({ok:false,message:error&&error.message?error.message:String(error)});}finally{if(token===lightHoldToken)stopLightHold()}})()
+  lightHoldPromise=(async()=>{let first=true;try{const transport=await getLightHoldTransport();while(lightHoldAction===action&&token===lightHoldToken&&Date.now()<lightHoldLeaseUntil){const key=transport.keys[action];await transport.client.fireBurst(transport.remote.device_id,key.name,first?1:LIGHT_HOLD_BURST);first=false;if(lightHoldAction!==action||token!==lightHoldToken)break}}catch(error){lightHoldTransport=null;if(token===lightHoldToken)stopLightHold();try{await web.evaluateJavaScript("nativeResult("+JSON.stringify({ok:false,message:error&&error.message?error.message:String(error)})+")")}catch(_){}}finally{if(token===lightHoldToken)stopLightHold()}})()
 }
 
 const FLOOR_HOST_KEY=CONFIG.floor.key
@@ -1205,8 +1254,7 @@ async function readFloor(){
   return floorData(await client.query({method:"get_device_info",params:null}))
 }
 async function configureFloor(){
-  if(typeof config!=="undefined"&&config.runsWithSiri)throw Error("フロアランプの接続設定はScriptableアプリ内で開いてください。設定は変更していません");
- const alert=new Alert();alert.title="フロアランプ接続";alert.message="Tapoアプリのフロアランプ → 設定 → デバイス情報で確認できる自宅LANのIPアドレスを入力。既存のTapo認証情報を使います。";alert.addTextField("例: 192.168.1.20",floorHost());alert.addAction("接続テストして保存");alert.addCancelAction("キャンセル")
+  const alert=new Alert();alert.title="フロアランプ接続";alert.message="Tapoアプリのフロアランプ → 設定 → デバイス情報で確認できる自宅LANのIPアドレスを入力。既存のTapo認証情報を使います。";alert.addTextField("例: 192.168.1.20",floorHost());alert.addAction("接続テストして保存");alert.addCancelAction("キャンセル")
   if(await alert.presentAlert()<0)return{ok:true,floor:floorHost()?await readFloor():{ready:false}}
   const newHost=validateFloorHost(alert.textFieldValue(0).trim())
   const oldHost=floorHost();Keychain.set(FLOOR_HOST_KEY,newHost);floorClient=null;floorConnectedHost=""
@@ -1231,126 +1279,7 @@ async function controlFloor(action,value){
   await client.query({method:"set_device_info",params})
   return{ok:true,floor:await readFloor()}
 }
-// Explicit shortcut requests bypass the WebView and never guess power state.
-async function tvShortcutPower(action){
- const read=async()=>{const state=(await sonyQuickJSON("system","getPowerStatus",[])).result?.[0]?.status;if(!["active","standby"].includes(state))throw Error("テレビの電源状態不明。送信中止");return state;};
- const before=await read(),desired=action==="toggle"?before!=="active":action==="on";
- if((before==="active")!==desired)await sonyQuickJSON("system","setPowerStatus",[{status:desired}]);
- const after=await read();
- if((after==="active")!==desired)throw Error("電源切替要求後の状態未確認");
- return after==="active"?"テレビ ON 確認":"テレビ OFF 確認";
-}
-// The signed launcher is UI-only regardless of the native intent's parameter shape.
-const REMOTE_LAUNCHER_ONLY=false;
-function resolveRemoteInput(input,launcherOnly=REMOTE_LAUNCHER_ONLY){
- if(launcherOnly)return "";
- const raw=input?.shortcutParameter??input?.queryParameters?.action??"";
- if(typeof raw==="string")return raw.trim();
- // Scriptable/Shortcuts can represent a missing input as an empty collection.
- if(Array.isArray(raw)&&raw.length===0)return "";
- if(raw&&Object.getPrototypeOf(raw)===Object.prototype&&Object.keys(raw).length===0)return "";
- throw Error("操作入力が文字列ではありません。家電へ送信していません");
-}
-function parseTVShortcut(raw){
- if(typeof raw!=="string"||raw.length>150)throw Error("入力形式：tv on / tv off / tv toggle / tv home / tv input / tv pictureoff / tv hdmi3 / tv pictureMode standard / tv brightness +5 / tv contrast 50 / tv app Netflix");
- const match=raw.trim().match(/^tv\s+(\S+)(?:\s+(.+))?$/i);
- if(!match)throw Error("テレビ操作は tv と操作名を指定してください。照明・エアコンは既存ショートカットを使ってください");
- const action=match[1].toLowerCase(),value=match[2]||"";
- if(["on","off","toggle","home","input","pictureoff","hdmi3"].includes(action)&&!value)return{action,value};
- if(action==="app"&&value.trim()&&value.length<=60)return{action,value:value.trim()};
- if(action==="picturemode"&&value.trim()&&value.length<=60&&!/[\u0000-\u001f\u007f]/.test(value))return{action,value:value.trim()};
- if(["brightness","contrast"].includes(action)&&/^[+-]?\d{1,4}$/.test(value))return{action,value};
- throw Error("未対応または不正なテレビ操作。送信していません");
-}
-async function executeTVShortcut(raw){
- const {action,value}=parseTVShortcut(raw);
- if(["on","off","toggle"].includes(action))return tvShortcutPower(action);
- if(["home","input","pictureoff"].includes(action)){await sonyAction(action==="pictureoff"?"pictureOff":action,false);return "テレビへ操作要求を送信（物理状態未確認）";}
- if(action==="hdmi3")return (await quickHDMI3()).message;
- if(action==="app"){
-  const entries=await yosTVGetApps(),matches=entries.filter(e=>e.title.toLowerCase()===value.toLowerCase());
-  if(matches.length!==1)throw Error("テレビの実アプリ一覧で一意に確認できません");
-  return (await yosTVMediaAction("launch",String(matches[0].index))).tvExtra;
- }
- const target=action==="picturemode"?"pictureMode":action;
- let desired=value;
- if(target!=="pictureMode"&&/^[+-]/.test(value)){
-  const entry=await pictureSingle(target);
-  if(!entry||!validPictureValue(entry,entry.currentValue)||!pictureRange(entry))throw Error("現在値を確認できません");
-  desired=String(Number(entry.currentValue)+Number(value));
- }
- await writePicture(target,desired);
- return target+" "+desired+" 反映確認";
-}
-const queue=[];let running=false,web=null,activeQueueItem=null;
-let probeEpoch=0,activeProbe=null,webClosed=false;
-const remoteResults=[];
-function postRemoteResult(result){if(!webClosed)remoteResults.push(result);}
-const probePending=new Set();
-function isProbe(item){return (item.device==="picture"||item.device==="quick")&&item.action==="probe";}
-function readQueueItem(item){return item.device==="system"||isProbe(item)||(item.device==="tvApps"&&item.action==="list");}
-function tvMutation(item){return !readQueueItem(item)&&(String(item.device).startsWith("tv")||item.device==="picture"||item.device==="quick");}
-function enqueueRemote(item){
- if(webClosed)return;
- if(isProbe(item)||item.device==="system"&&item.action==="refreshMode"||item.device==="tvApps"&&item.action==="list"){
-  const key=item.device==="system"?"mode":item.device==="tvApps"?"apps":item.device;
-  if(activeProbe!==key)probePending.add(key);runProbeLane();return;
- }
- if(readQueueItem(item)&&[activeQueueItem,...queue].some(x=>x&&x.device===item.device&&x.action===item.action))return;
- if(item.device==="picture"&&item.action==="set"&&[activeQueueItem,...queue].some(x=>x&&x.device===item.device&&x.action===item.action&&x.slot===item.slot))return;
- if(tvMutation(item))probeEpoch++;
- if(!readQueueItem(item)){const i=queue.findIndex(readQueueItem);if(i>=0){queue.splice(i,0,item);processQueue();return;}}
- queue.push(item);processQueue();
-}
-async function runProbeLane(){
- if(webClosed||activeProbe||!probePending.size||queue.some(tvMutation)||(activeQueueItem&&tvMutation(activeQueueItem)))return;
- const device=probePending.values().next().value;probePending.delete(device);activeProbe=device;
- const epoch=probeEpoch;let result;
- try{if(device==="picture")result={ok:true,picture:await pictureProbe()};
- else if(device==="quick")result={ok:true,quick:await quickProbe()};
- else if(device==="mode")result={ok:true,mode:await inferMode()};
- else if(device==="apps")result=await yosTVMediaAction("list","");
- else throw Error("未対応の取得操作");}
- catch(error){result={ok:false,device,message:String(error?.message||error)}}
- if(epoch!==probeEpoch){probePending.add(device)}
- else if(!webClosed){postRemoteResult(result);}
- activeProbe=null;
- if(!webClosed)runProbeLane();
-}
-async function processQueue(){if(running)return;running=true;while(queue.length&&!webClosed){const item=queue.shift();activeQueueItem=item;let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvApps"){result=await yosTVMediaAction(item.action,item.slot)}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:modeState.mode}}else if(item.device==="tvAdaptive"){const currentMode=modeState.mode;let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:modeState.mode}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:modeState.mode}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:modeState.mode}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else if(item.device==="openRemote"&&Object.prototype.hasOwnProperty.call(REMOTES,item.action)){Safari.open(REMOTES[item.action]);result={ok:true}}else throw new Error("不明なデバイスです")}catch(error){result={ok:false,device:item.device,message:error&&error.message?error.message:String(error)}}postRemoteResult(result);if(item.device==="picture"&&["set","load"].includes(item.action))probePending.add("picture");activeQueueItem=null;runProbeLane()}running=false;runProbeLane()}
-const directInput=resolveRemoteInput(args);
-if(directInput!==""&&directInput!==null){
- // Validate before any lock or device communication; do not auto-retry uncertain writes.
- parseTVShortcut(directInput);
- const lockKey="yos.remote.power-toggle.lock.v1.tv",now=Date.now();
- let held=null;try{if(Keychain.contains(lockKey))held=JSON.parse(Keychain.get(lockKey))}catch(_){}
- if(held&&Number.isFinite(held.at)&&now>=held.at&&now-held.at<45000)throw Error("直前のテレビ操作が処理中です。再送を防止しました");
- const token=String(now)+":"+Math.random();Keychain.set(lockKey,JSON.stringify({at:now,token}));
- try{const output=await executeTVShortcut(directInput);Script.setShortcutOutput(output);}
- finally{try{if(JSON.parse(Keychain.get(lockKey)).token===token)Keychain.remove(lockKey)}catch(_){}}
- Script.complete();
-}else{
-web=new WebView();
-await web.loadHTML(html,"https://yos-remote.local/");
-const presented=web.present(true).then(()=>{webClosed=true;return{closed:true}});
-function dispatchRemote(item){
- if(!item||typeof item.device!=="string"||typeof item.action!=="string")return;
- if(item.device==="tvHoldStart"){startTVHold(item.action);return}
- if(item.device==="tvHoldHeartbeat"){renewTVHold(item.action);return}
- if(item.device==="tvHoldStop"){stopTVHold();return}
- if(item.device==="lightHoldStart"){startLightHold(item.action);return}
- if(item.device==="lightHoldHeartbeat"){renewLightHold(item.action);return}
- if(item.device==="lightHoldStop"){stopLightHold();return}
- enqueueRemote(item);
-}
-while(!webClosed){
- const results=remoteResults.splice(0,32);
- const code="window.YOS_REMOTE_EXCHANGE("+JSON.stringify(results).replace(/</g,"\\u003c")+",function(value){completion(value)})";
- const pending=web.evaluateJavaScript(code,true).then(value=>({value}),error=>({error}));
- const next=await Promise.race([pending,presented]);
- if(webClosed||next.closed)break;
- if(next.error){console.warn("Remote bridge: "+String(next.error));stopTVHold();stopLightHold();break}
- try{const items=JSON.parse(String(next.value));if(Array.isArray(items))for(const item of items.slice(0,32))dispatchRemote(item)}catch(error){console.warn("Remote input: "+String(error))}
-}
-await presented;queue.length=0;probePending.clear();stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);Script.complete()
-}
+const queue=[];let running=false,web=null
+async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvApps"){result=await yosTVMediaAction(item.action,item.slot)}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
+web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);if(query.device==="tvHoldStart"){startTVHold(query.action);return false}if(query.device==="tvHoldHeartbeat"){renewTVHold(query.action);return false}if(query.device==="tvHoldStop"){stopTVHold();return false}if(query.device==="lightHoldStart"){startLightHold(query.action);return false}if(query.device==="lightHoldHeartbeat"){renewLightHold(query.action);return false}if(query.device==="lightHoldStop"){stopLightHold();return false}queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
+await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setTimeout(()=>probePictureScene(),250)") }catch(_){}try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);Script.complete()
