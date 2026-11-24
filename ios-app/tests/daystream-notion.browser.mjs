@@ -66,6 +66,23 @@ try{
   assert.equal(await page.evaluate(()=>items.find(x=>x.t==='歯磨き').s),beforeDrag,'one tap undo restores the original time');
   assert.equal(await page.locator('#moveDialog').isVisible(),false,'undo never opens placement advice');
   const startCard=page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'起床'});
+  // Move the 2-minute wake task into the 05:25 brush task's window.
+  // Collision must remain a small warning on the bar, never a drop-time sheet.
+  await startCard.scrollIntoViewIfNeeded();
+  const clashGrip=await startCard.locator('.task-drag-grip').boundingBox();
+  const clashDelta=await page.evaluate(()=>{
+   const task=items.find(x=>x.t==='起床');return yFor(task.s+5)-yFor(task.s);
+  });
+  const clashStart=await page.evaluate(()=>items.find(x=>x.t==='起床').s);
+  await page.mouse.move(clashGrip.x+clashGrip.width/2,clashGrip.y+clashGrip.height/2);
+  await page.mouse.down();
+  await page.mouse.move(clashGrip.x+clashGrip.width/2,clashGrip.y+clashGrip.height/2+clashDelta,{steps:10});
+  await page.mouse.up();
+  assert.equal(await page.locator('#moveDialog').isVisible(),false,'overlapping drop does not open placement advice');
+  assert.equal(await page.evaluate(()=>placementAt(items.find(x=>x.t==='起床'),items.find(x=>x.t==='起床').s).overlaps.some(x=>x.t==='歯磨き')),true,'collision is retained without moving the other task');
+  assert.equal(await page.locator('#tl .card.task').filter({hasText:'起床'}).locator('.layer-status').innerText(),'！');
+  await page.locator('#moveUndo').click();
+  assert.equal(await page.evaluate(()=>items.find(x=>x.t==='起床').s),clashStart,'overlapping drop can be undone');
   await startCard.locator('.task-drag-grip').click();
   assert.equal(await page.locator('#moveDialog').isVisible(),true,'tap move grip opens existing placement advisor');
   await page.locator('#moveTime').fill('16:20');
