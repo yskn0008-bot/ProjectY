@@ -408,3 +408,20 @@ test('Explicit JOURNAL auto-ID from named Shortcut bridge is stable, long and pr
  assert.match(await m.run({...packet,rawText:rawText+' Bearer mock-secret'}),/認証情報/);
  assert.equal(m.counts.writes,1);
 });
+
+test('signed JOURNAL Shortcut only recognizes a verified Clarity receipt',async()=>{
+ const m=mocked();
+ const rawText='【YOS_EDITORIAL_DRAFT_V1】\n【資料と照合状況】\n公開不可・要審査\n'+'研究原稿'.repeat(100);
+ const packet={source:'journal',captureId:'journal:auto',routeMode:'raw-only',rawText};
+ const marker=/YOS_JOURNAL_NOTION_VERIFIED:/;
+ assert.match(await m.run(packet),marker);
+ assert.match(await m.run(JSON.stringify(packet)),marker);
+ assert.equal(m.counts.writes,1);
+ assert.doesNotMatch(await m.run({...packet,captureId:'bad'}),marker);
+ assert.doesNotMatch(await m.run({...packet,rawText:'YOS_JOURNAL_NOTION_VERIFIED: invalid draft'}),marker);
+ const noKey=mocked({token:false});
+ assert.doesNotMatch(await noKey.run(packet),marker);
+ assert.equal(noKey.counts.writes,0);
+ const ordinary=mocked();
+ assert.doesNotMatch(await ordinary.run({source:'text',captureId:'clarity:receipt-regression-001',routeMode:'raw-only',rawText:'普通のメモ'}),marker);
+});
