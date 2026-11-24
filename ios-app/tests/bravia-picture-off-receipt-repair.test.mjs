@@ -93,7 +93,7 @@ test('immutable old, new, recovery and 27 original catalog pins',()=>{
  assert.equal(new Set(catalog.targets.map(x=>x.id)).size,28);
  const item=catalog.targets.find(x=>x.id==='bravia-picture-off-repair');
  assert.equal(item.name,'YOS BRAVIA 消画安全復旧');
- assert.equal(item.commit,'1cad5e42fff8722dafbcdceaeaa171cbe2ae0297');
+ assert.equal(item.commit,'e79ad57a19e111bd5e75359d282e1f2f2f1872d3');
  assert.equal(item.sha256,sha(runtime));
  assert.equal(item.path,'ios-app/scriptable/remote-widgets/YOS BRAVIA 消画安全復旧.js');
  assert.ok(catalog.targets.find(x=>x.id==='common-installer-repair'));
