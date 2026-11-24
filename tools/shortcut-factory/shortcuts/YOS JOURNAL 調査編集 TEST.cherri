@@ -73,13 +73,8 @@ if reviewCount == 0 {
     alert("公開不可マーカー欠落のため転送停止しました。", "YOS JOURNAL")
     stop()
 }
-// Do not forward an uncited draft. A source URL alone is not fact verification.
-const sourceLink = matchText("https://doi[.]org/|https://www[.]theguardian[.]com/|https://www[.]bbc[.](com|co[.]uk)/", draftText)
-const sourceLinkCount = count(sourceLink, "Items")
-if sourceLinkCount < 3 {
-    alert("原典への論文リンクが原稿にないため、Notion転送を保留しました。", "YOS JOURNAL")
-    stop()
-}
+// The private archive preserves incomplete citations.
+// Scriptable reports source mismatch as review-required, never publication approval.
 // Back up editor version and send this same final text to Notion.
 saveFile("YOS-JOURNAL-GPT-DRAFT-{stamp}.txt", draftText, false)
 
@@ -99,5 +94,5 @@ if receiptCount == 0 {
     alert("Notion保存未確認。結果：{notionText}。原稿の公開はしていません。", "YOS JOURNAL")
     stop()
 }
-showNotification("Notion原稿の読み戻し一致を確認しました。出典審査・公開は未実施。", "YOS JOURNAL")
+showNotification("Notion原稿の読み戻し一致を確認しました。出典審査・公開は未実施。結果：{notionText}", "YOS JOURNAL")
 stop()
