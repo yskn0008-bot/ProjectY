@@ -1389,10 +1389,10 @@ html,body,.app{background:#141516;color:#f1efeb}
    navigate('monthly');
    if(raw.length>16000){toast('売上取込データが長すぎます。保存していません。');return}
    let rows;
-   try{rows=JSON.parse(decodeURIComponent(raw));if(!Array.isArray(rows)||!rows.length||rows.length>62||rows.some(r=>!r||!/^\\d{4}-\\d{2}-\\d{2}$/.test(r.businessDate)||!Number.isSafeInteger(r.amountYen)||r.amountYen<0||r.amountYen>99999999||!/^([0-9a-f]{32})$/.test(r.sourceId)))throw Error('invalid')}
+   try{rows=JSON.parse(decodeURIComponent(raw));if(!Array.isArray(rows)||!rows.length||rows.length>62||rows.some(r=>!r||!/^\d{4}-\d{2}-\d{2}$/.test(r.businessDate)||!Number.isSafeInteger(r.amountYen)||r.amountYen<0||r.amountYen>99999999||!/^([0-9a-f]{32})$/.test(r.sourceId)))throw Error('invalid')}
    catch{toast('売上取込データが不正です。保存していません。');return}
    const dates=rows.map(r=>r.businessDate).sort();
-   openSheet('Notionの売上を取り込む',dates[0]+'〜'+dates.at(-1)+'｜'+rows.length+'日分\\n'+rows.map(r=>r.businessDate+'　'+money(r.amountYen)).join('\\n')+'\\n税区分・会社確定額は未確認。既存の同日記録は上書きしません。端末内にのみ保存。',[
+   openSheet('Notionの売上を取り込む',dates[0]+'〜'+dates.at(-1)+'｜'+rows.length+'日分\n'+rows.map(r=>r.businessDate+'　'+money(r.amountYen)).join('\n')+'\n税区分・会社確定額は未確認。既存の同日記録は上書きしません。端末内にのみ保存。',[
      {text:'売上を取り込む',primary:true,run:()=>{
        const result=window.YosTaxiConfirmedRevenueV1?.importNotion(rows);
        if(result?.status!=='saved'){toast('取り込めませんでした。既存記録は保護しています。');return}
@@ -1443,7 +1443,7 @@ html,body,.app{background:#141516;color:#f1efeb}
  $('strategy-advice-load').addEventListener('click',loadStrategyAdvice);
  $('revenue-paste-ocr').addEventListener('click',pasteRevenueOcr);
  $('status-btn').addEventListener('click',changeShift);$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
- renderMonthly();render();handleShortcutLink();handlePrivateSalesImport();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait();renderDailyPace();renderYosSend();if(strategyResearchFeed)renderStrategyResearch()},15000);setInterval(()=>{if($('sales-view').classList.contains('active'))renderCockpitWait()},1000);
+ renderMonthly();render();handleShortcutLink();handlePrivateSalesImport();addEventListener('hashchange',handlePrivateSalesImport);setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait();renderDailyPace();renderYosSend();if(strategyResearchFeed)renderStrategyResearch()},15000);setInterval(()=>{if($('sales-view').classList.contains('active'))renderCockpitWait()},1000);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderWait();renderYosSend()}});
  addEventListener('pageshow',()=>{renderWait();renderYosSend()});
  window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand,waitClock:{get:()=>waitView(),start:startWait,stop:finishWait,refresh:renderWait},fieldReport:{list:()=>structuredClone(currentFields()),record:reportField,undo:undoField,refresh:renderField,prepareYosRequest:prepareYosFieldRequest,sendToYos:sendFieldToYos}};
