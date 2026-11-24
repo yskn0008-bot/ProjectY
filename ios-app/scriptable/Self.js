@@ -1,5 +1,7 @@
+// Variables used by Scriptable.
+// icon-color: purple; icon-glyph: heart;
 // YOS_SCRIPT_NAME: Self
-// Private test candidate. NOT approved for public repository or distribution.
+// Self v0.4 — Scriptable distribution; personal data stays on-device.
 'use strict';
 function createSelfBridge(api, cfg) {
  const cleanId=x=>String(x||'').replace(/-/g,'').toLowerCase();
