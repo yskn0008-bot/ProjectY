@@ -9,12 +9,6 @@ const end=src.indexOf('</script></body></html>'+String.fromCharCode(96))+'</scri
 assert.ok(end>10000);
 const html=new Function(src.slice(0,end)+'\nreturn html;')();
 assert.ok(!html.includes('\u0000'));
-// WKWebView cancels native bridge navigations synchronously in shouldAllowRequest.
-// HTTP 204 is not equivalent to that behavior in standalone WebKit.
-// Substitute only the native transport before the real startup code runs.
-const boundary='bindLightHoldButtons();renderTV();renderTVStudio();requestMode();';
-assert.equal(html.split(boundary).length,2);
-const browserHTML=html.replace(boundary,'window.sent=[];nativeAction=(device,action,label,slot="")=>window.sent.push({device,action,label,slot});'+boundary);
 const origin='https://yos-remote.local/';
 for(const [name,engine] of Object.entries({chromium,webkit})){
  const browser=await engine.launch({headless:true});
@@ -24,17 +18,23 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   page.on('pageerror',e=>errors.push(String(e)));
   await page.route('**/*',async route=>{
    const url=new URL(route.request().url());
-   if(url.href===origin)return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:browserHTML});
+   if(url.href===origin)return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:html});
    if(url.origin==='https://yos-remote.local'&&url.pathname==='/__action')return route.fulfill({status:204,body:''});
    return route.abort();
   });
   await page.goto(origin,{waitUntil:'domcontentloaded'});
   assert.deepEqual(errors,[],'startup JavaScript errors');
   assert.equal(await page.locator('#tvGrid button').count(),12,'startup renders all keys');
-  assert.ok(await page.evaluate(()=>window.sent.some(x=>x.device==='picture'&&x.action==='probe')),'startup probes via native bridge');
+  // Exercise the real transport, not a replacement for nativeAction.
+  assert.equal(await page.evaluate(()=>remoteOutbox.length),0);
+  await page.evaluate(()=>{window.sent=[];window.bridgeClosed=false;const cycle=()=>{if(!window.bridgeClosed)window.YOS_REMOTE_EXCHANGE([],raw=>{window.sent.push(...JSON.parse(raw));setTimeout(cycle,0)})};cycle();});
+  await page.waitForFunction(()=>window.sent.some(x=>x.device==='picture'&&x.action==='probe'));
+  assert.equal(page.url(),origin);
+  await page.locator('.top-shortcut').last().click();
+  await page.waitForFunction(()=>window.sent.some(x=>x.device==='tv'&&x.action==='home'));
+  assert.equal(page.url(),origin);
   await page.evaluate(()=>{
    window.sent=[];
-   nativeAction=(device,action,label,slot='')=>window.sent.push({device,action,label,slot});
    nativeResult({ok:true,picture:{entries:[
     {target:'pictureMode',available:true,state:'ready',value:'standard',options:['standard','cinema'],min:null,max:null,step:null},
     {target:'brightness',available:true,state:'ready',value:'50',options:[],min:0,max:100,step:1},
@@ -63,6 +63,7 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   const preview=await page.locator('#tvBrightnessVal').textContent();
   assert.notEqual(preview,'50');
   await page.mouse.up();
+  await page.waitForFunction(()=>window.sent.some(x=>x.device==='picture'&&x.action==='set'));
   const commands=await page.evaluate(()=>window.sent.filter(x=>x.device==='picture'&&x.action==='set'));
   assert.equal(commands.length,1);
   assert.equal(JSON.parse(commands[0].slot).target,'brightness');
@@ -77,6 +78,7 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   assert.equal(await slider.isDisabled(),true);
   assert.deepEqual(errors,[]);
   console.log(name+' actual cooked HTML / 12 keys / 4 panels / drag commit once / apps / error PASS');
+  await page.evaluate(()=>window.bridgeClosed=true);
   await context.close();
  }finally{await browser.close();}
 }
