@@ -153,8 +153,8 @@
       "id": "shopping",
       "name": "YOS Shopping",
       "path": "ios-app/scriptable/YOS Shopping.js",
-      "commit": "873051d98eb9e0261820ff5789a3a74bf38276e4",
-      "sha256": "4c1a4e99a06ac593ef7a8a77ceeb1305aa8113eb3a7730171a58b1882389ab5b"
+      "commit": "983fd98c9511ab68384e8cb765273de713d82bb4",
+      "sha256": "349d360cdd61e0b36d8a29bf6a955cf621ec0f212f88180bfaa6d1f1202bf70f"
     },
     {
       "id": "scriptable-inventory",
@@ -197,6 +197,13 @@
       "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA 消画安全復旧.js",
       "commit": "eb844731556779c4689b3fec7c41772ca98dba99",
       "sha256": "7a923fa373b4675070b93cbea78bfa8bdc23c2725ca50a7683eecf52502e008e"
+    },
+    {
+      "id": "remote-hub-quick-test",
+      "name": "YOS Remote Hub Quick TEST",
+      "path": "ios-app/scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js",
+      "commit": "8282bed9940722e187de8740cec2b4889ecec29d",
+      "sha256": "90229407ab16b657c05e738852bbad843cb5d439f438d301aebb5500df43b843"
     }
   ]
 }

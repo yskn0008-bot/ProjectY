@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T16:23:30+09:00",
+  "updated_at": "2026-11-24T20:51:28+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,6 +13,16 @@
   },
   "inbox": [
     {
+      "id": "github-pr-944",
+      "title": "PR #944 Self v0.4 — private device data and existing installer distribution",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/944",
+      "updated_at": "2026-11-24T11:47:46Z"
+    },
+    {
       "id": "github-pr-830",
       "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
       "type": "GitHub PR",
@@ -20,7 +30,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/830",
-      "updated_at": "2026-11-24T07:22:49Z"
+      "updated_at": "2026-11-24T11:10:17Z"
     },
     {
       "id": "github-pr-857",
@@ -30,17 +40,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
-      "updated_at": "2026-11-23T21:18:52Z"
-    },
-    {
-      "id": "github-pr-892",
-      "title": "PR #892 Clarity｜入力専用ショートカット（履歴・写真OCR・音声）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/892",
-      "updated_at": "2026-11-23T06:27:05Z"
+      "updated_at": "2026-11-24T11:13:29Z"
     },
     {
       "id": "github-pr-901",
@@ -51,26 +51,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/901",
       "updated_at": "2026-11-23T20:09:46Z"
-    },
-    {
-      "id": "github-pr-902",
-      "title": "PR #902 DAYSTREAM｜保存エラーでもNotionタスクを安全に表示",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/902",
-      "updated_at": "2026-11-23T14:59:27Z"
-    },
-    {
-      "id": "github-pr-914",
-      "title": "PR #914 YOS Lists｜淡すぎないパステル配色へ微調整",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/914",
-      "updated_at": "2026-11-23T17:46:13Z"
     },
     {
       "id": "github-pr-925",
@@ -103,14 +83,34 @@
       "updated_at": "2026-11-24T01:04:30Z"
     },
     {
-      "id": "github-pr-932",
-      "title": "PR #932 fix(taxi): 営業画面1画面化・カレンダー明示",
+      "id": "github-pr-935",
+      "title": "PR #935 fix(daystream): deliver direct drop to Scriptable and compact overlap feedback",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/932",
-      "updated_at": "2026-11-24T01:27:20Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/935",
+      "updated_at": "2026-11-24T09:36:08Z"
+    },
+    {
+      "id": "github-pr-942",
+      "title": "PR #942 BRAVIA｜実機起動版ベースの画質プリセット・配置カスタム",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/942",
+      "updated_at": "2026-11-24T11:50:34Z"
+    },
+    {
+      "id": "github-pr-943",
+      "title": "PR #943 TAXI: private Notion sales import without sign-in",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/943",
+      "updated_at": "2026-11-24T11:14:24Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T07:22:55Z"
+      "updated_at": "2026-11-24T11:50:48Z"
     },
     {
       "id": "github-issue-234",
@@ -210,44 +210,44 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/900",
-      "updated_at": "2026-11-24T07:22:27Z"
+      "updated_at": "2026-11-24T07:58:02Z"
     }
   ],
   "recently_completed": [
     {
-      "id": "github-commit-d63648718030",
-      "title": "Merge PR #934: BRAVIA Picture Off receipt-safe one-time recovery",
-      "completed_at": "2026-11-24T07:21:20Z",
-      "result": "GitHub mainへ反映（d636487）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d63648718030b1be2f387a80dfd4430bff864201"
+      "id": "github-commit-9f3f9648a52f",
+      "title": "TAXI: specialist YOS research advice instead of canned summaries (#941)",
+      "completed_at": "2026-11-24T11:00:11Z",
+      "result": "GitHub mainへ反映（9f3f964）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9f3f9648a52f01f0bc3494a57a44abeb526d6ad6"
     },
     {
-      "id": "github-commit-a58ea2d76a19",
-      "title": "merge latest main into Picture Off isolated recovery while preserving 27 existing installer pins",
-      "completed_at": "2026-11-24T07:19:19Z",
-      "result": "GitHub mainへ反映（a58ea2d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a58ea2d76a193d75f77e870aa0aa592e89526882"
+      "id": "github-commit-6eae60f74f93",
+      "title": "Merge pull request #940 from yskn0008-bot/fix/bravia-webview-startup-20261124",
+      "completed_at": "2026-11-24T10:25:21Z",
+      "result": "GitHub mainへ反映（6eae60f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6eae60f74f9305b9c7aecd613bd3b88342612f88"
     },
     {
-      "id": "github-commit-c310d2e59100",
-      "title": "test(bravia): validate final strict-receipt recovery commit pin",
-      "completed_at": "2026-11-24T05:50:26Z",
-      "result": "GitHub mainへ反映（c310d2e）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c310d2e5910077bc0e7b91497011c156b2e91ad1"
+      "id": "github-commit-3f926a1c88d1",
+      "title": "test(bravia): validate actual generated HTML, not template text",
+      "completed_at": "2026-11-24T10:20:36Z",
+      "result": "GitHub mainへ反映（3f926a1）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3f926a1c88d19bbda8a5e048c0d8e1852b17f9f3"
     },
     {
-      "id": "github-commit-a536bf9676a0",
-      "title": "chore(installer): pin final strict-receipt Picture Off recovery bytes",
-      "completed_at": "2026-11-24T05:50:17Z",
-      "result": "GitHub mainへ反映（a536bf9）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a536bf9676a0064a9381a0b877d98f5e19196ada"
+      "id": "github-commit-0b4f3c629ee6",
+      "title": "fix(installer): pin WebView startup fix",
+      "completed_at": "2026-11-24T10:20:33Z",
+      "result": "GitHub mainへ反映（0b4f3c6）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0b4f3c629ee6801a74fd574bbd7f065e405c31b3"
     },
     {
-      "id": "github-commit-e79ad57a19e1",
-      "title": "fix(bravia): require exact historical receipt commit before guarded recovery",
-      "completed_at": "2026-11-24T05:50:05Z",
-      "result": "GitHub mainへ反映（e79ad57）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e79ad57a19e111bd5e75359d282e1f2f2f1872d3"
+      "id": "github-commit-8282bed99407",
+      "title": "fix(bravia): escape cooked WebView regex and close TV panel",
+      "completed_at": "2026-11-24T10:20:31Z",
+      "result": "GitHub mainへ反映（8282bed）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8282bed9940722e187de8740cec2b4889ecec29d"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #944をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T16:23:30+09:00",
+      "last_update": "2026-11-24T20:51:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 76件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T16:23:30+09:00",
+      "last_update": "2026-11-24T20:51:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -379,7 +379,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #649をレビューして公開判断する",
+      "next_action": "PR #944をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T16:23:30+09:00",
+      "last_update": "2026-11-24T20:51:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c56481b67475c9ba71ff9e7f20ec94c76954529905a169fba05c87e205ecba53"
+  "github_snapshot_hash": "7d2536641afb9ce020ec0d6708d72f3f1916287d6b68bb07ead45c59a3d07cd9"
 }

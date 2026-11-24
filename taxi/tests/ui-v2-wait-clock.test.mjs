@@ -35,12 +35,12 @@ function env({at='2026-11-23T20:00:00+09:00',ledger=initial(),wait=null,fail=fal
     structuredClone:x=>JSON.parse(JSON.stringify(x)),Date:ClockDate,Intl,URL});
   return {clock,store,window,el:document.getElementById.bind(document)};
 }
-test('one neutral card, four tabs and legacy actions remain',()=>{
+test('one neutral card, five tabs and legacy actions remain',()=>{
   assert.equal((html.match(/id="strategy-action"/g)||[]).length,1);
   assert.match(html,/data-decision="unknown"/);
   assert.match(html,/◌ 未判定/);
   assert.match(html,/取得時刻：なし/);
-  for(const value of ['#51DDBC','#F4BC55','#85AFFC','sales-view','strategy-view','history-view','analysis-view','drop-btn','photo-btn','m100-rule-btn'])assert.ok(html.includes(value));
+  for(const value of ['#51DDBC','#F4BC55','#85AFFC','sales-view','strategy-view','history-view','analysis-view','photo-btn','m100-rule-btn'])assert.ok(html.includes(value));
   assert.doesNotMatch(html,/\$\('strategy-main'\)\.textContent=item\[0\]/);
   assert.match(html,/index\.html\?legacy=1/);
 });
@@ -112,8 +112,8 @@ test('timer from prior shift is not displayed as today wait',()=>{
 });
 
 
-test('approved light dashboard preserves records and does not invent earnings',()=>{
-  assert.match(html,/color-scheme:light/);
+test('approved matte dashboard preserves records and does not invent earnings',()=>{
+  assert.match(html,/\.app\{color-scheme:dark/);
   assert.match(html,/id="monthly-view"/);
   assert.match(html,/id="monthly-calendar"/);
   assert.match(html,/id="remaining-shift"/);
@@ -123,7 +123,10 @@ test('approved light dashboard preserves records and does not invent earnings',(
   assert.match(html,/経過日報を送る/);
   assert.match(html,/確認済み日報のみを集計/);
   assert.match(html,/id="monthly-sum-value"/);
-   assert.match(html,/日報の確認額は未登録です。勤務時間・給与予測・Notion同期は未接続です。/);
+   assert.match(html,/日報の確認額は未登録です。/);
+  assert.match(html,/既存勤務時間の設定・記録が必要/);
+  assert.match(html,/給与対象税区分未確認/);
+  assert.match(html,/id="cockpit-wait-next"/);
   const e=env();
   assert.equal(e.el('sales-value').textContent,'—');
   assert.equal(e.el('required-hourly').textContent,'算出不可');
