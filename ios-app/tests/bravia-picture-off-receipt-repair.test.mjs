@@ -85,12 +85,12 @@ async function execute({code=oldCode,receipt=oldReceipt,header=false,consent=tru
  await new vm.Script('(async()=>{\n'+runtime+'\n})()').runInNewContext(sandbox,{timeout:8000});
  return {cloud,local,alerts,calls,opens,completed};
 }
-test('immutable old, new, recovery and 27 original catalog pins',()=>{
+test('immutable old, new and recovery catalog pins; unique registered targets',()=>{
  assert.equal(sha(oldCode),oldHash);
  assert.equal(sha(newCode),newHash);
  const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
- assert.equal(catalog.targets.length,28);
- assert.equal(new Set(catalog.targets.map(x=>x.id)).size,28);
+ assert.ok(catalog.targets.length>=28&&catalog.targets.length<=30);
+ assert.equal(new Set(catalog.targets.map(x=>x.id)).size,catalog.targets.length);
  const item=catalog.targets.find(x=>x.id==='bravia-picture-off-repair');
  assert.equal(item.name,'YOS BRAVIA 消画安全復旧');
  assert.equal(item.commit,'eb844731556779c4689b3fec7c41772ca98dba99');

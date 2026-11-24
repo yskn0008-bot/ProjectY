@@ -173,3 +173,88 @@ jobs:
             tools/shortcut-factory/artifacts/stash-hubsign.log
           if-no-files-found: error
           retention-days: 14
+
+  # PR-only signed launcher; no automatic install or modification of Untitled Script 9.
+  build-bravia-quick-test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check isolated BRAVIA v6.6 script syntax and behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check 'ios-app/scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js'
+          node --test ios-app/tests/bravia-quick-media.test.mjs ios-app/tests/bravia-v67-controls.test.mjs ios-app/tests/remote-v66-picture.test.mjs
+          python3 tools/shortcut-factory/validate_secret_free.py 'tools/shortcut-factory/shortcuts/YOS BRAVIA クイック TEST.cherri'
+
+      - name: Install existing pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile and embed the isolated quick control panel
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/shortcut-factory/shortcuts
+          cherri 'YOS BRAVIA クイック TEST.cherri' --skip-sign --debug
+          test -s 'YOS BRAVIA クイック TEST_unsigned.shortcut'
+          cd ../../..
+          python3 tools/shortcut-factory/patch_bravia_quick_inline.py \
+            'tools/shortcut-factory/shortcuts/YOS BRAVIA クイック TEST_unsigned.shortcut' \
+            --script 'ios-app/scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js'
+          mkdir -p tools/shortcut-factory/artifacts
+          cp 'tools/shortcut-factory/shortcuts/YOS BRAVIA クイック TEST_unsigned.shortcut' \
+            'tools/shortcut-factory/artifacts/YOS-BRAVIA-Quick-TEST-unsigned.shortcut'
+
+      - name: Verify compiled action graph and existing-device protection
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/shortcut-factory/validate_bravia_quick_candidate.py \
+            'tools/shortcut-factory/artifacts/YOS-BRAVIA-Quick-TEST-unsigned.shortcut'
+
+      - name: Sign through existing HubSign adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input 'tools/shortcut-factory/artifacts/YOS-BRAVIA-Quick-TEST-unsigned.shortcut' \
+            --output 'tools/shortcut-factory/artifacts/YOS-BRAVIA-Quick-TEST.shortcut' \
+            --name 'YOS BRAVIA クイック TEST'
+
+      - name: Verify signed AEA1 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/shortcut-factory/artifacts/YOS-BRAVIA-Quick-TEST.shortcut')
+          b=p.read_bytes()
+          assert b.startswith(b'AEA1') and len(b)>15000, 'signed 4-device launcher invalid'
+          print('BRAVIA Quick signed AEA1 PASS',len(b),'bytes')
+          PY
+
+      - name: Upload test-only iPhone shortcut
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-bravia-quick-test-iphone
+          path: |
+            tools/shortcut-factory/artifacts/YOS-BRAVIA-Quick-TEST.shortcut
+            tools/shortcut-factory/artifacts/YOS-BRAVIA-Quick-TEST-unsigned.shortcut
+          if-no-files-found: error
+          retention-days: 14
+
