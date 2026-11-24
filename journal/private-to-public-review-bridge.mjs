@@ -34,7 +34,7 @@ function claimedDois(text){
  }
  return set;
 }
-export function auditProvenance(privateDrafts,publicCandidate,independentDossier,{now=new Date()}={}){
+export function auditProvenance(privateDrafts,publicCandidate,independentDossier,{now=new Date(),selectedReceipts}={}){
  validateCandidate(publicCandidate,{now});
  const review=validateIndependentDossier(independentDossier);
  if(!Array.isArray(privateDrafts)||!privateDrafts.length)refuse('NO_PRIVATE_DRAFT');
@@ -47,18 +47,30 @@ export function auditProvenance(privateDrafts,publicCandidate,independentDossier
    const src=independentDossier.sources.find(x=>doiFor(x.url)===doi||x.url===a.link);
    if(!src||src.status!=='examined')refuse('NO_INDEPENDENT_SOURCE');
  }
- const privateSources=privateDrafts.filter(d=>{
+ // Explicit receipt selection is private runtime input, never a public candidate field.
+ let eligible=privateDrafts;
+ if(selectedReceipts!==undefined){
+   if(!Array.isArray(selectedReceipts)||selectedReceipts.length<1||selectedReceipts.length>3||
+      new Set(selectedReceipts).size!==selectedReceipts.length||
+      selectedReceipts.some(id=>typeof id!=='string'||id.length<8||id.length>140))
+     refuse('INVALID_RECEIPT_SELECTION');
+   eligible=selectedReceipts.map(id=>{
+     const matches=privateDrafts.filter(d=>d?.receipt===id);
+     if(matches.length!==1)refuse('RECEIPT_SELECTION_NOT_UNIQUE');
+     return matches[0];
+   });
+ }
+ const privateSources=eligible.filter(d=>{
    if(!d||d.state!=='private_unverified_never_publish'||typeof d.content!=='string')return false;
    const found=claimedDois(d.content);
    return [...claimed].some(id=>found.has(id));
  }).map(d=>({draft:d,dois:claimedDois(d.content)}));
- // Existing one-feature draft and a single whole-issue draft remain valid.
- // Three independent Shortcut drafts may also contribute one source each.
- const whole=privateSources.filter(x=>[...claimed].every(id=>x.dois.has(id)));
- const separate=claimed.size===3 && privateSources.length===3 &&
-   [...claimed].every(id=>privateSources.filter(x=>x.dois.has(id)).length===1) &&
-   privateSources.every(x=>[...claimed].filter(id=>x.dois.has(id)).length===1);
- if(!(whole.length===1&&privateSources.length===1) && !separate)refuse('SOURCE_PROVENANCE_AMBIGUOUS');
+ // One, two or three records may cover the issue. Each public source must
+ // belong to exactly one of the selected records; ambiguity still fails closed.
+ const uniqueCoverage=privateSources.length>=1&&privateSources.length<=claimed.size&&
+   [...claimed].every(id=>privateSources.filter(x=>x.dois.has(id)).length===1)&&
+   (selectedReceipts===undefined||privateSources.length===eligible.length);
+ if(!uniqueCoverage)refuse('SOURCE_PROVENANCE_AMBIGUOUS');
  if(publicCandidate.verification.some(v=>!Array.isArray(v.reviewClaimIds)||!v.reviewClaimIds.length))
    refuse('REVIEW_CLAIM_IDS_MISSING');
  // Do not assume the candidate's full prose has been checked because it
@@ -74,7 +86,7 @@ export function auditProvenance(privateDrafts,publicCandidate,independentDossier
    canPublishAutomatically:false
  };
 }
-export async function checkLiveDraftProvenance({token,fetcher=fetch,candidate,dossier,now=new Date()}={}){
+export async function checkLiveDraftProvenance({token,fetcher=fetch,candidate,dossier,now=new Date(),selectedReceipts}={}){
  const drafts=await readPrivateInbox({token,fetcher});
- return auditProvenance(drafts,candidate,dossier,{now});
+ return auditProvenance(drafts,candidate,dossier,{now,selectedReceipts});
 }
