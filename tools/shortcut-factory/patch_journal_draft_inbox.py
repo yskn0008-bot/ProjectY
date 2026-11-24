@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import copy
 import plistlib
+import uuid
 from pathlib import Path
 
 INTENT="dk.simonbs.Scriptable.RunScriptInlineIntent"
@@ -59,6 +60,12 @@ def patch(path:Path,script_path:Path):
         raise SystemExit('private Inbox script contract missing')
     p['script']={'Value':{'string':script},'WFSerializationType':'WFTextTokenString'}
     parameter=provenance_parameter(actions,attachment)
+    if parameter.get('WFSerializationType')=='WFTextTokenString':
+        # Materialize the composite as a native Text action, then pass its single output.
+        output_id=str(uuid.uuid4()).upper()
+        actions.insert(idx,{'WFWorkflowActionIdentifier':'is.workflow.actions.gettext','WFWorkflowActionParameters':{'WFTextActionText':parameter,'UUID':output_id,'CustomOutputName':'journalBoundText'}})
+        idx+=1
+        parameter={'WFSerializationType':'WFTextTokenAttachment','Value':{'Type':'ActionOutput','OutputUUID':output_id,'OutputName':'journalBoundText'}}
     p['parameter']=parameter
     result=repr(root)
     if SCRIPT_MARKER in result or PARAM_MARKER in result:
