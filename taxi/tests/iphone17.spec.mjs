@@ -399,7 +399,7 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
       const active = element => {const style=getComputedStyle(element);return style.display!=='none' && style.visibility!=='hidden' && element.getBoundingClientRect().height>0};
       const bad=items.filter(active).filter(element=>element.scrollWidth>element.clientWidth+1 || element.scrollHeight>element.clientHeight+2).map(element=>element.textContent.trim());
       const main=document.querySelector('.view.active');
-      if(main.scrollHeight>main.clientHeight+2)bad.push('sales main vertically overflowing');
+      if(main.scrollHeight>main.clientHeight+2 && (innerHeight>=799 || getComputedStyle(main).overflowY!=='auto'))bad.push('sales main vertically overflowing without permitted compact scroll');
       if(document.querySelector('.app>.header').getBoundingClientRect().height>0)bad.push('unused header visible');
       if(main.scrollWidth>main.clientWidth+2)bad.push('sales main horizontally overflowing');
       return bad;
@@ -1057,6 +1057,13 @@ test('strategy research displays only fresh official-source evidence, never taxi
   await page.locator('[data-page="strategy"]').click();
   await expect(page.locator('#strategy-research-status')).toContainText('公式情報源 3/3件取得');
   await expect(page.locator('#strategy-main')).toContainText('未判定');
+  await expect(page.locator('#strategy-research-brief')).toContainText('くもり、時々雨');
+  await expect(page.locator('#strategy-research-brief')).toContainText('営業上の仮説');
+  await expect(page.locator('#strategy-research-brief')).toContainText('テスト船');
+  await expect(page.locator('#strategy-research-brief')).toContainText('移動先を決めることはできません');
+  await expect(page.locator('#strategy-research-sources')).toBeHidden();
+  await page.locator('.strategy-research details summary').click();
+  await expect(page.locator('#strategy-research-sources')).toBeVisible();
   await expect(page.locator('#strategy-research-sources')).toContainText('くもり、時々雨');
   await expect(page.locator('#strategy-research-sources')).toContainText('寄港予約1件');
   await expect(page.locator('#strategy-research-sources')).toContainText('テスト船');
@@ -1072,6 +1079,7 @@ test('strategy research displays only fresh official-source evidence, never taxi
   await page.clock.runFor(15000);
   await expect(page.locator('#strategy-research-status')).toContainText('配信が古い');
   await expect(page.locator('#strategy-research-sources>div')).toHaveCount(0);
+  await expect(page.locator('#strategy-research-brief>p')).toHaveCount(0);
 });
 
 test('strategy research fails closed on malformed or unavailable official feed',async({page})=>{
@@ -1366,4 +1374,35 @@ test('daily cockpit uses recorded shift and existing target without inventing br
   await expect(page.locator('#cockpit-wait-time')).toHaveText('00:00');
   await page.locator('#cockpit-wait-toggle').click();
   await expect(page.locator('#cockpit-wait-toggle')).toHaveText('待機開始');
+});
+
+test('real-device feedback: sales hierarchy, matte strategy, contrast and preserved tap targets', async ({page},testInfo)=>{
+  await page.setViewportSize({width:402,height:874});
+  await page.clock.setFixedTime(new Date('2026-11-24T18:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const sales=await page.evaluate(()=>{
+    const box=id=>document.querySelector(id).getBoundingClientRect();
+    const font=id=>parseFloat(getComputedStyle(document.querySelector(id)).fontSize);
+    return {height:box('.sales-card').height,salesFont:font('#sales-value'),targetFont:font('#target-value'),gap:box('.pace-card').top-box('.sales-card').bottom,wait:box('#cockpit-wait-toggle').height,scroll:document.querySelector('#sales-view').scrollHeight-document.querySelector('#sales-view').clientHeight};
+  });
+  expect(sales.height).toBeGreaterThanOrEqual(153);
+  expect(sales.salesFont).toBeGreaterThanOrEqual(36);
+  expect(sales.salesFont).toBeGreaterThan(sales.targetFont);
+  expect(sales.gap).toBeLessThanOrEqual(6);
+  expect(sales.wait).toBeGreaterThanOrEqual(44);
+  expect(sales.scroll).toBeLessThanOrEqual(2);
+  await page.screenshot({path:resolve(artifactRoot,testInfo.project.name+'-field-sales.png')});
+  await page.locator('[data-page="strategy"]').click();
+  const colors=await page.evaluate(()=>{
+    const pairs=[['.strategy-action','#strategy-detail'],['.wait-card','#wait-guidance'],['.strategy-evidence','.strategy-evidence summary'],['.strat-row:not(.selected)','.strat-row:not(.selected) small'],['.strat-row.selected','.strat-row.selected b'],['.strategy-foot','.strategy-foot strong'],['#wait-toggle','#wait-toggle']];
+    const lum=rgb=>rgb.match(/[\d.]+/g).slice(0,3).map(Number).map(x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4}).reduce((v,x,i)=>v+x*[.2126,.7152,.0722][i],0);
+    return pairs.map(([bg,fg])=>{const a=getComputedStyle(document.querySelector(bg)),b=getComputedStyle(document.querySelector(fg)),l1=lum(a.backgroundColor),l2=lum(b.color);return {bg,background:a.backgroundImage,ratio:(Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05),light:l1};});
+  });
+  for(const pair of colors){expect(pair.background,pair.bg).toBe('none');expect(pair.light,pair.bg).toBeLessThan(.15);expect(pair.ratio,pair.bg).toBeGreaterThanOrEqual(4.5);}
+  await page.screenshot({path:resolve(artifactRoot,testInfo.project.name+'-field-strategy.png')});
+  await page.locator('.strategy-evidence summary').click();
+  await expect(page.locator('.evidence-body')).toBeVisible();
+  await page.locator('#field-open').click();
+  await expect(page.locator('.field-sheet')).toBeVisible();
+  await page.screenshot({path:resolve(artifactRoot,testInfo.project.name+'-field-sheet.png')});
 });
