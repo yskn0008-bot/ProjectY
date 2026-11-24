@@ -1,17 +1,18 @@
 {
   "version": 1,
   "latest": {
-    "slot": "2026-11-25T06:00:00+09:00",
-    "category": "EXPRESSION",
-    "title": "奥歯の力を抜く",
-    "action": "休憩中、唇を軽く閉じ、上下の歯を少し離して顎の力を抜いてみる。",
-    "reason": "口元の余計な力みを減らすと、穏やかで自然な表情に見えやすい。",
+    "slot": "2026-11-25T07:00:00+09:00",
+    "category": "BROW",
+    "title": "眉尻の毛流れを整える",
+    "action": "休憩中、鏡を見ながら眉尻の毛を指先で外側へそっと整える。",
+    "reason": "眉尻の毛流れが揃うと、目元の輪郭が自然にすっきり見える。",
     "image": "",
     "imageCredit": "",
     "imageSourceUrl": "",
     "imageLicenseUrl": ""
   },
   "recent": [
+    "BROW｜眉尻の毛流れを整える",
     "EXPRESSION｜奥歯の力を抜く",
     "POSTURE｜肩をすくめない",
     "HAIR｜もみあげの浮きを整える",
