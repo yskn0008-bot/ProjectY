@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T20:48:56+09:00",
+  "updated_at": "2026-11-24T20:51:28+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -94,13 +94,13 @@
     },
     {
       "id": "github-pr-942",
-      "title": "PR #942 BRAVIA｜統合最終改修：画質取得・TVショートカット・操作UI",
+      "title": "PR #942 BRAVIA｜実機起動版ベースの画質プリセット・配置カスタム",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/942",
-      "updated_at": "2026-11-24T11:48:18Z"
+      "updated_at": "2026-11-24T11:50:34Z"
     },
     {
       "id": "github-pr-943",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T11:47:46Z"
+      "updated_at": "2026-11-24T11:50:48Z"
     },
     {
       "id": "github-issue-234",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T20:48:56+09:00",
+      "last_update": "2026-11-24T20:51:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -365,7 +365,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T20:48:56+09:00",
+      "last_update": "2026-11-24T20:51:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T20:48:56+09:00",
+      "last_update": "2026-11-24T20:51:28+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2f326251bf543a7579e496adc71220c72ef709772da040f87fd0643f24edc199"
+  "github_snapshot_hash": "7d2536641afb9ce020ec0d6708d72f3f1916287d6b68bb07ead45c59a3d07cd9"
 }
