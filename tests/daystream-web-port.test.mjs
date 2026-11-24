@@ -6,8 +6,9 @@ const html=fs.readFileSync(new URL('../yos/daystream/index.html',import.meta.url
 const native=fs.readFileSync(new URL('../ios-app/scriptable/YOS Timeline Charcoal 確認 20261111.js',import.meta.url),'utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
 const boot=scripts[0],ui=scripts[1];
-test('Web port uses the DAYSTREAM light appearance and existing navigation',()=>{
- assert.match(html,/--bg:#f4f8fd/);
+test('Web port uses system-aware DAYSTREAM appearance and existing navigation',()=>{
+ assert.match(html,/--bg:#eff1f5/);
+ assert.match(html,/@media\(prefers-color-scheme:dark\)/);
  assert.match(html,/id="timelinePanel"/);
  assert.match(html,/id="taskPanel"/);
  assert.match(html,/id="yosLearningHints"/);
@@ -25,7 +26,8 @@ test('Direct drop saves immediately, keeps explicit time edit and undo/redo',()=
  assert.match(html,/commitDraggedTime\(item,next,previousRect\)/);
  assert.doesNotMatch(html,/if\(next!==item.s\)openMoveDialog/);
  assert.match(html,/if\(!saved\)item.s=original/);
- assert.match(html,/const reactToNeighbors=\(\)=>/);
+ assert.doesNotMatch(html,/const reactToNeighbors=\(\)=>/);
+ assert.match(html,/Only the selected card may animate/);
  assert.match(html,/\.card\.drag-neighbor/);
  assert.doesNotMatch(html,/flow-ghost/,'drag must leave no outline at its former position');
  assert.match(html,/item\.d<=15&&\[\.\.\.String\(item\.t\|\|''\)\]\.length<=9\)el\.classList\.add\('short-row'\)/);

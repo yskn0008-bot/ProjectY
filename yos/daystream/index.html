@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f4f8fd"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="DAYSTREAM"><link rel="manifest" href="./manifest.webmanifest"><title>DAYSTREAM｜YOS Web</title><style>
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#eff1f5"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111318"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="DAYSTREAM"><link rel="manifest" href="./manifest.webmanifest"><title>DAYSTREAM｜YOS Web</title><style>
 .yos-web-port{position:relative;z-index:300;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:calc(env(safe-area-inset-top) + 8px) 16px 12px;background:#262c35;color:#f5f7fb;border-bottom:1px solid #667080;font:12px -apple-system,BlinkMacSystemFont,sans-serif;filter:none;-webkit-filter:none;backdrop-filter:none;-webkit-backdrop-filter:none;opacity:1;box-shadow:none}
 .yos-web-port a,.yos-web-port button{color:#f3f6ff;border:1px solid #778395;border-radius:9px;background:#414958;padding:8px 11px;text-decoration:none;font-weight:650;opacity:1;filter:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
 .yos-web-port strong{font-size:12px;margin-right:auto;letter-spacing:.05em}
@@ -413,6 +413,81 @@ body.yos-daystream-web.flow-editing .app{padding-top:26px}
 #moveOptions button,#flowCandidates{border:1px solid #b8d8ce;background:#eff8f6;color:#1c5e4a;border-radius:12px;padding:9px 12px;min-height:42px;text-align:left}
 #flowCandidates{margin-top:10px}
 #moveEvidence a:not([hidden]){display:inline-block;color:#305a91;margin-top:8px;font-size:12px}
+
+/* DAYSTREAM: Quiet, system-aware appearance. Category color is a small signal,
+   never a heavy frame. Both modes share the same geometry. */
+:root{color-scheme:light dark;--bg:#eff1f5;--bg2:#ffffff;--text:#202632;--muted:#596575;--line:#d6dbe4;--surface:#e3e7ed;--control:#e5e9f0;--accent:#315fa6;--accent-ink:#fff;--nav:#f6f7fa;--card-text:#202632;--card-meta:#485769}
+html{background:var(--bg)!important;color-scheme:light dark}
+html body.yos-daystream-web{background:var(--bg);color:var(--text);background-attachment:scroll}
+.yos-daystream-web .app{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif}
+.timeline{--card-inset:56px}
+.timeline .axis{background:var(--line);width:1px;left:43px}
+.timeline .hour span{color:var(--muted);font-size:12px;font-weight:550;font-variant-numeric:tabular-nums}
+.timeline .tick{background:var(--flow-ink);border:1px solid var(--bg);box-shadow:none;width:7px;height:7px}
+[data-flow-tone=blue]{--tone-fill:#e0eaf8;--tone-zone:#dae5f4;--flow-ink:#315f9e}
+[data-flow-tone=mint]{--tone-fill:#dcebe4;--tone-zone:#d5e5df;--flow-ink:#236d54}
+[data-flow-tone=violet]{--tone-fill:#e8e2f3;--tone-zone:#e2dbef;--flow-ink:#7251a6}
+[data-flow-tone=peach]{--tone-fill:#f3e4d9;--tone-zone:#eeded3;--flow-ink:#984f2b}
+.timeline .card[data-flow-tone],.timeline .card[data-flow-tone]:is(.compat-positive,.compat-negative,.compat-danger){
+ background:var(--tone-fill);color:var(--card-text);border:1px solid transparent;border-radius:11px;box-shadow:none;
+ font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif;
+ padding:5px 7px 5px 10px;gap:7px;min-height:0;filter:none
+}
+.timeline .card[data-flow-tone].yos-backdrop,.timeline .card[data-notion="1"].yos-backdrop[data-flow-tone]{
+ background:var(--tone-zone)!important;border:1px solid var(--line);box-shadow:none
+}
+.timeline .card[data-flow-tone] :is(b,small),.timeline .card[data-flow-tone] .task-copy small{color:var(--card-text);font-family:inherit;opacity:1}
+.timeline .card[data-flow-tone] b{font-size:14px;font-weight:650;line-height:1.25;letter-spacing:0;white-space:normal;overflow-wrap:anywhere}
+.timeline .card[data-flow-tone] small,.timeline .card[data-flow-tone] .task-copy small{font-size:11px;color:var(--card-meta);font-weight:550;line-height:1.2}
+.timeline .card .card-icon,.timeline .card.short-row .card-icon{background:transparent;color:var(--flow-ink);width:20px;height:20px;flex:0 0 20px;border-radius:0;padding:0}
+.timeline .card.short-row .card-icon svg{display:block}
+.timeline .card .card-icon svg{width:18px;height:18px;stroke-width:1.7}
+.timeline .card .task-copy,.timeline .card .event-copy,.timeline .card.short-row .task-copy,.timeline .card.short-row .event-copy{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:2px;min-width:0;flex:1;height:auto}
+.timeline .card.short-row .task-copy b,.timeline .card.short-row .event-copy b{flex:none;line-height:1.25;font-size:14px;max-width:100%}
+.timeline .card .task-meta{flex:0 0 auto;display:flex;gap:6px;align-items:center;flex-wrap:nowrap;max-width:100%}
+.timeline .card.short-row .task-meta small,.timeline .card.short-row .task-copy small{font-size:11px;line-height:1.2}
+.timeline .card .task-drag-grip,.timeline .card[data-notion="1"] .task-drag-grip,.timeline .card.short-row .task-drag-grip{width:44px;min-width:44px;flex:0 0 44px;min-height:44px;align-self:center;background:transparent;color:var(--flow-ink);border:0;margin:0;padding:0;border-radius:8px;font-size:18px;opacity:.85}
+.timeline .card .fixed-label{color:var(--card-meta);background:transparent;font-size:10px}
+.timeline .card[data-notion="1"]>.fixed-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);padding:0;white-space:nowrap}
+.timeline .card .layer-status{font-size:0;width:15px;height:15px;display:grid;place-items:center;flex:none;color:var(--signal-accent)}
+.timeline .card.compat-positive .layer-status::after{content:'+';font-size:14px;font-weight:750}
+.timeline .card.compat-negative .layer-status::after{content:'!';font-size:12px;font-weight:750}
+.timeline .card.compat-danger .layer-status{background:#a9344d;color:#fff;border-radius:50%}
+.timeline .card.compat-danger .layer-status::after{font-size:11px}
+.timeline .card.drag-preview,.timeline .card.drag-preview[data-placement]{border-color:var(--flow-ink);box-shadow:0 9px 25px #0004;outline:none;filter:none}
+.timeline .card.drag-preview[data-placement=danger]{border-color:#e8798c}
+.timeline .card.done{opacity:.65}
+.timeline-legend span{background:transparent;border:0;box-shadow:none;color:var(--muted);font-size:11px;font-weight:550;padding:3px 6px}
+.flow-date-pill,.calendar-modes,.flow-date-row #dateBtn,.iconbtn,#flowEdit,#flowDone,.native-tools summary,.zoomBtn,.yos-history-button{background:var(--control);color:var(--text);border-color:transparent;box-shadow:none}
+.flow-date-pill button,.flow-edit-bar button,.flow-advice-bar button,.calendar-modes button,.day,.tab,.flow-tools,.yos-sync-panel{color:var(--muted)}
+.yos-daystream-web .day.active,.yos-daystream-web .calendar-modes button.active,#addBtn,.flow-add#addBtn,#moveSave{background:var(--accent);color:var(--accent-ink);border-color:transparent;box-shadow:none}
+#yosTimelineSync{background:transparent;color:var(--accent);font-weight:650}
+.yos-daystream-web .dock,body.yos-daystream-web .yos-web-port,.yos-history-actions{background:var(--nav);border-color:var(--line);color:var(--text);box-shadow:none}
+.tab.active{color:var(--accent)}
+.timeline .nowline{background:var(--accent);box-shadow:none}
+.timeline .nowline:before,.timeline .nowbadge{background:var(--accent);color:var(--accent-ink)}
+.editor,.tabbox,.review,.focus,.gesture-delete,.month-pop,.week-overview,.all-day,.yos-web-port-dialog,.flow-edit-bar,.flow-advice-bar,.flow-advice-card,.move-impact,.move-sheet-content,.yos-daystream-web .summary{background:var(--bg2);color:var(--text);border-color:var(--line);box-shadow:none}
+.editor input,.editor select,.editor .shortcut-picker,.tabbox input[type=time],.searchrow input,.move-time input,.move-sheet footer button,#moveOptions button,#flowCandidates,#moveSuggest,.yos-daystream-web .yos-web-port a,.yos-daystream-web .yos-web-port button,.yos-web-port-dialog button{background:var(--control);color:var(--text);border-color:var(--line)}
+.flow-advice-card :is(h2,h3),.move-impact h3,.move-impact ul,.flow-proposal #moveRange,.compat-status,.compat-status .overlap-details,.flow-rating,.week-overview-head,.week-day .agenda span,.month-grid span,.month-grid button,.daystream-date,.subtitle,.notice,.metric label{color:var(--muted)}
+.yos-daystream-web .ring:after{background:var(--bg2)}
+#yosNativeBoot{background:var(--bg)!important;color:var(--text)!important}
+.move-toast{background:var(--nav);color:var(--text);border:1px solid var(--line);box-shadow:0 5px 20px #0003}
+.move-toast button{background:var(--control);color:var(--accent);border:0;min-height:44px}
+@media(prefers-color-scheme:dark){
+ :root{--bg:#111318;--bg2:#1b1e25;--text:#f0f2f5;--muted:#a9b3c2;--line:#343b47;--surface:#222731;--control:#282e38;--accent:#9dbdff;--accent-ink:#17243a;--nav:#1b1e25;--card-text:#f0f2f5;--card-meta:#bdc7d6}
+ [data-flow-tone=blue]{--tone-fill:#222e40;--tone-zone:#1b2535;--flow-ink:#9dbdff}
+ [data-flow-tone=mint]{--tone-fill:#20352f;--tone-zone:#1c2d28;--flow-ink:#9edac1}
+ [data-flow-tone=violet]{--tone-fill:#302a40;--tone-zone:#262235;--flow-ink:#d1bafa}
+ [data-flow-tone=peach]{--tone-fill:#382d29;--tone-zone:#302522;--flow-ink:#f0b99a}
+ .timeline .card.compat-positive{--signal-accent:#9edac1}
+ .timeline .card.compat-negative{--signal-accent:#f0c68e}
+ .timeline .card.compat-danger{--signal-accent:#f2a7b8}
+ .month-grid button.selected,.week-day.today .date,.week-day .agenda .task,.week-day .agenda .habit,.week-day .agenda .due{color:var(--accent)}
+ .month-grid button.outside{color:var(--muted)}
+ .flow-rating span,.flow-rating span[data-level=danger],.compat-status .overlap-button{background:var(--control);color:var(--text);border-color:var(--line)}
+ #moveEvidence a:not([hidden]){color:var(--accent)}
+}
+@media(max-width:350px){.timeline{--card-inset:49px}.timeline .axis{left:36px}.timeline .tick{left:33px}.timeline .hour span{font-size:11px}.timeline .card[data-flow-tone]{padding-inline:7px 3px;gap:4px}.timeline .card .card-icon,.timeline .card.short-row .card-icon{width:16px;flex-basis:16px}.timeline .card .card-icon svg{width:15px}}
 </style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script></head><body class="yos-daystream-web">
 <div class="app">
   <div class="top">
@@ -1139,24 +1214,23 @@ function yosElasticAxis(rows,baseScale){
 
 /* The readable axis and proportional view share the same saved times. */
 function yosTaskDurationHeight(duration){
- // Denser display only; saved task minutes remain unchanged.
- if(duration<=5)return 34;
- if(duration<=15)return 36;
- if(duration<=30)return 38;
- if(duration<=60)return 42;
- if(duration<=120)return 46;
- return 48;
+ if(duration<=5)return 50;
+ if(duration<=15)return 52;
+ if(duration<=30)return 54;
+ if(duration<=60)return 58;
+ if(duration<=120)return 62;
+ return 64;
 }
 function yosReadableTaskHeight(item){
- // Reserve space for the 38px drag handle + full title and full start/end text.
- // Text can increase card height, but shorter source durations never get
- // silently stretched in the underlying schedule.
- const available=Math.max(122,Math.min(610,window.innerWidth)-166);
- const approxChars=Math.max(7,Math.floor(available/14));
+ const available=Math.max(100,Math.min(610,window.innerWidth)-160);
+ const approxChars=Math.max(5,Math.floor(available/14));
  const lines=Math.max(1,Math.ceil([...String(item.t||'')].length/approxChars));
- const contentMin=15*lines+12+1+4+2;
- return Math.max(yosTaskDurationHeight(item.d),contentMin);
+ return Math.max(yosTaskDurationHeight(item.d),18*lines+25);
 }
+function yosReadableCardHeight(item){
+ return yosReadableTaskHeight(item);
+}
+const yosCardGap=5;
 function yosBackdropRows(rows){
  // Connected intervals share the smallest available lane across the cluster.
  const layout=new Map();
@@ -1182,20 +1256,19 @@ function yosReadableAxis(rows,baseScale,backdrops){
   groups.get(item.s).push(item);
  }
  const starts=[...groups.keys()].sort((a,b)=>a-b),spans=[];
- for(let i=0;i<starts.length;i++){
-  const start=starts[i],entries=groups.get(start),next=starts[i+1];
-  const required=entries.reduce((sum,item)=>sum+(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(34,Math.min(60,base.coordinate(item.s+item.d)-base.coordinate(item.s)))),0);
-  const end=next??Math.min(1440,Math.max(start+1,...entries.map(item=>item.s+item.d)));
-  if(end<=start)continue;
-  const natural=base.coordinate(end)-base.coordinate(start);
-  if(natural<required)spans.push({start,end,extra:required-natural});
- }
- // Compress leading empty hours in the daily overview while keeping the time map invertible.
  const first=rows[0]?.s??0;
  const leading=baseScale===flowScale?base.coordinate(Math.min(first,360)):0;
- const compress=p=>p-Math.min(p,leading)*.72;
+ const compressed=m=>{const p=base.coordinate(m);return p-Math.min(p,leading)*.72};
+ for(let i=0;i<starts.length;i++){
+  const start=starts[i],entries=groups.get(start),next=starts[i+1];
+  const required=entries.reduce((sum,item)=>sum+yosReadableCardHeight(item)+yosCardGap,0);
+  const end=next??Math.min(1440,Math.max(start+1,...entries.map(item=>item.s+item.d)));
+  if(end<=start)continue;
+  const natural=compressed(end)-compressed(start);
+  if(natural<required)spans.push({start,end,extra:required-natural});
+ }
  const coordinate=minute=>{
-  const m=Math.max(0,Math.min(1440,minute));let result=compress(base.coordinate(m));
+  const m=Math.max(0,Math.min(1440,minute));let result=compressed(m);
   for(const band of spans){if(m<=band.start)continue;result+=band.extra*(m>=band.end?1:(m-band.start)/(band.end-band.start))}
   return result;
  };
@@ -1847,29 +1920,8 @@ function wireTaskGestures(el,item){
   const snapped=Math.round(minuteAtY(yFor(item.s)+offset())/5)*5;
   return Math.max(0,Math.min(1440-item.d,snapped));
  };
- let neighborGeometry=[];
- const reactToNeighbors=()=>{
-  const top=gesture.cardTop+offset(),bottom=top+gesture.cardHeight,center=(top+bottom)/2;
-  for(const {other,y,height,backdrop} of neighborGeometry){
-   const gap=Math.max(0,y-bottom,top-y-height);
-   const strength=1-Math.min(1,gap/72);
-   const side=y+height/2<center?-1:1;
-   const push=backdrop?6*strength:Math.min(52,gesture.cardHeight*.55+8)*strength*strength;
-   const shift=side*push;
-   if(strength>0)other.classList.add('drag-neighbor');
-   if(other.classList.contains('drag-neighbor'))other.style.transform='translate3d(0,'+shift.toFixed(2)+'px,0)';
-  }
- };
- const clearNeighbors=()=>{
-  for(const other of tl.querySelectorAll('.drag-neighbor')){
-   if(reduceMotion){other.style.transform='';other.classList.remove('drag-neighbor');continue}
-   other.style.transform='translate3d(0,0,0)';
-   // Let the neighboring card spring back before dropping its transition class.
-   setTimeout(()=>{if(!gesture&&other.isConnected){
-    other.style.transform='';other.classList.remove('drag-neighbor');
-   }},230);
-  }
- };
+ // Drag owns only the selected card; all other cards stay still.
+ const clearNeighbors=()=>{};
  const paint=()=>{
   paintFrame=0;
   if(!gesture||!el.isConnected){finish(true);return}
@@ -1883,7 +1935,6 @@ function wireTaskGestures(el,item){
   const prior=window.scrollY;
   if(direction)window.scrollBy(0,direction*8);
   el.style.transform='translate3d(0,'+offset()+'px,0)'+(reduceMotion?'':' scale(1.025)');
-  reactToNeighbors();
   const at=candidateStart();
   if(at!==lastCandidate){
    lastCandidate=at;
@@ -1933,8 +1984,6 @@ function wireTaskGestures(el,item){
     clearTimers();el.classList.remove('press-armed');
     if(ay>=ax){
      gesture.mode='drag';
-     gesture.cardTop=el.offsetTop;gesture.cardHeight=el.offsetHeight;
-     neighborGeometry=Array.from(tl.querySelectorAll('.card')).filter(other=>other!==el).map(other=>({other,y:other.offsetTop,height:other.offsetHeight,backdrop:other.classList.contains('yos-backdrop')}));
      el.classList.add('drag-preview');
     }else gesture.mode='ignored';
    }
@@ -1970,7 +2019,7 @@ function wireTaskGestures(el,item){
   if(mode==='armed'&&fromGrip){clearNeighbors();return}
   if(next!==item.s){
    // Drop is the confirmation: no blocking placement-advice modal.
-   // FLIP animates all neighboring cards from their reactive positions.
+   // Only the selected card may animate after the save.
    commitDraggedTime(item,next,previousRect);
   }else clearNeighbors();
  }
@@ -2000,18 +2049,15 @@ function wireTaskGestures(el,item){
 }
 function smoothRender(activeId,oldActiveRect){
  const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
- const before=new Map([...tl.querySelectorAll('.card')].map(n=>[n.dataset.id,n.getBoundingClientRect()]));
- if(activeId&&oldActiveRect)before.set(String(activeId),oldActiveRect);
+ const active=activeId==null?null:[...tl.querySelectorAll('.card')].find(n=>n.dataset.id===String(activeId));
+ const old=oldActiveRect||active?.getBoundingClientRect();
  render();
- if(reduceMotion)return;
- [...tl.querySelectorAll('.card')].forEach(n=>{
-  const old=before.get(n.dataset.id);if(!old||typeof n.animate!=='function')return;
-  const now=n.getBoundingClientRect();
-  const dx=old.left-now.left,dy=old.top-now.top;
-  const sx=old.width&&now.width?old.width/now.width:1;
-  if(Math.abs(dx)<.5&&Math.abs(dy)<.5&&Math.abs(sx-1)<.01)return;
-  n.animate([{transform:'translate3d('+dx+'px,'+dy+'px,0) scaleX('+sx+')',opacity:.88},{transform:'translate3d(0,0,0) scaleX(1)',opacity:1}],{duration:340,easing:'cubic-bezier(.22,1,.36,1)'});
- });
+ if(reduceMotion||!old||activeId==null)return;
+ const n=[...tl.querySelectorAll('.card')].find(node=>node.dataset.id===String(activeId));
+ if(!n||typeof n.animate!=='function')return;
+ const now=n.getBoundingClientRect(),dy=old.top-now.top;
+ if(Math.abs(dy)<.5)return;
+ n.animate([{transform:'translate3d(0,'+dy+'px,0)'},{transform:'translate3d(0,0,0)'}],{duration:180,easing:'cubic-bezier(.22,1,.36,1)'});
 }
 function render(){
  latestCompatibility=yosDayCompatibility(items);
@@ -2038,7 +2084,7 @@ function render(){
   let offset=0;
   for(const item of group){
    visualOffsets.set(item,offset);
-   offset+=(item.kind==='task'&&!item.f?yosReadableTaskHeight(item):Math.max(34,Math.min(60,yFor(item.s+item.d)-yFor(item.s))));
+   offset+=yosReadableCardHeight(item)+yosCardGap;
   }
  }
  let lastBottom=-2;
@@ -2046,7 +2092,7 @@ function render(){
    const natural=yFor(item.s);
    const backdrop=backdrops.has(item),isTask=item.kind==='task'&&!item.f;
    const span=yFor(item.s+item.d)-natural;
-   const height=backdrop?Math.max(1,span-2):isTask?yosReadableTaskHeight(item):Math.max(34,Math.min(60,span));
+   const height=backdrop?Math.max(1,span-2):yosReadableCardHeight(item);
    const top=natural+(visualOffsets.get(item)||0);
    lastBottom=Math.max(lastBottom,top+height);
    const el=document.createElement('div');el.className='card '+(item.kind==='habit'?'habit':item.kind==='task'?'task':'schedule');
