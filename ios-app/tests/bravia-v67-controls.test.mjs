@@ -91,7 +91,7 @@ test('secrets stay out of UI and startup never changes picture or VPN',()=>{
  const html=src.slice(first,last);
  assert.doesNotMatch(html,/sonyPSK\(|Keychain\.get\(/);
  assert.match(src,/nativeAction\("tvApps","list","アプリ一覧"\)/);
- assert.match(src,/if\(activePanel==="tv"\)probePictureScene\(\)/);
+ assert.match(src,/window\.YOS_REMOTE_EXCHANGE/);
  assert.doesNotMatch(media,/YOS_NOTION_INTEGRATION_TOKEN|ftp:|api\.github\.com/);
  const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
  assert.doesNotThrow(()=>new AsyncFunction(src));
@@ -170,7 +170,7 @@ test('picture read lane leaves commands responsive and rejects stale results',as
  const received=[];
  const api=new Function('pictureProbe','quickProbe','processMutation','receive',lane+`
  async function processQueue(){if(running)return;running=true;while(queue.length){activeQueueItem=queue.shift();await processMutation(activeQueueItem);activeQueueItem=null;}running=false;runProbeLane();}
- web={evaluateJavaScript:async code=>receive(code)};return{enqueueRemote};
+ return{enqueueRemote,results:remoteResults};
  `)(async()=>{reads++;if(reads===1)return new Promise(r=>{resolveFirst=r});return{entries:[{value:'new'}]}},async()=>({}),async()=>{mutations++},v=>received.push(v));
  api.enqueueRemote({device:'picture',action:'probe'});api.enqueueRemote({device:'picture',action:'probe'});
  api.enqueueRemote({device:'tv',action:'home'});
@@ -178,7 +178,7 @@ test('picture read lane leaves commands responsive and rejects stale results',as
  assert.equal(mutations,1);assert.equal(reads,1);
  resolveFirst({entries:[{value:'stale'}]});
  for(let i=0;i<20;i++)await Promise.resolve();
- assert.equal(reads,2);assert.ok(received.some(x=>x.includes('new')));assert.ok(!received.some(x=>x.includes('stale')));
+ assert.equal(reads,2);assert.ok(api.results.some(x=>JSON.stringify(x).includes('new')));assert.ok(!api.results.some(x=>JSON.stringify(x).includes('stale')));
 });
 
 test('launcher never interprets incoming Shortcuts objects or commands as a write',()=>{
@@ -196,4 +196,12 @@ test('launcher never interprets incoming Shortcuts objects or commands as a writ
  const launch=new Function(embedded+'return resolveRemoteInput;')();
  assert.equal(launch({shortcutParameter:'tv off'}),'');
  assert.equal(launch({shortcutParameter:{text:'tv off'}}),'');
+});
+
+test('single native bridge exchange, no navigation for device commands',()=>{
+ assert.equal((src.match(/web\.evaluateJavaScript\(/g)||[]).length,1);
+ assert.match(src,/web\.evaluateJavaScript\(code,true\)/);
+ const start=src.indexOf('function nativeAction(device,action,label,slot='),end=src.indexOf('function swipeAction',start);
+ assert.doesNotMatch(src.slice(start,end),/window\.location/);
+ assert.match(src,/while\(queue\.length&&!webClosed\)/);
 });
