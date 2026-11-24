@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-25T00:05:59+09:00",
+  "updated_at": "2026-11-25T00:17:40+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,16 +31,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-24T14:31:06Z"
-    },
-    {
-      "id": "github-pr-925",
-      "title": "PR #925 feat(bravia): 既存4台リモコンに2本画質バー・横スクロールアプリ・キーボード・VPN入口",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/925",
-      "updated_at": "2026-11-23T21:07:43Z"
     },
     {
       "id": "github-pr-930",
@@ -113,6 +103,16 @@
       "updated_at": "2026-11-24T14:55:35Z"
     },
     {
+      "id": "github-pr-951",
+      "title": "PR #951 Private daily hint native Shortcut candidate",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/951",
+      "updated_at": "2026-11-24T15:06:53Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T14:56:02Z"
+      "updated_at": "2026-11-24T15:06:54Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-6aaa08589ad2",
+      "title": "Replace LOOKS placeholder art with attributed editorial photos and 27 hourly tips",
+      "completed_at": "2026-11-24T15:16:30Z",
+      "result": "GitHub mainへ反映（6aaa085）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6aaa08589ad272cd41b13872d8b1ff4fba74e3c7"
+    },
+    {
       "id": "github-commit-eaeec7f8cf61",
       "title": "Add initial LOOKS fallback and trigger fresh Pages deployment",
       "completed_at": "2026-11-24T15:04:57Z",
@@ -241,13 +248,6 @@
       "completed_at": "2026-11-24T14:21:29Z",
       "result": "GitHub mainへ反映（06b526e）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/06b526e71dec602be06cb96b14afc4d70a617d69"
-    },
-    {
-      "id": "github-commit-52e25a800c74",
-      "title": "Build JOURNAL candidate with existing Clarity bridge after validating original shortcut",
-      "completed_at": "2026-11-24T13:27:55Z",
-      "result": "GitHub mainへ反映（52e25a8）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/52e25a800c7400aab8fb0dc5d539a662281b6733"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-25T00:05:59+09:00",
+      "last_update": "2026-11-25T00:17:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 77件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 78件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-25T00:05:59+09:00",
+      "last_update": "2026-11-25T00:17:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-25T00:05:59+09:00",
+      "last_update": "2026-11-25T00:17:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "1c7a43bad25be9b27b77e11b93286aa74a6a9b65ec9cd69a0c0f127493063bae"
+  "github_snapshot_hash": "eefb3da2c66c0a1bd248816f7ebcaa8fc8887db897d7036d2c0b5e92e0c7d6d8"
 }
