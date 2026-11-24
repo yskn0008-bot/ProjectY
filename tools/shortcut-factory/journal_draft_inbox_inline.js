@@ -72,12 +72,25 @@ async function confirm(store,records,row,token,segments){
   try{persist(store,records);}catch(e){return {status:'pending',reason:'LOCAL_VERIFIED_RECEIPT_WRITE_FAILED'};}
   return {status:'verified',reason:'NOTION_INDEPENDENT_READBACK_MATCH'};
 }
+function validProvenance(raw){
+  const marker='<<YOS_JOURNAL_RESEARCH_PROVENANCE_V1>>';
+  if(!raw.includes(marker))return true; // legacy private drafts remain supported
+  const parts=raw.split(marker);
+  if(parts.length!==2)return false;
+  const [draft,research]=parts.map(s=>s.trim());
+  if(!research.startsWith('YOS_RESEARCH_ABSTRACT_V1')||!research.includes('自動公開禁止'))return false;
+  const doiSet=s=>new Set((s.match(/https:\/\/doi\.org\/10\.\d{4,9}\/[^\s<>【】]+/gi)||[]).map(x=>x.toLowerCase()));
+  const sources=doiSet(research),citations=doiSet(draft);
+  return sources.size===3&&citations.size===3&&[...citations].every(x=>sources.has(x))&&
+    (research.match(/^資料[123]｜/gm)||[]).length===3;
+}
 async function transfer(input){
   if(typeof input!=='string')return {status:'held',reason:'NO_TEXT_INPUT'};
   const raw=input.trim();
   if(raw.length<150||raw.length>J.maxLength)return {status:'held',reason:'LENGTH_OUT_OF_RANGE'};
   if(!raw.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1')||!raw.includes('公開不可・要審査'))return {status:'held',reason:'NOT_A_REVIEW_DRAFT'};
   if(/(?:sk-proj-|gh[pousr]_[A-Za-z0-9_-]{16,}|Bearer\s+\S+)/i.test(raw))return {status:'held',reason:'SENSITIVE_TOKEN_MARKER'};
+  if(!validProvenance(raw))return {status:'held',reason:'THREE_SOURCE_PROVENANCE_MISMATCH'};
   if(!Keychain.contains(J.key))return {status:'held',reason:'NOTION_KEY_MISSING'};
   const token=Keychain.get(J.key);
   if(typeof token!=='string'||token.length<10)return {status:'held',reason:'NOTION_KEY_INVALID'};
