@@ -10,6 +10,16 @@ const legacy=fs.readFileSync(new URL('fixtures/yos-common-installer-legacy-69ca7
 const name='YOS Common Installer.js';
 const picture='YOS BRAVIA Picture Off.js';
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
+// Existing registrations must remain present; additions are permitted only within
+// the real installer's 30-target limit, with unique IDs and names.
+const protectedCatalogIds=["timeline-auto","journal","daystream-preview","daystream-glass-20261111","timeline-charcoal-20261111","bravia-smart-power","remote-direct-actions","remote-power-toggle","tapo-h110-core","sleep-scene","journal-book","journal-notion-bridge","life-calendar-sync","calendar-notion","clarity-inbox-bridge","daystream-notion","ikemen-magazine","bravia-picture-check","health-automation","bravia-picture-off","remote-hub","shopping","scriptable-inventory","bravia-picture-integration","yos-lists","home-scenes","common-installer-repair","bravia-picture-off-repair"];
+function assertCatalogPreserved(targets){
+ assert.ok(targets.length>=protectedCatalogIds.length&&targets.length<=30);
+ assert.equal(new Set(targets.map(x=>x.id)).size,targets.length);
+ assert.equal(new Set(targets.map(x=>x.name)).size,targets.length);
+ for(const id of protectedCatalogIds)assert.ok(targets.some(x=>x.id===id),'missing protected target: '+id);
+}
+
 
 function store(root,initial={}){
  const files=new Map(Object.entries(initial).map(([name,value])=>[root+'/'+name,value]));
@@ -167,7 +177,7 @@ test('one-time repair is packaged for existing Scriptable installer and never ru
  assert.match(runtime,/bootstrap-backups/);
  const cat=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
  const entry=cat.targets.find(x=>x.id==='common-installer-repair');
- assert.equal(cat.targets.length,28);
+ assertCatalogPreserved(cat.targets);
  assert.ok(entry);
  assert.equal(entry.name,'YOS Common Installer 修復');
  assert.equal(entry.path,'ios-app/scriptable/YOS Common Installer 修復.js');
@@ -175,10 +185,10 @@ test('one-time repair is packaged for existing Scriptable installer and never ru
  assert.equal(sha(runtime),entry.sha256);
  assert.equal(sha(official),'0f0af090deec3c9c523ee885d37f4d5394321bd009f8e04962deff91ea3fc0b0');
 });
-test('original 26 installer catalog registrations are not mutated',()=>{
+test('all existing installer catalog registrations remain present with unique identities',()=>{
  const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
  const oldIds=['bravia-picture-off','home-scenes'];
- assert.equal(new Set(catalog.targets.map(x=>x.id)).size,28);
+ assertCatalogPreserved(catalog.targets);
  for(const id of oldIds){
   const e=catalog.targets.find(x=>x.id===id);
   assert.ok(e);
