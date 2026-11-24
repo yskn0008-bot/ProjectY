@@ -83,7 +83,7 @@ test('uses publisher-deposited Crossref abstract only if Europe PMC unavailable'
   assert.match(r.result,/YOS_RESEARCH_ABSTRACT_V1/);
   assert.match(r.result,/Crossref公式REST/);
   assert.match(r.result,/全文未確認/);
-  assert.equal(r.urls.length,6);
+  assert.equal(r.urls.length,8);
   assert.match(r.urls[3],/^https:\/\/api\.crossref\.org\/works\?/);
   assert.ok(!r.urls.join(' ').includes('家計残高'));
 });
@@ -101,7 +101,7 @@ test('repeated run on same UTC day reuses public-only cache without another netw
   assert.equal(second.completed,1);
   assert.ok(!second.result.includes('非公開メモ'));
 });
-test('research request total timeout budget is limited to 10s and fails closed',async()=>{
+test('research request total timeout budget is limited to 7s and fails closed',async()=>{
   const r=await run({failure:true});
   assert.equal(r.result,'YOS_RESEARCH_HOLD_V1:THREE_VALID_SOURCES_UNAVAILABLE');
   assert.equal(r.completed,1);
