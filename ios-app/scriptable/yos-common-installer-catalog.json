@@ -209,8 +209,8 @@
       "id": "self",
       "name": "Self",
       "path": "ios-app/scriptable/Self.js",
-      "commit": "9da0b8f54d0cad8ea7a40b3fb322940cef92018d",
-      "sha256": "d4a021fa9c787db2ab2fe3feacb54c8d6047dbaccd3a40b18efaf52327afdc3d"
+      "commit": "f8ec1476050afaef469d1ecc9b4c8d79bab38dff",
+      "sha256": "c3437e6a5f2a15044eee4e22f3a7dc54d2309dd3df349f93a457c85dd04efcc4"
     }
   ]
 }
