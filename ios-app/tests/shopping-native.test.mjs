@@ -36,6 +36,8 @@ async function run(config={}){
  const pages=config.pages||[row()];
  const token=config.token===false?'':'scriptable-private-notion-token';
  const id=ID;
+ const clock=config.priceClock;
+ const ClockDate=clock?class extends Date{constructor(...args){super(...(args.length?args:[clock.now]));}static now(){return clock.now;}}:Date;
  class MockRequest{
   constructor(url){this.url=url;this.body='';this.headers={};this.method='GET';this.response=null;log.urls.push(url)}
   async loadJSON(){
@@ -78,6 +80,7 @@ async function run(config={}){
    if(this.url.endsWith('/shopping.css'))return CSS;
    if(this.url.endsWith('/shopping.js'))return JS;
    if(config.autoPhotos&&config.priceOffer&&this.url.includes('www.muji.com')){
+    if(clock)clock.now+=50;
     return '<html><head><script type="application/ld+json">'+JSON.stringify({
       '@context':'https://schema.org','@type':'Product',
       name:config.priceWrongItem?'無印良品 化粧水 150g':'無印良品 マイルドジェルクレンジング 150g',
@@ -124,7 +127,7 @@ async function run(config={}){
    return typeof config.choice==='number'?config.choice:0}
  }
  const sandbox={
-  Request:MockRequest,Alert:MockAlert,URL,Date,Intl,
+  Request:MockRequest,Alert:MockAlert,URL,Date:ClockDate,Intl,
   Keychain:{contains:()=>Boolean(token),get:()=>token},
   args:{queryParameters:config.query||{}},
   WebView:{loadHTML:async(html,...rest)=>{log.pages.push(html);assert.equal(rest.at(-1),true)}},
@@ -436,7 +439,8 @@ test('source-linked JPY listing is visible but never promoted to a Notion curren
    現在価格:{number:null},参考価格:{number:690},目標価格:{number:600}
  }});
  const storage=new Map();
- const first=await run({autoPhotos:true,storage,pages:[muji],priceOffer:true});
+ const priceClock={now:Date.parse(NOW)};
+ const first=await run({autoPhotos:true,storage,pages:[muji],priceOffer:true,priceClock});
  assert.match(first.log.pages[0],/"webPrice":690/);
  assert.match(first.log.pages[0],/"webPriceStatus":"public-listing"/);
  assert.match(first.log.pages[0],/"webPriceFresh":true/);
@@ -444,7 +448,7 @@ test('source-linked JPY listing is visible but never promoted to a Notion curren
  assert.match(first.log.pages[0],/掲載元を確認/);
  assert.equal(first.log.requests.filter(x=>x.method==='PATCH').length,0);
  assert.equal(muji.properties.現在価格.number,null);
- const second=await run({autoPhotos:true,storage,pages:[muji],priceOffer:true});
+ const second=await run({autoPhotos:true,storage,pages:[muji],priceOffer:true,priceClock});
  const network=second.log.urls.filter(x=>x.startsWith('https://www.muji.com'));
  assert.equal(network.length,0,'cached price and failed photo must not trigger repeated manufacturer requests');
  assert.match(second.log.pages[0],/"webPrice":690/);

@@ -1,7 +1,7 @@
 // Variables used by Scriptable.
 // YOS_SCRIPT_NAME: YOS Remote Power Toggle
-// YOS Remote Power Toggle v1.0 — one shortcut each for light and AC.
-// Shortcut parameters: "light" or "ac". Optional recovery: "light on", "light off", "ac on", "ac off", "light reset", "ac reset".
+// YOS Remote Power Toggle v1.1 — retains light/AC; adds actual-state BRAVIA power.
+// Shortcut parameters: light/ac/tv. Optional on/off/toggle; reset remains light/ac only.
 // This tracks commands / hub-side AC status only. Infrared cannot verify real appliance state.
 'use strict';
 
@@ -112,12 +112,44 @@ async function toggleAc(core, action, history) {
   await client.controlAc(remote.device_id, { power: wantOn, on: wantOn, ...profile });
   return { on: wantOn, source: reported !== null ? 'hub-reported' : 'last-sent-command', profile };
 }
+// Existing BRAVIA Smart Power RPC contract; no inferred TV state is stored.
+async function toggleTV(action) {
+  const hostKey='yos.bravia.scriptable.host',pskKey='yos.bravia.scriptable.psk';
+  if(!Keychain.contains(hostKey)||!Keychain.contains(pskKey))fail('BRAVIA接続設定なし');
+  const host=String(Keychain.get(hostKey)).trim().replace(/^https?:\/\//i,'').replace(/\/$/,'');
+  const psk=String(Keychain.get(pskKey));
+  if(!host||!psk)fail('BRAVIA接続設定なし');
+  async function rpc(method,params){
+    const r=new Request('http://'+host+'/sony/system');r.method='POST';r.timeoutInterval=8;
+    r.headers={'Content-Type':'application/json','X-Auth-PSK':psk};
+    r.body=JSON.stringify({method,params,id:1,version:'1.0'});
+    const data=JSON.parse(await r.loadString());
+    if(!data||data.error||!Array.isArray(data.result))fail('BRAVIA電源APIの応答を確認できません');
+    return data.result;
+  }
+  async function read(){
+    const state=(await rpc('getPowerStatus',[]))?.[0]?.status;
+    if(!['active','standby'].includes(state))fail('テレビの電源状態不明。送信中止');
+    return state;
+  }
+  const before=await read(),want=action==='toggle'?before!=='active':action==='on';
+  if((before==='active')!==want)await rpc('setPowerStatus',[{status:want}]);
+  const after=await read();
+  if((after==='active')!==want)fail('電源切替要求後の状態未確認。再送しません');
+  return want?'テレビ ON 確認':'テレビ OFF 確認';
+}
 async function main() {
   const input = String(args.shortcutParameter || (args.queryParameters && args.queryParameters.device) || '').trim().toLowerCase();
   const [device, rawAction, extra] = input.split(/\s+/);
-  if (extra || !['light', 'ac'].includes(device)) fail('ショートカットの入力は light または ac にしてください。');
+  if (extra || !['light', 'ac', 'tv'].includes(device)) fail('ショートカットの入力は light / ac / tv にしてください。');
   const action = rawAction || 'toggle';
   if (!['toggle', 'on', 'off', 'reset'].includes(action)) fail('操作はtoggle/on/off/resetのみ対応します。');
+  if(device==='tv'){
+    if(!['on','off','toggle'].includes(action))fail('テレビはtoggle/on/offのみ対応します。');
+    const release=acquire(device);
+    try{Script.setShortcutOutput(await toggleTV(action));}finally{release();}
+    return;
+  }
   const stateKey = STATE_PREFIX + device;
   if (action === 'reset') {
     if (Keychain.contains(stateKey)) Keychain.remove(stateKey);

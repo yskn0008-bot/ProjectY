@@ -15,7 +15,8 @@ const date='2026-12-01',rows=[
 ];
 // The next-day override assertion requires a recurring Notion fixture.
 for(const record of rows)record.properties['習慣周期']={select:{name:'毎日'}};
-const html=htmlFor(rows),browser=await (process.env.LIFE_BROWSER==='webkit'?webkit:chromium).launch({headless:true});
+const html=htmlFor(rows),browser=await (process.env.LIFE_BROWSER==='webkit'?webkit:chromium).launch({headless:true,
+ ...(process.env.DAYSTREAM_BROWSER_BIN?{executablePath:process.env.DAYSTREAM_BROWSER_BIN}:{})});
 const store='YOS_DAYSTREAM_WEB_PLAN_V1';
 try{
  for(const width of [320,390,402]){
@@ -56,15 +57,36 @@ try{
   const dragDebug=await dragCard.evaluate(el=>({active:el.classList.contains('drag-preview'),css:el.className,transform:el.style.transform,scroll:scrollY}));
   assert.equal(dragDebug.active,true,'bar lifts under the finger: '+JSON.stringify({dragDebug,events:await page.evaluate(()=>window.__dragDebug)}));
   assert.ok(await page.locator('#tl .card.drag-neighbor').count()>0,'other bars react during the drag');
+  assert.equal(await page.locator('#flowDragHint').isVisible(),false,'no floating drag warning');
   await page.mouse.up();
   assert.equal(await page.locator('#moveDialog').isVisible(),false,'drop never opens placement advice');
   assert.notEqual(await page.evaluate(()=>items.find(x=>x.t==='歯磨き').s),beforeDrag,'drop saves the new time');
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),null,'direct Notion drag never changes the manual plan');
+  assert.equal(await page.locator('#moveToast').isVisible(),true,'compact confirmation appears after saving');
+  await page.locator('#moveUndo').click();
+  assert.equal(await page.evaluate(()=>items.find(x=>x.t==='歯磨き').s),beforeDrag,'one tap undo restores the original time');
+  assert.equal(await page.locator('#moveDialog').isVisible(),false,'undo never opens placement advice');
   const startCard=page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'起床'});
+  // Move the 2-minute wake task into the 05:25 brush task's window.
+  // Collision must remain a small warning on the bar, never a drop-time sheet.
+  await startCard.scrollIntoViewIfNeeded();
+  const clashGrip=await startCard.locator('.task-drag-grip').boundingBox();
+  const clashDelta=await page.evaluate(()=>{
+   const task=items.find(x=>x.t==='起床');return yFor(task.s+5)-yFor(task.s);
+  });
+  const clashStart=await page.evaluate(()=>items.find(x=>x.t==='起床').s);
+  await page.mouse.move(clashGrip.x+clashGrip.width/2,clashGrip.y+clashGrip.height/2);
+  await page.mouse.down();
+  await page.mouse.move(clashGrip.x+clashGrip.width/2,clashGrip.y+clashGrip.height/2+clashDelta,{steps:10});
+  await page.mouse.up();
+  assert.equal(await page.locator('#moveDialog').isVisible(),false,'overlapping drop does not open placement advice');
+  assert.equal(await page.evaluate(()=>placementAt(items.find(x=>x.t==='起床'),items.find(x=>x.t==='起床').s).overlaps.some(x=>x.t==='歯磨き')),true,'collision is retained without moving the other task');
+  assert.equal(await page.locator('#tl .card.task').filter({hasText:'起床'}).locator('.layer-status').innerText(),'！');
+  await page.locator('#moveUndo').click();
+  assert.equal(await page.evaluate(()=>items.find(x=>x.t==='起床').s),clashStart,'overlapping drop can be undone');
   await startCard.locator('.task-drag-grip').click();
-  assert.equal(await page.locator('#moveDialog').isVisible(),true,'tap move grip opens existing placement advisor');
-  await page.locator('#moveTime').fill('16:20');
-  await page.locator('#moveSave').click();
+  assert.equal(await page.locator('#moveDialog').isVisible(),false,'tap on drag grip does not open a sheet');
+  assert.equal(await page.evaluate(()=>commitDraggedTime(items.find(x=>x.t==='起床'),16*60+20,null)),true,'direct save persists the selected time');
   assert.match(await page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'起床'}).innerText(),/16:20/);
   const moveKey='YOS_DAYSTREAM_NOTION_MOVES_V1';
   assert.ok(await page.evaluate(key=>localStorage.getItem(key),moveKey));

@@ -76,7 +76,8 @@ test('Layer uses the strongest state color and reason, with a visible label',()=
  for(const [state,shade] of [['positive','#dff5ec'],['negative','#fff0da'],['danger','#fce5eb']]){
   assert.ok(html.includes('.timeline .card.compat-'+state+'{--layer-surface:'+shade));
  }
- assert.match(ui,/positive:'＋ 相乗候補',negative:'− 注意',danger:'！ 時間衝突'/);
+ assert.match(ui,/positive:'＋ 相乗候補',negative:'− 注意',danger:'！'/);
+ assert.match(html,/\.card\.compat-danger \.layer-status::after\{content:'!'/);
 });
 test('Meal advice uses the planned sleep time and preserves an unknown meal size',()=>{
  const code=ui.slice(ui.indexOf('const yosCompatRank'),ui.indexOf('function yosDayCompatibility'));

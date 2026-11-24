@@ -455,7 +455,8 @@ try{
  const card=id=>gp.locator('#tl .card[data-id="'+id+'"]');
  assert.match(await card(1).getAttribute('class'),/yos-backdrop/);
  assert.match(await card(3).getAttribute('class'),/yos-backdrop/);
- assert.equal(await card(2).locator('.layer-status').textContent(),'！ 時間衝突');
+ assert.equal(await card(2).locator('.layer-status').textContent(),'！');
+ assert.match(await card(2).getAttribute('aria-label'),/時間衝突|時間重複/,'compact warning retains accessible conflict reason');
  assert.equal(await card(4).locator('.layer-status').textContent(),'＋ 相乗候補');
  assert.equal(await card(6).locator('.layer-status').textContent(),'− 注意');
  assert.equal(await card(8).locator('.layer-status').count(),0);

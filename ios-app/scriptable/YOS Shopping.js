@@ -726,7 +726,9 @@ async function enrichShoppingPrices(rows){
   };
  }
  try{savePriceObservations(fm,manifest)}catch{}
- return rows.map(item=>priceSnapshot(item,manifest.entries[item.id],now));
+ // Assess freshness after requests finish: new observations can postdate the batch start.
+ const snapshotNow=Date.now();
+ return rows.map(item=>priceSnapshot(item,manifest.entries[item.id],snapshotNow));
 }
 
 async function asset(file,min,max,contains){

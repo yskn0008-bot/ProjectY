@@ -14,4 +14,12 @@ for path in map(Path,sys.argv[1:]):
     if path.stem not in ('YOS TAXI 休憩_unsigned','YOS TAXI 緊急_unsigned'):
         assert any('openurl' in x for x in ids), (path,ids)
     assert not any('delete' in x or 'appendfile' in x or 'getfile' in x for x in ids),path
+    if path.stem=='YOS TAXI 日報_unsigned':
+        # The same shortcut must work from Photos Share Sheet without remote OCR.
+        assert 'ActionExtension' in set(wf.get('WFWorkflowTypes') or []),path
+        assert wf.get('WFWorkflowHasShortcutInputVariables') is True,path
+        assert any('extracttextfromimage' in x for x in ids),(path,ids)
+        assert any('setclipboard' in x for x in ids),(path,ids)
+        assert sum('openurl' in x for x in ids)>=2,(path,ids)
+        assert not any('getcontents' in x or 'upload' in x for x in ids),(path,ids)
     print(path.name, 'PASS',len(actions),'actions')
