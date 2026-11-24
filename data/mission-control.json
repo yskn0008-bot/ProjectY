@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-25T01:17:41+09:00",
+  "updated_at": "2026-11-25T01:20:34+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -13,14 +13,14 @@
   },
   "inbox": [
     {
-      "id": "github-pr-857",
-      "title": "PR #857 YOS JOURNAL｜一次資料照合の非公開プロトタイプと安全テスト",
+      "id": "github-pr-925",
+      "title": "PR #925 feat(bravia): 既存4台リモコンに2本画質バー・横スクロールアプリ・キーボード・VPN入口",
       "type": "GitHub PR",
       "status": "draft",
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
-      "updated_at": "2026-11-24T14:31:06Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/925",
+      "updated_at": "2026-11-23T21:07:43Z"
     },
     {
       "id": "github-pr-930",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/953",
-      "updated_at": "2026-11-24T16:16:33Z"
+      "updated_at": "2026-11-24T16:19:24Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T16:07:12Z"
+      "updated_at": "2026-11-24T16:19:51Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-c69babcd506d",
+      "title": "Integrate private JOURNAL reader and existing Clarity bridge (#857)",
+      "completed_at": "2026-11-24T16:19:44Z",
+      "result": "GitHub mainへ反映（c69babc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c69babcd506d7e33a2d831f88357885c1a1cabdc"
+    },
+    {
       "id": "github-commit-36b109401b36",
       "title": "Recognize exact legacy Scriptable installer export without final LF",
       "completed_at": "2026-11-24T16:17:00Z",
@@ -241,13 +248,6 @@
       "completed_at": "2026-11-24T15:16:30Z",
       "result": "GitHub mainへ反映（6aaa085）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/6aaa08589ad272cd41b13872d8b1ff4fba74e3c7"
-    },
-    {
-      "id": "github-commit-eaeec7f8cf61",
-      "title": "Add initial LOOKS fallback and trigger fresh Pages deployment",
-      "completed_at": "2026-11-24T15:04:57Z",
-      "result": "GitHub mainへ反映（eaeec7f）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/eaeec7f8cf617070c82a172dd63abae28db51538"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-25T01:17:41+09:00",
+      "last_update": "2026-11-25T01:20:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 78件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 77件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-25T01:17:41+09:00",
+      "last_update": "2026-11-25T01:20:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-25T01:17:41+09:00",
+      "last_update": "2026-11-25T01:20:34+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "782b7df259e312a43b361d5c84f0872d708a747e8bbd8b1367d98874c58d0312"
+  "github_snapshot_hash": "0860b757e3537f25c415341ed564addfe06d8f10680cd9e3d7be713ee3abdb99"
 }
