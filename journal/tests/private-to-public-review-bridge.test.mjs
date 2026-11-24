@@ -76,3 +76,26 @@ test('three distinct private drafts can trace three reviewed public articles wit
  assert.ok(!JSON.stringify(result).includes('非公開の独立原稿'));
  assert.throws(()=>auditProvenance([drafts[0],drafts[0],drafts[2]],c,e,{now:new Date('2026-11-24T00:50:00Z')}),/SOURCE_PROVENANCE_AMBIGUOUS/);
 });
+
+test('two private receipts can partition three stories, with explicit selection excluding old duplicates',()=>{
+ const c=structuredClone(publicCandidate),e=structuredClone(dossier);
+ const now=new Date('2026-11-24T00:50:00Z');
+ c.issue.issuedOn='2026-11-24';c.issue.date='2026.11.24 / TUE';e.reviewedOn='2026-11-24';
+ const dois=['10.1177/03010066241284956','10.1177/03010066241284957','10.1177/03010066241284958'];
+ c.issue.articles=dois.map((doi,i)=>({...c.issue.articles[0],title:'独立した研究テーマを考える '+i,summary:c.issue.articles[0].summary+' '+i,link:'https://journals.sagepub.com/doi/'+doi}));
+ c.verification=c.issue.articles.map((a,i)=>({...c.verification[0],link:a.link,checkedOn:'2026-11-24',reviewClaimIds:['C'+(i+1)]}));
+ e.sources=c.issue.articles.map((a,i)=>({...e.sources[0],id:'S'+(i+1),url:a.link}));
+ e.claims=c.issue.articles.map((_,i)=>({...e.claims[0],id:'C'+(i+1),sourceId:'S'+(i+1)}));
+ const make=(receipt,ids)=>({receipt,state:'private_unverified_never_publish',content:ids.map(i=>'DOI '+dois[i]).join('\n')});
+ const a=make('journal:receipt-a',[0,2]),b=make('journal:receipt-b',[1]),old=make('journal:receipt-old',[0]);
+ const result=auditProvenance([a,b,old],c,e,{now,selectedReceipts:[a.receipt,b.receipt]});
+ assert.equal(result.matchedPrivateDraftCount,2);assert.equal(result.confirmedPublicSourceCount,3);
+ assert.equal(result.canPublishAutomatically,false);assert.ok(!JSON.stringify(result).includes(a.receipt));
+ assert.equal(auditProvenance([a,b],c,e,{now}).matchedPrivateDraftCount,2);
+ assert.throws(()=>auditProvenance([a,b,old],c,e,{now}),/SOURCE_PROVENANCE_AMBIGUOUS/);
+ assert.throws(()=>auditProvenance([a,b],c,e,{now,selectedReceipts:[a.receipt,a.receipt]}),/INVALID_RECEIPT_SELECTION/);
+ assert.throws(()=>auditProvenance([a,b],c,e,{now,selectedReceipts:[a.receipt,'journal:missing']}),/RECEIPT_SELECTION_NOT_UNIQUE/);
+ assert.throws(()=>auditProvenance([a,a,b],c,e,{now,selectedReceipts:[a.receipt,b.receipt]}),/RECEIPT_SELECTION_NOT_UNIQUE/);
+ assert.throws(()=>auditProvenance([a,b],c,e,{now,selectedReceipts:[a.receipt]}),/SOURCE_PROVENANCE_AMBIGUOUS/);
+ assert.throws(()=>auditProvenance([a,b,old],c,e,{now,selectedReceipts:[a.receipt,b.receipt,old.receipt]}),/SOURCE_PROVENANCE_AMBIGUOUS/);
+});
