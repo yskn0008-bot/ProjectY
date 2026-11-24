@@ -291,7 +291,7 @@ body{padding:0 8px}
   <p class="config-help">画質項目を一覧化。実際に変更できるものはテレビから取得した値と範囲を使用します。非対応項目はテレビ本体で設定してください。</p>
   <div id="pictureGroups"></div>
   <p id="pictureStatus" class="pic-status" aria-live="polite">未接続。画質の確認中です。</p>
-  <button class="tool" onclick="probePictureScene(event)">現在の設定を再取得</button>
+  <button class="tool" onclick="probePictureScene(event)">現在の設定を再取得</button><button class="tool" onclick="nativeAction(&quot;picture&quot;,&quot;discover&quot;,&quot;追加項目の調査&quot;)">追加画質項目を調査</button>
   <button class="tool" onclick="sendTVShortcut(event,'quick','クイック設定')">テレビのクイック設定</button>
 </div></div>
 <div id="brightLayer" class="config-layer" role="dialog" aria-modal="true" aria-label="BRAVIA明るさバー"><div class="config-card">
@@ -851,10 +851,10 @@ async function sonyJSON(service,method){const r=new Request("http://"+sonyHost()
 const PICTURE_TARGETS=["pictureMode","autoPictureMode","lightSensor","brightness","contrast","autoLocalDimming","xtendedDynamicRange","color","colorTemperature","colorSpace","sharpness","hdrMode"]
 const PICTURE_PRESET_KEYS=["day","night","movie","extra1","extra2","extra3","extra4","extra5"]
 const PICTURE_PRESET_PREFIX="yos.bravia.scriptable.picture-user-preset.v2."
-async function sonyVideoJSON(method,params){
+async function sonyVideoJSON(method,params,version="1.0"){
  const r=new Request("http://"+sonyHost()+"/sony/video");r.method="POST";r.timeoutInterval=8
  r.headers={"Content-Type":"application/json","X-Auth-PSK":sonyPSK()}
- r.body=JSON.stringify({method,params,id:1,version:"1.0"})
+ r.body=JSON.stringify({method,params,id:1,version})
  const data=JSON.parse(await r.loadString())
  if(data&&data.error)throw Error("BRAVIA画質API拒否："+String(data.error[0]||"不明"))
  if(!data||!Array.isArray(data.result))throw Error("BRAVIA画質応答が不明です")
@@ -918,8 +918,8 @@ function readPicturePreset(key){
 }
 function picturePresetDetails(){return Object.fromEntries(PICTURE_PRESET_KEYS.map(k=>[k,readPicturePreset(k)]))}
 function pictureSavedFlags(){return Object.fromEntries(PICTURE_PRESET_KEYS.map(k=>[k,Keychain.contains(PICTURE_PRESET_PREFIX+k)]))}
-async function pictureProbe(message){
- const map=await pictureAll()
+async function pictureProbe(message,existing){
+ const map=existing||await pictureAll()
  const entries=PICTURE_TARGETS.filter(t=>map.has(t)).map(t=>picturePublic(map.get(t)))
  return{entries,saved:pictureSavedFlags(),presets:picturePresetDetails(),message:message||("BRAVIAから"+entries.length+"項目を取得。調整できない項目はテレビのクイック設定を使用してください。")}
 }
@@ -927,10 +927,11 @@ async function writePicture(target,value){
  if(!PICTURE_TARGETS.includes(target))throw Error("この画質項目は安全な直接操作に非対応です")
  const settings=await pictureAll(),entry=settings.get(target)
  if(!validPictureValue(entry,value))throw Error("テレビが許可していない設定値です："+target)
- if(String(entry.currentValue)===String(value))return
+ if(String(entry.currentValue)===String(value))return false
  await sonyVideoJSON("setPictureQualitySettings",[{settings:[{target,value:String(value)}]}])
  const checked=(await pictureAll()).get(target)
  if(!checked||(String(checked.currentValue)!==String(value)&&!(Number.isFinite(Number(value))&&Number(checked.currentValue)===Number(value))))throw Error("テレビ側で反映確認できませんでした："+target)
+ return true
 }
 async function editPicturePreset(payload){
  if(!payload||!PICTURE_PRESET_KEYS.includes(payload.key)||typeof payload.name!=="string"||!payload.name.trim()||payload.name.trim().length>24||!Array.isArray(payload.settings)||!payload.settings.length||payload.settings.length>PICTURE_TARGETS.length)throw Error("登録内容が不正です");
@@ -946,7 +947,7 @@ async function editPicturePreset(payload){
  if(Keychain.contains(storage))Keychain.set(storage+".previous",Keychain.get(storage));
  Keychain.set(storage,record);
  if(Keychain.get(storage)!==record)throw Error("登録の読戻しに失敗しました");
- return {...await pictureProbe("画質ショートカットを登録しました。テレビは変更していません。"),edited:payload.key};
+ return {...await pictureProbe("画質ショートカットを登録しました。テレビは変更していません。",supported),edited:payload.key};
 }
 async function pictureSave(key){
  if(!PICTURE_PRESET_KEYS.includes(key))throw Error("保存先が不明です")
@@ -975,12 +976,26 @@ async function pictureLoad(key){
  }
  list.sort((a,b)=>Number(b.target==="pictureMode")-Number(a.target==="pictureMode"))
  let changed=0
- try{for(const item of list){const current=(await pictureAll()).get(item.target);if(String(current?.currentValue)===item.value)continue;await writePicture(item.target,item.value);changed++}}
+ try{for(const item of list){if(await writePicture(item.target,item.value))changed++}}
  catch(e){throw Error("画質の一部だけ変更された可能性があります（"+changed+"件確認済み）。"+String(e.message||e))}
  return pictureProbe("保存済み「"+(readPicturePreset(key)?.name||({day:"昼",night:"夜",movie:"映画"}[key])||key)+"」を呼び出しました。"+changed+"項目を変更・読戻し確認しました。")
 }
+// Explicit user-initiated discovery only: never send settings or change startup.
+async function discoverExtraPictureTargets(){
+ const output=[];
+ for(const version of ["1.0","1.1"]){
+  try{
+   const data=await sonyVideoJSON("getPictureQualitySettings",[{target:""}],version);
+   const raw=flattenPicture(data.result);
+   const extras=[...new Set(raw.filter(e=>e.isAvailable!==false&&typeof e.target==="string"&&!PICTURE_TARGETS.includes(e.target)).map(e=>e.target))].slice(0,30);
+   output.push("v"+version+"："+(extras.length?extras.join("、"):"追加対象なし"));
+  }catch(_){output.push("v"+version+"：取得不可（非対応または通信失敗）")}
+ }
+ return{...await pictureProbe(),message:"読み取り専用調査｜"+output.join(" / ")+"。追加対象の変更可否は未検証。"};
+}
 async function pictureAction(action,slot){
  if(action==="probe")return pictureProbe()
+ if(action==="discover")return discoverExtraPictureTargets()
  if(action==="set"){
   let payload
   try{payload=JSON.parse(String(slot||""))}catch(_){throw Error("設定内容が不正です")}
