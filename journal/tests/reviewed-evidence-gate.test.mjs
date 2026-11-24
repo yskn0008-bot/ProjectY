@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {validateIndependentDossier} from '../reviewed-evidence-gate.mjs';
+import {validateIndependentDossier,reviewSourceUrl} from '../reviewed-evidence-gate.mjs';
 const original=JSON.parse(await readFile(new URL('../reviewed-evidence/2026-11-20-first-impressions.public.json',import.meta.url),'utf8'));
 const copy=()=>structuredClone(original);
 test('original-publisher review dossier distinguishes support from rejected extrapolations',()=>{
@@ -44,4 +44,13 @@ test('require explicit public-only scope and constrained schema',()=>{
  assert.throws(()=>validateIndependentDossier(d),/Not a public/);
  const x=copy();x.extra='secret data';
  assert.throws(()=>validateIndependentDossier(x),/Unexpected/);
+});
+
+test('canonical DOI identifiers can be reviewed without allowing arbitrary fetch targets',()=>{
+ const d=copy();d.sources[0].url='https://doi.org/10.1093/skinhd/vzag089';
+ assert.equal(validateIndependentDossier(d).sources,2);
+ assert.equal(reviewSourceUrl('https://doi.org/10.1093/SKINHD/VZAG089'),'https://doi.org/10.1093/skinhd/vzag089');
+ for(const url of ['https://doi.org.evil.test/10.1093/x','https://doi.org/10.1093/x?token=secret','https://doi.org/10.1093/x#fragment','https://doi.org/not-a-doi']){
+  assert.throws(()=>reviewSourceUrl(url),/Unsafe|Invalid/);
+ }
 });
