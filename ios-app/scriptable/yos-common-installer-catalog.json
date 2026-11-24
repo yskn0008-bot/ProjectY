@@ -204,6 +204,13 @@
       "path": "ios-app/scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js",
       "commit": "8282bed9940722e187de8740cec2b4889ecec29d",
       "sha256": "90229407ab16b657c05e738852bbad843cb5d439f438d301aebb5500df43b843"
+    },
+    {
+      "id": "self",
+      "name": "Self",
+      "path": "ios-app/scriptable/Self.js",
+      "commit": "9da0b8f54d0cad8ea7a40b3fb322940cef92018d",
+      "sha256": "d4a021fa9c787db2ab2fe3feacb54c8d6047dbaccd3a40b18efaf52327afdc3d"
     }
   ]
 }
