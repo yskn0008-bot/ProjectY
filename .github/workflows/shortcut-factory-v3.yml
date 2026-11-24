@@ -236,11 +236,6 @@ jobs:
             --output 'tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-signed.shortcut' \
             --name 'YOS JOURNAL 2段階編集 TEST'
 
-      - name: Sign isolated JOURNAL parameter diagnostic
-        run: |
-          python3 tools/clarity-factory/sign_with_hubsign.py --input tools/shortcut-factory/artifacts/YOS-JOURNAL-PARAMETER-unsigned.shortcut --output tools/shortcut-factory/artifacts/YOS-JOURNAL-PARAMETER-signed.shortcut --name 'YOS JOURNAL 受け渡し検証 TEST'
-          python3 -c "from pathlib import Path; assert Path('tools/shortcut-factory/artifacts/YOS-JOURNAL-PARAMETER-signed.shortcut').read_bytes().startswith(b'AEA1')"
-
       - name: Check signed AEA1 artifact
         shell: bash
         run: |
@@ -328,6 +323,11 @@ jobs:
             --input 'tools/shortcut-factory/artifacts/YOS-JOURNAL-RESEARCH-unsigned.shortcut' \
             --output 'tools/shortcut-factory/artifacts/YOS-JOURNAL-RESEARCH-signed.shortcut' \
             --name 'YOS JOURNAL 調査安定版 TEST'
+
+      - name: Sign isolated JOURNAL parameter diagnostic
+        run: |
+          python3 tools/clarity-factory/sign_with_hubsign.py --input tools/shortcut-factory/artifacts/YOS-JOURNAL-PARAMETER-unsigned.shortcut --output tools/shortcut-factory/artifacts/YOS-JOURNAL-PARAMETER-signed.shortcut --name 'YOS JOURNAL 受け渡し検証 TEST'
+          python3 -c "from pathlib import Path; assert Path('tools/shortcut-factory/artifacts/YOS-JOURNAL-PARAMETER-signed.shortcut').read_bytes().startswith(b'AEA1')"
 
       - name: Check signed AEA1 artifact
         shell: bash
