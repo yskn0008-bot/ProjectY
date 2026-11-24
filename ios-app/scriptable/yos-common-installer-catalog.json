@@ -181,8 +181,8 @@
       "id": "home-scenes",
       "name": "YOS Home Scenes",
       "path": "ios-app/scriptable/remote-widgets/YOS Home Scenes.js",
-      "commit": "6d857f498e1476413147591332b8830ade6065cb",
-      "sha256": "ceac93791f532f3725c4c93ab5acd10539d94a0c15588a77ab89e003aa58e8ef"
+      "commit": "d87ff1f6d67d4d3e6f0b9a2a9df2710b87287b5f",
+      "sha256": "88ab9e9bb79719168c4b52041c1dd219c43bde612b4ab398c51b2dcaa6d8aef3"
     },
     {
       "id": "common-installer-repair",
