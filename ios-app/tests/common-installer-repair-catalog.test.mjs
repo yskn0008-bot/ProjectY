@@ -186,3 +186,43 @@ test('original 26 installer catalog registrations are not mutated',()=>{
   assert.match(e.sha256,/^[a-f0-9]{64}$/);
  }
 });
+
+
+test('actual historical Common Installer accepts new pinned helper through the existing catalog and leaves original unchanged',async()=>{
+ const legacyInstaller=fs.readFileSync(new URL('fixtures/yos-common-installer-legacy-69ca7064.js',import.meta.url),'utf8');
+ const catalog=fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8');
+ const cloud=store('/cloud'),local=store('/local'),alerts=[],opened=[],requests=[],completed=[];
+ cloud.files.set('/cloud/YOS Common Installer.js',legacyInstaller);
+ cloud.remove=p=>{cloud.deletions.push(p);cloud.files.delete(p);};
+ local.remove=p=>{local.deletions.push(p);local.files.delete(p);};
+ const FileManager={iCloud:()=>cloud,local:()=>local};
+ class Request{
+  constructor(url){this.url=url;this.response={statusCode:200};}
+  async loadString(){
+   requests.push(this.url);
+   if(this.url.endsWith('yos-common-installer-catalog.json'))return catalog;
+   if(this.url.includes('cc7a0f91c4e5b758b290f7098aae417b57c631c7')&&this.url.includes('Common%20Installer%20'))return runtime;
+   this.response.statusCode=404;
+   return 'unapproved resource';
+  }
+ }
+ class Alert{
+  addAction(a){this.action=a;}
+  addCancelAction(c){this.cancel=c;}
+  async presentAlert(){alerts.push({title:this.title,message:this.message});return 0;}
+ }
+ const context={FileManager,Request,Alert,Script:{complete:()=>completed.push(true)},
+  args:{queryParameters:{script:'common-installer-repair'}},Safari:{open:x=>opened.push(x)}};
+ const script=new vm.Script('(async()=>{\n'+legacyInstaller+'\n})()');
+ await script.runInNewContext(context,{timeout:6000});
+ assert.equal(cloud.files.get('/cloud/YOS Common Installer.js'),legacyInstaller);
+ assert.equal(cloud.files.get('/cloud/YOS Common Installer 修復.js'),runtime);
+ assert.equal(local.writes.length,0);
+ assert.equal(requests.length,2);
+ assert.match(alerts.at(-1).title,/登録完了/);
+ assert.equal(completed.length,1);
+ assert.ok(opened[0].startsWith('scriptable:///open/'));
+ const record=cloud.files.get('/cloud/YOS Common Installer Data/'+encodeURIComponent('YOS Common Installer 修復')+'.receipt.json');
+ assert.ok(record);
+ assert.equal(JSON.parse(record).id,'common-installer-repair');
+});
