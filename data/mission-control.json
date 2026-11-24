@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T19:09:30+09:00",
+  "updated_at": "2026-11-24T19:10:37+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-938",
-      "title": "PR #938 fix(taxi): 実機フィードバック反映・営業リサーチ自然文",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/938",
-      "updated_at": "2026-11-24T10:08:50Z"
-    },
     {
       "id": "github-pr-830",
       "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
@@ -41,6 +31,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-24T09:35:36Z"
+    },
+    {
+      "id": "github-pr-892",
+      "title": "PR #892 Clarity｜入力専用ショートカット（履歴・写真OCR・音声）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/892",
+      "updated_at": "2026-11-23T06:27:05Z"
     },
     {
       "id": "github-pr-901",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T10:09:01Z"
+      "updated_at": "2026-11-24T10:09:25Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-f796b90fefb7",
+      "title": "fix(taxi): 実機フィードバック反映・営業リサーチ自然文 (#938)",
+      "completed_at": "2026-11-24T10:09:55Z",
+      "result": "GitHub mainへ反映（f796b90）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f796b90fefb7166fbdbead653a96cac23a5b73ab"
+    },
+    {
       "id": "github-commit-849fcfcd8efb",
       "title": "Merge pull request #870 from yskn0008-bot/bravia/quick-media-controls-20261119",
       "completed_at": "2026-11-24T10:07:38Z",
@@ -243,13 +250,6 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/983fd98c9511ab68384e8cb765273de713d82bb4"
     },
     {
-      "id": "github-commit-2f23060b7813",
-      "title": "Preserve all 28 existing installer IDs while allowing verified additive test registration",
-      "completed_at": "2026-11-24T08:28:00Z",
-      "result": "GitHub mainへ反映（2f23060）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2f23060b781317825cde64ae1f3e6fb0b5fef517"
-    },
-    {
       "id": "complete-002",
       "title": "iPhone向けMission Control Dashboardを実装",
       "completed_at": "2026-07-17T17:55:00+09:00",
@@ -274,7 +274,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #938をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T19:09:30+09:00",
+      "last_update": "2026-11-24T19:10:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T19:09:30+09:00",
+      "last_update": "2026-11-24T19:10:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -379,7 +379,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #938をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T19:09:30+09:00",
+      "last_update": "2026-11-24T19:10:37+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "f024cfe1200a5177e5fe2169430d667398f50af667624566f344b02a9ca19326"
+  "github_snapshot_hash": "9b8a00d45a4a5d4846cca1710c2099fe65f2e1403117c580641799ceff89f344"
 }
