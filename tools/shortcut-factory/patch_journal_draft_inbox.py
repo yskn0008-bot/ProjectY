@@ -122,13 +122,63 @@ def recovery(path:Path,out:Path):
     print('JOURNAL recovery-only Shortcut generated; iPhone folder access not verified')
 
 
+def convert_to_clarity(path:Path):
+    """Replace only the verified private writer with the existing named Bridge.
+    Run after the old candidate validator; diagnostic/recovery artifacts remain unchanged.
+    """
+    original=plistlib.loads(path.read_bytes())
+    root=copy.deepcopy(original)
+    actions=root['WFWorkflowActions']
+    matches=[i for i,a in enumerate(actions) if a.get('WFWorkflowActionIdentifier')==INTENT
+        and 'YOS_JOURNAL_DRAFT_V1' in repr(a.get('WFWorkflowActionParameters',{}).get('script'))]
+    if len(matches)!=1:raise SystemExit('expected one validated private handoff')
+    idx=matches[0]; prior=actions[idx]['WFWorkflowActionParameters']
+    parameter=prior.get('parameter',{})
+    attachment=parameter.get('Value',{})
+    if parameter.get('WFSerializationType')!='WFTextTokenAttachment' or attachment.get('Type')!='ActionOutput' or attachment.get('OutputName') not in ('journalBoundText','draftText') or not attachment.get('OutputUUID'):
+        raise SystemExit('invalid materialized journal source')
+    if not any(a.get('WFWorkflowActionParameters',{}).get('UUID')==attachment['OutputUUID'] for a in actions[:idx]):
+        raise SystemExit('missing original text producer')
+    if prior.get('runInApp') is not False or prior.get('ShowWhenRun') is not False:
+        raise SystemExit('unexpected handoff mode')
+    def literal(s):
+        return {'Value':{'string':s},'WFSerializationType':'WFTextTokenString'}
+    raw={'WFSerializationType':'WFTextTokenString','Value':{'string':'\ufffc','attachmentsByRange':{'{0, 1}':copy.deepcopy(attachment)}}}
+    packet={'source':literal('journal'),'captureId':literal('journal:auto'),'routeMode':literal('raw-only'),'rawText':raw}
+    dictionary_id=str(uuid.uuid4()).upper()
+    dictionary={'WFWorkflowActionIdentifier':'is.workflow.actions.dictionary','WFWorkflowActionParameters':{
+        'UUID':dictionary_id,'CustomOutputName':'journalClarityPacket','WFItems':{'Value':{'WFDictionaryFieldValueItems':[
+        {'WFItemType':0,'WFKey':literal(k),'WFValue':v} for k,v in packet.items()]},'WFSerializationType':'WFDictionaryFieldValue'}}}
+    runner=copy.deepcopy(actions[idx])
+    runner['WFWorkflowActionIdentifier']='dk.simonbs.Scriptable.ParameterizedRunScriptIntent'
+    p=runner['WFWorkflowActionParameters'];del p['script'];p['fileName']='YOS Clarity Inbox Bridge'
+    p['parameter']={'WFSerializationType':'WFTextTokenAttachment','Value':{'Type':'ActionOutput','OutputUUID':dictionary_id,'OutputName':'journalClarityPacket'}}
+    actions[idx:idx+1]=[dictionary,runner]
+    encoded=plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False)
+    read=plistlib.loads(encoded)
+    check=read['WFWorkflowActions'];old=original['WFWorkflowActions']
+    assert check[:idx]==old[:idx] and check[idx+2:]==old[idx+1:]
+    assert all(read[k]==v for k,v in original.items() if k!='WFWorkflowActions')
+    assert check[idx]==dictionary and check[idx+1]==runner
+    assert check[idx]['WFWorkflowActionParameters']['WFItems']['Value']['WFDictionaryFieldValueItems'][-1]['WFValue']==raw
+    assert 'script' not in check[idx+1]['WFWorkflowActionParameters']
+    path.write_bytes(encoded)
+    assert plistlib.loads(path.read_bytes())==read
+    print('JOURNAL -> existing Clarity Bridge named action PASS (unsigned)')
+
 if __name__=='__main__':
     ap=argparse.ArgumentParser()
     ap.add_argument('shortcut',type=Path)
-    ap.add_argument('--script',type=Path,required=True)
+    ap.add_argument('--script',type=Path)
+    ap.add_argument('--convert-to-clarity',action='store_true')
     ap.add_argument('--diagnostic',type=Path)
     ap.add_argument('--recovery',type=Path)
     a=ap.parse_args()
+    if a.convert_to_clarity:
+        if a.script or a.diagnostic or a.recovery:ap.error('conversion must follow original validation')
+        convert_to_clarity(a.shortcut)
+        raise SystemExit(0)
+    if not a.script:ap.error('--script is required for original patch')
     patch(a.shortcut,a.script)
     if a.diagnostic:diagnostic(a.shortcut,a.diagnostic)
     if a.recovery:recovery(a.shortcut,a.recovery)
