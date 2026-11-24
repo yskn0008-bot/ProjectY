@@ -97,11 +97,21 @@ test('secrets stay out of UI and startup never changes picture or VPN',()=>{
  assert.doesNotThrow(()=>new AsyncFunction(src));
 });
 
-test('embedded remote screen JavaScript parses (not merely Scriptable outer script)',()=>{
- const begin=src.indexOf('<script>\nconst REMOTES='),end=src.indexOf('</script></body></html>',begin);
- assert.ok(begin>=0&&end>begin,'remote script was found');
- const htmlJS=src.slice(begin+8,end).replace(/\$\{[^}]+\}/g,'0');
- assert.doesNotThrow(()=>new vm.Script(htmlJS));
+test('actual cooked WebView HTML parses after HTML tokenizer normalization and has independent panels',()=>{
+ const end=src.indexOf('</script></body></html>`')+'</script></body></html>`'.length;
+ const html=new Function(src.slice(0,end)+'\nreturn html;')();
+ assert.ok(!html.includes('\u0000'),'no raw NUL in emitted HTML');
+ const js=html.split('<script>')[1].split('</script>')[0].replace(/\u0000/g,'\ufffd');
+ assert.doesNotThrow(()=>new vm.Script(js));
+ assert.equal((html.match(/<section\b/g)||[]).length,(html.match(/<\/section>/g)||[]).length);
+ assert.equal((html.match(/<div\b/g)||[]).length,(html.match(/<\/div>/g)||[]).length);
+ assert.match(html,/<\/div><\/section>\s*<section class="card remote-panel" data-panel="light">/);
+ const regex=js.match(/\|\|\/(\[[^\]]+\])\/\.test\(value\)/);
+ assert.ok(regex);
+ const control=new RegExp(regex[1]);
+ assert.equal(control.test('沖縄'),false);
+ assert.equal(control.test('a\u0000b'),true);
+ assert.equal(control.test('a\n'),true);
 });
 
 
