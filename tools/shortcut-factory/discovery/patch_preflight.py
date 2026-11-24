@@ -75,8 +75,24 @@ def patch(path, root):
     mp["WFLLMPrompt"]={"WFSerializationType":"WFTextTokenAttachment","Value":{"Type":"ActionOutput","OutputUUID":pprompt["UUID"],"OutputName":"prompt"}}
     if "__YOS_DISCOVERY_PREFLIGHT_" in repr(wf):
         raise ValueError("placeholder survived")
-    if any(a["WFWorkflowActionIdentifier"] in ("is.workflow.actions.alert","is.workflow.actions.showresult","is.workflow.actions.notification") for a in actions):
+    # Visible checkpoints are restricted to this manually-run TEST.
+    alert_ids=[i for i,a in enumerate(actions) if a["WFWorkflowActionIdentifier"]=="is.workflow.actions.alert"]
+    if len(alert_ids)!=4 or not alert_ids[0]<ri<alert_ids[1]<alert_ids[2]<mi<inline[1][0]<alert_ids[3]:
+        raise ValueError("diagnostic checkpoint structure mismatch")
+    if any(a["WFWorkflowActionIdentifier"] in ("is.workflow.actions.showresult","is.workflow.actions.notification") for a in actions):
         raise ValueError("unexpected interactive output")
+    fi,fp=inline[1]
+    out=actions[fi+1]
+    op=out.get("WFWorkflowActionParameters",{})
+    if out["WFWorkflowActionIdentifier"]!="is.workflow.actions.detect.text" or not fp.get("UUID") or not op.get("UUID"):
+        raise ValueError("receipt text output not materialized")
+    op["WFInput"]={"WFSerializationType":"WFTextTokenAttachment","Value":{"Type":"ActionOutput","OutputUUID":fp["UUID"],"OutputName":"result"}}
+    final=actions[alert_ids[3]]["WFWorkflowActionParameters"]
+    if "WFAlertActionMessage" not in final:
+        raise ValueError("diagnostic alert message not materialized")
+    prefix="③ 最終結果："
+    key="{"+str(len(prefix.encode("utf-16-le"))//2)+", 1}"
+    final["WFAlertActionMessage"]={"WFSerializationType":"WFTextTokenString","Value":{"string":prefix+"\ufffc","attachmentsByRange":{key:{"Type":"ActionOutput","OutputUUID":op["UUID"],"OutputName":"receiptText"}}}}
     raw=plistlib.dumps(wf,fmt=plistlib.FMT_XML,sort_keys=False)
     if plistlib.loads(raw)!=wf: raise ValueError("plist readback mismatch")
     path.write_bytes(raw)
