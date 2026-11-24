@@ -262,7 +262,7 @@ test('new installer validates the extension globally and installs only the pinne
  class Request{constructor(url){this.url=url;this.response={statusCode:200};}async loadString(){requests.push(this.url);if(this.url.endsWith('yos-common-installer-catalog.json'))return JSON.stringify(catalog);if(this.url.includes(entry.commit)&&this.url.includes('YOS%20TAXI.js'))return taxi;this.response.statusCode=404;return 'unapproved';}}
  class Alert{addAction(){}addCancelAction(){}async presentAlert(){alerts.push(this.title);return 0;}}
  const ctx={FileManager:{iCloud:()=>cloud,local:()=>local},Request,Alert,Script:{complete:()=>{}},args:{queryParameters:{script:'yos-taxi'}},Safari:{open:x=>opened.push(x)}};
- await new vm.Script('(async()=>{\\n'+official+'\\n})()').runInNewContext(ctx,{timeout:6000});
+ await new vm.Script('(async()=>{\n'+official+'\n})()').runInNewContext(ctx,{timeout:6000});
  assert.equal(cloud.files.get('/cloud/YOS TAXI.js'),taxi);
  assert.equal(cloud.files.get('/cloud/unrelated.js'),'protected');
  assert.equal(cloud.files.get('/cloud/YOS Common Installer.js'),official);
