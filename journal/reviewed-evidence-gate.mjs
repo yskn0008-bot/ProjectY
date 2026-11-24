@@ -21,6 +21,13 @@ function str(x,min,max,label){
   throw Error('Invalid '+label);
  return x.trim();
 }
+// DOI is a bibliographic identifier, not an approved network fetch destination.
+export function reviewSourceUrl(raw){
+ const doi=/^https:\/\/doi\.org\/(10\.\d{4,9}\/[-._;()/:a-z0-9]+)$/i.exec(raw);
+ if(doi)return 'https://doi.org/'+doi[1].toLowerCase();
+ return safeSourceUrl(raw);
+}
+
 export function validateIndependentDossier(d){
  keys(d,['schemaVersion','publicOnly','reviewedOn','topic','reviewerMethod','sources','claims','articleAssessment'],'dossier');
  if(d.schemaVersion!==1||d.publicOnly!==true)throw Error('Not a public-only dossier');
@@ -41,7 +48,7 @@ export function validateIndependentDossier(d){
   keys(s,['id','url','title','publicationYear','originalAccess','status'],'source');
   if(!/^S[1-9]\d*$/.test(s.id)||ids.has(s.id))throw Error('Duplicate source id');
   ids.add(s.id);
-  const url=safeSourceUrl(s.url);
+  const url=reviewSourceUrl(s.url);
   if(urls.has(url))throw Error('Duplicate source URL');
   urls.add(url);
   str(s.title,20,250,'source title');
