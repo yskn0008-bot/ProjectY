@@ -1,17 +1,18 @@
 {
   "version": 1,
   "latest": {
-    "slot": "2026-11-25T04:00:00+09:00",
-    "category": "POSTURE",
-    "title": "肩をすくめない",
-    "action": "休憩中、息をゆっくり吐きながら肩の力を抜き、腕の重さを自然に感じてみる。",
-    "reason": "肩周りの余計な力みが減ると、落ち着いた自然な立ち姿に見えやすい。",
+    "slot": "2026-11-25T06:00:00+09:00",
+    "category": "EXPRESSION",
+    "title": "奥歯の力を抜く",
+    "action": "休憩中、唇を軽く閉じ、上下の歯を少し離して顎の力を抜いてみる。",
+    "reason": "口元の余計な力みを減らすと、穏やかで自然な表情に見えやすい。",
     "image": "",
     "imageCredit": "",
     "imageSourceUrl": "",
     "imageLicenseUrl": ""
   },
   "recent": [
+    "EXPRESSION｜奥歯の力を抜く",
     "POSTURE｜肩をすくめない",
     "HAIR｜もみあげの浮きを整える",
     "STYLE｜襟の左右を整える",
