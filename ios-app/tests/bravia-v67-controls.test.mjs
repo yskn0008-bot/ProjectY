@@ -163,3 +163,20 @@ test('TV shortcut validates input before sending and reads back actual power',as
  await assert.rejects(api.executeTVShortcut('tv toggle'),/状態不明/);assert.deepEqual(calls,['getPowerStatus']);
  for(const bad of ['tv delete','tv on extra','light','tv brightness 5.5',{}])assert.throws(()=>api.parseTVShortcut(bad));
 });
+
+test('picture read lane leaves commands responsive and rejects stale results',async()=>{
+ const lane=src.slice(src.indexOf('const queue=[];'),src.indexOf('async function processQueue()'));
+ let resolveFirst,reads=0,mutations=0;
+ const received=[];
+ const api=new Function('pictureProbe','quickProbe','processMutation','receive',lane+`
+ async function processQueue(){if(running)return;running=true;while(queue.length){activeQueueItem=queue.shift();await processMutation(activeQueueItem);activeQueueItem=null;}running=false;runProbeLane();}
+ web={evaluateJavaScript:async code=>receive(code)};return{enqueueRemote};
+ `)(async()=>{reads++;if(reads===1)return new Promise(r=>{resolveFirst=r});return{entries:[{value:'new'}]}},async()=>({}),async()=>{mutations++},v=>received.push(v));
+ api.enqueueRemote({device:'picture',action:'probe'});api.enqueueRemote({device:'picture',action:'probe'});
+ api.enqueueRemote({device:'tv',action:'home'});
+ await Promise.resolve();await Promise.resolve();
+ assert.equal(mutations,1);assert.equal(reads,1);
+ resolveFirst({entries:[{value:'stale'}]});
+ for(let i=0;i<20;i++)await Promise.resolve();
+ assert.equal(reads,2);assert.ok(received.some(x=>x.includes('new')));assert.ok(!received.some(x=>x.includes('stale')));
+});
