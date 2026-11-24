@@ -195,8 +195,8 @@
       "id": "bravia-picture-off-repair",
       "name": "YOS BRAVIA 消画安全復旧",
       "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA 消画安全復旧.js",
-      "commit": "1cad5e42fff8722dafbcdceaeaa171cbe2ae0297",
-      "sha256": "df59b861a8136b261ca93b6172df311104c5474ae61801f4ac582faa2789575c"
+      "commit": "e79ad57a19e111bd5e75359d282e1f2f2f1872d3",
+      "sha256": "8c56fbdd7802f88e4c9998be0857ab12bc767e777ff9a08970af72b9b655dab0"
     }
   ]
 }
