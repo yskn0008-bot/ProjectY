@@ -1,11 +1,11 @@
 # YOS DISCOVERY – isolated implementation / preflight candidate
 
-Status: **development only; not installed, not signed, not production-ready**.
+Status: **development only; previous signed diagnostic halted on iPhone; revised diagnostic awaiting acceptance**.
 
 ## What exists
 - `discovery-core.mjs`: JST daily execution ID, three-domain coverage contract, verified-source metadata gate, hypothesis labeling, bounded 3 total attempts, durable readback-before-write, no blind append retry after uncertain response, dedupe and at-most-once notification adapter.
 - `discovery-adapters.mjs`: fixed public Europe PMC queries and actual full-text retrieval path; private Notion single-block record adapter with complete pagination and exact readback. The full-text body is represented as a bounded excerpt, not independent semantic fact-checking.
-- `YOS DISCOVERY 実行検証 TEST.cherri`: separate, temporary preflight candidate using existing JOURNAL Scriptable inline + isolated ChatGPT Text action; real public source ID roundtrip and local-only receipt. It does not run daily research, write Notion, notify, or install any new trigger.
+- `YOS DISCOVERY 実行検証 TEST.cherri`: separate, temporary preflight candidate using existing JOURNAL Scriptable inline + isolated ChatGPT Text action; real public source ID roundtrip and local-only receipt. It does not run daily research, write Notion, notify, or install any new trigger. Manual TEST displays native checkpoints, and fetch is capped at two requests with a 5-second per-request timeout (not an iOS execution-time guarantee). Production remains silent.
 - `patch_preflight.py` and `build_preflight.sh`: existing Factory Cherri v2.3.0 / secret scan / existing signer reuse. No new signer, installer, workflow, database, API contract, or provider.
 - Source-level V8 mock tests: core 15, adapters 8, preflight 5. Exact fetched core and adapter source re-tested after hardening. Actual node module execution, Cherri compilation and patched plist verification are **not yet verified**.
 
