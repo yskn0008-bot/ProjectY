@@ -117,7 +117,7 @@ body{padding:0 8px}
 .device-tab.active{background:#24384f;border-color:#548deb;color:white}
 .remote-panel{display:none;min-height:0}
 .remote-panel.active{display:block}
-.tv-card:before{display:none}.tv-card .top-shortcuts{position:relative;top:auto;left:auto;right:auto;height:32px;margin-bottom:8px}
+.tv-card:before{display:none}.tv-card .top-shortcuts{position:relative;top:auto;left:auto;right:auto;height:44px;margin-bottom:4px}
 .floor-card{padding:13px}
 .floor-power{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
 .floor-power button,.floor-temp button{border:1px solid #373d48;border-radius:14px;background:#1b1f24;color:white;min-height:49px;font-weight:750;font-size:13px}
@@ -153,17 +153,19 @@ body{padding:0 8px}
 .icon{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;font-size:23px;font-weight:500;line-height:1;color:#438eff;font-variant-emoji:text}
 .label{font-size:11px;font-weight:700;white-space:nowrap}.alt-label{position:absolute;right:7px;bottom:5px;font-size:7px;font-weight:700;color:#777b83;line-height:1;white-space:nowrap}.brand{font-size:10px;color:#8d8f95}.ac-temp{font-size:17px;font-weight:800;color:#fff;min-width:34px;text-align:right}
 .picture-quick{display:grid;grid-template-columns:1.35fr 1.25fr 0.8fr;gap:5px;margin-top:6px}
-.picture-quick button{min-height:31px;border:1px solid #41464d;border-radius:10px;background:#181b21;color:#fff;font-size:11px;font-weight:650}
+.picture-quick button{min-height:44px;border:1px solid #41464d;border-radius:10px;background:#181b21;color:#fff;font-size:11px;font-weight:650}
 
 /* Additive BRAVIA quick studio: no changes to the 12 TV buttons. */
 .tv-card{max-height:calc(100dvh - 133px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
 .tv-card::-webkit-scrollbar{display:none}
-.tv-studio{margin-top:10px;border-top:1px solid #2a3441;padding-top:8px}
+.tv-card #tvGrid{gap:5px}
+.tv-card #tvGrid .key{height:52px}
+.tv-studio{margin-top:5px;border-top:1px solid #2a3441;padding-top:6px}
 .tv-studio h3{margin:0 0 7px;color:#b3c5da;font-size:11px;font-weight:600;letter-spacing:.12em}
-.tv-studio .scene-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:10px}
+.tv-studio .scene-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:4px}
 .tv-studio button{border:1px solid #2d4054;border-radius:10px;background:#17212b;color:#e7f1fc;min-height:44px;font:500 12px -apple-system,BlinkMacSystemFont,sans-serif}
 .tv-studio button:disabled{opacity:.35}
-.tv-studio .compact-adjust{display:grid;grid-template-columns:78px minmax(0,1fr) 35px;align-items:center;gap:7px;margin:4px 0}
+.tv-studio .compact-adjust{display:grid;grid-template-columns:78px minmax(0,1fr) 35px;align-items:center;gap:7px;margin:0}
 .tv-studio .compact-adjust label{font-size:11px;color:#b0bfd1}
 .tv-studio .compact-adjust input,.pic-slider-wrap input[type=range],.pic-big-bar{min-width:0;width:100%;height:48px;appearance:none;-webkit-appearance:none;background:transparent;accent-color:#70a9eb;touch-action:pan-y}
 .tv-studio .compact-adjust input::-webkit-slider-runnable-track,.pic-slider-wrap input[type=range]::-webkit-slider-runnable-track,.pic-big-bar::-webkit-slider-runnable-track{height:12px;border-radius:12px;background:#3b526a}
@@ -172,12 +174,15 @@ body{padding:0 8px}
 .tv-studio .compact-adjust output{color:#b0c9e5;font-variant-numeric:tabular-nums;text-align:right;font-size:11px}
 .tv-studio .tv-app-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 10px)/3);gap:5px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:1px 0 7px;scrollbar-width:none}
 .tv-studio .tv-app-scroll button{scroll-snap-align:start;white-space:normal;overflow:hidden;text-overflow:ellipsis;min-height:44px;font-size:10px}
-.tv-studio .tv-text-entry{display:flex;gap:6px;margin-top:7px}
-.tv-studio .tv-text-entry input{min-width:0;flex:1;background:#121923;border:1px solid #3a4c60;border-radius:10px;color:#eef6ff;padding:8px;font-size:14px}
-.tv-studio .tv-text-entry button{flex:0 0 64px}
-.tv-studio .tv-studio-note{font-size:10px;color:#879bb2;line-height:1.4;margin:5px 0 0}
-.tv-studio .tv-extra-line{display:flex;gap:8px;align-items:center;margin-top:8px}
-.tv-studio .tv-extra-line button{padding:0 10px}
+.tv-app-head{display:flex;align-items:center;justify-content:space-between;margin:0}
+.tv-app-head h3{margin:0;letter-spacing:.04em}
+.tv-app-head .tool{height:44px;width:44px;min-height:44px;padding:0;font-size:19px}
+.tv-studio .tv-text-entry,.quick-section .tv-text-entry{display:flex;gap:6px;margin-top:7px}
+.tv-studio .tv-text-entry input,.quick-section .tv-text-entry input{min-width:0;flex:1;background:#121923;border:1px solid #3a4c60;border-radius:10px;color:#eef6ff;padding:8px;font-size:14px}
+.tv-studio .tv-text-entry button,.quick-section .tv-text-entry button{flex:0 0 64px}
+.tv-studio .tv-studio-note,.quick-section .tv-studio-note{font-size:10px;color:#879bb2;line-height:1.4;margin:5px 0 0}
+.tv-studio .tv-extra-line,.quick-section .tv-extra-line{display:flex;gap:8px;align-items:center;margin-top:8px}
+.tv-studio .tv-extra-line button,.quick-section .tv-extra-line button{padding:0 10px}
 .tv-studio .tv-extra-status{min-width:0;flex:1;font-size:10px;color:#879bb2;line-height:1.4;overflow-wrap:anywhere}
 .quick-modes{display:flex;gap:5px;overflow-x:auto;margin-top:5px;min-height:29px;scrollbar-width:none}
 .quick-modes button,.quick-action{padding:8px 9px;min-height:44px;white-space:nowrap;border-radius:10px;border:1px solid #414b58;background:#1d2631;color:#e4ecfa;font-size:11px;font-weight:650}
@@ -221,16 +226,12 @@ body{padding:0 8px}
 </div>
 <div id="quickPictureModes" class="quick-modes" aria-label="画質モード切替"><span class="pic-manual">画質モードを確認中…</span></div>
 <div class="tv-studio" aria-label="BRAVIA クイックスタジオ">
- <h3>PICTURE · 画質プリセット</h3>
- <div class="scene-picks"><button onclick="loadPicturePreset(event,'day')" id="tvPresetDay" disabled>昼</button><button onclick="loadPicturePreset(event,'night')" id="tvPresetNight" disabled>夜</button><button onclick="loadPicturePreset(event,'movie')" id="tvPresetMovie" disabled>映画</button></div>
+  <div class="scene-picks"><button onclick="loadPicturePreset(event,'day')" id="tvPresetDay" disabled>昼</button><button onclick="loadPicturePreset(event,'night')" id="tvPresetNight" disabled>夜</button><button onclick="loadPicturePreset(event,'movie')" id="tvPresetMovie" disabled>映画</button></div>
  <div class="compact-adjust"><label for="tvBrightness">明るさ</label><input id="tvBrightness" type="range" min="0" max="100" value="0" disabled oninput="previewTVCompact(event,'brightness')" onchange="commitTVCompact(event,'brightness')"><output id="tvBrightnessVal">--</output></div>
  <div class="compact-adjust"><label for="tvContrast">コントラスト</label><input id="tvContrast" type="range" min="0" max="100" value="0" disabled oninput="previewTVCompact(event,'contrast')" onchange="commitTVCompact(event,'contrast')"><output id="tvContrastVal">--</output></div>
- <h3 style="margin-top:11px">APPS · 左右スクロール</h3>
- <button class="tool" onclick="nativeAction('tvApps','list','アプリ一覧')">一覧更新</button>
+ <div class="tv-app-head"><h3>アプリ</h3><button class="tool" aria-label="アプリ一覧更新" onclick="nativeAction('tvApps','list','アプリ一覧')">↻</button></div>
  <div id="tvAppScroll" class="tv-app-scroll" aria-label="BRAVIAアプリを横スクロール"><button onclick="nativeAction('tvApps','list','アプリ一覧')">アプリ取得</button></div>
- <div class="tv-text-entry"><input id="tvTextInput" type="text" maxlength="140" placeholder="テレビで入力欄を開いて文字入力" aria-label="BRAVIAへ送るテキスト"><button onclick="sendTVText(event)">送信</button></div>
- <p class="tv-studio-note">文字はテレビの検索欄が開いているときのみ。パスワード等の機密情報は入力しないでください。</p>
- <div class="tv-extra-line"><button onclick="openTVVPN(event)">VPNアプリ</button><span class="tv-extra-status" id="tvExtraStatus">VPNのON/OFFは接続アプリの対応確認後</span></div>
+ <div class="tv-extra-status" id="tvExtraStatus" role="status" aria-live="polite"></div>
 </div></section>
 <section class="card remote-panel" data-panel="light"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
 <section class="card remote-panel" data-panel="ac"><div class="head"><div class="title" onclick="openRemote('ac')">エアコン</div><div class="ac-meta"><span id="acTemp" class="ac-temp">--°</span><span class="brand">SHARP</span></div></div><div class="grid grid-4">${makeButtons("ac", AC_BUTTONS)}</div></section>
@@ -273,6 +274,11 @@ body{padding:0 8px}
     </div>
     <p class="quick-info">DMM.comはHDMI3に切り替えてFire TV側で起動。Proton VPNもテレビ内のアプリを開きます。VPN接続・解除の直接操作はまだ非対応です。</p>
   </div>
+  <div class="quick-section"><h3>文字入力・VPN</h3>
+ <div class="tv-text-entry"><input id="tvTextInput" type="text" maxlength="140" placeholder="テレビで入力欄を開いて文字入力" aria-label="BRAVIAへ送るテキスト"><button class="quick-action" onclick="sendTVText(event)">送信</button></div>
+ <p class="tv-studio-note">テレビの検索欄が開いているときのみ。パスワード等は入力しないでください。</p>
+ <button class="quick-action" onclick="openTVVPN(event)">VPNアプリ</button>
+ </div>
   <p class="pic-status" id="quickStatus">接続と対応状況を確認中…</p>
   <button class="tool" onclick="probeQuickEditor(event)">テレビから再取得</button>
 </div></div>
@@ -696,6 +702,7 @@ function commitTVCompact(e,target){
 function showTVExtra(message){
  const status=document.getElementById('tvExtraStatus');
  if(status)status.textContent=String(message||'').slice(0,100);
+ const quickStatus=document.getElementById('quickStatus');if(quickStatus&&document.getElementById('quickLayer').classList.contains('open'))quickStatus.textContent=String(message||'').slice(0,100);
 }
 function displayTVApps(apps){
  const root=document.getElementById('tvAppScroll');if(!root)return;
@@ -876,7 +883,7 @@ async function writePicture(target,value){
  if(String(entry.currentValue)===String(value))return entry
  await sonyVideoJSON("setPictureQualitySettings",[{settings:[{target,value:String(value)}]}])
  const checked=await pictureSingle(target)
- if(!checked||(String(checked.currentValue)!==String(value)&&!(Number.isFinite(Number(value))&&Number(checked.currentValue)===Number(value))))throw Error("テレビ側で反映確認できませんでした："+target)
+ if(!checked||!validPictureValue(checked,checked.currentValue)||(String(checked.currentValue)!==String(value)&&!(Number.isFinite(Number(value))&&Number(checked.currentValue)===Number(value))))throw Error("テレビ側で反映確認できませんでした："+target)
  return checked
 }
 async function pictureSave(key){
