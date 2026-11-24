@@ -218,8 +218,8 @@
       "id": "yos-taxi",
       "name": "YOS TAXI",
       "path": "ios-app/scriptable/YOS TAXI.js",
-      "commit": "19bc6a119ab667a3d0309b0f55f02020d036959e",
-      "sha256": "1bb3ce8e80787682311bb0b9d4f2facbb37b1b2a96ebe60002e38eca02371973"
+      "commit": "34a459e80b230cc509752ec64b38e2b7c08f9f87",
+      "sha256": "66d457b1e78c651aa5e65633d660ae90a3f096f9960e671735ac0fae7eaad295"
     }
   ]
 }
