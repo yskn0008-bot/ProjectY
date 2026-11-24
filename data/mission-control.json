@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T22:24:40+09:00",
+  "updated_at": "2026-11-24T22:27:52+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-945",
-      "title": "PR #945 Fix Self installer rejection: Scriptable metadata header",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/945",
-      "updated_at": "2026-11-24T13:23:59Z"
-    },
     {
       "id": "github-pr-830",
       "title": "PR #830 YOS JOURNAL: iPhone Shortcuts 朝刊確認・通知の開発候補",
@@ -40,7 +30,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
-      "updated_at": "2026-11-24T11:13:29Z"
+      "updated_at": "2026-11-24T13:26:34Z"
+    },
+    {
+      "id": "github-pr-892",
+      "title": "PR #892 Clarity｜入力専用ショートカット（履歴・写真OCR・音声）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/892",
+      "updated_at": "2026-11-23T06:27:05Z"
     },
     {
       "id": "github-pr-901",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T13:08:01Z"
+      "updated_at": "2026-11-24T13:26:32Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,27 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-79ced0d3708a",
+      "title": "Merge pull request #945 from yskn0008-bot/oel/self-v04-scriptable-header-hotfix",
+      "completed_at": "2026-11-24T13:26:37Z",
+      "result": "GitHub mainへ反映（79ced0d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/79ced0d3708a3828e58091821dd3a6dc2320d7b1"
+    },
+    {
+      "id": "github-commit-a3b7b3235741",
+      "title": "Pin corrected Self header without changing other installer targets",
+      "completed_at": "2026-11-24T13:23:47Z",
+      "result": "GitHub mainへ反映（a3b7b32）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a3b7b3235741608a0139a3bf6dc66495abd661c4"
+    },
+    {
+      "id": "github-commit-f8ec1476050a",
+      "title": "Fix missing Scriptable metadata header for Self",
+      "completed_at": "2026-11-24T13:23:43Z",
+      "result": "GitHub mainへ反映（f8ec147）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f8ec1476050afaef469d1ecc9b4c8d79bab38dff"
+    },
+    {
       "id": "github-commit-a6b1f3038ff9",
       "title": "Merge pull request #944 from yskn0008-bot/oel/self-v04-distribution-20261124",
       "completed_at": "2026-11-24T13:20:56Z",
@@ -227,27 +248,6 @@
       "completed_at": "2026-11-24T13:06:41Z",
       "result": "GitHub mainへ反映（ff217d1）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/ff217d1638867e09a589502d488620bfca2f901c"
-    },
-    {
-      "id": "github-commit-23eb4ce2b62c",
-      "title": "Fix DAYSTREAM Scriptable direct drop and compact feedback (#935)",
-      "completed_at": "2026-11-24T13:05:56Z",
-      "result": "GitHub mainへ反映（23eb4ce）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/23eb4ce2b62cbabdd72768cac463ff03a2ea9445"
-    },
-    {
-      "id": "github-commit-836bc9bad0d9",
-      "title": "BRAVIA: customize picture presets and remote layout on proven launch baseline",
-      "completed_at": "2026-11-24T13:03:22Z",
-      "result": "GitHub mainへ反映（836bc9b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/836bc9bad0d9a8d9da1e8e05f681c579f0064b1a"
-    },
-    {
-      "id": "github-commit-e59c32ca6206",
-      "title": "Merge current main into DAYSTREAM direct-drop fix; preserve all other installer targets",
-      "completed_at": "2026-11-24T12:47:28Z",
-      "result": "GitHub mainへ反映（e59c32c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e59c32ca6206b85d61b566d8fecc73de5d73c192"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #945をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T22:24:40+09:00",
+      "last_update": "2026-11-24T22:27:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 73件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T22:24:40+09:00",
+      "last_update": "2026-11-24T22:27:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -379,7 +379,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #945をレビューして公開判断する",
+      "next_action": "PR #649をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T22:24:40+09:00",
+      "last_update": "2026-11-24T22:27:52+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "ecd149e0745dc7900e40cfcd73669fec18a2bc3b78e17ff76920807f6fa1059d"
+  "github_snapshot_hash": "191e774e99b3957e3ad5cb59a4e4daafc811617e50adc7f857c0a11e6b3846dc"
 }
