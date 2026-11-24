@@ -141,7 +141,46 @@ test('modified receipt SHA does not acquire authority from an old code match',as
  const r=await execute({receipt:fake});
  assert.equal(r.cloud.writes.length,0);
  assert.equal(r.calls.length,0);
- assert.match(r.alerts.at(-1).title,/受領証が不明/);
+ assert.match(r.alerts.at(-1).title,/受領証を保護/);
+ assert.match(r.alerts.at(-1).message,/検証値/);
+ assert.doesNotMatch(r.alerts.at(-1).message,/f{64}/);
+});
+test('legacy installer receipt accepts alternate valid historical commit for identical official code',async()=>{
+ const past=JSON.stringify({...JSON.parse(oldReceipt),commit:'0'.repeat(40)});
+ const r=await execute({receipt:past});
+ assert.equal(r.cloud.files.get('/icloud/'+name+'.js'),newCode);
+ assert.equal(JSON.parse(r.cloud.files.get(receiptFile)).sha256,newHash);
+ const backups=[...r.cloud.files.entries()].filter(([p,v])=>p.includes('/picture-off-repair-backups/')&&p.endsWith('.receipt.json'));
+ assert.equal(backups.length,1);assert.equal(backups[0][1],past);
+});
+test('verified auto-icon header plus receipt for raw bytes may be safely updated',async()=>{
+ const banner='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: purple; icon-glyph: shield-check;\n';
+ const rawHash=sha(banner+oldCode);
+ const rec=JSON.stringify({...JSON.parse(oldReceipt),sha256:rawHash,commit:'1'.repeat(40)});
+ const r=await execute({header:true,receipt:rec});
+ assert.equal(r.cloud.files.get('/icloud/'+name+'.js'),newCode);
+ assert.equal(JSON.parse(r.cloud.files.get(receiptFile)).sha256,newHash);
+});
+test('missing historical commit is accepted only when owner and hash still prove the source',async()=>{
+ const rec=JSON.parse(oldReceipt);delete rec.commit;
+ const r=await execute({receipt:JSON.stringify(rec)});
+ assert.equal(r.cloud.files.get('/icloud/'+name+'.js'),newCode);
+});
+test('malformed commit never bypasses the source and ownership guard',async()=>{
+ const r=await execute({receipt:JSON.stringify({...JSON.parse(oldReceipt),commit:'invalid'})});
+ assert.equal(r.cloud.writes.length,0);
+ assert.match(r.alerts.at(-1).message,/更新履歴/);
+});
+test('receipt field mismatch gives a non-sensitive diagnostic without losing code',async()=>{
+ const fake=JSON.stringify({...JSON.parse(oldReceipt),id:'another',storage:'local',sha256:'e'.repeat(64)});
+ const r=await execute({receipt:fake});
+ assert.equal(r.cloud.writes.length,0);
+ assert.equal(r.cloud.files.get(receiptFile),fake);
+ assert.equal(r.cloud.files.get('/icloud/'+name+'.js'),oldCode);
+ assert.match(r.alerts.at(-1).message,/配布ID/);
+ assert.match(r.alerts.at(-1).message,/保存先/);
+ assert.match(r.alerts.at(-1).message,/検証値/);
+ assert.doesNotMatch(r.alerts.at(-1).message,/e{64}|another/);
 });
 test('receipt owner, ID, storage and path must match exactly',async()=>{
  for(const prop of [{name:'OTHER'},{storage:'local'},{id:'other'},{path:'bad'}]){
