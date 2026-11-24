@@ -6,7 +6,7 @@ const J=Object.freeze({
   inbox:'3d35ca88-2895-81ef-9dc8-d5f11ff8e213',
   key:'YOS_NOTION_INTEGRATION_TOKEN',
   version:'2025-09-03',
-  maxLength:12000,
+  maxLength:36000,
   chunkSize:1400,
   receipts:'YOS JOURNAL Draft Receipt Cache.json'
 });
@@ -80,7 +80,15 @@ function validProvenance(raw){
   const [draft,research]=parts.map(s=>s.trim());
   if(!research.startsWith('YOS_RESEARCH_ABSTRACT_V1')||!research.includes('自動公開禁止'))return false;
   const doiSet=s=>new Set((s.match(/https:\/\/(?:doi\.org\/10\.\d{4,9}\/|www\.theguardian\.com\/|www\.bbc\.(?:com|co\.uk)\/)[^\s<>【】]+/gi)||[]).map(x=>x.replace(/^https:\/\/doi\.org\/.*$/i,m=>m.toLowerCase())));
-  const sources=doiSet(research),citations=doiSet(draft);
+  // Research links are exact line values. Markdown link closing parentheses
+  // are formatting, not part of a URL; preserve parentheses inside source URLs.
+  const canonical=x=>x.startsWith('https://doi.org/')?x.toLowerCase():x;
+  const sources=new Set([...research.matchAll(/^(?:論文|出典)リンク: (https:\/\/[^\s]+)$/gm)].map(m=>canonical(m[1])));
+  const citations=new Set([...doiSet(draft)].map(x=>{
+    let v=canonical(x);
+    while(!sources.has(v)&&/[)\]、。.,;]$/.test(v))v=v.slice(0,-1);
+    return v;
+  }));
   return sources.size===3&&citations.size===3&&[...citations].every(x=>sources.has(x))&&
     (research.match(/^資料[123]｜/gm)||[]).length===3;
 }
