@@ -476,7 +476,14 @@ if(outcome.status==='confirmed'){
 }
 const line=outcome.status==='confirmed'?'Notion Inbox保存確認済み':
   outcome.status==='missing'?'Notion未保存：入力がありません':'Notion未保存・確認待ち';
-Script.setShortcutOutput(line+'\n'+outcome.detail+'\n'+(outcome.captureId||'')+(routeStatus?'\n'+routeStatus:''));
+// The existing signed JOURNAL Shortcut recognizes this machine receipt.
+// Keep the ordinary Clarity human-readable output and all non-JOURNAL paths unchanged.
+const journalReceiptPrefix = sourceKey==='journal' && outcome.status==='confirmed'
+  ? 'YOS_JOURNAL_NOTION_VERIFIED: ' : '';
+const outputDetail = sourceKey==='journal'
+  ? String(outcome.detail||'').replace(/YOS_JOURNAL_NOTION_VERIFIED:/g,'JOURNAL_RECEIPT_TEXT')
+  : outcome.detail;
+Script.setShortcutOutput(journalReceiptPrefix+line+'\n'+outputDetail+'\n'+(outcome.captureId||'')+(routeStatus?'\n'+routeStatus:''));
 // Notify only on errors, without exposing the sensitive voice content.
 if(outcome.status!=='confirmed'){
   try {const n=new Notification();n.title=sourceKey==='journal'?'JOURNAL｜Notion保存を確認できません':'Clarity｜Notion保存を確認できません';n.body=outcome.detail;n.sound='default';await n.schedule();}catch(_){}
