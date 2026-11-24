@@ -1261,9 +1261,9 @@ const directInput=args.shortcutParameter??args.queryParameters?.action??"";
 if(directInput!==""&&directInput!==null){
  // Validate before any lock or device communication; do not auto-retry uncertain writes.
  parseTVShortcut(directInput);
- const lockKey="yos.remote.quick.shortcut.lock.v1",now=Date.now();
+ const lockKey="yos.remote.power-toggle.lock.v1.tv",now=Date.now();
  let held=null;try{if(Keychain.contains(lockKey))held=JSON.parse(Keychain.get(lockKey))}catch(_){}
- if(held&&Number.isFinite(held.at)&&now>=held.at&&now-held.at<60000)throw Error("直前のテレビ操作が処理中です。再送を防止しました");
+ if(held&&Number.isFinite(held.at)&&now>=held.at&&now-held.at<45000)throw Error("直前のテレビ操作が処理中です。再送を防止しました");
  const token=String(now)+":"+Math.random();Keychain.set(lockKey,JSON.stringify({at:now,token}));
  try{const output=await executeTVShortcut(directInput);Script.setShortcutOutput(output);}
  finally{try{if(JSON.parse(Keychain.get(lockKey)).token===token)Keychain.remove(lockKey)}catch(_){}}
