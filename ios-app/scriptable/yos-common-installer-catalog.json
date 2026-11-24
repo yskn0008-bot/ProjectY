@@ -183,6 +183,13 @@
       "path": "ios-app/scriptable/remote-widgets/YOS Home Scenes.js",
       "commit": "6d857f498e1476413147591332b8830ade6065cb",
       "sha256": "ceac93791f532f3725c4c93ab5acd10539d94a0c15588a77ab89e003aa58e8ef"
+    },
+    {
+      "id": "common-installer-repair",
+      "name": "YOS Common Installer 修復",
+      "path": "ios-app/scriptable/YOS Common Installer 修復.js",
+      "commit": "cc7a0f91c4e5b758b290f7098aae417b57c631c7",
+      "sha256": "c1ca6e8fe99b3ca33e8ec78aa478a1d707114c10c74bd068554845e3b227c620"
     }
   ]
 }
