@@ -4,7 +4,7 @@
 // Existing DAYSTREAM UI with read-only Notion/iCloud inputs and a local plan.
 'use strict';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
-const UI_REF='c0735bf7dc092f8c30753b1c0c73cfd1cd758416';
+const UI_REF='61830f123ef442a868ec3fd15c46a591c4b707af';
 // Stable, already-published HTTPS base for Scriptable's generated HTML.
 // Do not delete or migrate any existing DAYSTREAM localStorage keys.
 const UI_BASE_URL='https://yskn0008-bot.github.io/ProjectY/yos/daystream/';
@@ -152,6 +152,21 @@ const BROWSER_DIRECT_IMPORT=String.raw`
   try{
    const json=JSON.stringify(moves);
    localStorage.setItem(MOVE_KEY,json);
+   return localStorage.getItem(MOVE_KEY)===json;
+  }catch{return false;}
+ };
+ window.YOS_NOTION_LOCAL_READ_MOVE=(day,ref)=>{
+  const moves=readMoves();
+  return moves&&Object.hasOwn(moves,slotKey(day,ref))?moves[slotKey(day,ref)]:null;
+ };
+ window.YOS_NOTION_LOCAL_RESTORE_MOVE=(day,ref,expected,previous)=>{
+  if(!validDay(day)||!/^notion:[a-f0-9]{32}$/.test(ref)||
+    !Number.isInteger(expected)||!(previous===null||Number.isInteger(previous)))return false;
+  const moves=readMoves(),key=slotKey(day,ref);
+  if(!moves||moves[key]!==expected)return false;
+  if(previous===null)delete moves[key];else moves[key]=previous;
+  try{
+   const json=JSON.stringify(moves);localStorage.setItem(MOVE_KEY,json);
    return localStorage.getItem(MOVE_KEY)===json;
   }catch{return false;}
  };
