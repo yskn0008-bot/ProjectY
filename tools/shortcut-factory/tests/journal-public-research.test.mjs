@@ -8,10 +8,20 @@ const study={
   abstractText:'The first study evaluated the association between ratings of facial attractiveness and measured immune response under experimentally controlled conditions. '.repeat(5),
   pubYear:'2022',doi:'10.1038/s41598-022-22866-x',pmid:'36319732'
 };
-async function run({data={resultList:{result:[study]}},failure=false,input='',fallback=false,cache=null,duplicate=false,editorial=false}={}){
-  let result,completed=0,urls=[],timeouts=[];
+
+const HISTORY_MARK='本人用の非公開読書版。原著の主要箇所と照合済み。外部公開・配信は行っていない。';
+const block=(type,t,url)=>({type,[type]:{rich_text:[{plain_text:t,...(url?{href:url}:{})}]}});
+function historyFixture(dois=['10.1234/old1','10.1234/old2','10.1234/old3']){
+ const list=[block('heading_2','YOS JOURNAL｜2026.11.24 TUE'),block('paragraph','見出し'),block('paragraph','導入'),block('paragraph',HISTORY_MARK)];
+ for(let i=1;i<=3;i++)list.push({type:'divider'},block('heading_3','0'+i+' / CULTURE｜記事'),...['概要','本文','日常への視点','研究の限界'].map(t=>block('paragraph',t)),block('paragraph','原著論文','https://doi.org/'+dois[i-1]));
+ list.push({type:'divider'},block('paragraph','UNRELATED PRIVATE CONTENT'));
+ return list;
+}
+
+async function run({data={resultList:{result:[study]}},failure=false,input='',fallback=false,cache=null,duplicate=false,editorial=false,history=historyFixture(),historyError=false,key=true,historyPages=null}={}){
+  let result,completed=0,urls=[],timeouts=[],historyReads=0,authLeak=false;
   class Request{
-    constructor(url){urls.push(url);this.url=url;this.index=urls.length-1;}
+    constructor(url){this.url=url;if(!url.startsWith('https://api.notion.com/'))urls.push(url);this.index=urls.length-1;}
     async loadString(){
       timeouts.push(this.timeoutInterval);
       if(!editorial)throw Error('feed unavailable');
@@ -20,6 +30,15 @@ async function run({data={resultList:{result:[study]}},failure=false,input='',fa
       return '<rss><channel>'+[1,2,3].map(n=>'<item><title>Example science editorial article '+n+'</title><description>'+study.abstractText+'</description><link>https://'+host+'/science/test-'+n+'</link><pubDate>'+new Date().toUTCString()+'</pubDate></item>').join('')+'</channel></rss>';
     }
     async loadJSON(){
+      if(this.url.startsWith('https://api.notion.com/')){
+        historyReads++;
+        assert.equal(this.headers.Authorization,'Bearer mock-existing-key');
+        if(historyError)throw Error('Notion unavailable');
+        this.response={statusCode:200};
+        if(historyPages){const page=historyPages[historyReads-1];if(!page)throw Error('unexpected history page');return page;}
+        return {results:history,has_more:false};
+      }
+      if(this.headers?.Authorization)authLeak=true;
       timeouts.push(this.timeoutInterval);
       if(failure)throw new Error('network disabled');
       if(fallback){
@@ -43,8 +62,8 @@ async function run({data={resultList:{result:[study]}},failure=false,input='',fa
       writeString(p,v){cache.set(p,v);}
     };
   }};
-  await new AsyncFunction('Request','Script','args','FileManager',source)(Request,Script,{shortcutParameter:input},FileManager);
-  return {result,completed,urls,timeouts};
+  await new AsyncFunction('Request','Script','args','FileManager','Keychain',source)(Request,Script,{shortcutParameter:input},FileManager,{contains:()=>key,get:()=> 'mock-existing-key'});
+  return {result,completed,urls,timeouts,historyReads,authLeak};
 }
 test('returns only real received abstract metadata with DOI URL',async()=>{
   const r=await run();
@@ -88,7 +107,7 @@ test('uses publisher-deposited Crossref abstract only if Europe PMC unavailable'
   assert.ok(!r.urls.join(' ').includes('家計残高'));
 });
 
-test('repeated run on same UTC day reuses public-only cache without another network request',async()=>{
+test('repeated run on same JST day reuses public-only cache without another network request',async()=>{
   const cache=new Map();
   const first=await run({cache});
   assert.match(first.result,/YOS_RESEARCH_ABSTRACT_V1/);
@@ -98,6 +117,7 @@ test('repeated run on same UTC day reuses public-only cache without another netw
   const second=await run({failure:true,cache,input:'非公開メモ'});
   assert.equal(second.result,first.result);
   assert.equal(second.urls.length,0);
+  assert.equal(second.historyReads,1);
   assert.equal(second.completed,1);
   assert.ok(!second.result.includes('非公開メモ'));
 });
@@ -118,3 +138,35 @@ test('tampered or malformed local source cache is ignored',async()=>{
 test('duplicate DOI across topics never produces three articles',async()=>{const r=await run({duplicate:true});assert.match(r.result,/^YOS_RESEARCH_HOLD_V1:THREE_VALID_SOURCES_UNAVAILABLE/);assert.match(r.result,/YOS_RESEARCH_PARTIAL_V1/);assert.doesNotMatch(r.result,/YOS_RESEARCH_ABSTRACT_V1/);});
 
 test('editorial RSS fallback works without academic DOI',async()=>{const r=await run({failure:true,editorial:true});assert.match(r.result,/YOS_RESEARCH_ABSTRACT_V1/);assert.equal((r.result.match(/^出典リンク: https:/gm)||[]).length,3);assert.match(r.result,/本文未確認/);});
+
+test('previously reviewed DOI is excluded case-insensitively and public providers never receive credentials',async()=>{
+ const old=study.doi+'-0';
+ const r=await run({history:historyFixture([old.toUpperCase(),'10.1234/old2','10.1234/old3'])});
+ assert.doesNotMatch(r.result,new RegExp('論文リンク: https://doi.org/'+old+'\\n','i'));
+ assert.equal(r.authLeak,false);
+ assert.equal(r.historyReads,1);
+ assert.ok(!r.result.includes('UNRELATED PRIVATE CONTENT'));
+});
+test('history must be readable, complete and authenticated before cached or fresh research',async()=>{
+ const cache=new Map();
+ const first=await run({cache});assert.match(first.result,/^YOS_RESEARCH_ABSTRACT_V1/);
+ for(const option of [{historyError:true},{key:false},{history:historyFixture().slice(0,10)},{history:[]}]){
+  const r=await run({...option,cache});
+  assert.equal(r.result,'YOS_RESEARCH_HOLD_V1:REVIEWED_HISTORY_UNAVAILABLE');
+  assert.equal(r.urls.length,0);
+ }
+});
+test('a complete paginated reviewed history is read before the public request',async()=>{
+ const h=historyFixture();
+ const r=await run({historyPages:[{results:h.slice(0,8),has_more:true,next_cursor:'next'},{results:h.slice(8),has_more:false}]});
+ assert.equal(r.historyReads,2);
+ assert.match(r.result,/^YOS_RESEARCH_ABSTRACT_V1/);
+});
+test('cache is invalidated when an edition using its DOI is reviewed',async()=>{
+ const cache=new Map(),first=await run({cache});
+ const doi=/論文リンク: https:\/\/doi\.org\/([^\s]+)/.exec(first.result)[1];
+ const r=await run({cache,history:historyFixture([doi,'10.1234/old2','10.1234/old3'])});
+ assert.notEqual(r.result,first.result);
+ assert.ok(!(r.result.match(/^論文リンク: .+$/gm)||[]).some(x=>x.endsWith('/'+doi)));
+ assert.ok(r.urls.length>0);
+});
