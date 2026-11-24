@@ -6,9 +6,10 @@
 // No Keychain reads/writes, telemetry, credential collection, or device commands.
 // This temporary Scriptable helper is not a second permanent installer.
 const OFFICIAL_NAME='YOS Common Installer';
-const PIN='8bb289519b0f4f6c907b27f336a623bc5669e669';
-const EXPECTED='0f0af090deec3c9c523ee885d37f4d5394321bd009f8e04962deff91ea3fc0b0';
+const PIN='510fa3f2f032eecc062df9d7d2033cf6057c6d04';
+const EXPECTED='1fd8e27aab18c267569312689d206899ba9713eb654e7dbdd41dd2cf7b77b8d4';
 const OLD_TRUSTED=new Set([
+ '0f0af090deec3c9c523ee885d37f4d5394321bd009f8e04962deff91ea3fc0b0',
  'e8f6ad7ab426ee53cfca3c9528f12418b1659d6d5be88558181721a9cc221507',
  '92a40d07db2f89594f05e9daa8236035df93c0ee5bccd126cd8a94beac87ea5c',
  '1867267e2f4eeea9a4b3a8f7122e44a1c9b5e90296316266630a00eb92fcb743',
@@ -203,7 +204,7 @@ async function main(){
  await alert('共通インストーラー更新完了',
    '同じ名前のコードだけを更新し、読戻しまで確認しました。元コードのバックアップは残っています。'+
    '\n\n消画：'+picture+
-   '\n次は既存の共通インストーラーで消画を安全に更新します。',false);
+   '\n次は既存の共通インストーラーから必要なアプリ（消画・YOS TAXI等）を導入してください。',false);
 }
 try{await main();}
 catch(error){await alert('共通インストーラー修復は未完了',
