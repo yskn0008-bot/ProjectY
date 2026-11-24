@@ -8,8 +8,11 @@ const safeLink=s=>/^https:\/\/doi\.org\/10\.\d{4,9}\/[A-Za-z0-9._;()/:%-]{1,300}
 export function parseReviewedEdition(blocks){
  if(!Array.isArray(blocks)||blocks.length>500)throw Error('invalid blocks');
  const starts=blocks.map((b,i)=>b.type==='heading_2'&&HEAD.test(text(b))?i:-1).filter(i=>i>=0);
- if(starts.length!==1)throw Error('edition ambiguous');
- let i=starts[0],m=HEAD.exec(text(blocks[i])),issuedOn=m.slice(1).join('-');
+ if(!starts.length)throw Error('edition absent');
+ const candidates=starts.map(i=>({i,date:HEAD.exec(text(blocks[i])).slice(1).join('-')}));
+ if(new Set(candidates.map(x=>x.date)).size!==candidates.length)throw Error('edition ambiguous');
+ candidates.sort((a,b)=>b.date.localeCompare(a.date));
+ let {i,date:issuedOn}=candidates[0];
  const dt=new Date(issuedOn+'T00:00:00Z');if(!Number.isFinite(+dt)||dt.toISOString().slice(0,10)!==issuedOn)throw Error('date invalid');
  const header=blocks.slice(i+1,i+4).map(text);
  if(header.length!==3||!header[0]||!header[1]||header[2]!=='本人用の非公開読書版。原著の主要箇所と照合済み。外部公開・配信は行っていない。')throw Error('review marker absent');
