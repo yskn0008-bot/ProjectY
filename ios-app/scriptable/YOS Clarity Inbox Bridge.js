@@ -40,7 +40,15 @@ const sourceLabels = Object.freeze({voice:'Clarity Voice',text:'Clarity Text',sh
 const sourceLabel = sourceLabels[sourceKey] || null;
 const shareSource = sourceKey === 'share' && /^(text|url|webpage|richtext|image|pdf)$/.test(String(payload.shareSource || '').toLowerCase())
   ? String(payload.shareSource).toLowerCase() : '';
-const externalId = payload.captureId === undefined || payload.captureId === null || payload.captureId === '' ? '' : String(payload.captureId);
+// Explicit JOURNAL auto-ID is deterministic across retries; all other modes keep the old contract.
+function journalCaptureId(value){
+ let a=2166136261,b=2246822519;
+ for(let i=0;i<value.length;i++){const ch=value.charCodeAt(i);a=Math.imul(a^ch,16777619)>>>0;b=Math.imul(b^ch,3266489917)>>>0;}
+ return 'journal:'+a.toString(16).padStart(8,'0')+b.toString(16).padStart(8,'0')+'-'+value.length;
+}
+const externalId = sourceKey==='journal'&&payload.routeMode==='raw-only'&&payload.captureId==='journal:auto'
+ ? journalCaptureId(raw)
+ : payload.captureId === undefined || payload.captureId === null || payload.captureId === '' ? '' : String(payload.captureId);
 // A calendar event created by the local Shortcuts executor must never be
 // turned into a second scheduled Notion task merely because its Raw text
 // contains an explicit time. This mode only suppresses downstream routing;
@@ -160,6 +168,8 @@ async function run() {
   // a stable edition receipt before any local or remote write; never auto-create
   // a fresh ID for a retry, and never route a non-editorial payload as a draft.
   if (sourceKey==='journal') {
+    if (/(?:sk-proj-|gh[pousr]_[A-Za-z0-9_-]{16,}|Bearer\s+\S+)/i.test(raw))
+      return message('held',null,'JOURNAL原稿に認証情報の可能性があるため停止');
     if (!externalId || !externalId.startsWith('journal:'))
       return message('held',null,'JOURNAL号の固定受付IDがありません。重複防止のため保存しません');
     if (!raw.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1') ||
