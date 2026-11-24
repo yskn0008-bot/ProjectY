@@ -150,7 +150,7 @@ async function main(){
    accepted.push(...results.filter(Boolean));
    if(accepted.length===6)break;
   }
-  if(accepted.length<3){Script.setShortcutOutput(HOLD);return;}
+  if(accepted.length<3||new Set(accepted.map(r=>r.group)).size!==3){Script.setShortcutOutput(HOLD);return;}
   const records=accepted.map((r,i)=>({...r,id:'S'+(i+1)}));
   // Machine-checked access and section presence only, not semantic approval.
   const out=POOL+'\n'+JSON.stringify(records);
