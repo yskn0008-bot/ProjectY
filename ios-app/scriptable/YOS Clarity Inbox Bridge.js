@@ -26,6 +26,12 @@ const sourceLabel = sourceLabels[sourceKey] || null;
 const shareSource = sourceKey === 'share' && /^(text|url|webpage|richtext|image|pdf)$/.test(String(payload.shareSource || '').toLowerCase())
   ? String(payload.shareSource).toLowerCase() : '';
 const externalId = payload.captureId === undefined || payload.captureId === null || payload.captureId === '' ? '' : String(payload.captureId);
+// A calendar event created by the local Shortcuts executor must never be
+// turned into a second scheduled Notion task merely because its Raw text
+// contains an explicit time. This mode only suppresses downstream routing;
+// the original capture is still saved and verified in the existing Inbox.
+const routeMode = payload.routeMode === undefined ? 'auto' : payload.routeMode;
+const calendarCreated = payload.executionTarget === 'calendar.create';
 const fm = FileManager.local();
 const receiptPath = fm.joinPath(fm.documentsDirectory(), CFG.receiptsFile);
 const isNonEmpty = typeof raw === 'string' && raw.trim().length > 0;
@@ -378,6 +384,9 @@ async function routeToPage(v,receipt,token){
 }
 async function routeAfterVerifiedRaw(outcome){
   if(outcome.status!=='confirmed'||sourceKey==='share')return null;
+  if(calendarCreated && routeMode!=='raw-only')return '振り分け保留（既存カレンダー登録の重複防止）';
+  if(routeMode==='raw-only')return '原文のみ保存（別原本の予定を二重登録しません）';
+  if(routeMode!=='auto')return '振り分け保留（未対応の振り分けモード）';
   if(!Keychain.contains(CFG.tokenKey))return '振り分け保留（認証情報なし）';
   const rows=load(),entry=rows.find(x=>x.captureId===outcome.captureId);
   if(!entry||entry.status!=='confirmed'||entry.raw!==raw)return '振り分け保留（Raw受領確認なし）';

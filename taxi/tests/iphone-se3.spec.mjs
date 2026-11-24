@@ -163,9 +163,12 @@ test('default entry: approved one-screen UI and legacy recovery', async ({ page 
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('./index.html', {waitUntil:'domcontentloaded'});
   await expect(page).toHaveURL(/\/ui-v2\.html$/);
-  await expect(page.locator('#drop-btn')).toBeVisible();
+  await expect(page.locator('#drop-btn')).toHaveCount(0);
   await expect(page.locator('#photo-btn')).toBeVisible();
   await expect(page.locator('#sync-status')).toContainText('Notion未接続');
+  await page.locator('#monthly-open').click();
+  await expect(page.locator('#monthly-view')).toBeVisible();
+  await page.locator('[data-page="sales"]').click();
   const pageOverflow=await page.evaluate(() => document.documentElement.scrollHeight > innerHeight + 1);
   expect(pageOverflow).toBe(false);
   await page.locator('[data-page="strategy"]').click();

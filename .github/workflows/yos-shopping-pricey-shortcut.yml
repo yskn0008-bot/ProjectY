@@ -1,0 +1,158 @@
+name: YOS Shopping Notion Pricey Shortcut
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/shortcut-factory/shortcuts/YOS 買い物とリサーチ.cherri'
+      - 'tools/shortcut-factory/shopping/validate_research_launcher.py'
+      - '.github/workflows/yos-shopping-pricey-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check source contains only agreed Notion and Pricey routes
+        run: |
+          set -euo pipefail
+          python3 tools/shortcut-factory/validate_secret_free.py 'tools/shortcut-factory/shortcuts/YOS 買い物とリサーチ.cherri'
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('tools/shortcut-factory/shortcuts/YOS 買い物とリサーチ.cherri').read_text()
+          assert s.count('openURL(')==1
+          assert 'https://app.notion.com/p/33e8d09b97d54f399e00fbcdc8a30475' in s
+          assert s.count('openApp(')==1
+          assert 'openApp("__PRICEY_BUNDLE_ID__")' in s
+          assert 'setClipboard(item)' in s
+          assert 'chooseFromList(@actions' in s
+          for bad in ('reminders','Perplexity','api.notion.com','YOS_NOTION_INTEGRATION_TOKEN','scriptable:///run'):
+              assert bad not in s,bad
+          print('Notion source retained; Pricey as research provider: PASS')
+          PY
+      - name: Verify Pricey App Store ID and resolve signed app bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 2 --max-time 15 \
+            'https://itunes.apple.com/lookup?country=jp&id=1535699847' \
+            -o /tmp/pricey-appstore.json
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          obj=json.loads(Path('/tmp/pricey-appstore.json').read_text())
+          records=[x for x in obj.get('results',[]) if x.get('trackId')==1535699847]
+          assert len(records)==1,'App Store record not uniquely found'
+          app=records[0]
+          assert 'pricey' in (str(app.get('trackName',''))+' '+str(app.get('bundleId',''))).lower()
+          assert 'wilico' in (str(app.get('artistName',''))+' '+str(app.get('sellerName',''))).lower()
+          bundle=app.get('bundleId','')
+          assert re.fullmatch(r'[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+){2,}',bundle),bundle
+          source=Path('tools/shortcut-factory/shortcuts/YOS 買い物とリサーチ.cherri')
+          code=source.read_text()
+          assert code.count('__PRICEY_BUNDLE_ID__')==2
+          source.write_text(code.replace('"__PRICEY_BUNDLE_ID__"', '"'+bundle+'"').replace('__PRICEY_BUNDLE_ID__',''))
+          Path('/tmp/pricey-bundle-id').write_text(bundle)
+          print('Verified Wilico Pricey App Store bundle:',bundle)
+          PY
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+      - name: Compile one native launcher menu and validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/shortcut-factory/shortcuts
+          cherri 'YOS 買い物とリサーチ.cherri' --skip-sign --debug
+          test -f 'YOS 買い物とリサーチ_unsigned.shortcut'
+          mkdir -p ../shopping/artifacts
+          cp 'YOS 買い物とリサーチ_unsigned.shortcut' ../shopping/artifacts/YOS_Shopping_Research_unsigned.plist
+          cd ../../..
+          PRICEY_BUNDLE_ID="$(cat /tmp/pricey-bundle-id)" \
+            python3 tools/shortcut-factory/shopping/validate_research_launcher.py \
+            tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Research_unsigned.plist
+      - name: Sign using existing ProjectY HubSign
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Research_unsigned.plist \
+            --output tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Research.shortcut \
+            --name 'YOS 買い物とリサーチ'
+      - name: Verify AEA1 signed artifact is the intended Notion plus Pricey menu
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check --quiet lzfse
+          python3 - <<'PY'
+          from pathlib import Path
+          import lzfse,tempfile,subprocess
+          raw=Path('tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Research.shortcut').read_bytes()
+          assert raw.startswith(b'AEA1') and len(raw)>500
+          cert_len=int.from_bytes(raw[8:12],'little')
+          i=raw.find(b'bvx',12+cert_len)
+          assert i>=0
+          data=lzfse.decompress(raw[i:])
+          start=data.find(b'bplist00')
+          assert start>=0
+          with tempfile.NamedTemporaryFile(suffix='.plist') as out:
+              out.write(data[start:]);out.flush()
+              bundle=Path('/tmp/pricey-bundle-id').read_text()
+              subprocess.run(['python3','tools/shortcut-factory/shopping/validate_research_launcher.py',
+                  out.name,'--pricey-bundle-id',bundle],check=True)
+          print('HubSign shortcut structure and destinations verified')
+          PY
+      - name: Upload signed file
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-shopping-notion-pricey-shortcut
+          path: |
+            tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Research.shortcut
+            tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Research_unsigned.plist
+          if-no-files-found: error
+          retention-days: 21
+      - name: Stage signed file on isolated review branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'feat/yos-shopping-research-shortcut-20261120'
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
+          TARGET_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          set -euo pipefail
+          test "$TARGET_REPO" = "$GITHUB_REPOSITORY"
+          test "$TARGET_BRANCH" = 'feat/yos-shopping-research-shortcut-20261120'
+          cp tools/shortcut-factory/shopping/artifacts/YOS_Shopping_Research.shortcut /tmp/YOS_Shopping_Research.shortcut
+          git fetch origin "$TARGET_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+          mkdir -p downloads/yos-shopping
+          cp /tmp/YOS_Shopping_Research.shortcut downloads/yos-shopping/YOS_Shopping_Research.shortcut
+          python3 - <<'PY'
+          from pathlib import Path
+          raw=Path('downloads/yos-shopping/YOS_Shopping_Research.shortcut').read_bytes()
+          assert raw.startswith(b'AEA1') and len(raw)>500
+          PY
+          git add downloads/yos-shopping/YOS_Shopping_Research.shortcut
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' \
+                -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'build(shortcuts): signed Notion plus Pricey shortcut [skip ci]'
+            git push origin HEAD:"$TARGET_BRANCH"
+          fi

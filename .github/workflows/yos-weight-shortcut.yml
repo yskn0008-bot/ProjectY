@@ -1,0 +1,102 @@
+name: YOS Weight native Shortcut
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/shortcut-factory/weight/**'
+      - '.github/workflows/yos-weight-shortcut.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-sign-weight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate native Apple Health input and no external data path
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tools/shortcut-factory/weight -p 'test_*.py' -v
+          python3 tools/shortcut-factory/weight/build_weight_shortcut.py \
+            --output /tmp/YOS-Weight-unsigned.plist
+          python3 - <<'PY'
+          from pathlib import Path
+          import plistlib
+          data=plistlib.loads(Path('/tmp/YOS-Weight-unsigned.plist').read_bytes())
+          actions=data['WFWorkflowActions']
+          assert len(actions)==2
+          assert [a['WFWorkflowActionIdentifier'] for a in actions] == [
+              'is.workflow.actions.ask','is.workflow.actions.health.quantity.log']
+          log=actions[1]['WFWorkflowActionParameters']
+          ask=actions[0]['WFWorkflowActionParameters']
+          assert ask['WFInputType']=='Number'
+          assert log['WFQuantitySampleType']=='Weight'
+          assert log['WFQuantitySampleQuantity']['Value']['Unit']=='kg'
+          assert log['WFQuantitySampleQuantity']['Value']['Magnitude']['Value']['OutputUUID']==ask['UUID']
+          assert log['WFQuantitySampleDate']['Value']['Type']=='CurrentDate'
+          print('Native HealthKit weight action structure: PASS')
+          PY
+
+      - name: Sign using existing ProjectY HubSign boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tools/shortcut-factory/weight/artifacts
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input /tmp/YOS-Weight-unsigned.plist \
+            --output tools/shortcut-factory/weight/artifacts/YOS_Weight.shortcut \
+            --name 'YOS 体重'
+          cp /tmp/YOS-Weight-unsigned.plist tools/shortcut-factory/weight/artifacts/YOS_Weight.plist
+
+      - name: Verify signed AEA1 artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          data=Path('tools/shortcut-factory/weight/artifacts/YOS_Weight.shortcut').read_bytes()
+          assert data.startswith(b'AEA1'), 'signed shortcut is not an AEA1 container'
+          assert len(data)>500, 'signed artifact unexpectedly small'
+          print('Signed YOS 体重 AEA1 artifact: PASS',len(data))
+          PY
+
+      - name: Upload installable shortcut for iPhone review
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-weight-iphone-signed
+          path: |
+            tools/shortcut-factory/weight/artifacts/YOS_Weight.shortcut
+            tools/shortcut-factory/weight/artifacts/YOS_Weight.plist
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish signed weight shortcut on its dedicated draft branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'feat/yos-weight-health-shortcut-20261119'
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
+          TARGET_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          set -euo pipefail
+          test "$TARGET_REPO" = "$GITHUB_REPOSITORY"
+          test "$TARGET_BRANCH" = 'feat/yos-weight-health-shortcut-20261119'
+          cp tools/shortcut-factory/weight/artifacts/YOS_Weight.shortcut /tmp/YOS_Weight.shortcut
+          git fetch origin "$TARGET_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+          mkdir -p downloads/yos-weight
+          cp /tmp/YOS_Weight.shortcut downloads/yos-weight/YOS_Weight.shortcut
+          git add downloads/yos-weight/YOS_Weight.shortcut
+          if git diff --cached --quiet; then
+            echo 'No binary change to publish'
+          else
+            git -c user.name='github-actions[bot]' \
+                -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+                commit -m 'build(health): publish signed YOS weight Shortcut [skip ci]'
+            git push origin HEAD:"$TARGET_BRANCH"
+          fi

@@ -1,0 +1,170 @@
+name: Taxi native Shortcuts build
+
+on:
+  pull_request:
+    paths:
+      - 'taxi/ui-v2.html'
+      - 'taxi/tests/ui-v2-wait-clock.test.mjs'
+      - 'taxi/tests/ui-v2-field-report.test.mjs'
+      - 'taxi/verified-revenue-v1.js'
+      - 'taxi/tests/verified-revenue-v1.test.mjs'
+      - 'taxi/tests/verified-revenue-offline.test.mjs'
+      - 'taxi/service-worker.js'
+      - 'taxi/research.html'
+      - 'taxi/build_research_feed.py'
+      - 'taxi/test_research_feed.py'
+      - 'taxi/tests/iphone17.spec.mjs'
+      - 'tools/taxi-shortcuts/**'
+      - '.github/workflows/taxi-shortcuts-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-shortcuts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test YOS TAXI strategy and wait clock (Node)
+        run: node --test taxi/tests/ui-v2-wait-clock.test.mjs taxi/tests/ui-v2-field-report.test.mjs taxi/tests/verified-revenue-v1.test.mjs taxi/tests/verified-revenue-offline.test.mjs
+      - name: Check fixed URLs, no duplicate ledger and native source code
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/taxi-shortcuts/test_source.py
+          python3 -m unittest discover -s taxi -p 'test_research_feed.py' -v
+          if grep -REi '(gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY)' tools/taxi-shortcuts; then
+            echo 'Found possible secret in Shortcut source' >&2; exit 1
+          fi
+      # Diagnostic only: external sites may be unavailable; record each source separately.
+      # Never turn a transport failure into successful research.
+      - name: Probe live official research sources (diagnostic only)
+        continue-on-error: true
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          python3 taxi/build_research_feed.py --no-previous --out "$RUNNER_TEMP/yos-taxi-research-live.json"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          path=Path(os.environ["RUNNER_TEMP"])/"yos-taxi-research-live.json"
+          feed=json.loads(path.read_text(encoding="utf-8"))
+          assert feed["schema"]==1 and len(feed["sources"])==3
+          for source in feed["sources"]:
+              print("YOS_TAXI_LIVE_SOURCE",source["id"],source["status"],
+                    "publishedAt="+str(source.get("publishedAt")),
+                    "checkedAt="+str(source.get("checkedAt")),
+                    "reason="+str(source.get("detail",""))[:140])
+              if source["status"]!="ok":
+                  print("::warning::YOS TAXI source",source["id"],"not confirmed:",source["status"])
+          PY
+      - name: Upload research source probe (not published, contains no user data)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: YOS-TAXI-live-source-probe
+          path: |
+            ${{ runner.temp }}/yos-taxi-research-live.json
+            ${{ runner.temp }}/yos-taxi-cruise-columns.json
+          if-no-files-found: warn
+          retention-days: 3
+      - name: Inspect Okinawa official cruise table schema (diagnostic, not demand forecast)
+        continue-on-error: true
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import csv,io,json,os,sys,urllib.parse
+          from pathlib import Path
+          sys.path.insert(0, "taxi")
+          import build_research_feed as b
+          out=Path(os.environ["RUNNER_TEMP"])/"yos-taxi-cruise-columns.json"
+          evidence={"checkedAt":b.iso(b.NOW()),"status":"not_confirmed","dataset":b.CRUISE_PAGE}
+          try:
+              catalog=json.loads(b.fetch(b.CRUISE_API))
+              if not catalog.get("success") or not isinstance(catalog.get("result"),dict):
+                  raise ValueError("Invalid official catalog")
+              resources=[x for x in catalog["result"].get("resources",[])
+                         if isinstance(x,dict) and "2026" in str(x.get("name") or "")
+                         and str(x.get("format") or "").upper()=="CSV"]
+              resources.sort(key=lambda x:str(x.get("metadata_modified") or x.get("last_modified") or x.get("created") or ""),reverse=True)
+              if not resources:raise ValueError("No 2026 CSV")
+              resource=resources[0]
+              evidence["resourceName"]=str(resource.get("name") or "")[:160]
+              evidence["resourceUpdatedAt"]=resource.get("metadata_modified") or resource.get("last_modified")
+              evidence["resourceId"]=str(resource.get("id") or "")
+              fileurl=str(resource.get("url") or "")
+              # b.fetch restricts all URLs and redirects to the approved BODIK domain.
+              body=b.fetch(fileurl,limit=360000)
+              for enc in ("utf-8-sig","cp932"):
+                  try:content=body.decode(enc);evidence["encoding"]=enc;break
+                  except UnicodeDecodeError:continue
+              else:raise ValueError("CSV encoding not recognized")
+              reader=csv.reader(io.StringIO(content))
+              columns=next(reader)
+              evidence["columns"]=[str(x)[:90] for x in columns[:35]]
+              evidence["sampleRows"]=[[str(c)[:90] for c in row[:35]] for _,row in zip(range(3),reader)]
+              evidence["rowSizeBytes"]=len(body)
+              evidence["status"]="schema_observed"
+              print("YOS_TAXI_CRUISE_SCHEMA",json.dumps(evidence,ensure_ascii=False)[:7000])
+          except Exception as error:
+              evidence["reason"]=type(error).__name__+":"+str(error)[:130]
+              print("::warning::YOS TAXI cruise CSV probe unconfirmed",evidence["reason"])
+          out.write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding="utf-8")
+          PY
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+      - name: Compile native Shortcuts
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/taxi-shortcuts
+          for source in ./*.cherri; do
+            cherri "$source" --skip-sign --debug
+          done
+          python3 validate_compiled.py *_unsigned.shortcut
+      - name: Sign credential-free Shortcuts via existing HubSign procedure
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tools/taxi-shortcuts/artifacts
+          for source in tools/taxi-shortcuts/*_unsigned.shortcut; do
+            name="${source##*/}"
+            name="${name%_unsigned.shortcut}"
+            python3 tools/clarity-factory/sign_with_hubsign.py --input "$source" --output "tools/taxi-shortcuts/artifacts/${name}.shortcut" --name "$name"
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          sources=list(Path('tools/taxi-shortcuts').glob('*_unsigned.shortcut'))
+          signed=list(Path('tools/taxi-shortcuts/artifacts').glob('*.shortcut'))
+          assert len(sources)==len(signed)==7, (len(sources),len(signed))
+          for source in sources:
+              name=source.name.replace('_unsigned.shortcut','.shortcut')
+              data=(Path('tools/taxi-shortcuts/artifacts')/name).read_bytes()
+              assert data.startswith(b'AEA1') and len(data)>500, f'invalid signed Shortcut: {name}'
+              print(name, 'signed AEA1',len(data))
+          PY
+      - name: Upload iPhone installable pack
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: YOS-TAXI-Shift-Shortcuts
+          path: |
+            tools/taxi-shortcuts/artifacts/*.shortcut
+            tools/taxi-shortcuts/*_unsigned.shortcut
+            tools/taxi-shortcuts/README.md
+          if-no-files-found: warn

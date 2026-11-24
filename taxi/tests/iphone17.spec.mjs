@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const pages = [
@@ -352,7 +352,7 @@ test('default entry: approved one-screen UI and legacy recovery', async ({ page 
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('./index.html', {waitUntil:'domcontentloaded'});
   await expect(page).toHaveURL(/\/ui-v2\.html$/);
-  await expect(page.locator('#drop-btn')).toBeVisible();
+  await expect(page.locator('#drop-btn')).toHaveCount(0);
   await expect(page.locator('#photo-btn')).toBeVisible();
   await expect(page.locator('#sync-status')).toContainText('Notion未接続');
   const pageOverflow=await page.evaluate(() => document.documentElement.scrollHeight > innerHeight + 1);
@@ -379,21 +379,29 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
       return {
         periodRows:[...document.querySelectorAll('.period')].filter(visible).length,
         kpiCells:[...document.querySelectorAll('.kpis>div')].filter(visible).length,
-        dropFont:parseFloat(getComputedStyle(document.querySelector('#drop-btn .copy b')).fontSize),
+        dropFont:parseFloat(getComputedStyle(document.querySelector('#photo-btn .copy b')).fontSize),
         statusFont:parseFloat(getComputedStyle(document.querySelector('.status-label')).fontSize),
       };
     });
-    expect(cockpit.periodRows,'only current time band shown').toBe(1);
-    expect(cockpit.kpiCells,'only measured counters shown').toBe(2);
+    expect(cockpit.periodRows,'secondary period rows hidden on cockpit').toBe(0);
+    expect(cockpit.kpiCells,'secondary counters hidden on cockpit').toBe(0);
     expect(cockpit.dropFont,'primary action must remain legible').toBeGreaterThanOrEqual(width<=350?12:16);
     expect(cockpit.statusFont,'shift status must remain legible').toBeGreaterThanOrEqual(width<=350?15:17);
-    await expect(page.locator('#photo-btn')).toContainText('日報写真');
+    await expect(page.locator('#photo-btn')).toContainText('経過日報を送る');
+    await expect(page.locator('.nav button')).toHaveCount(5);
+    await expect(page.locator('#monthly-open')).toHaveText('カレンダー');
+    await page.locator('#monthly-open').click();
+    await expect(page.locator('#monthly-view')).toBeVisible();
+    await expect(page.locator('#monthly-open')).toHaveClass(/active/);
+    await page.locator('[data-page="sales"]').click();
     let problems = await page.evaluate(() => {
       const items=[...document.querySelectorAll('.quick .copy b,.quick .copy small,.decision strong,.decision span,.period b,.period small,.kpi-label,.kpi-value,.footer-card span')];
       const active = element => {const style=getComputedStyle(element);return style.display!=='none' && style.visibility!=='hidden' && element.getBoundingClientRect().height>0};
       const bad=items.filter(active).filter(element=>element.scrollWidth>element.clientWidth+1 || element.scrollHeight>element.clientHeight+2).map(element=>element.textContent.trim());
       const main=document.querySelector('.view.active');
-      if(main.scrollHeight>main.clientHeight+2)bad.push('sales main internally overflowing');
+      if(main.scrollHeight>main.clientHeight+2 && (innerHeight>=799 || getComputedStyle(main).overflowY!=='auto'))bad.push('sales main vertically overflowing without permitted compact scroll');
+      if(document.querySelector('.app>.header').getBoundingClientRect().height>0)bad.push('unused header visible');
+      if(main.scrollWidth>main.clientWidth+2)bad.push('sales main horizontally overflowing');
       return bad;
     });
     expect(problems, 'sales text overflow at '+width+'x'+height).toEqual([]);
@@ -415,7 +423,8 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
         }
       });
       const main=document.querySelector('.view.active');
-      if(main.scrollHeight>main.clientHeight+2)bad.push('strategy main internally overflowing');
+      // Strategy intentionally scrolls vertically so new wait controls remain readable on compact iPhones.
+      if(main.scrollHeight>main.clientHeight+2 && getComputedStyle(main).overflowY!=='auto')bad.push('strategy main overflowing without scroll');
       if(document.documentElement.scrollHeight>innerHeight+1)bad.push('page scroll');
       return bad;
     });
@@ -444,10 +453,982 @@ test('M100: safe-stop checklist opens without changing ride records or viewport'
     await page.locator('#close-modal').click();
     await expect(page.locator('#modal')).not.toBeVisible();
     await page.locator('[data-page="sales"]').click();
-    await expect(page.locator('#drop-btn')).toBeVisible();
+    await expect(page.locator('#drop-btn')).toHaveCount(0);
     await expect(page.locator('#photo-btn')).toBeVisible();
     const after=await page.evaluate(() => localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
     expect(after,'M100 guidance must not mutate shift or ride records').toBe(before);
   }
   expect(errors).toEqual([]);
+});
+
+
+test('Taxi Shortcuts: locked/home widgets use same local shift and retry-safe dropoff', async ({page,browser}) => {
+  const errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.clock.setFixedTime(new Date('2026-11-19T17:15:00+09:00'));
+  const id='20261119171500-345671';
+  const state=()=>page.evaluate(()=>window.YOSTaxiPreview.debugState());
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req='+id,{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#modal-title')).toContainText('降車は記録していません');
+  expect((await state()).events).toHaveLength(0);
+  expect(page.url()).not.toContain('yos_action');
+  await page.goto('./ui-v2.html?yos_action=start',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#modal-title')).toContainText('営業を開始');
+  await page.locator('#modal-actions .primary').click();
+  expect((await state()).events).toHaveLength(1);
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req='+id,{waitUntil:'domcontentloaded'});
+  expect((await state()).events).toHaveLength(2);
+  const recorded=(await state()).events.at(-1);
+  expect(recorded.shortcutRequestId).toBe(id);
+  expect(new Date(recorded.at).getTime()).toBe(new Date('2026-11-19T08:15:00.000Z').getTime());
+  await page.reload();
+  expect((await state()).events).toHaveLength(2);
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req='+id,{waitUntil:'domcontentloaded'});
+  expect((await state()).events).toHaveLength(2);
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req=invalid',{waitUntil:'domcontentloaded'});
+  expect((await state()).events).toHaveLength(2);
+  await expect(page.locator('#modal-title')).toContainText('降車は記録していません');
+  await page.clock.setFixedTime(new Date('2026-11-19T17:20:00+09:00'));
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req=20261119171000-882200',{waitUntil:'domcontentloaded'});
+  expect((await state()).events).toHaveLength(2);
+  await expect(page.locator('#modal-title')).toContainText('降車は記録していません');
+  await page.goto('./ui-v2.html?yos_action=end',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#modal-title')).toContainText('営業終了');
+  await page.locator('#modal-actions .primary').click();
+  expect((await state()).events).toHaveLength(3);
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req=20261119172000-991122',{waitUntil:'domcontentloaded'});
+  expect((await state()).events).toHaveLength(3);
+  await expect(page.locator('#modal-title')).toContainText('降車は記録していません');
+  // Safari and Home Screen PWA can have isolated storage. Never write to a new one.
+  const separate=await browser.newContext({timezoneId:'Asia/Tokyo'});
+  const other=await separate.newPage();
+  await other.clock.setFixedTime(new Date('2026-11-19T17:15:00+09:00'));
+  await other.goto(new URL('./ui-v2.html?yos_action=dropoff&yos_req=20261119171500-221133',page.url()).href,{waitUntil:'domcontentloaded'});
+  await expect(other.locator('#modal-title')).toContainText('降車は記録していません');
+  expect(await other.evaluate(()=>window.YOSTaxiPreview.debugState().events.length)).toBe(0);
+  await separate.close();
+  expect(errors).toEqual([]);
+});
+
+
+test('Dropoff result is persistent and clearly confirms success, retry and failure', async ({page}) => {
+  const errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.setViewportSize({width:320,height:568});
+  await page.clock.setFixedTime(new Date('2026-11-19T17:15:00+09:00'));
+  const eventCount=()=>page.evaluate(()=>window.YOSTaxiPreview.debugState().events.filter(e=>e.type==='dropoff').length);
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await page.evaluate(()=>window.YOSTaxiPreview.recordDropoff());
+  await expect(page.locator('#modal.dropoff-result-error')).toBeVisible();
+  await expect(page.locator('#modal-title')).toHaveText('降車は記録していません');
+  await expect(page.locator('#dropoff-outcome-badge')).toHaveText('保存なし');
+  await expect(page.locator('#dropoff-outcome-time')).toHaveText('未記録');
+  await expect(page.locator('#dropoff-outcome-count')).toHaveText('本日の降車記録 0件');
+  expect(await eventCount()).toBe(0);
+  await page.goto('./ui-v2.html?yos_action=start',{waitUntil:'domcontentloaded'});
+  await page.locator('#modal-actions .primary').click();
+  await page.evaluate(()=>window.YOSTaxiPreview.recordDropoff());
+  await expect(page.locator('#modal.dropoff-result-success')).toBeVisible();
+  await expect(page.locator('#modal-title')).toHaveText('降車を記録しました');
+  await expect(page.locator('#dropoff-outcome-badge')).toHaveText('保存完了');
+  await expect(page.locator('#dropoff-outcome-time')).toHaveText('降車 17:15:00');
+  await expect(page.locator('#dropoff-outcome-count')).toHaveText('本日の降車記録 1件');
+  await expect(page.locator('#modal-body')).toContainText('Notionとは未同期');
+  const sizes=await page.locator('#modal').evaluate(node=>{
+    const sheet=node.querySelector('.sheet').getBoundingClientRect();
+    const stamp=node.querySelector('#dropoff-outcome-time');
+    return {font:parseFloat(getComputedStyle(stamp).fontSize),bottom:sheet.bottom,top:sheet.top};
+  });
+  expect(sizes.font).toBeGreaterThanOrEqual(30);
+  expect(sizes.bottom).toBeLessThanOrEqual(569);
+  expect(sizes.top).toBeGreaterThanOrEqual(-1);
+  await page.waitForTimeout(3200);
+  await expect(page.locator('#modal.dropoff-result-success')).toBeVisible();
+  await page.locator('#modal-actions button').first().click();
+  await expect(page.locator('#modal')).toBeHidden();
+  await page.evaluate(()=>window.YOSTaxiPreview.recordDropoff());
+  await expect(page.locator('#modal.dropoff-result-duplicate')).toBeVisible();
+  await expect(page.locator('#modal-title')).toContainText('追加なし');
+  await expect(page.locator('#dropoff-outcome-count')).toHaveText('本日の降車記録 1件');
+  expect(await eventCount()).toBe(1);
+
+  await page.clock.setFixedTime(new Date('2026-11-19T17:20:00+09:00'));
+  const id='20261119172000-123456';
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req='+id,{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#modal.dropoff-result-success')).toBeVisible();
+  await expect(page.locator('#dropoff-outcome-time')).toHaveText('降車 17:20:00');
+  await expect(page.locator('#dropoff-outcome-count')).toHaveText('本日の降車記録 2件');
+  expect(await eventCount()).toBe(2);
+  await page.reload();
+  await expect(page.locator('#modal')).toBeHidden();
+  expect(await eventCount()).toBe(2);
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req='+id,{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#modal.dropoff-result-duplicate')).toBeVisible();
+  await expect(page.locator('#dropoff-outcome-time')).toHaveText('降車 17:20:00');
+  await expect(page.locator('#dropoff-outcome-count')).toHaveText('本日の降車記録 2件');
+  expect(await eventCount()).toBe(2);
+
+  await page.goto('./ui-v2.html?yos_action=dropoff&yos_req=invalid',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#modal.dropoff-result-error')).toBeVisible();
+  await expect(page.locator('#dropoff-outcome-badge')).toHaveText('保存なし');
+  expect(await eventCount()).toBe(2);
+  expect(errors).toEqual([]);
+});
+
+
+test('YOS TAXI workflow links: read-only history and analysis do not alter shift records', async ({page}) => {
+  const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  await page.clock.setFixedTime(new Date('2026-11-19T18:30:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const original=await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+  await page.goto('./ui-v2.html?yos_action=history',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#history-view')).toBeVisible();
+  expect(page.url()).not.toContain('yos_action');
+  const afterHistory=await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+  expect(afterHistory).toBe(original);
+  await page.goto('./ui-v2.html?yos_action=analysis',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#analysis-view')).toBeVisible();
+  expect(page.url()).not.toContain('yos_action');
+  const afterAnalysis=await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
+  expect(afterAnalysis).toBe(original);
+  expect(errors).toEqual([]);
+});
+
+
+test('Taxi research: official forecast displays separate publication, retrieval and target times without touching shift data', async ({page}) => {
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.clock.setFixedTime(new Date('2026-11-19T21:00:00+09:00'));
+  await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{
+      publishingOffice:'沖縄気象台',reportDatetime:'2026-11-19T17:00:00+09:00',
+      timeSeries:[{timeDefines:['2026-11-19T17:00:00+09:00','2026-11-20T00:00:00+09:00'],
+      areas:[{area:{name:'本島中南部',code:'471010'},weathers:['くもり','雨　夜遅く晴れ']}]}]
+    }])});
+  });
+  await page.goto('./research.html?phase=before',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#phase-before')).toHaveAttribute('aria-pressed','true');
+  await page.locator('#weather-fetch').click();
+  await expect(page.locator('#weather-status')).toHaveText('公式予報を取得');
+  // 21:00 belongs to the forecast period which started at 17:00, not the next 00:00 slot.
+  await expect(page.locator('#weather-report')).toContainText('くもり');
+  await expect(page.locator('#weather-report')).not.toContainText('雨　夜遅く晴れ');
+  await expect(page.locator('#weather-meta')).toContainText('発表');
+  await expect(page.locator('#weather-meta')).toContainText('取得');
+  await expect(page.locator('#weather-meta')).toContainText('予報期間開始');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+  // Once midnight has passed, the 00:00 slot becomes the active forecast period.
+  await page.clock.setFixedTime(new Date('2026-11-20T01:00:00+09:00'));
+  await page.locator('#weather-fetch').click();
+  await expect(page.locator('#weather-report')).toContainText('雨　夜遅く晴れ');
+  await page.locator('#phase-during').click();
+  await expect(page.locator('#phase-during')).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('#weather-status')).toHaveText('公式予報を取得');
+  expect(errors).toEqual([]);
+});
+
+test('Taxi research: JMA date-only periods switch at midnight Japan time, not 09:00',async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-20T01:30:00+09:00'));
+  await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{
+      publishingOffice:'沖縄気象台',reportDatetime:'2026-11-19T17:00:00+09:00',
+      timeSeries:[{timeDefines:['2026-11-19','2026-11-20'],
+      areas:[{area:{code:'471010'},weathers:['くもり','雨']}]}]
+    }])});
+  });
+  await page.goto('./research.html?phase=during',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#weather-status')).toHaveText('公式予報を取得');
+  await expect(page.locator('#weather-report')).toContainText('雨');
+  await expect(page.locator('#weather-report')).not.toContainText('くもり');
+  await expect(page.locator('#weather-meta')).toContainText('00:00');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+test('Taxi research: outdated official publication is explicitly expired even after a successful HTTP fetch',async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-19T21:00:00+09:00'));
+  await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{
+      publishingOffice:'沖縄気象台',reportDatetime:'2026-11-18T05:00:00+09:00',
+      timeSeries:[{timeDefines:['2026-11-19T21:00:00+09:00'],areas:[{area:{code:'471010'},weathers:['晴れ']}]}]
+    }])});
+  });
+  await page.goto('./research.html?phase=during',{waitUntil:'domcontentloaded'});
+  await page.locator('#weather-fetch').click();
+  await expect(page.locator('#weather-status')).toHaveText('期限切れ');
+  await expect(page.locator('#weather-report')).not.toContainText('晴れ');
+  await expect(page.locator('#weather-report')).toContainText('最新とは扱わず');
+});
+
+test('Taxi research: HTTP error / malformed data never becomes current conditions or shift writes',async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-19T21:00:00+09:00'));
+  await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{
+      publishingOffice:'沖縄気象台',reportDatetime:'2026-11-19T17:00:00+09:00',
+      timeSeries:[{timeDefines:['2026-11-20T00:00:00+09:00'],areas:[{area:{code:'999999'},weathers:['晴れ']}]}]
+    }])});
+  });
+  await page.goto('./research.html',{waitUntil:'domcontentloaded'});
+  await page.locator('#weather-fetch').click();
+  await expect(page.locator('#weather-status')).toHaveText('未取得');
+  await expect(page.locator('#weather-report')).toContainText('公開データの内容・時刻が確認条件に合いませんでした');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+
+test('Taxi research redesign: compact first viewport, expandable sources and automatic forecast retrieval',async ({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.clock.setFixedTime(new Date('2026-11-19T21:00:00+09:00'));
+  await page.setViewportSize({width:390,height:844});
+  let hits=0;
+  await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{
+    hits++;
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{
+      publishingOffice:'沖縄気象台',reportDatetime:'2026-11-19T17:00:00+09:00',
+      timeSeries:[{timeDefines:['2026-11-19T17:00:00+09:00'],
+      areas:[{area:{code:'471010'},weathers:['くもり']}]}]
+    }])});
+  });
+  await page.goto('./research.html?phase=during',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#phase-during')).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('#weather-status')).toHaveText('公式予報を取得');
+  expect(hits).toBe(1);
+  const positions=await page.evaluate(()=>{
+    const rect=selector=>document.querySelector(selector).getBoundingClientRect();
+    return {pageWidth:document.documentElement.scrollWidth,screenWidth:innerWidth,
+    header:rect('header').bottom,
+    decision:rect('.decision').bottom,
+    auto:rect('#auto-research').top,
+    weather:rect('#weather-section').bottom,
+    sources:rect('#official-sources').top};
+  });
+  expect(positions.pageWidth).toBeLessThanOrEqual(positions.screenWidth);
+  expect(positions.decision).toBeLessThan(380);
+  expect(positions.auto).toBeLessThan(770);
+  expect(positions.auto).toBeLessThan(positions.weather);
+  expect(positions.sources).toBeGreaterThan(positions.weather); // Scheduled source card is now between weather and manual links.
+  const road=page.locator('#official-sources details').first();
+  await expect(road).not.toHaveAttribute('open','');
+  await road.locator('summary').click();
+  await expect(road).toHaveAttribute('open','');
+  await expect(road.locator('a')).toHaveAttribute('href','https://www.jartic.or.jp/');
+  await expect(page.locator('.decision')).toContainText('未判定');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+  expect(errors).toEqual([]);
+});
+
+test('Taxi research redesign: forecast automatically becomes stale after 15 minutes, without false current data',async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-19T21:00:00+09:00'));
+  await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{
+      publishingOffice:'沖縄気象台',reportDatetime:'2026-11-19T17:00:00+09:00',
+      timeSeries:[{timeDefines:['2026-11-19T17:00:00+09:00'],areas:[{area:{code:'471010'},weathers:['くもり']}]}]
+    }])});
+  });
+  await page.goto('./research.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#weather-status')).toHaveText('公式予報を取得');
+  await page.clock.setFixedTime(new Date('2026-11-19T21:16:00+09:00'));
+  await page.evaluate(()=>window.YOSTaxiResearchTest.revalidate());
+  await expect(page.locator('#weather-status')).toHaveText('要再確認');
+  await expect(page.locator('#weather-report')).not.toContainText('くもり');
+  await expect(page.locator('#weather-report')).toContainText('15分以上');
+});
+
+
+test('Taxi research LIVE verification of JMA data from a browser without mocked network',async ({page},testInfo)=>{
+  const endpoint='https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json';
+  const responses=[];const failedRequests=[];
+  page.on('response',r=>{
+    if(r.url().startsWith(endpoint)){
+      responses.push({http:r.status(),type:r.headers()['content-type']||'',cors:r.headers()['access-control-allow-origin']||''});
+    }
+  });
+  page.on('requestfailed',r=>{
+    if(r.url().startsWith(endpoint))failedRequests.push(r.failure()?.errorText||'request failed');
+  });
+  await page.goto('./research.html?phase=during',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#weather-fetch')).toBeEnabled({timeout:15000});
+  const state=(await page.locator('#weather-status').innerText()).trim();
+  const message=(await page.locator('#weather-report').innerText()).trim();
+  const metadata=(await page.locator('#weather-meta').innerText()).trim();
+  // This is an evidence-gathering probe, NOT a gate that mistakes network restrictions
+  // on a GitHub runner for an application regression or claims production iPhone success.
+  expect(['公式予報を取得','期限切れ','未取得']).toContain(state);
+  if(state==='公式予報を取得'){
+    expect(metadata).toContain('発表');
+    expect(metadata).toContain('取得');
+    expect(metadata).toContain('予報期間開始');
+  }else{
+    expect(message).toMatch(/公式ページ|最新とは扱わず/);
+  }
+  const result={browser:testInfo.project.name,status:state,when:new Date().toISOString(),responses,
+    failedRequests,reason:state==='未取得'?message.slice(0,120):'',
+    metadata:state==='公式予報を取得'?metadata:''};
+  console.log('YOS_JMA_LIVE_PROBE '+JSON.stringify(result));
+  await testInfo.attach('yos-jma-live-probe.json',{body:Buffer.from(JSON.stringify(result,null,2)),contentType:'application/json'});
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+
+test('Taxi shift briefing: 2026-11-21 10:00 start shows verified official schedules and expires afterward',async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-20T09:00:00+09:00'));
+  await page.route('https://www.jma.go.jp/bosai/forecast/data/forecast/471000.json',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{
+      publishingOffice:'沖縄気象台',reportDatetime:'2026-11-20T08:00:00+09:00',
+      timeSeries:[{timeDefines:['2026-11-20T06:00:00+09:00'],
+        areas:[{area:{code:'471010'},weathers:['くもり']}]}]
+    }])});
+  });
+  await page.goto('./research.html?phase=before',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#shift-brief')).toBeVisible();
+  await expect(page.locator('header h1')).toHaveText('営業リサーチ');
+  await expect(page.locator('#shift-brief')).toContainText('11/21（土）10:00出庫');
+  await expect(page.locator('#shift-brief')).toContainText('宜野湾市産業まつり');
+  await expect(page.locator('#shift-brief')).toContainText('日米対抗ソフトボール');
+  await expect(page.locator('#shift-brief')).toContainText('FRUITS ZIPPER');
+  await expect(page.locator('#shift-brief')).toContainText('乗車需要は未確認');
+  await expect(page.locator('#shift-brief .shift-item')).toHaveCount(3);
+  await expect(page.locator('#shift-brief .shift-item').nth(2)).toHaveAttribute('href','https://fruitszipper.asobisystem.com/live_information/detail/40048');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+  await page.clock.setFixedTime(new Date('2026-11-21T10:05:00+09:00'));
+  await page.reload();
+  await expect(page.locator('#shift-brief')).toBeVisible();
+  await page.clock.setFixedTime(new Date('2026-11-22T00:01:00+09:00'));
+  await page.evaluate(()=>window.dispatchEvent(new Event('pageshow')));
+  await expect(page.locator('#shift-brief')).toBeHidden();
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+
+test('Taxi scheduled evidence: source status, age, official links and change tracking are rendered safely',async ({page})=>{
+ const now=new Date('2026-11-20T12:00:00+09:00');
+ await page.clock.setFixedTime(now);
+ await page.route('**/taxi/research-feed.json?ts=*',async route=>{
+   await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+     schema:1,generatedAt:'2026-11-20T02:50:00Z',timezone:'Asia/Tokyo',sources:[
+       {id:'jma',name:'気象庁｜予報',status:'ok',checkedAt:'2026-11-20T02:50:00Z',
+        publishedAt:'2026-11-20T02:00:00Z',url:'https://www.jma.go.jp/bosai/forecast/',
+        summary:'くもり',items:[]},
+       {id:'naha_rss',name:'那覇市｜公式更新',status:'ok',checkedAt:'2026-11-20T02:50:00Z',
+        publishedAt:null,url:'https://www.city.naha.okinawa.jp/about/rss.html',
+        summary:'直近の関連見出し1件',items:[{id:'a',title:'交通規制のお知らせ',url:'https://www.city.naha.okinawa.jp/news/test.html'}]},
+       {id:'cruise_catalog',name:'沖縄県｜クルーズ台帳',status:'error',checkedAt:'2026-11-20T02:50:00Z',
+        publishedAt:null,url:'https://data.bodik.jp/dataset/470007_okinawa-cruise',
+        summary:'公式情報を取得できませんでした',items:[]}
+     ],difference:{status:'compared',added:[{id:'a'}],previousAt:'2026-11-20T01:50:00Z'}
+   })});
+ });
+ await page.goto('./research.html?phase=during',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#feed-status')).toHaveText('一部未取得');
+ await expect(page.locator('#feed-meta')).toContainText('気象庁：取得成功');
+ await expect(page.locator('#feed-meta')).toContainText('那覇市：取得成功');
+ await expect(page.locator('#feed-meta')).toContainText('沖縄県：未取得');
+ const layout=await page.evaluate(()=>({
+  first:document.querySelector('#auto-research').getBoundingClientRect().top,
+  shift:document.querySelector('#shift-brief').getBoundingClientRect().top,
+  weather:document.querySelector('#weather-section').getBoundingClientRect().top,
+  badge:document.querySelector('#feed-status').getBoundingClientRect().top,
+  viewport:innerHeight,
+  bodyWidth:document.documentElement.scrollWidth,
+  viewportWidth:innerWidth
+ }));
+ expect(layout.first).toBeLessThan(layout.shift);
+ expect(layout.first).toBeLessThan(layout.weather);
+ expect(layout.badge).toBeLessThan(layout.viewport);
+ expect(layout.bodyWidth).toBeLessThanOrEqual(layout.viewportWidth);
+ await expect(page.locator('#feed-sources')).toContainText('くもり');
+ await expect(page.locator('#feed-sources')).toContainText('直近の関連見出し1件');
+ await expect(page.locator('#feed-sources')).toContainText('未取得');
+ await expect(page.locator('#feed-sources')).toContainText('前回の配信との差分');
+ await expect(page.locator('#feed-details')).not.toHaveAttribute('open','');
+ await page.locator('#feed-details summary').click();
+ await expect(page.locator('#feed-details')).toHaveAttribute('open','');
+ await expect(page.locator('#feed-sources a[href="https://www.city.naha.okinawa.jp/news/test.html"]')).toBeVisible();
+ expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+test('Taxi scheduled evidence: stale snapshot cannot masquerade as current',async ({page})=>{
+ await page.clock.setFixedTime(new Date('2026-11-20T12:00:00+09:00'));
+ await page.route('**/taxi/research-feed.json?ts=*',async route=>{
+   await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      schema:1,generatedAt:'2026-11-19T05:00:00Z',
+      sources:[{id:'jma',name:'気象庁｜予報',status:'ok',checkedAt:'2026-11-19T05:00:00Z',
+        publishedAt:'2026-11-19T04:00:00Z',url:'https://www.jma.go.jp/bosai/forecast/',summary:'昔の天気',items:[]}],
+      difference:{status:'compared',added:[],previousAt:null}
+   })});
+ });
+ await page.goto('./research.html?phase=before',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#feed-status')).toHaveText('配信が古い');
+ await expect(page.locator('#feed-sources')).not.toContainText('昔の天気');
+ await expect(page.locator('#feed-sources')).toContainText('更新されていません');
+});
+
+test('Taxi scheduled evidence: missing feed fails closed',async ({page})=>{
+ await page.route('**/taxi/research-feed.json?ts=*',route=>route.fulfill({status:503,body:'unavailable'}));
+ await page.goto('./research.html',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#feed-status')).toHaveText('未取得');
+ await expect(page.locator('#feed-meta')).toContainText('公式原本を直接確認');
+});
+
+
+test('Taxi scheduled evidence: errors never produce a green source health indicator',async ({page})=>{
+ await page.clock.setFixedTime(new Date('2026-11-20T12:00:00+09:00'));
+ await page.route('**/taxi/research-feed.json?ts=*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+   schema:1,generatedAt:'2026-11-20T02:50:00Z',timezone:'Asia/Tokyo',
+   sources:[
+     {id:'jma',name:'気象庁',status:'error',checkedAt:'2026-11-20T02:50:00Z',
+       publishedAt:null,url:'https://www.jma.go.jp/bosai/forecast/',summary:'失敗',items:[]},
+     {id:'naha_rss',name:'那覇市',status:'error',checkedAt:'2026-11-20T02:50:00Z',
+       publishedAt:null,url:'https://www.city.naha.okinawa.jp/about/rss.html',summary:'失敗',items:[]}
+   ],difference:{status:'not_checked',added:[],previousAt:null}
+ })}));
+ await page.goto('./research.html?phase=during',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#feed-status')).toHaveText('情報源未取得');
+ await expect(page.locator('#feed-status')).toHaveClass(/warn/);
+ await expect(page.locator('#feed-meta')).toContainText('確認できた公式情報がありません');
+ expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+test('Taxi scheduled evidence: an open screen expires automatically when the feed passes 150 minutes',async ({page})=>{
+ await page.clock.setFixedTime(new Date('2026-11-20T12:00:00+09:00'));
+ await page.route('**/taxi/research-feed.json?ts=*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+   schema:1,generatedAt:'2026-11-20T02:50:00Z',
+   sources:[{id:'jma',name:'気象庁',status:'ok',checkedAt:'2026-11-20T02:50:00Z',
+     publishedAt:'2026-11-20T02:00:00Z',url:'https://www.jma.go.jp/bosai/forecast/',summary:'今の予報',items:[]}],
+   difference:{status:'not_checked',added:[],previousAt:null}
+ })}));
+ await page.goto('./research.html?phase=during',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#feed-status')).toHaveText('配信確認');
+ await page.clock.setFixedTime(new Date('2026-11-20T14:31:00+09:00'));
+ await page.evaluate(()=>window.YOSTaxiResearchTest.revalidateOfficialFeed());
+ await expect(page.locator('#feed-status')).toHaveText('配信が古い');
+ await expect(page.locator('#feed-sources')).not.toContainText('今の予報');
+ await expect(page.locator('#feed-sources')).toContainText('更新されていません');
+ expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+test('Taxi scheduled evidence: unknown source publication date is not a failed request',async ({page})=>{
+ await page.clock.setFixedTime(new Date('2026-11-20T02:22:00+09:00'));
+ await page.route('**/taxi/research-feed.json?ts=*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+  schema:1,generatedAt:'2026-11-19T17:18:00Z',
+  sources:[
+   {id:'jma',name:'気象庁｜本島中南部の予報',status:'ok',checkedAt:'2026-11-19T17:18:00Z',
+     publishedAt:'2026-11-19T08:00:00Z',summary:'くもり',url:'https://www.jma.go.jp/bosai/forecast/',items:[]},
+   {id:'naha_rss',name:'那覇市｜公式更新',status:'ok',checkedAt:'2026-11-19T17:18:00Z',
+     publishedAt:null,summary:'関連する見出しなし',url:'https://www.city.naha.okinawa.jp/about/rss.html',items:[]},
+   {id:'cruise_catalog',name:'沖縄県｜クルーズ予約・実績資料',status:'unknown',
+     checkedAt:'2026-11-19T17:18:00Z',publishedAt:null,
+     summary:'2026年の寄港予約CSV',url:'https://data.bodik.jp/dataset/470007_okinawa-cruise',items:[]}
+  ],
+  difference:{status:'not_checked',added:[],previousAt:null}
+ })}));
+ await page.goto('./research.html?phase=before',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#feed-status')).toHaveText('一部要確認');
+ await expect(page.locator('#feed-status')).toHaveClass(/warn/);
+ await expect(page.locator('#feed-meta')).toContainText('沖縄県：更新日不明');
+ await expect(page.locator('#feed-meta')).toContainText('更新日・鮮度を要確認');
+ await expect(page.locator('#feed-meta')).not.toContainText('一部の公式情報を取得できませんでした');
+ expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+
+test('field report: tap, reload, duplicate guard and one-item undo on simulated iPhone', async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-23T20:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#status-btn')).toBeVisible();
+  // Use the same real UI route that creates a confirmed local shift, not a mocked API.
+  await page.locator('#status-btn').click();
+  await page.locator('#modal-actions button.primary').click();
+  await page.locator('[data-page="strategy"]').click();
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
+  await page.locator('#field-open').click();
+  await expect(page.locator('#field-layer')).toBeVisible();
+  await page.locator('[data-observation="go_none"]').click();
+  await expect(page.locator('#field-layer')).toBeHidden();
+  await expect(page.locator('#field-summary')).toContainText('GO反応なし');
+  const readStored=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('yos-taxi-field-reports-v1')));
+  expect((await readStored()).entries).toHaveLength(1);
+  await page.locator('#field-open').click();
+  await page.locator('[data-observation="go_none"]').click();
+  expect((await readStored()).entries).toHaveLength(1);
+  await page.locator('#field-close').click();
+  // Changing the observed fact creates a second event, not a fabricated recommendation.
+  await page.locator('#field-open').click();
+  await page.locator('[data-observation="queue_still"]').click();
+  expect((await readStored()).entries).toHaveLength(2);
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
+  // Reload must retain local observations, and undo must not cascade to older observations.
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="strategy"]').click();
+  await expect(page.locator('#field-summary')).toContainText('待機列が動かない');
+  await page.locator('#field-open').click();
+  await page.locator('#field-undo').click();
+  const audit=await readStored();
+  expect(audit.entries).toHaveLength(2);
+  expect(audit.entries[1].voidedAt).toBeTruthy();
+  expect(audit.entries[0].voidedAt).toBeUndefined();
+  await expect(page.locator('#field-undo')).toBeDisabled();
+  await expect(page.locator('#field-last')).toContainText('GO反応なし');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="strategy"]').click();
+  await page.locator('#field-open').click();
+  await expect(page.locator('#field-undo')).toBeDisabled();
+  expect((await readStored()).entries).toHaveLength(2);
+});
+
+test('field report: narrow viewports keep text and every tap target accessible',async ({page})=>{
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="strategy"]').click();
+  await page.locator('#field-open').click();
+  await expect(page.locator('#field-layer')).toBeVisible();
+  for(const width of [320,375,390,402]){
+    await page.setViewportSize({width,height:700});
+    const layout=await page.evaluate(()=>{
+      const sheet=document.querySelector('.field-sheet'),buttons=[...document.querySelectorAll('.field-choice,.field-close,.field-undo')];
+      const rect=sheet.getBoundingClientRect();
+      return {viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,
+        sheet:{left:rect.left,right:rect.right,width:rect.width},
+        buttons:buttons.map(el=>({label:el.textContent.trim(),width:el.getBoundingClientRect().width,
+          height:el.getBoundingClientRect().height,overflow:el.scrollWidth>el.clientWidth+1}))};
+    });
+    expect(layout.documentWidth,'horizontal overflow at '+width).toBeLessThanOrEqual(layout.viewport);
+    expect(layout.sheet.left,'left clipping at '+width).toBeGreaterThanOrEqual(-1);
+    expect(layout.sheet.right,'right clipping at '+width).toBeLessThanOrEqual(layout.viewport+1);
+    for(const b of layout.buttons){
+      expect(b.width,b.label+' tap width at '+width).toBeGreaterThanOrEqual(44);
+      expect(b.height,b.label+' tap height at '+width).toBeGreaterThanOrEqual(44);
+      expect(b.overflow,b.label+' text overflow at '+width).toBe(false);
+    }
+  }
+});
+
+
+test('YOS field consultation requires explicit tap and keeps the recommendation neutral',async ({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-23T20:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await page.locator('#status-btn').click();
+  await page.locator('#modal-actions button.primary').click();
+  await page.locator('[data-page="strategy"]').click();
+  await expect(page.locator('#field-yos-send')).toBeHidden();
+  await page.evaluate(()=>{
+    window.__yosMockCalls=[];
+    window.YOS_AI_BASE_URL='https://project-y-yos-ai.vercel.app';
+    window.YOS_AUTH={getGoogleIdToken:async()=>'short-lived-only'};
+    window.YosAiClient=class{
+      async chat(input){window.__yosMockCalls.push(input);return {answer:'地域情報が未確認のため移動を確定できません'};}
+    };
+  });
+  await page.locator('#field-open').click();
+  await page.locator('[data-observation="go_none"]').click();
+  await expect(page.locator('#field-yos-send')).toBeVisible();
+  await expect(page.locator('#field-yos-send')).toHaveText('YOSに現状を送って相談');
+  expect(await page.evaluate(()=>window.__yosMockCalls.length)).toBe(0);
+  await page.locator('#field-yos-send').click();
+  await expect(page.locator('#field-yos-status')).toContainText('参考回答を受信しました');
+  await expect(page.locator('#field-yos-answer')).toContainText('地域情報が未確認');
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
+  expect(await page.evaluate(()=>window.__yosMockCalls.length)).toBe(1);
+  const storage=await page.evaluate(()=>JSON.stringify({...localStorage}));
+  expect(storage).not.toContain('short-lived-only');
+  expect(storage).not.toContain('地域情報が未確認');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="strategy"]').click();
+  await expect(page.locator('#field-yos-send')).toBeVisible();
+  await expect(page.locator('#field-yos-answer')).toBeHidden();
+});
+
+
+test.describe('isolated research feed mocks (no service worker)',()=>{
+  test.use({serviceWorkers:'block'});
+
+test('strategy research displays fresh facts and requests specialist advice only on explicit tap',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T12:00:00+09:00'));
+  let requests=0;
+  await page.route('**/research-feed.json?*',async route=>{
+    requests++;
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      schema:1,generatedAt:'2026-11-24T11:30:00+09:00',sources:[
+        {id:'jma',name:'気象庁｜沖縄本島中南部',status:'ok',summary:'くもり、時々雨'},
+        {id:'naha_rss',name:'那覇市｜公式更新',status:'ok',summary:'対象見出し0件'},
+        {id:'cruise_catalog',name:'沖縄県｜クルーズ',status:'ok',summary:'寄港予約1件',items:[{title:'11/24 18:00 那覇港寄港予約 テスト船／出港予定 11/24 22:00',eventAt:'2026-11-24T18:00:00+09:00',departureAt:'2026-11-24T22:00:00+09:00'}]}
+      ]})});
+  });
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  expect(requests).toBe(0); // no network call until strategy is opened
+  await page.locator('[data-page="strategy"]').click();
+  await expect(page.locator('#strategy-research-status')).toContainText('公式情報源 3/3件取得');
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
+  await expect(page.locator('#strategy-research-brief')).toContainText('くもり、時々雨');
+  await expect(page.locator('#strategy-research-brief')).toContainText('テスト船');
+  const brief=await page.locator('#strategy-research-brief').innerText();
+  expect(brief.match(/11\/24 18:00/g)).toHaveLength(1);
+  expect(brief.match(/11\/24 22:00/g)).toHaveLength(1);
+  await expect(page.locator('#strategy-advice-load')).toBeVisible();
+  await page.evaluate(()=>{
+    window.__researchCalls=[];
+    window.YOS_AI_BASE_URL='https://project-y-yos-ai.vercel.app';
+    window.YOS_AUTH={getGoogleIdToken:async()=>'ephemeral'};
+    window.YosAiClient=class{async chat(input){window.__researchCalls.push(input);return {answer:'雨が降り始めたら短距離の配車反応を比べ、空車時間に応じて待機を見直す。'};}};
+  });
+  expect(await page.evaluate(()=>window.__researchCalls.length)).toBe(0);
+  await page.locator('#strategy-advice-load').click();
+  await expect(page.locator('#strategy-advice-answer')).toContainText('短距離の配車反応');
+  const calls=await page.evaluate(()=>window.__researchCalls);
+  expect(calls).toHaveLength(1);
+  expect(calls[0].userText).toContain('空車回送の機会費用');
+  expect(calls[0].userText).toContain('テスト船');
+  expect(calls[0].userText).toContain('現在地、実車状況、競合台数、個人売上は未確認');
+  expect(Object.keys(calls[0])).toEqual(['userText']);
+  expect(await page.evaluate(()=>JSON.stringify({...localStorage}))).not.toContain('短距離の配車反応');
+  await page.evaluate(()=>{window.YosAiClient=class{async chat(){throw Object.assign(Error('limited'),{status:429})}}});
+  await page.locator('#strategy-advice-load').click();
+  await expect(page.locator('#strategy-advice-status')).toContainText('AI分析は未取得');
+  await expect(page.locator('#strategy-advice-answer')).toBeHidden();
+  await expect(page.locator('#strategy-research-sources')).toBeHidden();
+  await page.locator('.strategy-research details summary').click();
+  await expect(page.locator('#strategy-research-sources')).toBeVisible();
+  await expect(page.locator('#strategy-research-sources')).toContainText('くもり、時々雨');
+  await expect(page.locator('#strategy-research-sources')).toContainText('寄港予約1件');
+  await expect(page.locator('#strategy-research-sources')).toContainText('テスト船');
+  await expect(page.locator('#strategy-research-sources')).toContainText('実際の需要は未確認');
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
+  expect(requests).toBe(1);
+  await page.locator('#strategy-research-load').click();
+  await expect(page.locator('#strategy-research-status')).toContainText('公式情報源 3/3件取得');
+  expect(requests).toBe(2); // explicit refresh is still available
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
+  await page.clock.setFixedTime(new Date('2026-11-24T15:30:00+09:00'));
+  await page.clock.runFor(15000);
+  await expect(page.locator('#strategy-research-status')).toContainText('配信が古い');
+  await expect(page.locator('#strategy-research-sources>div')).toHaveCount(0);
+  await expect(page.locator('#strategy-research-brief>p')).toHaveCount(0);
+  await expect(page.locator('#strategy-advice-load')).toBeHidden();
+  await expect(page.locator('#strategy-advice-answer')).toBeHidden();
+});
+
+test('strategy research fails closed on malformed or unavailable official feed',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T12:00:00+09:00'));
+  await page.route('**/research-feed.json?*',async route=>route.fulfill({status:200,contentType:'application/json',body:'{"schema":1,"sources":[],"generatedAt":"bad"}'}));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="strategy"]').click();
+  await page.locator('#strategy-research-load').click();
+  await expect(page.locator('#strategy-research-status')).toContainText('取得失敗');
+  await expect(page.locator('#strategy-advice-load')).toBeHidden();
+  await expect(page.locator('#strategy-advice-answer')).toBeHidden();
+  await expect(page.locator('#strategy-main')).toContainText('未判定');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+}); // Restore default service worker behavior for all other app tests.
+
+test('daily-report OCR handoff uses on-device clipboard only and requires photo confirmation',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-21T20:50:00+09:00'));
+  await page.addInitScript(()=>{
+    Object.defineProperty(navigator,'clipboard',{configurable:true,value:{readText:async()=> '令和8年11月21日 総収入 21,950 現金 10,400'}});
+  });
+  await page.goto('./ui-v2.html?yos_action=report&yos_ocr=clipboard',{waitUntil:'domcontentloaded'});
+  await expect(page).not.toHaveURL(/yos_ocr|yos_action/);
+  const mockImage=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8\/x8AAwMCAO8Zr1cAAAAASUVORK5CYII=','base64');
+  await page.locator('#photo-input').setInputFiles({name:'paper-ocr.png',mimeType:'image/png',buffer:mockImage});
+  await page.locator('#modal-actions button.primary').click();
+  await page.locator('#revenue-paste-ocr').click();
+  await expect(page.locator('#revenue-amount')).toHaveValue('21950');
+  await expect(page.locator('#revenue-extract')).toContainText('総収入候補');
+  await expect(page.locator('#revenue-status')).toContainText('まだ保存していません');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ui-v2-live-20261117'))).toBeNull();
+});
+
+test('photo-linked confirmed revenue: keeps the paper total, refuses duplicate image and preserves old storage',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-21T20:50:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#sales-value')).toHaveText('—');
+  const mockImage=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8Zr1cAAAAASUVORK5CYII=','base64');
+  await page.locator('#photo-input').setInputFiles({name:'paper-report-20261121.png',mimeType:'image/png',buffer:mockImage});
+  await expect(page.locator('#modal-title')).toHaveText('日報写真を選択しました');
+  await page.locator('#modal-actions button.primary').click();
+  await expect(page.locator('#revenue-form')).toBeVisible();
+  await page.locator('#revenue-text').fill('営業履歴（15） 総収入 21,950 ¥750');
+  await page.locator('#revenue-amount').fill('21950');
+  await page.locator('#revenue-is-total').check();
+  await page.locator('#revenue-checked').check();
+  await page.locator('#revenue-save-btn').click();
+  await expect(page.locator('#revenue-status')).toContainText('営業履歴の個別運賃');
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
+  await page.locator('#revenue-text').fill('令和8年11月21日 総収入 21,950 現金 10,400');
+  await expect(page.locator('#revenue-amount')).toHaveValue('21950');
+  await page.locator('#revenue-is-total').check();
+  await page.locator('#revenue-checked').check();
+  await page.locator('#revenue-save-btn').click();
+  await expect(page.locator('#modal')).not.toHaveClass(/open/);
+  await expect(page.locator('#sales-value')).toContainText('21,950');
+  await expect(page.locator('#report-clock')).toContainText('税込／税抜未確認');
+  let records=await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-taxi-confirmed-reports-v1')));
+  expect(records.records).toHaveLength(1);
+  expect(records.records[0].businessDate).toBe('2026-11-21');
+  expect(records.records[0].amountYen).toBe(21950);
+  expect(records.records[0].photoSha256).toMatch(/^sha256:[a-f0-9]{64}$/);
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-ops-v1'))).toBeNull();
+  await page.locator('[data-page="history"]').click();
+  const downloadPromise=page.waitForEvent('download');
+  await page.locator('#export-btn').click();
+  const download=await downloadPromise;
+  const backup=JSON.parse(await readFile(await download.path(),'utf8'));
+  expect(backup.confirmedRevenue.records).toHaveLength(1);
+  expect(backup.confirmedRevenue.records[0].amountYen).toBe(21950);
+  await page.locator('[data-page="sales"]').click();
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#sales-value')).toContainText('21,950');
+  await page.locator('#monthly-open').click();
+  await expect(page.locator('#monthly-sum-value')).toHaveText('区分未確認');
+  await expect(page.locator('#monthly-goal-value')).toHaveText('¥1,000,000');
+  await expect(page.locator('#monthly-progress-value')).toHaveText('—');
+  await expect(page.locator('#monthly-calendar .month-day small').filter({hasText:'21,950'})).toHaveCount(1);
+  await page.locator('[data-page="sales"]').click();
+  await page.locator('#photo-input').setInputFiles({name:'same-photo.png',mimeType:'image/png',buffer:mockImage});
+  await page.locator('#modal-actions button.primary').click();
+  await page.locator('#revenue-amount').fill('24000');
+  await page.locator('#revenue-is-total').check();
+  await page.locator('#revenue-checked').check();
+  await page.locator('#revenue-save-btn').click();
+  await expect(page.locator('#revenue-status')).toContainText('同じ写真は記録済み');
+  records=await page.evaluate(()=>JSON.parse(localStorage.getItem('yos-taxi-confirmed-reports-v1')));
+  expect(records.records).toHaveLength(1);
+});
+
+
+test('confirmed revenue: closing verification while photo digest is pending never writes a record',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-21T20:50:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const image=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8Zr1cAAAAASUVORK5CYII=','base64');
+  // Hold the selected image's bytes until the user has dismissed the sheet.
+  await page.evaluate(()=>{
+    const original=File.prototype.arrayBuffer;
+    File.prototype.arrayBuffer=function(){
+      return new Promise((resolve,reject)=>{
+        window.__releaseDelayedPhotoRead=()=>original.call(this).then(resolve,reject);
+      });
+    };
+  });
+  await page.locator('#photo-input').setInputFiles({name:'paper-report.png',mimeType:'image/png',buffer:image});
+  await page.locator('#modal-actions button.primary').click();
+  await page.locator('#revenue-amount').fill('21950');
+  await page.locator('#revenue-is-total').check();
+  await page.locator('#revenue-checked').check();
+  await page.locator('#revenue-save-btn').click();
+  await expect(page.locator('#revenue-save-btn')).toBeDisabled();
+  await page.locator('#close-modal').click();
+  await page.evaluate(()=>window.__releaseDelayedPhotoRead());
+  await page.waitForTimeout(80);
+  expect(await page.evaluate(()=>localStorage.getItem('yos-taxi-confirmed-reports-v1'))).toBeNull();
+  await expect(page.locator('#modal')).not.toHaveClass(/open/);
+});
+
+
+test('monthly revenue counts the latest daily snapshot only when confirmed tax bases match',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-22T20:50:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const statuses=await page.evaluate(()=>{
+    const api=window.YosTaxiConfirmedRevenueV1;
+    const mk=(day,amount,basis,c)=>({
+      businessDate:day,amountYen:amount,taxBasis:basis,reportClock:null,
+      photoSha256:'sha256:'+c.repeat(64),photoKind:'paper-total'
+    });
+    return [
+      api.confirm(mk('2026-11-21',21950,'tax-included','a')).status,
+      api.confirm(mk('2026-11-22',14750,'tax-included','b')).status
+    ];
+  });
+  expect(statuses).toEqual(['saved','saved']);
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#analysis-sales')).toHaveText('¥14,750');
+  await expect(page.locator('#analysis-revenue-note')).toContainText('税込');
+  await page.locator('#monthly-open').click();
+  await expect(page.locator('#monthly-sum-value')).toHaveText('¥36,700');
+  await expect(page.locator('#monthly-progress-value')).toHaveText('3.7%（参考）');
+  await expect(page.locator('#monthly-sum-label')).toContainText('2日');
+  await expect(page.locator('#monthly-notice')).toContainText('確定月商ではありません');
+  await page.evaluate(()=>{
+    const api=window.YosTaxiConfirmedRevenueV1;
+    api.confirm({businessDate:'2026-11-23',amountYen:30000,taxBasis:'tax-excluded',
+      reportClock:null,photoSha256:'sha256:'+'c'.repeat(64),photoKind:'paper-total'});
+  });
+  await page.locator('[data-page="sales"]').click();
+  await page.locator('#monthly-open').click();
+  await expect(page.locator('#monthly-sum-value')).toHaveText('区分混在');
+  await expect(page.locator('#monthly-progress-value')).toHaveText('—');
+  await expect(page.locator('#monthly-notice')).toContainText('合計を表示しません');
+});
+
+
+
+test('monthly calendar keeps the prior business month at 02:00 after local midnight',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-12-01T02:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const saved=await page.evaluate(()=>{
+    const api=window.YosTaxiConfirmedRevenueV1;
+    return api.confirm({
+      businessDate:'2026-11-30',amountYen:21950,taxBasis:'tax-included',reportClock:'23:30',
+      photoSha256:'sha256:'+'b'.repeat(64),photoKind:'paper-total'
+    }).status;
+  });
+  expect(saved).toBe('saved');
+  await page.locator('#monthly-open').click();
+  await expect(page.locator('#monthly-title')).toHaveText('2026年11月');
+  await expect(page.locator('#monthly-sum-value')).toHaveText('¥21,950');
+  await expect(page.locator('#monthly-calendar .month-day small').filter({hasText:'21,950'})).toHaveCount(1);
+});
+
+
+test('manual backup retains exact corrupted shift, wait, field and photo-ledger bytes without changing them',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T02:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const expected={
+    'yos-taxi-ui-v2-live-20261117':'{broken-shift',
+    'yos-taxi-wait-clock-v1':'{broken-wait',
+    'yos-taxi-field-reports-v1':'{broken-field',
+    'yos-taxi-confirmed-reports-v1':'{broken-photo'
+  };
+  await page.evaluate(values=>{
+    for(const [key,value] of Object.entries(values))localStorage.setItem(key,value);
+  },expected);
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('[data-page="history"]').click();
+  const downloadPromise=page.waitForEvent('download');
+  await page.locator('#export-btn').click();
+  const download=await downloadPromise;
+  const backup=JSON.parse(await readFile(await download.path(),'utf8'));
+  expect(backup.formatVersion).toBe(2);
+  expect(backup.rawLedgers).toEqual(expected);
+  expect(backup.confirmedRevenue.status).toBe('corrupt-preserved');
+  expect(backup.confirmedRevenue.raw).toBe(expected['yos-taxi-confirmed-reports-v1']);
+  const after=await page.evaluate(keys=>Object.fromEntries(keys.map(k=>[k,localStorage.getItem(k)])),Object.keys(expected));
+  expect(after).toEqual(expected);
+});
+
+
+test('corrupted legacy shift data is never overwritten by a new shift, even if corrupted after load',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T20:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const key='yos-taxi-ui-v2-live-20261117';
+  await page.evaluate(k=>localStorage.setItem(k,'{legacy-corrupt'),key);
+  await page.locator('#status-btn').click();
+  await page.locator('#modal-actions button.primary').click();
+  expect(await page.evaluate(k=>localStorage.getItem(k),key)).toBe('{legacy-corrupt');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#status-label')).toContainText('読込エラー');
+  await page.locator('#status-btn').click();
+  await expect(page.locator('#toast')).toContainText('上書きせず停止');
+  expect(await page.evaluate(k=>localStorage.getItem(k),key)).toBe('{legacy-corrupt');
+});
+
+test('matte cockpit calendar reuses existing plans, safe salary range and weekday analysis without rewriting ledgers',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T20:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const before=await page.evaluate(()=>{
+    const plans={monthlyGoals:{},days:{
+      '2026-11-21':{status:'work',target:450000,actualHours:80,event:'登録イベント'},
+      '2026-11-22':{status:'work',target:180000,actualHours:60},
+      '2026-11-24':{status:'off'}
+    }};
+    const settings={months:{'2026-11':{hourLimit:175,carryHours:3}}};
+    localStorage.setItem('yos-taxi-calendar-v1',JSON.stringify(plans));
+    localStorage.setItem('yos-taxi-calendar-settings-v3',JSON.stringify(settings));
+    const api=window.YosTaxiConfirmedRevenueV1;
+    for(const [day,amount,hash] of [['2026-11-21',440000,'a'],['2026-11-22',180000,'b']]){
+      const r=api.confirm({businessDate:day,amountYen:amount,taxBasis:'tax-excluded',reportClock:'23:00',
+        photoSha256:'sha256:'+hash.repeat(64),photoKind:'paper-total'});
+      if(r.status!=='saved')throw Error(r.status);
+    }
+    return Object.fromEntries(['yos-taxi-calendar-v1','yos-taxi-calendar-settings-v3','yos-taxi-confirmed-reports-v1'].map(k=>[k,localStorage.getItem(k)]));
+  });
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#cockpit-wait-toggle')).toBeDisabled();
+  await expect(page.locator('#cockpit-research')).toBeVisible();
+  await expect(page.locator('#cockpit-yos')).toBeVisible();
+  await page.locator('#monthly-open').click();
+  await expect(page.locator('#monthly-sum-value')).toHaveText('¥620,000');
+  await expect(page.locator('#monthly-pay')).toHaveText('¥310,600〜¥328,600');
+  await expect(page.locator('#monthly-hours-left')).toHaveText('32時間');
+  await expect(page.locator('.month-day .below-target')).toHaveText('¥440,000');
+  await expect(page.locator('.month-day .cal-plan').filter({hasText:'公休'})).toHaveCount(1);
+  await expect(page.locator('.month-day .cal-event').filter({hasText:'登録イベント'})).toHaveCount(1);
+  await page.locator('#cal-show-sales').uncheck();
+  await expect(page.locator('.month-day .below-target')).toBeHidden();
+  await page.locator('#cal-show-plans').uncheck();
+  await expect(page.locator('.cal-plan')).toHaveCount(0);
+  await page.locator('#cal-show-events').uncheck();
+  await expect(page.locator('.cal-event')).toHaveCount(0);
+  await page.locator('#cal-show-sales').check();
+  await page.locator('#month-prev').click();
+  await expect(page.locator('#monthly-title')).toHaveText('2026年10月');
+  await expect(page.locator('#monthly-pay')).toHaveText('—');
+  await page.locator('#month-next').click();
+  await expect(page.locator('#monthly-title')).toHaveText('2026年11月');
+  await page.locator('.month-day').filter({hasText:'¥440,000'}).click();
+  await expect(page.locator('#modal-body')).toContainText('日次目標：¥450,000');
+  await page.locator('#close-modal').click();
+  await page.locator('#monthly-analysis-open').click();
+  await expect(page.locator('#weekday-bars>div')).toHaveCount(7);
+  await expect(page.locator('#weekday-bars')).toContainText('¥440,000');
+  await expect(page.locator('#monthly-trend')).toContainText('¥620,000');
+  const after=await page.evaluate(keys=>Object.fromEntries(keys.map(k=>[k,localStorage.getItem(k)])),Object.keys(before));
+  expect(after).toEqual(before);
+});
+
+test('daily cockpit uses recorded shift and existing target without inventing break time',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T20:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await page.evaluate(()=>{
+    localStorage.setItem('yos-taxi-calendar-v1',JSON.stringify({days:{'2026-11-24':{status:'work',target:45000,serviceEnd:'05:00'}}}));
+    const r=window.YosTaxiConfirmedRevenueV1.confirm({businessDate:'2026-11-24',amountYen:15000,taxBasis:'tax-excluded',reportClock:'19:30',
+      photoSha256:'sha256:'+'c'.repeat(64),photoKind:'paper-total'});
+    if(r.status!=='saved')throw Error(r.status);
+  });
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#sales-value')).toHaveText('¥15,000');
+  await expect(page.locator('#target-value')).toHaveText('¥45,000');
+  await expect(page.locator('#remaining-target')).toHaveText('¥30,000');
+  await expect(page.locator('#remaining-shift')).toHaveText('未確認');
+  await page.locator('#status-btn').click();
+  await page.locator('#modal-actions button.primary').click();
+  await expect(page.locator('#remaining-shift')).toHaveText('9h 00m');
+  await expect(page.locator('#required-hourly')).toHaveText('¥3,333');
+  await expect(page.locator('#confirmed-hourly')).toHaveText('算出不可');
+  await page.locator('#cockpit-wait-toggle').click();
+  await expect(page.locator('#cockpit-wait-toggle')).toHaveText('待機終了');
+  await expect(page.locator('#cockpit-wait-time')).toHaveText('00:00');
+  await page.locator('#cockpit-wait-toggle').click();
+  await expect(page.locator('#cockpit-wait-toggle')).toHaveText('待機開始');
+});
+
+test('real-device feedback: sales hierarchy, matte strategy, contrast and preserved tap targets', async ({page},testInfo)=>{
+  await page.setViewportSize({width:402,height:874});
+  await page.clock.setFixedTime(new Date('2026-11-24T18:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const sales=await page.evaluate(()=>{
+    const box=id=>document.querySelector(id).getBoundingClientRect();
+    const font=id=>parseFloat(getComputedStyle(document.querySelector(id)).fontSize);
+    return {height:box('.sales-card').height,salesFont:font('#sales-value'),targetFont:font('#target-value'),gap:box('.pace-card').top-box('.sales-card').bottom,wait:box('#cockpit-wait-toggle').height,scroll:document.querySelector('#sales-view').scrollHeight-document.querySelector('#sales-view').clientHeight};
+  });
+  expect(sales.height).toBeGreaterThanOrEqual(153);
+  expect(sales.salesFont).toBeGreaterThanOrEqual(36);
+  expect(sales.salesFont).toBeGreaterThan(sales.targetFont);
+  expect(sales.gap).toBeLessThanOrEqual(6);
+  expect(sales.wait).toBeGreaterThanOrEqual(44);
+  expect(sales.scroll).toBeLessThanOrEqual(2);
+  await page.screenshot({path:resolve(artifactRoot,testInfo.project.name+'-field-sales.png')});
+  await page.locator('[data-page="strategy"]').click();
+  const colors=await page.evaluate(()=>{
+    const pairs=[['.strategy-action','#strategy-detail'],['.wait-card','#wait-guidance'],['.strategy-evidence','.strategy-evidence summary'],['.strat-row:not(.selected)','.strat-row:not(.selected) small'],['.strat-row.selected','.strat-row.selected b'],['.strategy-foot','.strategy-foot strong'],['#wait-toggle','#wait-toggle']];
+    const lum=rgb=>rgb.match(/[\d.]+/g).slice(0,3).map(Number).map(x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4}).reduce((v,x,i)=>v+x*[.2126,.7152,.0722][i],0);
+    return pairs.map(([bg,fg])=>{const a=getComputedStyle(document.querySelector(bg)),b=getComputedStyle(document.querySelector(fg)),l1=lum(a.backgroundColor),l2=lum(b.color);return {bg,background:a.backgroundImage,ratio:(Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05),light:l1};});
+  });
+  for(const pair of colors){expect(pair.background,pair.bg).toBe('none');expect(pair.light,pair.bg).toBeLessThan(.15);expect(pair.ratio,pair.bg).toBeGreaterThanOrEqual(4.5);}
+  await page.screenshot({path:resolve(artifactRoot,testInfo.project.name+'-field-strategy.png')});
+  await page.locator('.strategy-evidence summary').click();
+  await expect(page.locator('.evidence-body')).toBeVisible();
+  await page.locator('#field-open').click();
+  await expect(page.locator('.field-sheet')).toBeVisible();
+  await page.screenshot({path:resolve(artifactRoot,testInfo.project.name+'-field-sheet.png')});
 });

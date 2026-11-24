@@ -119,6 +119,9 @@ async function organizeRoot(fm, kind, currentExistsAnywhere) {
     if (group.length < 2) continue
     group.sort((a, b) => preference(b.name) - preference(a.name))
     for (const record of group.slice(1)) {
+      // An Untitled Script may be called by exact name from Shortcuts or widgets.
+      // Identical code does not prove the launcher name is unused.
+      if (isUntitled(record.name)) continue
       if (!fm.fileExists(record.path)) continue
       if (await moveToBak(fm, record.path, archive, record.name)) moved.push({ kind, name: record.name, reason: 'duplicate' })
     }
@@ -126,8 +129,10 @@ async function organizeRoot(fm, kind, currentExistsAnywhere) {
 
   for (const record of records) {
     if (!fm.fileExists(record.path)) continue
+    // Unknown-name launchers are never safe to archive based on their code text.
+    // In particular the active v6.6 direct remote opens as Untitled Script 9.
+    if (isUntitled(record.name)) continue
     let shouldMove = legacyVariant(record.name)
-    if (!shouldMove && isUntitled(record.name) && currentExistsAnywhere && REMOTE_SIGNATURE.test(record.text)) shouldMove = true
     if (!shouldMove) continue
     if (await moveToBak(fm, record.path, archive, record.name)) moved.push({ kind, name: record.name, reason: 'legacy' })
   }

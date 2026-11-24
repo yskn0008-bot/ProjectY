@@ -11,7 +11,7 @@ async function run({review='修正後の物語',choice=0,readbackFails=false,sto
  class WebView{
   async loadHTML(html){state.html=html}
   async present(){}
-  async evaluateJavaScript(){if(readbackFails)throw Error('webview unavailable');return review}
+  async evaluateJavaScript(code){if(readbackFails)throw Error('webview unavailable');if(code.includes('yosFinish'))return true;if(code.includes('yosMood'))return '';return review}
  }
  class Alert{addAction(){}addCancelAction(){}async presentAlert(){return choice}}
  const Data={fromBase64String:v=>({toRawString:()=>Buffer.from(v,'base64').toString()}),fromString:v=>({toBase64String:()=>Buffer.from(v).toString('base64')})};

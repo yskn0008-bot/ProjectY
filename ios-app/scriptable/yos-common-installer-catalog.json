@@ -52,6 +52,13 @@
       "sha256": "ee8959104a4d239b8b277fa368824a8810a03e682183a18d95b90dd99fd64d9b"
     },
     {
+      "id": "remote-power-toggle",
+      "name": "YOS Remote Power Toggle",
+      "path": "ios-app/scriptable/remote-widgets/YOS Remote Power Toggle.js",
+      "commit": "78babcb2e338adc264382fca5865644b38781cc2",
+      "sha256": "3faf56811245c177224b67f03360ccffcfcae903e3b6e94020824dc2db5ac98b"
+    },
+    {
       "id": "tapo-h110-core",
       "name": "YOS Tapo H110 Core",
       "path": "ios-app/scriptable/remote-widgets/YOS Tapo H110 Core.js",
@@ -62,15 +69,15 @@
       "id": "sleep-scene",
       "name": "YOS Sleep Scene",
       "path": "ios-app/scriptable/remote-widgets/YOS Sleep Scene.js",
-      "commit": "808d9e797a5734a4f7326e0471d6a4474244bc38",
-      "sha256": "987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8"
+      "commit": "23b09502ea5b4fd854d4e055c393aaca804938a0",
+      "sha256": "7daf038a551ff9d01f2344a60509bcfd4640238b4f4942e4d0320bb204445357"
     },
     {
       "id": "journal-book",
       "name": "YOS Journal Book",
       "path": "ios-app/scriptable/YOS Journal Book.js",
-      "commit": "f14674bfc52926e66e1f22d8490de23f6a2ba079",
-      "sha256": "9886c3d41c6b9871b5db6153616884c3830b61e11c6867ba1b89e8478d0bba6b"
+      "commit": "459f1c76c1a76ab87bb9221906b98b5f4ee1bbc8",
+      "sha256": "3423e5853c6d30d75f8603bb015dbac9863bab700c6821cc89f1a614ac65a6ac"
     },
     {
       "id": "journal-notion-bridge",
@@ -97,15 +104,15 @@
       "id": "clarity-inbox-bridge",
       "name": "YOS Clarity Inbox Bridge",
       "path": "ios-app/scriptable/YOS Clarity Inbox Bridge.js",
-      "commit": "bcecaceb7d933ee0d97e45dbedd159b6004d5860",
-      "sha256": "25917c13e195f585fae450a1bd34147bf240e69801c55cd8a4012b0a35dc45d8"
+      "commit": "82e287cc48cd486b60867caa14d8c8fb00615914",
+      "sha256": "dab381d8dfa18b9bc0b89e855c69673abe021d7a349c18d0bf84340e58af227f"
     },
     {
       "id": "daystream-notion",
       "name": "YOS DAYSTREAM Notion",
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
-      "commit": "8cbd54645a4f51d7867d954ea2ebd04979d4baee",
-      "sha256": "0f1e827cbe578f004d9295548e905bf676252639debaab5d4a4b8b9d4b517931"
+      "commit": "80ae63a893c57d226d1e356cd6aafc01811fce2a",
+      "sha256": "28e6b33de8557daa53057b1df79a7d334055ed19c252c740438c2c6a012b2d8e"
     },
     {
       "id": "ikemen-magazine",
@@ -113,6 +120,97 @@
       "path": "ios-app/scriptable/YOS イケメン攻略本.js",
       "commit": "7c94cb39f25c3ec513167063514d4eb19346a48c",
       "sha256": "41dbc735247e3241a35ec0ccb0bfe141cb684b1f0bc98489104484916ff70281"
+    },
+    {
+      "id": "bravia-picture-check",
+      "name": "YOS BRAVIA Picture Check",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Picture Check.js",
+      "commit": "71504b0e8a7b51e6b403a312437c37152a7e7e20",
+      "sha256": "e202fa7ecc4efcb0dd18dc5b4ad6cf788144a7775e83be2ac0a6868306e147b6"
+    },
+    {
+      "id": "health-automation",
+      "name": "YOS Health Automation",
+      "path": "ios-app/scriptable/YOS Health Automation.js",
+      "commit": "022655be1d3f19fd5046428b9ea404d3288e337e",
+      "sha256": "63366cabebee9f5f8d0b1e0f5b78fa3a7de2fb2e67a2341e920663eca3e94f5b"
+    },
+    {
+      "id": "bravia-picture-off",
+      "name": "YOS BRAVIA Picture Off",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA Picture Off.js",
+      "commit": "4b1ede82c2e1282f8441119371a0802331838c1e",
+      "sha256": "a3fd9ef9193eb856ae3242626ae830d9020d8b4b2c2263cdc59d99fb8dc44a8d"
+    },
+    {
+      "id": "remote-hub",
+      "name": "リモコン",
+      "path": "ios-app/scriptable/remote-widgets/YOS Remote Hub.js",
+      "commit": "696eb3bd9d0bc0faf147c55ee4e73aa1c1ae9f44",
+      "sha256": "cf7b6f441db5e715feee185971c77b51e3c6945675fac71c13a6e7050072235a"
+    },
+    {
+      "id": "shopping",
+      "name": "YOS Shopping",
+      "path": "ios-app/scriptable/YOS Shopping.js",
+      "commit": "983fd98c9511ab68384e8cb765273de713d82bb4",
+      "sha256": "349d360cdd61e0b36d8a29bf6a955cf621ec0f212f88180bfaa6d1f1202bf70f"
+    },
+    {
+      "id": "scriptable-inventory",
+      "name": "YOS Scriptable 棚卸し",
+      "path": "ios-app/scriptable/YOS Scriptable 棚卸し.js",
+      "commit": "fa6c7d41013dcc89e74f4afdff96eaf3630b07d0",
+      "sha256": "bbc3b709a9c2a1c10908c5a3eb8b5dd65d1dccbe117c727fc6f12566d0feffad"
+    },
+    {
+      "id": "bravia-picture-integration",
+      "name": "YOS BRAVIA 画質統合",
+      "path": "ios-app/scriptable/YOS BRAVIA 画質統合.js",
+      "commit": "2b61b650314c3cd05b62287134971d3bfa12edfd",
+      "sha256": "78056b332397e98d2351f093f7268593c471a9c0b01c14fbf838a2ba446f7ed2"
+    },
+    {
+      "id": "yos-lists",
+      "name": "YOS Lists",
+      "path": "ios-app/scriptable/YOS Lists.js",
+      "commit": "ed750c0487b6332dc38423d8b4adb68fd36d90b6",
+      "sha256": "44c72eaf539d20696835df8125657af7f3e2f7610eb6e7a30f30d4ff4e4fd3e1"
+    },
+    {
+      "id": "home-scenes",
+      "name": "YOS Home Scenes",
+      "path": "ios-app/scriptable/remote-widgets/YOS Home Scenes.js",
+      "commit": "d87ff1f6d67d4d3e6f0b9a2a9df2710b87287b5f",
+      "sha256": "88ab9e9bb79719168c4b52041c1dd219c43bde612b4ab398c51b2dcaa6d8aef3"
+    },
+    {
+      "id": "common-installer-repair",
+      "name": "YOS Common Installer 修復",
+      "path": "ios-app/scriptable/YOS Common Installer 修復.js",
+      "commit": "cc7a0f91c4e5b758b290f7098aae417b57c631c7",
+      "sha256": "c1ca6e8fe99b3ca33e8ec78aa478a1d707114c10c74bd068554845e3b227c620"
+    },
+    {
+      "id": "bravia-picture-off-repair",
+      "name": "YOS BRAVIA 消画安全復旧",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA 消画安全復旧.js",
+      "commit": "eb844731556779c4689b3fec7c41772ca98dba99",
+      "sha256": "7a923fa373b4675070b93cbea78bfa8bdc23c2725ca50a7683eecf52502e008e"
+    },
+    {
+      "id": "remote-hub-quick-test",
+      "name": "YOS Remote Hub Quick TEST",
+      "path": "ios-app/scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js",
+      "commit": "bd7d6011179a670309c464f2e558b1ec814089c5",
+      "sha256": "dbf8f7c6dd0cdb0f41d3ae1ed256f3ff580d12b8366c2c179887d63355c2c758"
+    },
+    {
+      "id": "self",
+      "name": "Self",
+      "path": "ios-app/scriptable/Self.js",
+      "commit": "f8ec1476050afaef469d1ecc9b4c8d79bab38dff",
+      "sha256": "c3437e6a5f2a15044eee4e22f3a7dc54d2309dd3df349f93a457c85dd04efcc4"
     }
   ]
 }

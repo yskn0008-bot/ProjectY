@@ -20,20 +20,27 @@ function fm(root){
 async function run(options={}){
  const cloud=options.cloud||fm('/icloud'),local=options.local||fm('/local'),catalog=options.catalog||shipped;
  const sources=options.sources||fixtures,choices=[...(options.choices||[0,-1])],alerts=[],opened=[],requests=[];
- class Request{constructor(url){this.url=url;this.response=null;requests.push(url)}
+ class Request{constructor(url){this.url=url;this.response=null;this.headers={};requests.push(url)}
  async loadString(){if(options.offline)throw Error('network offline');this.response={statusCode:options.status||200};if(this.url.includes('yos-common-installer-catalog.json'))return JSON.stringify(catalog);
- for(const t of catalog.targets)if(this.url.includes('/'+t.commit+'/')&&this.url.endsWith(t.path.split('/').map(encodeURIComponent).join('/')))return sources[t.id];
- throw Error('unexpected '+this.url)}}
+ for(const t of catalog.targets)if(this.url.includes('/'+t.commit+'/')&&this.url.endsWith(t.path.split('/').map(encodeURIComponent).join('/')))return options.corruptRaw?'// WRONG RAW CONTENT':sources[t.id];
+ throw Error('unexpected '+this.url)}
+ async loadJSON(){if(options.offline)throw Error('network offline');this.response={statusCode:200};
+ for(const t of catalog.targets)if(this.url.includes('/contents/'+t.path.split('/').map(encodeURIComponent).join('/')+'?ref='+t.commit)){
+  const source=options.corruptApi?'// WRONG API CONTENT':sources[t.id];
+  return {encoding:'base64',content:Buffer.from(source,'utf8').toString('base64'),size:Buffer.byteLength(source)};
+ }
+ throw Error('unexpected API '+this.url)}}
  class Alert{constructor(){this.title='';this.message='';this.actions=[]}addAction(x){this.actions.push(x)}addCancelAction(x){this.actions.push(x)}
  async presentAlert(){alerts.push({title:this.title,message:this.message});return choices.length?choices.shift():-1}}
- const globals={Request,Alert,FileManager:{iCloud:()=>cloud,local:()=>local},Safari:{open:x=>opened.push(x)},Script:{complete(){}},args:{shortcutParameter:options.id||'',queryParameters:{}},console};
+ const Data={fromBase64String(s){return {toRawString(){return Buffer.from(s,'base64').toString('utf8')}}}};
+ const globals={Data,Request,Alert,FileManager:{iCloud:()=>cloud,local:()=>local},Safari:{open:x=>opened.push(x)},Script:{complete(){}},args:{shortcutParameter:options.id||'',queryParameters:{}},console};
  await vm.runInNewContext('(async()=>{'+script+'})()',globals,{timeout:10000});
  return {cloud,local,alerts,opened,requests};
 }
 const target='/icloud/YOS Timeline Auto.js',receipt='/icloud/YOS Common Installer Data/YOS%20Timeline%20Auto.receipt.json',marker='/icloud/YOS Common Installer Data/YOS%20Timeline%20Auto.pending.json';
 test('catalog pins original bytes, canonical script names and SHA256',()=>{
  assert.equal(shipped.schema,1);
- for(const t of shipped.targets){assert.equal(hash(fixtures[t.id]),t.sha256);assert.equal(t.name,t.path.split('/').pop().slice(0,-3));assert.match(t.commit,/^[0-9a-f]{40}$/)}});
+ for(const t of shipped.targets){assert.equal(hash(fixtures[t.id]),t.sha256);assert.equal(t.name,t.id==='remote-hub'?'リモコン':t.path.split('/').pop().slice(0,-3));assert.match(t.commit,/^[0-9a-f]{40}$/)}});
 test('calendar importer is available through the existing shared installer without manual naming',async()=>{
  const entry=shipped.targets.find(t=>t.id==='life-calendar-sync');
  assert.ok(entry,'YOS Life Calendar Sync must be catalogued');
@@ -464,4 +471,228 @@ test('two orphan receipts in iCloud and local prevent any restore',async()=>{
  assert.deepEqual([...cloud.files],c);assert.deepEqual([...local.files],l);
  assert.equal(r.opened.length,0);
  assert.match(r.alerts.at(-1).message,/管理記録が両方/);
+});
+
+const REMOTE_REPLACEMENTS=[
+ ['YOS Remote Hub','リモコン'],['YOS BRAVIA Remote','テレビリモコン'],['YOS BRAVIA Widget','テレビウィジェット'],
+ ['YOS AC Remote','エアコンリモコン'],['YOS AC Widget','エアコンウィジェット'],
+ ['YOS Light Remote','照明リモコン'],['YOS Light Widget','照明ウィジェット'],
+ ['YOS Tapo H110 Core','リモコン/内部/Tapo共通']
+];
+const localizeRemote=s=>REMOTE_REPLACEMENTS.reduce((v,[a,b])=>v.split(a).join(b),s);
+const remoteEntry=shipped.targets.find(x=>x.id==='remote-hub');
+const remotePath='/icloud/リモコン.js';
+const remoteReceipt='/icloud/YOS Common Installer Data/'+encodeURIComponent('リモコン')+'.receipt.json';
+test('bundle and JavaScript installer are identical',()=>{
+ const bundle=JSON.parse(fs.readFileSync(new URL('../scriptable/YOS Common Installer.scriptable',import.meta.url),'utf8'));
+ assert.equal(bundle.name,'YOS Common Installer');
+ assert.equal(bundle.script,script);
+});
+test('Japanese remote uses one verified source and never creates a second remote',async()=>{
+ assert.ok(remoteEntry);
+ assert.equal(remoteEntry.name,'リモコン');
+ assert.equal(remoteEntry.path,'ios-app/scriptable/remote-widgets/YOS Remote Hub.js');
+ assert.equal(hash(fixtures['remote-hub']),remoteEntry.sha256);
+ assert.match(fixtures['remote-hub'],/ショートカット/);
+ assert.match(fixtures['remote-hub'],/pictureSave/);
+ const r=await run({id:'remote-hub'});
+ assert.equal(r.cloud.files.size,0);
+ assert.equal(r.local.files.size,0);
+ assert.match(r.alerts.at(-1).message,/既存の「リモコン」がありません/);
+});
+test('known unmanaged Japanese remote upgrades in place, protecting other scripts',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const old=localizeRemote(fixtures['remote-hub']);
+ assert.equal(hash(old),'49ca95b6ce3e0ad07397cfc561d4027d0b04764cf5362e959070956c5186a071');
+ cloud.files.set(remotePath,old);
+ cloud.files.set('/icloud/テレビリモコン.js','PRIVATE TV REMOTE');
+ cloud.files.set('/icloud/エアコンリモコン.js','PRIVATE AIRCON');
+ const future=fixtures['remote-hub']+'\n// TEST: verified future picture UI release\n';
+ const next=localizeRemote(future);
+ const catalog=clone(shipped),entry=catalog.targets.find(x=>x.id==='remote-hub');
+ entry.commit='f'.repeat(40);entry.sha256=hash(future);
+ const r=await run({cloud,local,id:'remote-hub',catalog,sources:{...fixtures,'remote-hub':future},choices:[0,-1]});
+ assert.equal(cloud.files.get(remotePath),next);
+ assert.equal(JSON.parse(cloud.files.get(remoteReceipt)).sha256,hash(next));
+ assert.equal(cloud.files.get('/icloud/テレビリモコン.js'),'PRIVATE TV REMOTE');
+ assert.equal(cloud.files.get('/icloud/エアコンリモコン.js'),'PRIVATE AIRCON');
+ const backup='/icloud/YOS Common Installer Data/backups/'+encodeURIComponent('リモコン')+'-'+hash(old)+'.txt';
+ assert.equal(cloud.files.get(backup),old);
+ assert.equal(r.opened.length,0);
+});
+test('unknown edits and iCloud/local duplicates are protected',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ cloud.files.set(remotePath,'PERSONAL SCRIPT');
+ let r=await run({id:'remote-hub',cloud,local});
+ assert.equal(cloud.files.get(remotePath),'PERSONAL SCRIPT');
+ assert.match(r.alerts.at(-1).message,/管理記録がありません/);
+ const other=fm('/local');
+ cloud.files.set(remotePath,localizeRemote(fixtures['remote-hub']));
+ other.files.set('/local/リモコン.js','CUSTOM LOCAL');
+ r=await run({id:'remote-hub',cloud,local:other});
+ assert.equal(other.files.get('/local/リモコン.js'),'CUSTOM LOCAL');
+ assert.match(r.alerts.at(-1).title,/同名スクリプト/);
+});
+test('interrupted unmanaged remote upgrade restores its exact code and removes new receipt',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const old=localizeRemote(fixtures['remote-hub']);
+ const future=old+'\n// synthetic newer version\n';
+ const oldHash=hash(old),newHash=hash(future);
+ const folder='/icloud/YOS Common Installer Data';
+ cloud.createDirectory(folder+'/backups');
+ const backup=folder+'/backups/'+encodeURIComponent('リモコン')+'-'+oldHash+'.txt';
+ const marker=folder+'/'+encodeURIComponent('リモコン')+'.pending.json';
+ cloud.files.set(backup,old);
+ cloud.files.set(remotePath,future);
+ cloud.files.set(remoteReceipt,JSON.stringify({schema:1,name:'リモコン',id:'remote-hub',path:remoteEntry.path,storage:'iCloud',sha256:newHash,commit:'f'.repeat(40)}));
+ cloud.files.set(marker,JSON.stringify({schema:1,name:'リモコン',oldHash,newHash,backup,receiptFile:remoteReceipt,oldReceipt:null}));
+ const r=await run({cloud,local,id:'remote-hub'});
+ assert.equal(cloud.files.get(remotePath),old);
+ assert.equal(cloud.files.has(remoteReceipt),false);
+ assert.equal(cloud.files.has(marker),false);
+ assert.match(r.alerts.at(-1).message,/復旧しました/);
+});
+
+test('raw source hash mismatch retries immutable GitHub Contents API before writing',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const r=await run({cloud,local,id:'remote-hub',corruptRaw:true});
+ assert.equal(r.cloud.files.size,0);
+ assert.equal(r.local.files.size,0);
+ assert.ok(r.requests.some(x=>x.includes('/contents/ios-app/scriptable/remote-widgets/YOS%20Remote%20Hub.js?ref=')));
+ assert.match(r.alerts.at(-1).message,/既存の「リモコン」がありません/);
+});
+test('both source routes mismatching stop without touching scripts and explain fingerprints',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ cloud.files.set(remotePath,'PERSONAL REMOTE');
+ const r=await run({cloud,local,id:'remote-hub',corruptRaw:true,corruptApi:true});
+ assert.equal(cloud.files.get(remotePath),'PERSONAL REMOTE');
+ assert.match(r.alerts.at(-1).message,/検証が2経路とも不一致/);
+ assert.match(r.alerts.at(-1).message,/RAW:/);
+ assert.match(r.alerts.at(-1).message,/API:/);
+});
+
+
+test('Scriptable-generated icon header only is an accepted managed update with raw backup',async()=>{
+  const cloud=fm('/icloud'),local=fm('/local');
+  await run({cloud,local,id:'sleep-scene',choices:[-1]});
+  const name='YOS Sleep Scene',path='/icloud/'+name+'.js';
+  const rec='/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.receipt.json';
+  const before=cloud.files.get(path);
+  const banner='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: deep-green; icon-glyph: magic;\n';
+  const phoneCode=banner+before;
+  cloud.files.set(path,phoneCode);
+  const next=before+'\n// safe test upgrade\n';
+  const cat=clone(shipped),entry=cat.targets.find(x=>x.id==='sleep-scene');
+  entry.commit='f'.repeat(40);entry.sha256=hash(next);
+  let r=await run({cloud,local,id:'sleep-scene',catalog:cat,sources:{...fixtures,'sleep-scene':next},choices:[0,-1]});
+  assert.equal(cloud.files.get(path),next);
+  assert.equal(JSON.parse(cloud.files.get(rec)).sha256,hash(next));
+  assert.ok(r.alerts.some(x=>x.title==='更新の確認'));
+  assert.equal(cloud.files.get('/icloud/YOS Common Installer Data/backups/'+encodeURIComponent(name)+'-'+hash(phoneCode)+'.txt'),phoneCode);
+});
+
+test('Scriptable metadata never exempts even a single real source edit',async()=>{
+  const cloud=fm('/icloud'),local=fm('/local');
+  await run({cloud,local,id:'sleep-scene',choices:[-1]});
+  const path='/icloud/YOS Sleep Scene.js',initial=cloud.files.get(path);
+  const banner='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: deep-green; icon-glyph: magic;\n';
+  // Simulate a real code edit regardless of the source's current version label.
+  const versionLine=/^\/\/ YOS Sleep Scene v[^\n]+$/m;
+  assert.match(initial,versionLine,'the installed source must contain a version marker');
+  const altered=banner+initial.replace(versionLine,'// YOS Sleep Scene manually edited');
+  assert.notEqual(altered,banner+initial,'a genuine source edit must occur');
+  cloud.files.set(path,altered);
+  const next=initial+'\n// future version\n',cat=clone(shipped),entry=cat.targets.find(x=>x.id==='sleep-scene');
+  entry.commit='f'.repeat(40);entry.sha256=hash(next);
+  const r=await run({cloud,local,id:'sleep-scene',catalog:cat,sources:{...fixtures,'sleep-scene':next},choices:[0,-1]});
+  assert.equal(cloud.files.get(path),altered);
+  assert.match(r.alerts.at(-1).message,/変更されたコード/);
+});
+
+test('Scriptable icon header managed update interrupted is fully restorable',async()=>{
+  const cloud=fm('/icloud'),local=fm('/local');
+  await run({cloud,local,id:'sleep-scene',choices:[-1]});
+  const name='YOS Sleep Scene',path='/icloud/'+name+'.js',base='/icloud/YOS Common Installer Data';
+  const rec=base+'/'+encodeURIComponent(name)+'.receipt.json',marker=base+'/'+encodeURIComponent(name)+'.pending.json';
+  const old=cloud.files.get(path),oldReceipt=cloud.files.get(rec);
+  const banner='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: deep-green; icon-glyph: magic;\n';
+  const annotated=banner+old,newCode=old+'\n// new\n';
+  const catalog=clone(shipped),e=catalog.targets.find(x=>x.id==='sleep-scene');
+  e.commit='f'.repeat(40);e.sha256=hash(newCode);
+  const backup=base+'/backups/'+encodeURIComponent(name)+'-'+hash(annotated)+'.txt';
+  cloud.createDirectory(base+'/backups');
+  cloud.files.set(backup,annotated);cloud.files.set(path,newCode);
+  cloud.files.set(rec,JSON.stringify({...JSON.parse(oldReceipt),sha256:hash(newCode),commit:e.commit}));
+  cloud.files.set(marker,JSON.stringify({schema:1,name,oldHash:hash(annotated),newHash:hash(newCode),backup,receiptFile:rec,oldReceipt}));
+  const r=await run({cloud,local,id:'sleep-scene',catalog,sources:{...fixtures,'sleep-scene':newCode}});
+  assert.equal(cloud.files.get(path),annotated);
+  assert.equal(cloud.files.get(rec),oldReceipt);
+  assert.equal(cloud.files.has(marker),false);
+  assert.match(r.alerts.at(-1).message,/復旧しました/);
+});
+
+test('verified original Sleep Scene v1.0 can be migrated only with consent, backup and valid historical receipt',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ await run({cloud,local,id:'sleep-scene',choices:[-1]});
+ const name='YOS Sleep Scene',path='/icloud/'+name+'.js',rec='/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.receipt.json';
+ const legacy=fs.readFileSync(new URL('fixtures/YOS Sleep Scene original v1.0.js',import.meta.url),'utf8');
+ assert.equal(hash(legacy),'987664699fee3963f001e6610eafb5d371e3009cba990560785ed456171587f8');
+ cloud.files.set(path,legacy);
+ const historicalReceipt=JSON.parse(cloud.files.get(rec));
+ historicalReceipt.sha256='5db5b1e0278e9ab0da3c25f2a74a0a5d8682962ad9ac2de3cfd29c8dc98ac47f';
+ const oldReceipt=JSON.stringify(historicalReceipt);cloud.files.set(rec,oldReceipt);
+ cloud.files.set('/icloud/YOS Sleep Scene 1.js','ACCIDENTAL USER COPY');
+ let r=await run({cloud,local,id:'sleep-scene',choices:[-1]});
+ assert.equal(cloud.files.get(path),legacy,'decline must not alter original');
+ assert.equal(cloud.files.get(rec),oldReceipt,'decline must not alter historical receipt');
+ assert.equal(r.alerts.at(-1).title,'YOS Sleep Scene｜旧正式版の安全更新');
+ r=await run({cloud,local,id:'sleep-scene',choices:[0,-1]});
+ assert.equal(cloud.files.get(path),fixtures['sleep-scene']);
+ assert.equal(JSON.parse(cloud.files.get(rec)).sha256,shipped.targets.find(t=>t.id==='sleep-scene').sha256);
+ assert.equal(cloud.files.get('/icloud/YOS Common Installer Data/backups/'+encodeURIComponent(name)+'-'+hash(legacy)+'.txt'),legacy);
+ assert.equal(cloud.files.get('/icloud/YOS Sleep Scene 1.js'),'ACCIDENTAL USER COPY');
+ assert.equal(cloud.files.has('/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.pending.json'),false);
+});
+test('verified old Sleep Scene with only a Scriptable icon banner remains updateable with raw backup',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ await run({cloud,local,id:'sleep-scene',choices:[-1]});
+ const name='YOS Sleep Scene',path='/icloud/'+name+'.js';
+ const old=fs.readFileSync(new URL('fixtures/YOS Sleep Scene original v1.0.js',import.meta.url),'utf8');
+ const banner='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: deep-green; icon-glyph: magic;\n';
+ cloud.files.set(path,banner+old);
+ const rec='/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.receipt.json';
+ const oldReceipt=JSON.parse(cloud.files.get(rec));oldReceipt.sha256='5db5b1e0278e9ab0da3c25f2a74a0a5d8682962ad9ac2de3cfd29c8dc98ac47f';cloud.files.set(rec,JSON.stringify(oldReceipt));
+ await run({cloud,local,id:'sleep-scene',choices:[0,-1]});
+ assert.equal(cloud.files.get(path),fixtures['sleep-scene']);
+ assert.equal(cloud.files.get('/icloud/YOS Common Installer Data/backups/'+encodeURIComponent(name)+'-'+hash(banner+old)+'.txt'),banner+old);
+});
+test('unrecognized Sleep Scene edit or spoofed historical receipt cannot bypass protection',async()=>{
+ for(const type of ['edit','receipt']){
+  const cloud=fm('/icloud'),local=fm('/local');
+  await run({cloud,local,id:'sleep-scene',choices:[-1]});
+  const name='YOS Sleep Scene',path='/icloud/'+name+'.js',rec='/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.receipt.json';
+  const old=fs.readFileSync(new URL('fixtures/YOS Sleep Scene original v1.0.js',import.meta.url),'utf8');
+  const live=type==='edit'?old.replace('YOS Sleep Scene v1.0','YOS Sleep Scene user changed'):old;
+  cloud.files.set(path,live);
+  const r0=JSON.parse(cloud.files.get(rec));r0.sha256=type==='receipt'?'f'.repeat(64):'5db5b1e0278e9ab0da3c25f2a74a0a5d8682962ad9ac2de3cfd29c8dc98ac47f';
+  const receipt=JSON.stringify(r0);cloud.files.set(rec,receipt);
+  const r=await run({cloud,local,id:'sleep-scene',choices:[0,-1]});
+  assert.equal(cloud.files.get(path),live);
+  assert.equal(cloud.files.get(rec),receipt);
+  assert.equal(r.alerts.at(-1).title,'YOS導入・更新は未完了');
+  assert.match(r.alerts.at(-1).message,/Scriptable内で変更されたコード/);
+ }
+});
+test('verified unmanaged original Sleep Scene upgrades only after explicit confirmation and backup',async()=>{
+ const cloud=fm('/icloud'),local=fm('/local');
+ const old=fs.readFileSync(new URL('fixtures/YOS Sleep Scene original v1.0.js',import.meta.url),'utf8');
+ const name='YOS Sleep Scene',path='/icloud/'+name+'.js',rec='/icloud/YOS Common Installer Data/'+encodeURIComponent(name)+'.receipt.json';
+ cloud.files.set(path,old);
+ let r=await run({cloud,local,id:'sleep-scene',choices:[-1]});
+ assert.equal(cloud.files.get(path),old);assert.equal(cloud.files.has(rec),false);
+ assert.equal(r.alerts.at(-1).title,'YOS Sleep Scene｜旧正式版の安全更新');
+ r=await run({cloud,local,id:'sleep-scene',choices:[0,-1]});
+ assert.equal(cloud.files.get(path),fixtures['sleep-scene']);
+ assert.equal(JSON.parse(cloud.files.get(rec)).sha256,hash(fixtures['sleep-scene']));
+ assert.equal(cloud.files.get('/icloud/YOS Common Installer Data/backups/'+encodeURIComponent(name)+'-'+hash(old)+'.txt'),old);
 });

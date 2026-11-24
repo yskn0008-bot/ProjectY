@@ -1,0 +1,16 @@
+#define name YOS TAXI 降車
+#define color orange
+
+#include 'actions/text'
+#include 'actions/calendar'
+#include 'actions/web'
+
+// Use the existing YOS Taxi browser event store only.
+// This Shortcut never writes to iCloud/Clarity or creates another ledger.
+// Native actions capture tap time before opening the browser.
+const tapDate = currentDate()
+const tappedAt = formatDate(tapDate, "Custom", "yyyyMMddHHmmss")
+const salt = randomNumber(100000, 999999)
+const recordUrl = text("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=dropoff&yos_req={tappedAt}-{salt}")
+openURL(recordUrl)
+stop()

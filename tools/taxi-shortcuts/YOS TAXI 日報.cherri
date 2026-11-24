@@ -1,0 +1,31 @@
+#define name YOS TAXI 日報
+#define color orange
+#define inputs image
+#define from sharesheet
+
+#include 'actions/images'
+#include 'actions/text'
+#include 'actions/sharing'
+#include 'actions/web'
+#include 'actions/shortcuts'
+
+// Existing standalone launch is retained. Sharing a photo performs on-device OCR,
+// places the recognized text on the clipboard, and opens the existing review flow.
+// No image upload, Notion write, or automatic sales confirmation.
+if ShortcutInput {
+    const images = getImages(ShortcutInput)
+    @recognized = ""
+    for image in images {
+        const imageText = getTextFromImage(@image)
+        @recognized += "{imageText}\n"
+    }
+    if @recognized {
+        setClipboard(@recognized)
+        alert("写真の文字を端末内で読み取り、クリップボードにコピーしました。次の画面で同じ写真を選び、総収入欄を確認してください。文字は自動保存・送信されません。", "YOS TAXI｜日報OCR")
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=report&yos_ocr=clipboard")
+        stop()
+    }
+    alert("写真から文字を読み取れませんでした。次の画面で日報写真を確認し、総収入を手入力してください。", "YOS TAXI｜日報")
+}
+openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=report")
+stop()

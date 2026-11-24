@@ -1,0 +1,146 @@
+#define name YOS TAXI 運行
+#define color blue
+
+#include 'actions/text'
+#include 'actions/sharing'
+#include 'actions/calendar'
+#include 'actions/web'
+
+// One existing launch point. Do not create a parallel shift, ride or expense ledger.
+// All steps are intended to be used only when the vehicle is safely parked.
+// The dedicated "YOS TAXI 降車" stays separate for Lock Screen / Home Screen use.
+@stages: array
+@stages += "出庫前｜確認・開始"
+@stages += "営業中｜判断・休憩・記録"
+@stages += "帰庫｜終了・日報"
+@stages += "困ったとき｜安全対応"
+
+const stage = chooseFromList(@stages, "YOS TAXI｜運行")
+const selected = getText(stage)
+
+if selected == "出庫前｜確認・開始" {
+    @prep: array
+    @prep += "出庫前点検｜確認する"
+    @prep += "出庫｜営業開始を確認"
+    @prep += "営業画面｜開く"
+    @prep += "営業前リサーチ｜公式情報を確認"
+    const choicePrep = chooseFromList(@prep, "出庫前")
+    const prepText = getText(choicePrep)
+    if prepText == "出庫前点検｜確認する" {
+        alert("安全な停車中に確認してください。\n・免許・社員証・必要書類\n・車両・タイヤ・灯火・メーター・燃料等（会社点検に従う）\n・車内・忘れ物・清掃・決済端末\n・体調・眠気・休憩・携行品\n※点検を自動実施・記録した意味ではありません。", "YOS TAXI｜出庫前点検")
+        stop()
+    }
+    if prepText == "出庫｜営業開始を確認" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=start")
+        stop()
+    }
+    if prepText == "営業画面｜開く" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html")
+        stop()
+    }
+    if prepText == "営業前リサーチ｜公式情報を確認" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/research.html?phase=before")
+        stop()
+    }
+    stop()
+}
+
+if selected == "営業中｜判断・休憩・記録" {
+    @ops: array
+    @ops += "営業画面｜開く"
+    @ops += "営業中リサーチ｜変化を確認"
+    @ops += "M100｜停車中に確認"
+    @ops += "空車｜15分タイマー"
+    @ops += "休憩｜20分タイマー"
+    @ops += "営業履歴｜確認"
+    @ops += "実績分析｜未同期に注意"
+    @ops += "業務メモ・経費｜既存Inbox"
+    const choiceOps = chooseFromList(@ops, "営業中｜安全な停車時のみ")
+    const opsText = getText(choiceOps)
+    if opsText == "営業画面｜開く" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html")
+        stop()
+    }
+    if opsText == "営業中リサーチ｜変化を確認" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/research.html?phase=during")
+        stop()
+    }
+    if opsText == "M100｜停車中に確認" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=m100")
+        stop()
+    }
+    if opsText == "空車｜15分タイマー" {
+        alert("15分後の見直し用タイマーです。経過後に必ず移動するルールではありません。空車記録とは連動しません。", "M100｜再判断の目安")
+        startTimer(qty(15, "min"))
+        stop()
+    }
+    if opsText == "休憩｜20分タイマー" {
+        alert("20分タイマーを開始します。休憩時間の記録・会社規定上の休憩完了確認は行いません。疲労や社内規定に応じ、必要な休憩を確保してください。", "YOS TAXI｜休憩")
+        startTimer(qty(20, "min"))
+        stop()
+    }
+    if opsText == "営業履歴｜確認" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=history")
+        stop()
+    }
+    if opsText == "実績分析｜未同期に注意" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=analysis")
+        stop()
+    }
+    if opsText == "業務メモ・経費｜既存Inbox" {
+        alert("既存NotionのYOS Inboxを開きます。\n営業メモ・経費・写真などを入力する入口です。\n※このショートカットだけでは自動保存しません。Clarityの既存保存処理は変更しません。", "YOS TAXI｜記録入口")
+        openURL("https://app.notion.com/p/3d35ca88289581ef9dc8d5f11ff8e213")
+        stop()
+    }
+    stop()
+}
+
+if selected == "帰庫｜終了・日報" {
+    @close: array
+    @close += "帰庫前点検｜確認する"
+    @close += "帰庫｜営業終了を確認"
+    @close += "日報写真｜選択する"
+    @close += "未照合・履歴｜確認"
+    const choiceClose = chooseFromList(@close, "帰庫・日報")
+    const closeText = getText(choiceClose)
+    if closeText == "帰庫前点検｜確認する" {
+        alert("会社規定に従って確認してください。\n・帰庫時間・メーター・乗務日報\n・現金と電子決済・未精算・忘れ物\n・車両の異常・給油・清掃・鍵\n・未照合の降車記録と日報写真\n※確認項目の表示だけで、精算や照合は実行しません。", "YOS TAXI｜帰庫前チェック")
+        stop()
+    }
+    if closeText == "帰庫｜営業終了を確認" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=end")
+        stop()
+    }
+    if closeText == "日報写真｜選択する" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=report")
+        stop()
+    }
+    if closeText == "未照合・履歴｜確認" {
+        openURL("https://yskn0008-bot.github.io/ProjectY/taxi/ui-v2.html?yos_action=history")
+        stop()
+    }
+    stop()
+}
+
+if selected == "困ったとき｜安全対応" {
+    @help: array
+    @help += "事故・急病｜安全確保"
+    @help += "故障｜路上トラブル"
+    @help += "忘れ物｜会社へ報告"
+    const choiceHelp = chooseFromList(@help, "安全な場所で確認")
+    const helpText = getText(choiceHelp)
+    if helpText == "事故・急病｜安全確保" {
+        alert("まず安全な場所に停止、ハザード等で危険を防止。\n人命・負傷の確認を優先し、必要なら119、事故時は110、会社へ連絡してください。\n負傷者救護と二次事故防止を優先。安全が確保できるまでアプリ操作をしないでください。\n※自動通報・位置送信はしません。", "緊急｜事故・急病")
+        stop()
+    }
+    if helpText == "故障｜路上トラブル" {
+        alert("無理に走行せず、安全確保と二次事故防止を優先。\n必要な表示・退避を行い、会社へ連絡して指示に従ってください。\n高速道路では特に危険です。安全な場所への退避を優先。\n※自動救援依頼はしません。", "緊急｜車両故障")
+        stop()
+    }
+    if helpText == "忘れ物｜会社へ報告" {
+        alert("車内に残ったものは安全に保管し、発見時刻・場所・品目を整理して会社へ報告。\nお客様の個人情報を勝手に公開せず、会社の受渡手順に従ってください。\n※自動登録・連絡・送信はしません。", "YOS TAXI｜忘れ物")
+        stop()
+    }
+    stop()
+}
+stop()

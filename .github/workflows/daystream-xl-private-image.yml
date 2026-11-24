@@ -1,0 +1,28 @@
+name: DAYSTREAM XL private image
+on:
+  pull_request:
+    paths:
+      - 'ios-app/scriptable/YOS DAYSTREAM Notion.js'
+      - 'ios-app/scriptable/yos-common-installer-catalog.json'
+      - 'ios-app/tests/daystream-xl-private-image.test.mjs'
+      - '.github/workflows/daystream-xl-private-image.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ios-app/scriptable/YOS DAYSTREAM Notion.js'
+      - 'ios-app/scriptable/yos-common-installer-catalog.json'
+      - 'ios-app/tests/daystream-xl-private-image.test.mjs'
+      - '.github/workflows/daystream-xl-private-image.yml'
+permissions:
+  contents: read
+jobs:
+  private-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Existing DAYSTREAM contract plus private XL image
+        run: node --test ios-app/tests/daystream-xl-private-image.test.mjs ios-app/tests/daystream-one-tap-notion-preview.test.mjs ios-app/tests/daystream-notion-scriptable.test.mjs ios-app/tests/common-scriptable-installer.test.mjs

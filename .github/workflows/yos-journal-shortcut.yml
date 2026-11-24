@@ -83,29 +83,25 @@ jobs:
           data=plistlib.loads(src.read_bytes())
           ids=[a.get('WFWorkflowActionIdentifier','') for a in data.get('WFWorkflowActions',[])]
           blob=repr(data)
-          assert ids.count('is.workflow.actions.askllm') == 8, ids
-          assert ids.count('is.workflow.actions.ask') == 6, ids
-          assert 'YOS Journal Questions' in blob
-          assert 'すでに提示済みの問い' in blob
-          assert 'この実行ですでに聞いた2問' in blob
-          assert '別の問い' in blob
-          assert ids.count('is.workflow.actions.file.getfoldercontents') == 2, ids
-          assert ids.count('is.workflow.actions.documentpicker.save') == 5, ids
-          assert 'YOSの分析とアドバイス' in blob
-          assert '今日の物語' in blob
-          assert 'storyRevision' not in blob or '修正したい場合' in blob
-          assert '目的別の問い' in blob
-          assert '直近のローカル日記控え' in blob
-          assert '（導入1）' in blob
-          assert '（導入2）' in blob
-          assert '3/3 自分の言葉で。刺さらなければ' in blob
-          assert '空欄ならここで終わり' in blob
-          assert ids.count('is.workflow.actions.openurl') == 1, ids
+          assert ids.count('is.workflow.actions.askllm') == 1, ids
+          assert ids.count('is.workflow.actions.ask') == 0, ids
+          # One callback branch (start/end), so no ChatGPT-output conditional is allowed.
+          assert ids.count('is.workflow.actions.conditional') == 3, ids
+          assert 'if !edited' not in Path('tools/yos-journal/YOS 日記.cherri').read_text()
+          assert ids.count('is.workflow.actions.documentpicker.save') == 2, ids
+          assert ids.count('is.workflow.actions.openurl') == 2, ids
+          assert 'YOS_JOURNAL_COMPOSE_V1:' in blob
+          assert 'mode=compose' in blob
           assert ids.count('com.apple.journal.CreateEntryIntent') == 0
+          for required in ('【出来事】','【気持ち】','【どう感じた】',
+                           '本人の言葉（原文）','YOS Journal Pending',
+                           'YOS_JOURNAL_RAW_V2','YOS_JOURNAL_LOCAL_BACKUP_V2',
+                           '【今日の記憶】'):
+              assert required in blob, required
           assert 'scriptable:///run?scriptName=YOS%20Journal%20Book' in blob
           assert 'YOS_NOTION_INTEGRATION_TOKEN' not in blob
-          assert 'YOS Journal Pending' in blob
-          print('YOS 日記 independent shortcut contract: PASS',len(ids),'actions')
+          assert 'api.notion.com' not in blob
+          print('YOS 日記 one-input memory diary with book review: PASS',len(ids),'actions')
           PY
 
       - name: Sign using existing HubSign workflow
@@ -140,7 +136,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish signed install file on the isolated draft branch
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'feat/yos-night-journal-integration-20261112'
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 663 && github.event.pull_request.head.ref == 'feat/yos-journal-standalone-20261103'
         shell: bash
         env:
           TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
@@ -148,7 +144,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$TARGET_REPO" = "$GITHUB_REPOSITORY"
-          test "$TARGET_BRANCH" = "feat/yos-night-journal-integration-20261112"
+          test "$TARGET_BRANCH" = "feat/yos-journal-standalone-20261103"
           cp 'tools/yos-journal/artifacts/YOS 日記.shortcut' /tmp/YOS_Journal_signed.shortcut
           git fetch origin "$TARGET_BRANCH"
           git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
