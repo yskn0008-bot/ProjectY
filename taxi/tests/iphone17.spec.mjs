@@ -352,7 +352,7 @@ test('default entry: approved one-screen UI and legacy recovery', async ({ page 
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('./index.html', {waitUntil:'domcontentloaded'});
   await expect(page).toHaveURL(/\/ui-v2\.html$/);
-  await expect(page.locator('#drop-btn')).toBeVisible();
+  await expect(page.locator('#drop-btn')).toHaveCount(0);
   await expect(page.locator('#photo-btn')).toBeVisible();
   await expect(page.locator('#sync-status')).toContainText('Notion未接続');
   const pageOverflow=await page.evaluate(() => document.documentElement.scrollHeight > innerHeight + 1);
@@ -379,21 +379,28 @@ test('v2 in-app browser heights: all sales text and strategy rows fit their boxe
       return {
         periodRows:[...document.querySelectorAll('.period')].filter(visible).length,
         kpiCells:[...document.querySelectorAll('.kpis>div')].filter(visible).length,
-        dropFont:parseFloat(getComputedStyle(document.querySelector('#drop-btn .copy b')).fontSize),
+        dropFont:parseFloat(getComputedStyle(document.querySelector('#photo-btn .copy b')).fontSize),
         statusFont:parseFloat(getComputedStyle(document.querySelector('.status-label')).fontSize),
       };
     });
-    expect(cockpit.periodRows,'only current time band shown').toBe(1);
-    expect(cockpit.kpiCells,'only measured counters shown').toBe(2);
+    expect(cockpit.periodRows,'secondary period rows hidden on cockpit').toBe(0);
+    expect(cockpit.kpiCells,'secondary counters hidden on cockpit').toBe(0);
     expect(cockpit.dropFont,'primary action must remain legible').toBeGreaterThanOrEqual(width<=350?12:16);
     expect(cockpit.statusFont,'shift status must remain legible').toBeGreaterThanOrEqual(width<=350?15:17);
     await expect(page.locator('#photo-btn')).toContainText('経過日報を送る');
+    await expect(page.locator('.nav button')).toHaveCount(5);
+    await expect(page.locator('#monthly-open')).toHaveText('カレンダー');
+    await page.locator('#monthly-open').click();
+    await expect(page.locator('#monthly-view')).toBeVisible();
+    await expect(page.locator('#monthly-open')).toHaveClass(/active/);
+    await page.locator('[data-page="sales"]').click();
     let problems = await page.evaluate(() => {
       const items=[...document.querySelectorAll('.quick .copy b,.quick .copy small,.decision strong,.decision span,.period b,.period small,.kpi-label,.kpi-value,.footer-card span')];
       const active = element => {const style=getComputedStyle(element);return style.display!=='none' && style.visibility!=='hidden' && element.getBoundingClientRect().height>0};
       const bad=items.filter(active).filter(element=>element.scrollWidth>element.clientWidth+1 || element.scrollHeight>element.clientHeight+2).map(element=>element.textContent.trim());
       const main=document.querySelector('.view.active');
-      // The pace card and monthly entry intentionally make sales vertically scrollable.
+      if(main.scrollHeight>main.clientHeight+2)bad.push('sales main vertically overflowing');
+      if(document.querySelector('.app>.header').getBoundingClientRect().height>0)bad.push('unused header visible');
       if(main.scrollWidth>main.clientWidth+2)bad.push('sales main horizontally overflowing');
       return bad;
     });
@@ -446,7 +453,7 @@ test('M100: safe-stop checklist opens without changing ride records or viewport'
     await page.locator('#close-modal').click();
     await expect(page.locator('#modal')).not.toBeVisible();
     await page.locator('[data-page="sales"]').click();
-    await expect(page.locator('#drop-btn')).toBeVisible();
+    await expect(page.locator('#drop-btn')).toHaveCount(0);
     await expect(page.locator('#photo-btn')).toBeVisible();
     const after=await page.evaluate(() => localStorage.getItem('yos-taxi-ui-v2-live-20261117'));
     expect(after,'M100 guidance must not mutate shift or ride records').toBe(before);
@@ -511,7 +518,7 @@ test('Dropoff result is persistent and clearly confirms success, retry and failu
   await page.clock.setFixedTime(new Date('2026-11-19T17:15:00+09:00'));
   const eventCount=()=>page.evaluate(()=>window.YOSTaxiPreview.debugState().events.filter(e=>e.type==='dropoff').length);
   await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
-  await page.locator('#drop-btn').click();
+  await page.evaluate(()=>window.YOSTaxiPreview.recordDropoff());
   await expect(page.locator('#modal.dropoff-result-error')).toBeVisible();
   await expect(page.locator('#modal-title')).toHaveText('降車は記録していません');
   await expect(page.locator('#dropoff-outcome-badge')).toHaveText('保存なし');
@@ -520,7 +527,7 @@ test('Dropoff result is persistent and clearly confirms success, retry and failu
   expect(await eventCount()).toBe(0);
   await page.goto('./ui-v2.html?yos_action=start',{waitUntil:'domcontentloaded'});
   await page.locator('#modal-actions .primary').click();
-  await page.locator('#drop-btn').click();
+  await page.evaluate(()=>window.YOSTaxiPreview.recordDropoff());
   await expect(page.locator('#modal.dropoff-result-success')).toBeVisible();
   await expect(page.locator('#modal-title')).toHaveText('降車を記録しました');
   await expect(page.locator('#dropoff-outcome-badge')).toHaveText('保存完了');
@@ -539,7 +546,7 @@ test('Dropoff result is persistent and clearly confirms success, retry and failu
   await expect(page.locator('#modal.dropoff-result-success')).toBeVisible();
   await page.locator('#modal-actions button').first().click();
   await expect(page.locator('#modal')).toBeHidden();
-  await page.locator('#drop-btn').click();
+  await page.evaluate(()=>window.YOSTaxiPreview.recordDropoff());
   await expect(page.locator('#modal.dropoff-result-duplicate')).toBeVisible();
   await expect(page.locator('#modal-title')).toContainText('追加なし');
   await expect(page.locator('#dropoff-outcome-count')).toHaveText('本日の降車記録 1件');
@@ -1279,4 +1286,84 @@ test('corrupted legacy shift data is never overwritten by a new shift, even if c
   await page.locator('#status-btn').click();
   await expect(page.locator('#toast')).toContainText('上書きせず停止');
   expect(await page.evaluate(k=>localStorage.getItem(k),key)).toBe('{legacy-corrupt');
+});
+
+test('matte cockpit calendar reuses existing plans, safe salary range and weekday analysis without rewriting ledgers',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T20:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  const before=await page.evaluate(()=>{
+    const plans={monthlyGoals:{},days:{
+      '2026-11-21':{status:'work',target:450000,actualHours:80,event:'登録イベント'},
+      '2026-11-22':{status:'work',target:180000,actualHours:60},
+      '2026-11-24':{status:'off'}
+    }};
+    const settings={months:{'2026-11':{hourLimit:175,carryHours:3}}};
+    localStorage.setItem('yos-taxi-calendar-v1',JSON.stringify(plans));
+    localStorage.setItem('yos-taxi-calendar-settings-v3',JSON.stringify(settings));
+    const api=window.YosTaxiConfirmedRevenueV1;
+    for(const [day,amount,hash] of [['2026-11-21',440000,'a'],['2026-11-22',180000,'b']]){
+      const r=api.confirm({businessDate:day,amountYen:amount,taxBasis:'tax-excluded',reportClock:'23:00',
+        photoSha256:'sha256:'+hash.repeat(64),photoKind:'paper-total'});
+      if(r.status!=='saved')throw Error(r.status);
+    }
+    return Object.fromEntries(['yos-taxi-calendar-v1','yos-taxi-calendar-settings-v3','yos-taxi-confirmed-reports-v1'].map(k=>[k,localStorage.getItem(k)]));
+  });
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#cockpit-wait-toggle')).toBeDisabled();
+  await expect(page.locator('#cockpit-research')).toBeVisible();
+  await expect(page.locator('#cockpit-yos')).toBeVisible();
+  await page.locator('#monthly-open').click();
+  await expect(page.locator('#monthly-sum-value')).toHaveText('¥620,000');
+  await expect(page.locator('#monthly-pay')).toHaveText('¥310,600〜¥328,600');
+  await expect(page.locator('#monthly-hours-left')).toHaveText('32時間');
+  await expect(page.locator('.month-day .below-target')).toHaveText('¥440,000');
+  await expect(page.locator('.month-day .cal-plan').filter({hasText:'公休'})).toHaveCount(1);
+  await expect(page.locator('.month-day .cal-event').filter({hasText:'登録イベント'})).toHaveCount(1);
+  await page.locator('#cal-show-sales').uncheck();
+  await expect(page.locator('.month-day .below-target')).toBeHidden();
+  await page.locator('#cal-show-plans').uncheck();
+  await expect(page.locator('.cal-plan')).toHaveCount(0);
+  await page.locator('#cal-show-events').uncheck();
+  await expect(page.locator('.cal-event')).toHaveCount(0);
+  await page.locator('#cal-show-sales').check();
+  await page.locator('#month-prev').click();
+  await expect(page.locator('#monthly-title')).toHaveText('2026年10月');
+  await expect(page.locator('#monthly-pay')).toHaveText('—');
+  await page.locator('#month-next').click();
+  await expect(page.locator('#monthly-title')).toHaveText('2026年11月');
+  await page.locator('.month-day').filter({hasText:'¥440,000'}).click();
+  await expect(page.locator('#modal-body')).toContainText('日次目標：¥450,000');
+  await page.locator('#close-modal').click();
+  await page.locator('#monthly-analysis-open').click();
+  await expect(page.locator('#weekday-bars>div')).toHaveCount(7);
+  await expect(page.locator('#weekday-bars')).toContainText('¥440,000');
+  await expect(page.locator('#monthly-trend')).toContainText('¥620,000');
+  const after=await page.evaluate(keys=>Object.fromEntries(keys.map(k=>[k,localStorage.getItem(k)])),Object.keys(before));
+  expect(after).toEqual(before);
+});
+
+test('daily cockpit uses recorded shift and existing target without inventing break time',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-11-24T20:00:00+09:00'));
+  await page.goto('./ui-v2.html',{waitUntil:'domcontentloaded'});
+  await page.evaluate(()=>{
+    localStorage.setItem('yos-taxi-calendar-v1',JSON.stringify({days:{'2026-11-24':{status:'work',target:45000,serviceEnd:'05:00'}}}));
+    const r=window.YosTaxiConfirmedRevenueV1.confirm({businessDate:'2026-11-24',amountYen:15000,taxBasis:'tax-excluded',reportClock:'19:30',
+      photoSha256:'sha256:'+'c'.repeat(64),photoKind:'paper-total'});
+    if(r.status!=='saved')throw Error(r.status);
+  });
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.locator('#sales-value')).toHaveText('¥15,000');
+  await expect(page.locator('#target-value')).toHaveText('¥45,000');
+  await expect(page.locator('#remaining-target')).toHaveText('¥30,000');
+  await expect(page.locator('#remaining-shift')).toHaveText('未確認');
+  await page.locator('#status-btn').click();
+  await page.locator('#modal-actions button.primary').click();
+  await expect(page.locator('#remaining-shift')).toHaveText('9h 00m');
+  await expect(page.locator('#required-hourly')).toHaveText('¥3,333');
+  await expect(page.locator('#confirmed-hourly')).toHaveText('算出不可');
+  await page.locator('#cockpit-wait-toggle').click();
+  await expect(page.locator('#cockpit-wait-toggle')).toHaveText('待機終了');
+  await expect(page.locator('#cockpit-wait-time')).toHaveText('00:00');
+  await page.locator('#cockpit-wait-toggle').click();
+  await expect(page.locator('#cockpit-wait-toggle')).toHaveText('待機開始');
 });
