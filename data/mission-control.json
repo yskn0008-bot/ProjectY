@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T18:37:10+09:00",
+  "updated_at": "2026-11-24T19:08:29+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,16 +33,6 @@
       "updated_at": "2026-11-24T09:35:36Z"
     },
     {
-      "id": "github-pr-870",
-      "title": "PR #870 BRAVIA｜4台リモコン保護・画質ワンタップ／音声／アプリ／HDMI3クイック操作 TEST",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/870",
-      "updated_at": "2026-11-24T09:03:58Z"
-    },
-    {
       "id": "github-pr-901",
       "title": "PR #901 draft: iPhone共通インストーラー自己更新の安全要件 #900",
       "type": "GitHub PR",
@@ -51,6 +41,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/901",
       "updated_at": "2026-11-23T20:09:46Z"
+    },
+    {
+      "id": "github-pr-902",
+      "title": "PR #902 DAYSTREAM｜保存エラーでもNotionタスクを安全に表示",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/902",
+      "updated_at": "2026-11-23T14:59:27Z"
     },
     {
       "id": "github-pr-914",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T09:36:36Z"
+      "updated_at": "2026-11-24T10:07:45Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-849fcfcd8efb",
+      "title": "Merge pull request #870 from yskn0008-bot/bravia/quick-media-controls-20261119",
+      "completed_at": "2026-11-24T10:07:38Z",
+      "result": "GitHub mainへ反映（849fcfc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/849fcfcd8efbd74a34856c87588a266b6a0cf469"
+    },
+    {
       "id": "github-commit-9f6f11a84f96",
       "title": "fix(taxi): 営業画面1画面化・カレンダー明示 (#932)",
       "completed_at": "2026-11-24T09:16:37Z",
@@ -222,32 +229,25 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9f6f11a84f960f3dbf6c9a2d458cd8d178a3de92"
     },
     {
-      "id": "github-commit-472d89b29398",
-      "title": "Merge PR #937: YOS Home Scenes nine-mode consolidated remote",
-      "completed_at": "2026-11-24T08:15:03Z",
-      "result": "GitHub mainへ反映（472d89b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/472d89b2939844c4b3eb8665c01c309ceef95335"
+      "id": "github-commit-e302deb767dc",
+      "title": "Pin verified Shopping clock fix without changing other 27 original targets or remote candidate",
+      "completed_at": "2026-11-24T09:03:46Z",
+      "result": "GitHub mainへ反映（e302deb）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e302deb767dcd80dac6c381c12c8b873f089a294"
     },
     {
-      "id": "github-commit-83a1b7a708b1",
-      "title": "chore(installer): preserve latest BRAVIA safety fix; update only home-scenes",
-      "completed_at": "2026-11-24T08:12:15Z",
-      "result": "GitHub mainへ反映（83a1b7a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/83a1b7a708b1e3dbe5a854b6e956203272189394"
+      "id": "github-commit-983fd98c9511",
+      "title": "Fix existing shared Shopping contract blocker: assess listing age after fetch; deterministic clock regression",
+      "completed_at": "2026-11-24T09:02:35Z",
+      "result": "GitHub mainへ反映（983fd98）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/983fd98c9511ab68384e8cb765273de713d82bb4"
     },
     {
-      "id": "github-commit-16cc9c28282a",
-      "title": "test(home-scenes): nine-mode remote tests against latest main",
-      "completed_at": "2026-11-24T08:12:11Z",
-      "result": "GitHub mainへ反映（16cc9c2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/16cc9c28282a724602548d672aa6b3c1329117e8"
-    },
-    {
-      "id": "github-commit-aea74f66f0ed",
-      "title": "feat(home-scenes): nine-mode remote preserved against latest main",
-      "completed_at": "2026-11-24T08:12:08Z",
-      "result": "GitHub mainへ反映（aea74f6）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aea74f66f0ed40cc47ac65d9edf8f697f34a072e"
+      "id": "github-commit-2f23060b7813",
+      "title": "Preserve all 28 existing installer IDs while allowing verified additive test registration",
+      "completed_at": "2026-11-24T08:28:00Z",
+      "result": "GitHub mainへ反映（2f23060）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/2f23060b781317825cde64ae1f3e6fb0b5fef517"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T18:37:10+09:00",
+      "last_update": "2026-11-24T19:08:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 75件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T18:37:10+09:00",
+      "last_update": "2026-11-24T19:08:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T18:37:10+09:00",
+      "last_update": "2026-11-24T19:08:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "4915f3045c2630a18421693d565d112057bc208a62b614e27eeb4c124b63dd73"
+  "github_snapshot_hash": "c6e54385d9708f56e93cae55b1283eee0a465bae95db2437b7c4519860b2fae4"
 }
