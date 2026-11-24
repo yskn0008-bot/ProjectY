@@ -5,6 +5,7 @@ Does not claim runtime, Notion readback or original-publication validation.
 import argparse
 import plistlib
 from patch_journal_draft_inbox import provenance_parameter
+from patch_journal_research_inline import validate_research_boundary
 from pathlib import Path
 
 INTENT="dk.simonbs.Scriptable.RunScriptInlineIntent"
@@ -29,8 +30,7 @@ def validate(path):
         scripts.append(x)
     if 'YOS_RESEARCH_ABSTRACT_V1' not in scripts[0] or 'YOS_RESEARCH_HOLD_V1' not in scripts[0]:
         raise AssertionError("research source preflight missing")
-    if any(x in scripts[0] for x in ['api.notion.com','api.github.com','YOS_NOTION_INTEGRATION_TOKEN']):
-        raise AssertionError("public source research must never send private data")
+    validate_research_boundary(scripts[0])
     if 'YOS_JOURNAL_DRAFT_V1' not in scripts[1] or 'YOS_NOTION_INTEGRATION_TOKEN' not in scripts[1]:
         raise AssertionError("private draft handoff changed")
     if any(x in repr(root) for x in ['__YOS_JOURNAL_RESEARCH_INLINE__','__YOS_JOURNAL_INBOX_INLINE__','__YOS_JOURNAL_DRAFT_INPUT__']):
