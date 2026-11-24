@@ -8,10 +8,17 @@ const study={
   abstractText:'The first study evaluated the association between ratings of facial attractiveness and measured immune response under experimentally controlled conditions. '.repeat(5),
   pubYear:'2022',doi:'10.1038/s41598-022-22866-x',pmid:'36319732'
 };
-async function run({data={resultList:{result:[study]}},failure=false,input='',fallback=false,cache=null,duplicate=false}={}){
+async function run({data={resultList:{result:[study]}},failure=false,input='',fallback=false,cache=null,duplicate=false,editorial=false}={}){
   let result,completed=0,urls=[],timeouts=[];
   class Request{
     constructor(url){urls.push(url);this.url=url;this.index=urls.length-1;}
+    async loadString(){
+      timeouts.push(this.timeoutInterval);
+      if(!editorial)throw Error('feed unavailable');
+      this.response={statusCode:200};
+      const host=this.url.includes('guardian')?'www.theguardian.com':'www.bbc.com';
+      return '<rss><channel>'+[1,2,3].map(n=>'<item><title>Example science editorial article '+n+'</title><description>'+study.abstractText+'</description><link>https://'+host+'/science/test-'+n+'</link><pubDate>'+new Date().toUTCString()+'</pubDate></item>').join('')+'</channel></rss>';
+    }
     async loadJSON(){
       timeouts.push(this.timeoutInterval);
       if(failure)throw new Error('network disabled');
@@ -98,7 +105,7 @@ test('research request total timeout budget is limited to 7s and fails closed',a
   const r=await run({failure:true});
   assert.equal(r.result,'YOS_RESEARCH_HOLD_V1:THREE_VALID_SOURCES_UNAVAILABLE');
   assert.equal(r.completed,1);
-  assert.equal(r.timeouts.length,6);
+  assert.equal(r.timeouts.length,8);
   assert.ok(r.timeouts.slice(0,3).every(x=>x<=4) && r.timeouts.slice(3).every(x=>x<=3));
 });
 test('tampered or malformed local source cache is ignored',async()=>{
@@ -109,3 +116,5 @@ test('tampered or malformed local source cache is ignored',async()=>{
 });
 
 test('duplicate DOI across topics never produces three articles',async()=>{const r=await run({duplicate:true});assert.equal(r.result,'YOS_RESEARCH_HOLD_V1:THREE_VALID_SOURCES_UNAVAILABLE');});
+
+test('editorial RSS fallback works without academic DOI',async()=>{const r=await run({failure:true,editorial:true});assert.match(r.result,/YOS_RESEARCH_ABSTRACT_V1/);assert.equal((r.result.match(/^出典リンク: https:/gm)||[]).length,3);assert.match(r.result,/本文未確認/);});
