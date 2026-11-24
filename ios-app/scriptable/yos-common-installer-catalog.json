@@ -190,6 +190,13 @@
       "path": "ios-app/scriptable/YOS Common Installer 修復.js",
       "commit": "cc7a0f91c4e5b758b290f7098aae417b57c631c7",
       "sha256": "c1ca6e8fe99b3ca33e8ec78aa478a1d707114c10c74bd068554845e3b227c620"
+    },
+    {
+      "id": "bravia-picture-off-repair",
+      "name": "YOS BRAVIA 消画安全復旧",
+      "path": "ios-app/scriptable/remote-widgets/YOS BRAVIA 消画安全復旧.js",
+      "commit": "e79ad57a19e111bd5e75359d282e1f2f2f1872d3",
+      "sha256": "8c56fbdd7802f88e4c9998be0857ab12bc767e777ff9a08970af72b9b655dab0"
     }
   ]
 }

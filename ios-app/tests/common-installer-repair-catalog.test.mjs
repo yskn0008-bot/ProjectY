@@ -167,7 +167,7 @@ test('one-time repair is packaged for existing Scriptable installer and never ru
  assert.match(runtime,/bootstrap-backups/);
  const cat=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
  const entry=cat.targets.find(x=>x.id==='common-installer-repair');
- assert.equal(cat.targets.length,27);
+ assert.equal(cat.targets.length,28);
  assert.ok(entry);
  assert.equal(entry.name,'YOS Common Installer 修復');
  assert.equal(entry.path,'ios-app/scriptable/YOS Common Installer 修復.js');
@@ -178,7 +178,7 @@ test('one-time repair is packaged for existing Scriptable installer and never ru
 test('original 26 installer catalog registrations are not mutated',()=>{
  const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
  const oldIds=['bravia-picture-off','home-scenes'];
- assert.equal(new Set(catalog.targets.map(x=>x.id)).size,27);
+ assert.equal(new Set(catalog.targets.map(x=>x.id)).size,28);
  for(const id of oldIds){
   const e=catalog.targets.find(x=>x.id===id);
   assert.ok(e);
