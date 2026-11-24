@@ -85,7 +85,7 @@ function receiptOk(obj,kind){
  if(!obj||obj.schema!==1||obj.name!==TARGET_NAME||obj.id!==TARGET_ID||
  obj.path!==TARGET_PATH||obj.storage!==kind)return false;
  if(obj.sha256!==OLD_SHA)return false;
- return obj.commit===undefined||typeof obj.commit==='string'&&/^[a-f0-9]{40}$/.test(obj.commit);
+ return obj.commit===undefined||obj.commit==='cfae0db7be4e5d560242520ee9c99b04a8a08fd5';
 }
 async function notice(title,message,ask=false){
  const a=new Alert();a.title=title;a.message=message;
