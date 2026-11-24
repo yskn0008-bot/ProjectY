@@ -228,6 +228,7 @@ body{padding:0 8px}
  <div class="tv-text-entry"><input id="tvTextInput" type="text" maxlength="140" placeholder="テレビで入力欄を開いて文字入力" aria-label="BRAVIAへ送るテキスト"><button onclick="sendTVText(event)">送信</button></div>
  <p class="tv-studio-note">文字はテレビの検索欄が開いているときのみ。パスワード等の機密情報は入力しないでください。</p>
  <div class="tv-extra-line"><button onclick="openTVVPN(event)">VPNアプリ</button><span class="tv-extra-status" id="tvExtraStatus">VPNのON/OFFは接続アプリの対応確認後</span></div>
+</div></section>
 <section class="card remote-panel" data-panel="light"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
 <section class="card remote-panel" data-panel="ac"><div class="head"><div class="title" onclick="openRemote('ac')">エアコン</div><div class="ac-meta"><span id="acTemp" class="ac-temp">--°</span><span class="brand">SHARP</span></div></div><div class="grid grid-4">${makeButtons("ac", AC_BUTTONS)}</div></section>
 <section class="card floor-card remote-panel" data-panel="floor">
@@ -713,7 +714,7 @@ function displayTVApps(apps){
 function sendTVText(e){
  if(e){e.preventDefault();e.stopPropagation()}
  const el=document.getElementById('tvTextInput'),value=String(el?.value||'');
- if(!value.trim()||value.length>140||/[\u0000-\u001f\u007f]/.test(value)){showTVExtra('空欄・制御文字は送れません');return}
+ if(!value.trim()||value.length>140||/[\\u0000-\\u001f\\u007f]/.test(value)){showTVExtra('空欄・制御文字は送れません');return}
  showTVExtra('テレビの入力欄へ送信中…');
  nativeAction('tvApps','text','キーボード入力',value);
 }
