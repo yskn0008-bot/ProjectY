@@ -99,7 +99,12 @@ async function transfer(input){
   if(raw.length<150||raw.length>J.maxLength)return {status:'held',reason:'LENGTH_OUT_OF_RANGE'};
   if(!raw.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1')||!raw.includes('公開不可・要審査'))return {status:'held',reason:'NOT_A_REVIEW_DRAFT'};
   if(/(?:sk-proj-|gh[pousr]_[A-Za-z0-9_-]{16,}|Bearer\s+\S+)/i.test(raw))return {status:'held',reason:'SENSITIVE_TOKEN_MARKER'};
-  if(!validProvenance(raw))return {status:'held',reason:'THREE_SOURCE_PROVENANCE_MISMATCH'};
+  // Storage is not editorial approval. Preserve mismatched citations only in
+  // the existing private Inbox with original text and publication prohibition.
+  const provenanceNeedsReview=!validProvenance(raw);
+  const withReviewFlag=result=>provenanceNeedsReview
+    ?{...result,reason:result.reason+':THREE_SOURCE_PROVENANCE_MISMATCH_REVIEW_REQUIRED'}
+    :result;
   if(!Keychain.contains(J.key))return {status:'held',reason:'NOTION_KEY_MISSING'};
   const token=Keychain.get(J.key);
   if(typeof token!=='string'||token.length<10)return {status:'held',reason:'NOTION_KEY_INVALID'};
@@ -112,7 +117,7 @@ async function transfer(input){
   // Unknown deliveries must never be blindly retried.
   if(row){
     if(row.status==='unknown')return {status:'held',reason:'PREVIOUS_RESULT_UNKNOWN'};
-    return confirm(store,records,row,token,segments);
+    return withReviewFlag(await confirm(store,records,row,token,segments));
   }
   records.push({id,status:'unknown'});
   persist(store,records);
@@ -124,7 +129,7 @@ async function transfer(input){
   candidate.status='submitted';candidate.blockIds=ids;
   try{persist(store,records);}catch(e){return {status:'pending',reason:'LOCAL_RECEIPT_UPDATE_FAILED'};}
   // A PATCH acknowledgement alone must not be treated as successful saving.
-  return confirm(store,records,candidate,token,segments);
+  return withReviewFlag(await confirm(store,records,candidate,token,segments));
 }
 async function main(){
   let result={status:'held',reason:'UNKNOWN'};
