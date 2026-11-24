@@ -64,7 +64,7 @@ test('Script.complete runs even if Shortcuts output API throws',async()=>{
  const t=mock({outputError:true});await t.execute();assert.equal(t.done.length,1);
 });
 test('invalid and oversize drafts are not sent',async()=>{
- for(const input of ['not a journal'.repeat(30),raw.repeat(100)]){
+ for(const input of ['not a journal'.repeat(30),raw.repeat(200)]){
   const t=mock({input});await t.execute();assert.equal(t.calls.length,0);assert.equal(t.done.length,1);
  }
 });
@@ -116,3 +116,5 @@ test('missing or invented DOI prevents transfer',async()=>{
 });
 
 test('editorial source URLs are accepted only when present in research backup',async()=>{const links=['https://www.theguardian.com/science/test-a','https://www.bbc.com/news/test-b',urls[2]];const p=provenance.replaceAll(urls[0],links[0]).replaceAll(urls[1],links[1]);const t=mock({input:raw+'\n'+links.join('\n')+p});await t.execute();assert.match(t.outputs[0],/NOTION_VERIFIED/);});
+
+test('Markdown citations match exact research URL without closing delimiter',async()=>{const t=mock({input:raw+'\n'+urls.map(u=>'[出典]('+u+')').join('\n')+provenance});await t.execute();assert.match(t.outputs[0],/NOTION_VERIFIED/);});
