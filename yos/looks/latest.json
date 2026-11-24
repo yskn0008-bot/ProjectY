@@ -1,17 +1,18 @@
 {
   "version": 1,
   "latest": {
-    "slot": "2026-11-25T00:00:00+09:00",
-    "category": "SKIN",
-    "title": "こすらず、押さえる。",
-    "action": "休憩中、汗や皮脂が気になるなら清潔なティッシュでそっと押さえる。",
-    "reason": "摩擦を減らすことも、肌をいたわる小さな習慣。",
-    "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Man_grooming_in_a_modern_bathroom_mirror_during_evening_hours_while_checking_reflection.jpg?width=800",
-    "imageCredit": "Shixart1985 / Wikimedia Commons",
-    "imageSourceUrl": "https://commons.wikimedia.org/wiki/File:Man_grooming_in_a_modern_bathroom_mirror_during_evening_hours_while_checking_reflection.jpg",
-    "imageLicenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+    "slot": "2026-11-25T01:00:00+09:00",
+    "category": "STYLE",
+    "title": "襟の左右を整える",
+    "action": "休憩中、鏡で襟の折れや左右の高さを確認し、そっと整える。",
+    "reason": "顔に近い襟元が整うと、服全体がすっきり見え、自然な清潔感につながる。",
+    "image": "",
+    "imageCredit": "",
+    "imageSourceUrl": "",
+    "imageLicenseUrl": ""
   },
   "recent": [
+    "STYLE｜襟の左右を整える",
     "SKIN｜こすらず、押さえる。"
   ]
 }
