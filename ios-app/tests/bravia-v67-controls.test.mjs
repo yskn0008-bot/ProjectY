@@ -160,3 +160,22 @@ test('editable presets preserve legacy storage, mode-only and custom value seman
  assert.equal(keys.get(prefix+'extra1'),before);
  const count=writes.length;assert.match((await api.pictureAction('discover','')).message,/futureGamma/);assert.equal(writes.length,count);
 });
+
+test('discovery button shows immediate feedback and reports a result without altering saved controls',()=>{
+ const begin=src.indexOf('let discoveryPending=false'),end=src.indexOf('function pictureEntry(',begin);
+ const els={discoverPictureButton:{},discoverPictureStatus:{}},calls=[],timers=[];
+ const api=new Function('document','nativeAction','setTimeout','clearTimeout',src.slice(begin,end)+'return{startPictureDiscovery,finishPictureDiscovery};')({getElementById:id=>els[id]},(...args)=>calls.push(args),fn=>{timers.push(fn);return 1},()=>{});
+ api.startPictureDiscovery();api.startPictureDiscovery();
+ assert.equal(calls.length,1);assert.equal(els.discoverPictureButton.disabled,true);assert.equal(els.discoverPictureStatus.hidden,false);
+ api.finishPictureDiscovery('API拒否（12）');assert.equal(els.discoverPictureButton.disabled,false);assert.equal(els.discoverPictureStatus.textContent,'API拒否（12）');
+ api.startPictureDiscovery();timers.at(-1)();assert.equal(els.discoverPictureButton.disabled,false);assert.match(els.discoverPictureStatus.textContent,/応答未確認/);
+});
+test('extra discovery uses only two bounded reads, exact v1.1 request and distinguishes API rejection',async()=>{
+ const code=src.slice(src.indexOf('const PICTURE_TARGETS='),src.indexOf('const QUICK_APP_MATCHERS='));
+ const calls=[];
+ class Request{async loadString(){const q=JSON.parse(this.body);calls.push({q,timeout:this.timeoutInterval});return q.version==='1.0'?JSON.stringify({result:[[{target:'brightness',currentValue:'30'}]]}):JSON.stringify({error:[12,'unsupported']});}}
+ const api=new Function('Request','sonyHost','sonyPSK','Keychain',code+'return{discoverExtraPictureTargets};')(Request,()=> 'example',()=> 'mock',{});
+ const result=await api.discoverExtraPictureTargets();
+ assert.equal(calls.length,2);assert.ok(calls.every(x=>x.q.method==='getPictureQualitySettings'&&x.timeout===5));
+ assert.deepEqual(calls[1].q.params,[{}]);assert.equal(result.discovery,true);assert.match(result.message,/API拒否（12）/);assert.equal(result.entries,undefined);
+});
