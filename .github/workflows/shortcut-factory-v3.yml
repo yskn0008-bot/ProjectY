@@ -614,3 +614,41 @@ jobs:
           path: /tmp/dialogue/YOS 通知対話.shortcut
           if-no-files-found: error
           retention-days: 14
+
+
+  build-notification-integration:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'oel/self-notification-shortcut-20261125'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify local notification handoff
+        run: node tools/shortcut-factory/test_notification_dialogue_handoff.mjs
+      - name: Build both generic shortcuts
+        run: python3 tools/shortcut-factory/build_notification_integration.py /tmp/integrated
+      - name: Sign generic artifacts
+        run: |
+          python3 tools/clarity-factory/sign_with_hubsign.py --input /tmp/integrated/dialogue.plist --output '/tmp/integrated/YOS 通知対話 統合版.shortcut' --name 'YOS 通知対話 統合版'
+          python3 tools/clarity-factory/sign_with_hubsign.py --input /tmp/integrated/output.plist --output '/tmp/integrated/YOS 通知出力.shortcut' --name 'YOS 通知出力'
+      - name: Check signed actions match source
+        run: |
+          python3 -m pip install --disable-pip-version-check --quiet lzfse
+          python3 - <<'PY'
+          import plistlib,lzfse,hashlib
+          from pathlib import Path
+          root=Path('/tmp/integrated')
+          for key,name in [('dialogue','YOS 通知対話 統合版'),('output','YOS 通知出力')]:
+            b=(root/(name+'.shortcut')).read_bytes()
+            assert b.startswith(b'AEA1')
+            raw=lzfse.decompress(b[b.find(b'bvx',12+int.from_bytes(b[8:12],'little')):])
+            actual=plistlib.loads(raw[raw.find(b'bplist00'):])
+            expected=plistlib.loads((root/(key+'.plist')).read_bytes())
+            assert actual['WFWorkflowActions']==expected['WFWorkflowActions']
+            print(name,hashlib.sha256(b).hexdigest())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yos-notification-integration-signed
+          path: /tmp/integrated/*.shortcut
+          if-no-files-found: error
+          retention-days: 14
