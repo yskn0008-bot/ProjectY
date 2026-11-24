@@ -100,3 +100,17 @@ test('legacy submitted receipt without block IDs stays pending without retransmi
  assert.match(t.outputs[0],/NOTION_PENDING:SUBMITTED_READBACK_PENDING/);
  assert.equal(t.calls.length,0);
 });
+
+const urls=[1,2,3].map(n=>'https://doi.org/10.1234/test-'+n);
+const provenance='\n\n<<YOS_JOURNAL_RESEARCH_PROVENANCE_V1>>\n\nYOS_RESEARCH_ABSTRACT_V1\n自動公開禁止\n'+urls.map((u,i)=>'資料'+(i+1)+'｜Test\n論文リンク: '+u).join('\n');
+test('three-source private draft preserves exact research provenance',async()=>{
+ const t=mock({input:raw+'\n'+urls.join('\n')+provenance});await t.execute();
+ assert.match(t.outputs[0],/NOTION_VERIFIED/);
+ assert.ok(t.calls.find(c=>c.method==='PATCH').body.includes('YOS_JOURNAL_RESEARCH_PROVENANCE_V1'));
+});
+test('missing or invented DOI prevents transfer',async()=>{
+ for(const links of [urls.slice(0,2),[...urls.slice(0,2),'https://doi.org/10.1234/invented']]){
+ const t=mock({input:raw+'\n'+links.join('\n')+provenance});await t.execute();
+ assert.match(t.outputs[0],/THREE_SOURCE_PROVENANCE_MISMATCH/);assert.equal(t.calls.length,0);
+ }
+});
