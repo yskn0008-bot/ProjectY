@@ -57,6 +57,7 @@ try{
   const dragDebug=await dragCard.evaluate(el=>({active:el.classList.contains('drag-preview'),css:el.className,transform:el.style.transform,scroll:scrollY}));
   assert.equal(dragDebug.active,true,'bar lifts under the finger: '+JSON.stringify({dragDebug,events:await page.evaluate(()=>window.__dragDebug)}));
   assert.ok(await page.locator('#tl .card.drag-neighbor').count()>0,'other bars react during the drag');
+  assert.equal(await page.locator('#flowDragHint').isVisible(),false,'no floating drag warning');
   await page.mouse.up();
   assert.equal(await page.locator('#moveDialog').isVisible(),false,'drop never opens placement advice');
   assert.notEqual(await page.evaluate(()=>items.find(x=>x.t==='歯磨き').s),beforeDrag,'drop saves the new time');
@@ -84,9 +85,8 @@ try{
   await page.locator('#moveUndo').click();
   assert.equal(await page.evaluate(()=>items.find(x=>x.t==='起床').s),clashStart,'overlapping drop can be undone');
   await startCard.locator('.task-drag-grip').click();
-  assert.equal(await page.locator('#moveDialog').isVisible(),true,'tap move grip opens existing placement advisor');
-  await page.locator('#moveTime').fill('16:20');
-  await page.locator('#moveSave').click();
+  assert.equal(await page.locator('#moveDialog').isVisible(),false,'tap on drag grip does not open a sheet');
+  assert.equal(await page.evaluate(()=>commitDraggedTime(items.find(x=>x.t==='起床'),16*60+20,null)),true,'direct save persists the selected time');
   assert.match(await page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'起床'}).innerText(),/16:20/);
   const moveKey='YOS_DAYSTREAM_NOTION_MOVES_V1';
   assert.ok(await page.evaluate(key=>localStorage.getItem(key),moveKey));
