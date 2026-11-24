@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-24T16:21:16+09:00",
+  "updated_at": "2026-11-24T16:21:56+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,6 +31,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/857",
       "updated_at": "2026-11-23T21:18:52Z"
+    },
+    {
+      "id": "github-pr-892",
+      "title": "PR #892 Clarity｜入力専用ショートカット（履歴・写真OCR・音声）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/892",
+      "updated_at": "2026-11-23T06:27:05Z"
     },
     {
       "id": "github-pr-901",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-24T01:27:20Z"
     },
     {
-      "id": "github-pr-934",
-      "title": "PR #934 fix(bravia): one-time Picture Off receipt recovery preserving unknown installer #900",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/934",
-      "updated_at": "2026-11-24T07:20:26Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-24T07:20:14Z"
+      "updated_at": "2026-11-24T07:21:27Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
-      "id": "github-commit-435847bbbadc",
-      "title": "Merge PR #933: safe one-time repair via existing Scriptable installer catalog",
-      "completed_at": "2026-11-24T05:38:47Z",
-      "result": "GitHub mainへ反映（435847b）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/435847bbbadcde7249b008a9728df98693c8458e"
+      "id": "github-commit-d63648718030",
+      "title": "Merge PR #934: BRAVIA Picture Off receipt-safe one-time recovery",
+      "completed_at": "2026-11-24T07:21:20Z",
+      "result": "GitHub mainへ反映（d636487）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d63648718030b1be2f387a80dfd4430bff864201"
     },
     {
-      "id": "github-commit-0aacd8752d34",
-      "title": "merge main into temporary shared-installer repair PR; preserve all existing 26 registrations",
-      "completed_at": "2026-11-24T05:37:09Z",
-      "result": "GitHub mainへ反映（0aacd87）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0aacd8752d34bd3647d021d5816898ce95599c89"
+      "id": "github-commit-a58ea2d76a19",
+      "title": "merge latest main into Picture Off isolated recovery while preserving 27 existing installer pins",
+      "completed_at": "2026-11-24T07:19:19Z",
+      "result": "GitHub mainへ反映（a58ea2d）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a58ea2d76a193d75f77e870aa0aa592e89526882"
     },
     {
-      "id": "github-commit-55add51a8cf4",
-      "title": "chore(yos-ai): retry deferred approved release (1/4)",
-      "completed_at": "2026-11-24T05:31:38Z",
-      "result": "GitHub mainへ反映（55add51）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/55add51a8cf497b1f8e2fb39339d8ac7b8fc116e"
+      "id": "github-commit-c310d2e59100",
+      "title": "test(bravia): validate final strict-receipt recovery commit pin",
+      "completed_at": "2026-11-24T05:50:26Z",
+      "result": "GitHub mainへ反映（c310d2e）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c310d2e5910077bc0e7b91497011c156b2e91ad1"
     },
     {
-      "id": "github-commit-85add62b4e01",
-      "title": "merge current main into one-time Common Installer repair draft; retain all original catalog targets",
-      "completed_at": "2026-11-24T01:26:45Z",
-      "result": "GitHub mainへ反映（85add62）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/85add62b4e01a14e8a62d8f22aa27788ea10b820"
+      "id": "github-commit-a536bf9676a0",
+      "title": "chore(installer): pin final strict-receipt Picture Off recovery bytes",
+      "completed_at": "2026-11-24T05:50:17Z",
+      "result": "GitHub mainへ反映（a536bf9）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a536bf9676a0064a9381a0b877d98f5e19196ada"
     },
     {
-      "id": "github-commit-38c60a231738",
-      "title": "test(installer): run authentic 2026 legacy installer through 27-entry catalog end to end",
-      "completed_at": "2026-11-24T01:23:26Z",
-      "result": "GitHub mainへ反映（38c60a2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/38c60a2317389f9ccf44575a20764b75800a9633"
+      "id": "github-commit-e79ad57a19e1",
+      "title": "fix(bravia): require exact historical receipt commit before guarded recovery",
+      "completed_at": "2026-11-24T05:50:05Z",
+      "result": "GitHub mainへ反映（e79ad57）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/e79ad57a19e111bd5e75359d282e1f2f2f1872d3"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-24T16:21:16+09:00",
+      "last_update": "2026-11-24T16:21:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 75件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 74件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-24T16:21:16+09:00",
+      "last_update": "2026-11-24T16:21:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-24T16:21:16+09:00",
+      "last_update": "2026-11-24T16:21:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "92b51bcd46a8a932a230da338bb13580ed307df1a3fae7ed4901962bb664b63d"
+  "github_snapshot_hash": "09cf6bb180ea34fd33ed3465f0b9d53add0498de7aa0968a7a9362723e065bf9"
 }
