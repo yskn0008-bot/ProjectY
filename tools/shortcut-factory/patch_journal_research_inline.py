@@ -9,6 +9,34 @@ from pathlib import Path
 INTENT="dk.simonbs.Scriptable.RunScriptInlineIntent"
 MARKER="__YOS_JOURNAL_RESEARCH_INLINE__"
 
+
+def validate_research_boundary(script):
+    """Allow the exact reviewed-history GET in this private on-device workflow.
+    Public research requests still use fixed topics and never carry the Notion token.
+    This is a structural check, supplemented by the runtime privacy regression tests.
+    """
+    required = (
+        "const REVIEW_PAGE='4215ca88-2895-816f-bdd3-c48c6cf700ae';",
+        "const base='https://api.notion.com/v1/blocks/'+REVIEW_PAGE+'/children?page_size=100';",
+        "const token=Keychain.get('YOS_NOTION_INTEGRATION_TOKEN');",
+        "r.method='GET';r.timeoutInterval=Math.min(4,remaining/1000);",
+        "r.onRedirect=()=>null;",
+        "r.headers={Authorization:'Bearer '+token,'Notion-Version':'2025-09-03',Accept:'application/json'};",
+        "return historyFromBlocks(blocks);",
+        "const seen=new Set(history);",
+        "await reviewedHistory()",
+    )
+    if not all(x in script for x in required):
+        raise AssertionError('reviewed history read-only boundary incomplete')
+    if (script.count('api.notion.com') != 1 or
+        script.count('YOS_NOTION_INTEGRATION_TOKEN') != 2 or
+        script.count('Keychain.get(') != 1 or
+        script.count('Authorization:') != 1 or
+        'api.github.com' in script or 'args.shortcutParameter' in script or
+        'Keychain.set(' in script or 'Keychain.remove(' in script or
+        any(v in script for v in ("method='POST'", "method='PATCH'", "method='PUT'", "method='DELETE'"))):
+        raise AssertionError('unexpected credential, user input or write API in research stage')
+
 def patch(path, source):
     root=plistlib.loads(path.read_bytes())
     actions=root.get('WFWorkflowActions',[])
@@ -31,8 +59,7 @@ def patch(path, source):
     required=('YOS_RESEARCH_ABSTRACT_V1','YOS_RESEARCH_HOLD_V1','Script.setShortcutOutput','Script.complete()')
     if not all(x in script for x in required):
         raise SystemExit('missing public research safety markers')
-    if any(x in script for x in ['api.notion.com','api.github.com','YOS_NOTION_INTEGRATION_TOKEN']):
-        raise SystemExit('public research stage must not access private or write APIs')
+    validate_research_boundary(script)
     p['script']={'Value':{'string':script},'WFSerializationType':'WFTextTokenString'}
     path.write_bytes(plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False))
     check=plistlib.loads(path.read_bytes())
