@@ -236,6 +236,11 @@ jobs:
             --output 'tools/shortcut-factory/artifacts/YOS-JOURNAL-GPT-signed.shortcut' \
             --name 'YOS JOURNAL 2段階編集 TEST'
 
+      - name: Sign isolated JOURNAL parameter diagnostic
+        run: |
+          python3 tools/clarity-factory/sign_with_hubsign.py --input tools/shortcut-factory/artifacts/YOS-JOURNAL-PARAMETER-unsigned.shortcut --output tools/shortcut-factory/artifacts/YOS-JOURNAL-PARAMETER-signed.shortcut --name 'YOS JOURNAL 受け渡し検証 TEST'
+          python3 -c "from pathlib import Path; assert Path('tools/shortcut-factory/artifacts/YOS-JOURNAL-PARAMETER-signed.shortcut').read_bytes().startswith(b'AEA1')"
+
       - name: Check signed AEA1 artifact
         shell: bash
         run: |
@@ -297,8 +302,10 @@ jobs:
             --script 'tools/shortcut-factory/journal_public_research_inline.js'
           python3 tools/shortcut-factory/patch_journal_draft_inbox.py \
             'tools/shortcut-factory/shortcuts/YOS JOURNAL 調査安定版 TEST_unsigned.shortcut' \
-            --script 'tools/shortcut-factory/journal_draft_inbox_inline.js'
+            --script 'tools/shortcut-factory/journal_draft_inbox_inline.js' \
+            --diagnostic /tmp/YOS-JOURNAL-PARAMETER-unsigned.shortcut
           mkdir -p tools/shortcut-factory/artifacts
+          cp /tmp/YOS-JOURNAL-PARAMETER-unsigned.shortcut tools/shortcut-factory/artifacts/
           cp 'tools/shortcut-factory/shortcuts/YOS JOURNAL 調査安定版 TEST_unsigned.shortcut' 'tools/shortcut-factory/artifacts/YOS-JOURNAL-RESEARCH-unsigned.shortcut'
 
       - name: Validate private Notion writer and failure tests
@@ -340,6 +347,8 @@ jobs:
           path: |
             tools/shortcut-factory/artifacts/YOS-JOURNAL-RESEARCH-signed.shortcut
             tools/shortcut-factory/artifacts/YOS-JOURNAL-RESEARCH-unsigned.shortcut
+            tools/shortcut-factory/artifacts/YOS-JOURNAL-PARAMETER-signed.shortcut
+            tools/shortcut-factory/artifacts/YOS-JOURNAL-PARAMETER-unsigned.shortcut
           if-no-files-found: error
           retention-days: 14
 
