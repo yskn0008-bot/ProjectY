@@ -51,6 +51,31 @@ class CollectorTests(unittest.TestCase):
   self.assertEqual(x["summary"],"くもり")
   self.assertEqual(x["checkedAt"],b.iso(CHECKED))
 
+ def test_date_only_forecast_periods_are_japan_midnight(self):
+  daily=FORECAST.replace(b'2026-11-20T09:00:00+09:00',b'2026-11-20')\
+                .replace(b'2026-11-20T21:00:00+09:00',b'2026-11-21')
+  self.assertEqual(b.forecast_period_time('2026-11-20'),dt.datetime(2026,11,19,15,0,tzinfo=UTC))
+  self.assertIsNone(b.parse_time('2026-11-20'))  # publication dates still require a timezone
+  self.assertEqual(b.forecast(daily,CHECKED)['summary'],'くもり')
+  late=daily.replace(b'2026-11-20T10:00:00+09:00',b'2026-11-20T17:00:00+09:00')
+  self.assertEqual(b.forecast(late,dt.datetime(2026,11,20,15,30,tzinfo=UTC))['summary'],'雨')
+
+ def test_bad_date_only_forecast_period_never_becomes_current(self):
+  invalid=FORECAST.replace(b'2026-11-20T09:00:00+09:00',b'2026-11-99')\
+                  .replace(b'2026-11-20T21:00:00+09:00',b'2026-11-99')
+  self.assertIsNone(b.forecast_period_time('2026-11-99'))
+  with self.assertRaisesRegex(ValueError,'not interpretable'):
+   b.forecast(invalid,CHECKED)
+
+ def test_source_error_includes_safe_jma_validation_label(self):
+  invalid=FORECAST.replace(b'471010',b'999999')
+  def fail_jma(url):
+   return invalid if url==b.FORECAST_URL else getter(url)
+  source=b.build(get=fail_jma,checked=CHECKED)['sources'][0]
+  self.assertEqual(source['status'],'error')
+  self.assertIn('JMA target region/period mismatch',source['detail'])
+  self.assertEqual(source['items'],[])
+
  def test_stale_forecast_is_not_presented_as_current(self):
   old=FORECAST.replace(b"2026-11-20T10:00:00+09:00",b"2026-11-19T10:00:00+09:00")
   x=b.forecast(old,CHECKED)
