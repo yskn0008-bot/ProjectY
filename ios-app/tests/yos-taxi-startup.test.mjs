@@ -21,7 +21,7 @@ async function run({ready=true,denied=true}={}){
  const closed=new Promise(resolve=>{close=resolve});let n=0;
  const fm={libraryDirectory:()=>'/local',joinPath:(a,b)=>a+'/'+b,fileExists:p=>files.has(p),readString:p=>files.get(p),writeString:(p,v)=>files.set(p,v),remove:p=>files.delete(p),move:(a,b)=>{files.set(b,files.get(a));files.delete(a)},copy:(a,b)=>files.set(b,files.get(a))};
  class WebView{
-  async loadHTML(html,base){events.push('load');assert.equal(base,'https://yos-taxi.invalid/');assert.match(html,/YOS TAXI を起動中/);assert.match(html,/<\/head><body>/);const {window,get}=htmlUI(html);assert.equal(window.yosReady,true);assert.match(get('screen').innerHTML,/営業状態/);assert.match(get('nav').innerHTML,/分析/);this.window=window;}
+  async loadHTML(html,base){events.push('load');assert.equal(base,'https://yos-taxi.invalid/');assert.match(html,/YOS TAXI を起動中/);assert.match(html,/<\/head><body>/);const {window,get}=htmlUI(html);assert.equal(window.yosReady,true);assert.match(get('screen').innerHTML,/給与見込み/);assert.doesNotMatch(get('screen').innerHTML,/営業状態/);assert.match(get('nav').innerHTML,/分析/);this.window=window;}
   async evaluateJavaScript(js,callback){assert.equal(callback,false);if(js.startsWith('Boolean(')){events.push('ready');return ready}if(js.startsWith('window.yosSnapshot')){events.push('snapshot');assert.match(js,/未同期/);return null}if(js.startsWith('JSON.stringify(window.yosTake')){events.push('poll');return JSON.stringify(this.window.yosTake())}throw Error('unexpected eval')}
   present(fullscreen){assert.equal(fullscreen,false);events.push('present');return closed}
  }
@@ -46,4 +46,33 @@ test('unconfirmed initial render stops with native diagnostic, without data requ
  const r=await run({ready:false,denied:false});
  assert.deepEqual(r.events,['load','ready','complete']);
  assert.deepEqual(r.alerts,['YOS TAXI｜起動・接続エラー']);assert.equal(r.files.size,0);
+});
+
+test('direct-source parsers reject stale and malformed information and distinguish reservations',()=>{
+ const util=vm.runInNewContext(src.slice(src.indexOf('const sourceSpec='),src.indexOf('const planPath='))+';({parseJMA,parseNaha,csvRows,parseCruise,cruiseResource,feedSource})');
+ const now=Date.parse('2026-11-25T08:00:00+09:00'),d=new Date(now-3600000).toISOString();
+ const weather=[{publishingOffice:'沖縄気象台',reportDatetime:d,timeSeries:[{timeDefines:[d],areas:[{area:{code:'471010'},weathers:['雨']}]}]}];
+ assert.equal(util.parseJMA(weather,now).status,'ok');
+ assert.equal(util.parseJMA(weather,now+13*3600000).status,'stale');
+ assert.throws(()=>util.parseJMA([],now));
+ const rss='<rss><channel><item><title>道路通行止め</title><link>https://www.city.naha.okinawa.jp/a</link><pubDate>'+d+'</pubDate></item><item><title>交通委託業務</title><link>https://www.city.naha.okinawa.jp/b</link><pubDate>'+d+'</pubDate></item></channel></rss>';
+ assert.equal(util.parseNaha(rss,now).items.length,1);
+ assert.throws(()=>util.parseNaha('<html>error</html>',now));
+ const csv='港湾,入港月日,入港時間,出港月日,出港時間,船名,係留施設名（バース）\n那覇港,2026-11-25,10:00,2026-11-25,18:00,"船,一",岸壁\n';
+ assert.equal(util.parseCruise(csv,now-86400000,now).items[0].title,'船,一（那覇港・寄港予約）');
+ assert.throws(()=>util.parseCruise('wrong,headers\nx,y',now,now));
+ assert.equal(util.feedSource({schema:1,generatedAt:d,sources:[]},'naha_rss',now).status,'error');
+ assert.equal(util.feedSource({schema:1,generatedAt:d,sources:[]},'naha_rss',now+3*3600000).status,'stale');
+ assert.throws(()=>util.cruiseResource({success:true,result:{resources:[{name:'2026',format:'CSV',url:'https://example.invalid/file.csv',created:d}]}},now));
+});
+test('dashboard keeps sales analysis on separate pages and explicit calendar off/target controls',()=>{
+ const html=JSON.parse(src.match(/^const UI=(.*);$/m)[1]);
+ assert.match(html,/overflow:hidden/);
+ assert.match(html,/data-act="pageNext"/);
+ assert.match(html,/data-save-day/);
+ assert.match(html,/day\.off/);
+ assert.match(html,/day\.missed/);
+ assert.match(html,/給与見込み/);
+ assert.match(html,/根拠付きAI相談文をコピー/);
+ assert.match(html,/未校正/);
 });
