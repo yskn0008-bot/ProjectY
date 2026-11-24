@@ -81,12 +81,27 @@ function trustedOld(value){
  const stripped=exactGeneratedHeader(value);
  return digest(value)===OLD_SHA||(stripped!==null&&digest(stripped)===OLD_SHA);
 }
-function receiptOk(obj,kind){
- if(!obj||obj.schema!==1||obj.name!==TARGET_NAME||obj.id!==TARGET_ID||
- obj.path!==TARGET_PATH||obj.storage!==kind)return false;
- if(obj.sha256!==OLD_SHA)return false;
- return obj.commit===undefined||obj.commit==='cfae0db7be4e5d560242520ee9c99b04a8a08fd5';
+// Match the existing Common Installer's receipt ownership contract, and
+// independently verify the receipt SHA against the immutable old code.
+// The original installer does not bind a receipt to one specific commit SHA:
+// legitimate catalog pins can differ while the installed code is unchanged.
+function receiptAudit(obj,kind,code){
+ const mismatches=[];
+ const checks=[
+  ['形式',obj&&obj.schema===1],
+  ['名前',obj&&obj.name===TARGET_NAME],
+  ['配布ID',obj&&obj.id===TARGET_ID],
+  ['コード参照先',obj&&obj.path===TARGET_PATH],
+  ['保存先',obj&&obj.storage===kind],
+  ['検証値',obj&&typeof obj.sha256==='string'&&
+   [OLD_SHA,digest(code)].includes(obj.sha256)],
+  ['更新履歴',obj&&(obj.commit===undefined||
+   typeof obj.commit==='string'&&/^[0-9a-f]{40}$/.test(obj.commit))]
+ ];
+ for(const [name,ok] of checks)if(!ok)mismatches.push(name);
+ return {ok:mismatches.length===0,mismatches};
 }
+function receiptOk(obj,kind,code){return receiptAudit(obj,kind,code).ok;}
 async function notice(title,message,ask=false){
  const a=new Alert();a.title=title;a.message=message;
  a.addAction(ask?'バックアップして消画のみ更新':'閉じる');
@@ -128,7 +143,7 @@ async function restoreInterrupted(fm,p){
  if(!fm.fileExists(oldFile)||!fm.fileExists(oldReceipt))throw Error('中断前バックアップを確認できません。保護して停止');
  const before=await read(fm,oldFile),beforeRec=await read(fm,oldReceipt);
  if(digest(before)!==t.oldHash||!trustedOld(before)||digest(beforeRec)!==t.receiptHash||
-    !receiptOk(JSON.parse(beforeRec),t.storage))throw Error('復旧元のハッシュ・受領証が一致しません。保護して停止');
+    !receiptOk(JSON.parse(beforeRec),t.storage,before))throw Error('復旧元のハッシュ・受領証が一致しません。保護して停止');
  const live=await read(fm,p.target),rec=await read(fm,p.receipt);
  const liveHash=digest(live);
  const newReceipt=JSON.stringify({schema:1,name:TARGET_NAME,id:TARGET_ID,path:TARGET_PATH,sha256:NEW_SHA,storage:t.storage,commit:NEW_COMMIT});
@@ -163,7 +178,13 @@ async function run(){
  const old=await read(fm,p.target),oldHash=digest(old),oldReceipt=await read(fm,p.receipt);
  let previous;
  try{previous=JSON.parse(oldReceipt)}catch(_){await notice('消画の受領証が読めません','安全のため何も変更しません。');return;}
- if(!receiptOk(previous,kind)){await notice('消画の受領証が不明です','旧公式版の管理記録を特定できず保護しました。コード・受領証を変更していません。');return;}
+ const audit=receiptAudit(previous,kind,old);
+ if(!audit.ok){
+  await notice('消画の受領証を保護',
+   '旧正式版の管理記録に一致しない項目：'+audit.mismatches.join('、')+
+   '\nコード・受領証を変更していません。該当する値や認証情報は表示しません。');
+  return;
+ }
  if(!trustedOld(old)){
   if(oldHash===NEW_SHA){await notice('消画コードは既に最新版','コードはGitHub最新版と一致しますが、受領証が旧版です。自動修復せず保護しました。');return;}
   await notice('既存の消画コードを保護','旧公式版と一致しないため更新しません（識別 '+oldHash.slice(0,12)+'）。');return;
