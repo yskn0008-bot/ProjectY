@@ -25,7 +25,8 @@ const researchOutput = fetchPublicResearch("")
 const researchPool = getText(researchOutput)
 saveFile("YOS-JOURNAL-GPT-CANDIDATES-{stamp}.txt", researchPool, false)
 const poolMark = matchText("^YOS_RESEARCH_FULLTEXT_POOL_V1", researchPool)
-if count(poolMark, "Items") == 0 {
+const poolCount = count(poolMark, "Items")
+if poolCount == 0 {
     alert("原典を確認できる資料が不足したため制作保留。推測では書きません。", "YOS JOURNAL")
     stop()
 }
@@ -42,7 +43,8 @@ const reviewOutput = selectReviewedResearch("__YOS_JOURNAL_REVIEW_INPUT__")
 const researchText = getText(reviewOutput)
 saveFile("YOS-JOURNAL-GPT-RESEARCH-{stamp}.txt", researchText, false)
 const evidenceMarker = matchText("^YOS_RESEARCH_APPROVED_V1", researchText)
-if count(evidenceMarker, "Items") == 0 {
+const evidenceCount = count(evidenceMarker, "Items")
+if evidenceCount == 0 {
     alert("原典審査を通過した3件が揃わなかったため執筆せず終了しました。", "YOS JOURNAL")
     stop()
 }
