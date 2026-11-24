@@ -1,5 +1,5 @@
 // Public-source discovery for YOS JOURNAL. Runs inside the new Research TEST Shortcut.
-// No credentials, no private Notion lookup, no uploads. Hard-coded search terms only.
+// Existing Notion Keychain: read only reviewed source IDs; public searches use fixed terms only. No uploads.
 // Returns abstract-level study leads, NOT independently verified full-text conclusions.
 'use strict';
 const TOPICS = Object.freeze([
@@ -14,9 +14,71 @@ const TOPICS = Object.freeze([
 ]);
 const clean=x=>String(x||'').replace(/<[^>]*>/g,' ').replace(/&(?:nbsp|amp|lt|gt|quot);/g,' ').replace(/\s+/g,' ').trim();
 // Shortcuts extensions may be killed on long network waits. Reuse only the
-// exact UTC-day's public abstract notes; this cache never stores private input.
+// exact JST-day's public abstract notes; this cache never stores private input.
 const CACHE_FILE = 'YOS JOURNAL Public Abstract Cache V1.json';
 const HOLD = 'YOS_RESEARCH_HOLD_V1:THREE_VALID_SOURCES_UNAVAILABLE';
+
+// Read only source identifiers from the EXISTING private reviewed reading page.
+// No page text, credentials, titles or private history are sent to research providers.
+const REVIEW_PAGE='4215ca88-2895-816f-bdd3-c48c6cf700ae';
+const HISTORY_HOLD='YOS_RESEARCH_HOLD_V1:REVIEWED_HISTORY_UNAVAILABLE';
+const textOf=b=>(b?.[b.type]?.rich_text||[]).map(x=>x.plain_text??x.text?.content??'').join('');
+function sourceKey(url){
+ if(typeof url!=='string')return '';
+ const doi=/^https:\/\/doi\.org\/(10\.\d{4,9}\/[A-Za-z0-9._;()/:+%-]{1,300})$/i.exec(url);
+ if(doi){try{return 'doi:'+decodeURIComponent(doi[1]).toLowerCase()}catch{return ''}}
+ return /^https:\/\/(?:www\.theguardian\.com|www\.bbc\.com|www\.bbc\.co\.uk)\/[^\s?#]+$/i.test(url)?url.toLowerCase():'';
+}
+function historyFromBlocks(blocks){
+ if(!Array.isArray(blocks)||blocks.length>3000)throw Error('HISTORY_INVALID');
+ const dates=new Set(),seen=new Set();let count=0;
+ for(let i=0;i<blocks.length;i++){
+  const b=blocks[i],m=b?.type==='heading_2'&&/^YOS JOURNAL｜(\d{4})\.(\d{2})\.(\d{2})(?:\s|$)/u.exec(textOf(b));
+  if(!m)continue;
+  const date=m.slice(1).join('-');
+  if(dates.has(date)||textOf(blocks[i+3])!=='本人用の非公開読書版。原著の主要箇所と照合済み。外部公開・配信は行っていない。')throw Error('HISTORY_EDITION_INVALID');
+  dates.add(date);let cursor=i+4;
+  for(let n=1;n<=3;n++){
+   if(blocks[cursor]?.type==='divider')cursor++;
+   if(blocks[cursor]?.type!=='heading_3'||!new RegExp('^0'+n+'\\s*/\\s*[A-Z]+｜').test(textOf(blocks[cursor])))throw Error('HISTORY_ARTICLE_INVALID');
+   const parts=blocks.slice(cursor+1,cursor+6);
+   if(parts.length!==5||parts.some(x=>x.type!=='paragraph'))throw Error('HISTORY_ARTICLE_INCOMPLETE');
+   const b=parts[4],links=(b.paragraph?.rich_text||[]).map(x=>x.href??x.text?.link?.url).filter(Boolean);
+   const key=links.length===1&&sourceKey(links[0]);
+   if(!key||!textOf(b).startsWith('原著論文'))throw Error('HISTORY_SOURCE_INVALID');
+   seen.add(key);cursor+=6;
+  }
+  if(blocks[cursor]?.type!=='divider')throw Error('HISTORY_BOUNDARY_INVALID');
+  count++;i=cursor;
+ }
+ if(!count)throw Error('HISTORY_NO_REVIEWED_EDITION');
+ return seen;
+}
+async function reviewedHistory(){
+ if(typeof Keychain==='undefined'||!Keychain.contains('YOS_NOTION_INTEGRATION_TOKEN'))throw Error('HISTORY_KEY_MISSING');
+ const token=Keychain.get('YOS_NOTION_INTEGRATION_TOKEN');
+ const base='https://api.notion.com/v1/blocks/'+REVIEW_PAGE+'/children?page_size=100';
+ let cursor='',blocks=[],deadline=Date.now()+10000;
+ for(let p=0;p<30;p++){
+  const remaining=deadline-Date.now();if(remaining<500)throw Error('HISTORY_TIMEOUT');
+  const r=new Request(base+(cursor?'&start_cursor='+encodeURIComponent(cursor):''));
+  r.method='GET';r.timeoutInterval=Math.min(4,remaining/1000);
+  r.headers={Authorization:'Bearer '+token,'Notion-Version':'2025-09-03',Accept:'application/json'};
+  r.onRedirect=()=>null;
+  const body=await r.loadJSON();
+  if(r.response?.statusCode!==200||!Array.isArray(body.results)||typeof body.has_more!=='boolean')throw Error('HISTORY_HTTP');
+  blocks.push(...body.results);
+  if(!body.has_more)return historyFromBlocks(blocks);
+  if(typeof body.next_cursor!=='string'||!body.next_cursor||body.next_cursor===cursor)throw Error('HISTORY_CURSOR');
+  cursor=body.next_cursor;
+ }
+ throw Error('HISTORY_INCOMPLETE');
+}
+function cacheEligible(notes,history){
+ const keys=(notes.match(/^(?:論文|出典)リンク: https:\/\/[^\s]+$/gm)||[]).map(line=>sourceKey(line.slice(line.indexOf('https://'))));
+ return keys.length===3&&new Set(keys).size===3&&keys.every(k=>k&&!history.has(k));
+}
+
 const validNotes=s=>typeof s==='string'&&s.startsWith('YOS_RESEARCH_ABSTRACT_V1')&&s.includes('自動公開禁止')&&[...new Set((s.match(/^(?:論文|出典)リンク: https:\/\/[^\s]+$/gm)||[]).map(x=>x.toLowerCase()))].length===3&&(s.match(/^資料[123]｜/gm)||[]).length===3;
 function cacheStore(){
   try{
@@ -72,7 +134,7 @@ function format(records,topic,query,provider){
 }
 async function fetchStudies(topic){
   const q='https://www.ebi.ac.uk/europepmc/webservices/rest/search?query='+
-    encodeURIComponent(topic[1])+'&format=json&resultType=core&pageSize=5';
+    encodeURIComponent(topic[1])+'&format=json&resultType=core&pageSize=12';
   const r=new Request(q);
   r.method='GET';r.timeoutInterval=4;
   r.headers={'Accept':'application/json'};
@@ -86,14 +148,14 @@ async function fetchStudies(topic){
     const v=makeRecord(row);
     if(!v||seen.has(v.url))continue;
     matched.push(v);seen.add(v.url);
-    if(matched.length===5)break;
+    if(matched.length===12)break;
   }
   if(!matched.length)throw Error('NO_PUBLIC_ABSTRACTS');
   return matched.map(r=>({...r,provider:'Europe PMC公式REST（抄録）'}));
 }
 async function fetchCrossref(topic){
   // Only publisher-deposited public metadata and abstracts; never treated as full text.
-  const url='https://api.crossref.org/works?rows=5&query='+encodeURIComponent(topic[1]);
+  const url='https://api.crossref.org/works?rows=12&query='+encodeURIComponent(topic[1]);
   const r=new Request(url);
   r.method='GET';r.timeoutInterval=3;
   r.headers={'Accept':'application/json'};
@@ -113,7 +175,7 @@ async function fetchCrossref(topic){
     });
     if(!v||seen.has(v.url))continue;
     seen.add(v.url);matched.push(v);
-    if(matched.length===5)break;
+    if(matched.length===12)break;
   }
   if(!matched.length)throw Error('NO_CROSSREF_ABSTRACTS');
   return matched.map(r=>({...r,provider:'Crossref公式REST（登録抄録・全文未確認）'}));
@@ -141,27 +203,29 @@ async function fetchEditorialFeed([url,host,provider]){
 }
 async function main(){
   // Daily theme rotation, never transmit shortcut input or personal data in a query.
-  const day=Math.floor(Date.now()/86400000);
+  const day=Math.floor((Date.now()+9*3600000)/86400000);
   const index=day%TOPICS.length;
   try{
+    let history;
+    try{history=await reviewedHistory();}catch(_){Script.setShortcutOutput(HISTORY_HOLD);return;}
     const previous=readCache(day);
-    if(previous){Script.setShortcutOutput(previous);return;}
+    if(previous&&cacheEligible(previous,history)){Script.setShortcutOutput(previous);return;}
     const topics=[0,3,5].map(offset=>TOPICS[(index+offset)%TOPICS.length]);
     // Three independent topic searches in parallel; at most two bounded waves.
     const primary=await Promise.all(topics.map(t=>fetchStudies(t).catch(()=>[])));
-    const seen=new Set();
-    const choose=rows=>rows.find(r=>!seen.has(r.doi.toLowerCase()));
-    const selected=primary.map(rows=>{const r=choose(rows);if(r)seen.add(r.doi.toLowerCase());return r;});
+    const seen=new Set(history);
+    const choose=rows=>rows.find(r=>sourceKey(r.url)&&!seen.has(sourceKey(r.url)));
+    const selected=primary.map(rows=>{const r=choose(rows);if(r)seen.add(sourceKey(r.url));return r;});
     const [fallback,feeds]=await Promise.all([
       Promise.all(topics.map((t,i)=>selected[i]?Promise.resolve([]):fetchCrossref(t).catch(()=>[]))),
       selected.every(Boolean)?Promise.resolve([]):Promise.all(FEEDS.map(f=>fetchEditorialFeed(f).catch(()=>[])))
     ]);
-    for(let i=0;i<selected.length;i++)if(!selected[i]){const r=choose(fallback[i]);if(r){seen.add(r.doi.toLowerCase());selected[i]=r;}}
+    for(let i=0;i<selected.length;i++)if(!selected[i]){const r=choose(fallback[i]);if(r){seen.add(sourceKey(r.url));selected[i]=r;}}
     if(selected.filter(Boolean).length!==3){
       const used=new Set(selected.filter(Boolean).map(x=>x.url));
       for(let i=0;i<selected.length;i++)if(!selected[i]){
-        const row=feeds.flat().find(x=>!used.has(x.url));
-        if(row){selected[i]=row;used.add(row.url);}
+        const row=feeds.flat().find(x=>sourceKey(x.url)&&!seen.has(sourceKey(x.url))&&!used.has(x.url));
+        if(row){selected[i]=row;used.add(row.url);seen.add(sourceKey(row.url));}
       }
     }
     if(selected.filter(Boolean).length!==3){
@@ -170,7 +234,7 @@ async function main(){
       return;
     }
     const notes=format(selected,topics.map(t=>t[0]).join('／'),topics.map(t=>t[1]).join('／'),'各資料の取得元を参照');
-    if(!validNotes(notes))throw Error('INVALID_NOTES');
+    if(!validNotes(notes)||!cacheEligible(notes,history))throw Error('INVALID_NOTES');
     // Always output before optional cache write; local file errors are non-fatal.
     Script.setShortcutOutput(notes);
     writeCache(day,notes);
