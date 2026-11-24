@@ -134,3 +134,29 @@ test('quick remote includes the required legacy and current Scriptable installer
  assert.ok(src.startsWith('// Variables used by Scriptable.\n'));
  assert.match(src.split('\n').slice(0,20).join('\n'),/^\/\/ YOS_SCRIPT_NAME: YOS Remote Hub Quick TEST$/m);
 });
+
+test('editable presets preserve legacy storage, mode-only and custom value semantics',async()=>{
+ const code=src.slice(src.indexOf('const PICTURE_TARGETS='),src.indexOf('const QUICK_APP_MATCHERS='));
+ const settings={pictureMode:{target:'pictureMode',currentValue:'standard',candidate:[{value:'standard'},{value:'cinema'},{value:'custom'}]},brightness:{target:'brightness',currentValue:'30',candidate:[{min:0,max:50,step:1}]}};
+ const keys=new Map(),writes=[];
+ class Request{async loadString(){
+  const q=JSON.parse(this.body);
+  if(q.method==='getPictureQualitySettings'){const list=Object.values(settings).filter(x=>!q.params[0].target||x.target===q.params[0].target);if(q.version==='1.1')list.push({target:'futureGamma',currentValue:'1',candidate:[{value:'1'}]});return JSON.stringify({result:[list]});}
+  if(q.method==='setPictureQualitySettings'){const item=q.params[0].settings[0];writes.push(item);settings[item.target].currentValue=item.value;if(item.target==='pictureMode')settings.brightness.currentValue='5';return JSON.stringify({result:[]});}
+  throw Error('unexpected RPC');
+ }}
+ const api=new Function('Request','sonyHost','sonyPSK','Keychain',code+'return{pictureProbe,pictureLoad,editPicturePreset,pictureAction};')(Request,()=> 'example',()=> 'mock',{contains:k=>keys.has(k),get:k=>keys.get(k),set:(k,v)=>keys.set(k,v)});
+ const prefix='yos.bravia.scriptable.picture-user-preset.v2.';
+ keys.set(prefix+'day',JSON.stringify({schema:2,settings:[{target:'brightness',value:'30'}]}));
+ assert.equal((await api.pictureProbe()).presets.day.settings[0].value,'30');
+ await api.editPicturePreset({key:'day',name:'昼シネマ',settings:[{target:'pictureMode',value:'cinema'}]});
+ assert.equal(writes.length,0);
+ assert.equal(JSON.parse(keys.get(prefix+'day.previous')).settings[0].value,'30');
+ await api.pictureLoad('day');assert.deepEqual(writes,[{target:'pictureMode',value:'cinema'}]);
+ await api.editPicturePreset({key:'extra1',name:'独自',settings:[{target:'pictureMode',value:'custom'},{target:'brightness',value:'30'}]});
+ await api.pictureLoad('extra1');assert.equal(settings.brightness.currentValue,'30');assert.equal(settings.pictureMode.currentValue,'custom');
+ const before=keys.get(prefix+'extra1');
+ await assert.rejects(api.editPicturePreset({key:'extra1',name:'invalid',settings:[{target:'brightness',value:'999'}]}),/許可/);
+ assert.equal(keys.get(prefix+'extra1'),before);
+ const count=writes.length;assert.match((await api.pictureAction('discover','')).message,/futureGamma/);assert.equal(writes.length,count);
+});

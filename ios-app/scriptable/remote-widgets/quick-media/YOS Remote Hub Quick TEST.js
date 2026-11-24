@@ -194,9 +194,22 @@ body{padding:0 8px}
 .pic-slider-wrap input[type=range]{width:100%;height:30px;accent-color:#6b9fff;flex:1}
 .pic-slider-wrap output{min-width:44px;text-align:right;font-size:13px;color:#a5c2ff}
 .pic-enum{min-width:145px;max-width:200px;padding:9px 6px;background:#202832;border:1px solid #414854;border-radius:10px;color:#eef1f7}
-.pic-preset{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:7px;padding:10px 0;border-top:1px solid #2e3138}
+.pic-preset{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:7px;padding:10px 0;border-top:1px solid #2e3138}
 .pic-preset button{border:1px solid #464d58;color:#fff;background:#151c26;border-radius:10px;padding:10px 11px}
 .pic-preset button:disabled{opacity:.35}
+#presetEditor{border-top:1px solid #394451;padding:12px 0}
+#presetEditor input[type=text],#presetEditor input[type=number],#presetEditor select,#remoteAppearance select{width:100%;min-width:0;padding:9px;color:#eaf1fa;background:#202832;border:1px solid #404b5a;border-radius:9px;font-size:14px}
+.preset-edit-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid #30353c}
+.preset-edit-row label{display:flex;align-items:center;gap:8px;font-size:13px}
+#presetHome{display:grid;grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:calc((100% - 10px)/3);gap:5px;overflow-x:auto;scroll-snap-type:x proximity}
+#presetHome button{min-height:44px;scroll-snap-align:start;white-space:normal;color:#e7f1fc;background:#17212b;border:1px solid #2d4054;border-radius:10px}
+#presetHome button:disabled{opacity:.35}
+#tvGrid[data-size=compact] .key{height:48px}
+#tvGrid[data-size=large] .key{height:76px}
+#remoteAppearance{display:grid;gap:8px;margin:12px 0}
+.tv-studio .compact-adjust input,.pic-slider-wrap input[type=range],.pic-big-bar{min-height:44px;appearance:none;-webkit-appearance:none;background:transparent}
+.tv-studio .compact-adjust input::-webkit-slider-runnable-track,.pic-slider-wrap input[type=range]::-webkit-slider-runnable-track,.pic-big-bar::-webkit-slider-runnable-track{height:10px;border-radius:10px;background:#53677f}
+.tv-studio .compact-adjust input::-webkit-slider-thumb,.pic-slider-wrap input[type=range]::-webkit-slider-thumb,.pic-big-bar::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-8px;background:#dbe9fa;border-radius:50%;border:1px solid #9ab7d9}
 .pic-status{font-size:12px;line-height:1.6;color:#9db0c7;white-space:pre-line;padding:10px;background:#121924;border-radius:10px;margin:10px 0}
 .pic-big-bar{width:100%;height:52px;accent-color:#7aa5ff}
 .config-layer{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.94);padding:max(58px,calc(env(safe-area-inset-top) + 4px)) 10px max(12px,env(safe-area-inset-bottom));overflow:auto}
@@ -219,7 +232,7 @@ body{padding:0 8px}
 <div id="quickPictureModes" class="quick-modes" aria-label="画質モード切替"><span class="pic-manual">画質モードを確認中…</span></div>
 <div class="tv-studio" aria-label="BRAVIA クイックスタジオ">
  <h3>PICTURE · 画質プリセット</h3>
- <div class="scene-picks"><button onclick="loadPicturePreset(event,'day')" id="tvPresetDay" disabled>昼</button><button onclick="loadPicturePreset(event,'night')" id="tvPresetNight" disabled>夜</button><button onclick="loadPicturePreset(event,'movie')" id="tvPresetMovie" disabled>映画</button></div>
+ <div class="scene-picks" id="presetHome"><button onclick="loadPicturePreset(event,'day')" id="tvPresetDay" disabled>昼</button><button onclick="loadPicturePreset(event,'night')" id="tvPresetNight" disabled>夜</button><button onclick="loadPicturePreset(event,'movie')" id="tvPresetMovie" disabled>映画</button></div>
  <div class="compact-adjust"><label for="tvBrightness">明るさ</label><input id="tvBrightness" type="range" min="0" max="100" value="0" disabled oninput="previewTVCompact(event,'brightness')" onchange="commitTVCompact(event,'brightness')"><output id="tvBrightnessVal">--</output></div>
  <div class="compact-adjust"><label for="tvContrast">コントラスト</label><input id="tvContrast" type="range" min="0" max="100" value="0" disabled oninput="previewTVCompact(event,'contrast')" onchange="commitTVCompact(event,'contrast')"><output id="tvContrastVal">--</output></div>
  <h3 style="margin-top:11px">APPS · 左右スクロール</h3>
@@ -253,7 +266,7 @@ body{padding:0 8px}
 <p class="floor-footnote">色・調光は自宅Wi-Fiで直接操作。エフェクト・自動バイオリズムはTapoアプリで設定してください。Matter対応だけではScriptableへの直接接続はできません。</p>
 </section>
 </div>
-<div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」で入れ替え。再生位置が自動カーソルの中心。中央キーはタップ最優先で決定、24px以上動かした時だけスワイプとして上下左右へ移動します。切替中の長押しは元機能です。</p><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
+<div id="configLayer" class="config-layer"><div class="config-card"><div class="config-head"><div class="config-title">BRAVIA 配置</div><div class="config-actions"><button class="tool" onclick="resetLayout(event)">初期化</button><button class="tool" onclick="closeLayoutEditor(event)">完了</button></div></div><p class="config-help">12枠内は「移動元 → 移動先」で入れ替え。再生位置が自動カーソルの中心。中央キーはタップ最優先で決定、24px以上動かした時だけスワイプとして上下左右へ移動します。切替中の長押しは元機能です。</p><div id="remoteAppearance"><label>操作ボタンの大きさ<select id="remoteSize" onchange="changeRemoteAppearance()"><option value="standard">標準</option><option value="compact">コンパクト</option><option value="large">大きめ</option></select></label><label>画質プリセットの位置<select id="presetPosition" onchange="changeRemoteAppearance()"><option value="below">12キーの下</option><option value="above">12キーの上</option></select></label></div><div class="section-label">表示中の12枠</div><div id="configGrid" class="config-grid"></div><div class="section-label">使えるBRAVIAボタン</div><div id="palette" class="palette"></div></div></div>
 <div id="quickLayer" class="config-layer" role="dialog" aria-modal="true" aria-label="BRAVIAワンタップ操作"><div class="config-card">
   <div class="config-head"><div class="config-title">BRAVIA クイック操作</div><button class="tool" onclick="closeQuickEditor(event)">閉じる</button></div>
   <p class="quick-info">テレビから取得できた設定のみ直接変更。各操作は本人が押したときだけ送信します。</p>
@@ -278,7 +291,7 @@ body{padding:0 8px}
   <p class="config-help">画質項目を一覧化。実際に変更できるものはテレビから取得した値と範囲を使用します。非対応項目はテレビ本体で設定してください。</p>
   <div id="pictureGroups"></div>
   <p id="pictureStatus" class="pic-status" aria-live="polite">未接続。画質の確認中です。</p>
-  <button class="tool" onclick="probePictureScene(event)">現在の設定を再取得</button>
+  <button class="tool" onclick="probePictureScene(event)">現在の設定を再取得</button><button class="tool" onclick="nativeAction(&quot;picture&quot;,&quot;discover&quot;,&quot;追加項目の調査&quot;)">追加画質項目を調査</button>
   <button class="tool" onclick="sendTVShortcut(event,'quick','クイック設定')">テレビのクイック設定</button>
 </div></div>
 <div id="brightLayer" class="config-layer" role="dialog" aria-modal="true" aria-label="BRAVIA明るさバー"><div class="config-card">
@@ -290,8 +303,8 @@ body{padding:0 8px}
 </div></div>
 <div id="shortcutsLayer" class="config-layer" role="dialog" aria-modal="true" aria-label="BRAVIA画質ショートカット"><div class="config-card">
   <div class="config-head"><div class="config-title">画質ショートカット</div><button class="tool" onclick="closeShortcuts(event)">閉じる</button></div>
-  <p class="config-help">テレビで好きな画質に調整して「保存」。保存対象は今の映像入力でAPIから取得できた項目だけです。明るさが未取得なら保存・復元できません。YOSが数値を勝手に決めることはありません。</p>
-  <div id="picturePresets"></div>
+  <p class="config-help">昼・夜・映画は自由登録です。「編集」で名前、モード、適用項目を指定。「現在を保存」で今の画質を登録。保存だけではテレビを変更しません。</p>
+  <div id="picturePresets"></div><div id="presetEditor" hidden></div>
   <p id="shortcutsStatus" class="pic-status" aria-live="polite">設定を確認中</p>
   <button class="tool" onclick="probePictureScene(event)">登録状況を再取得</button>
 </div></div>
@@ -472,7 +485,19 @@ function renderConfig(){
     palette.appendChild(b)
   })
 }
-function openLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=null;document.getElementById("configLayer").classList.add("open");renderConfig()}
+const REMOTE_APPEARANCE_KEY="yos.remote.tv.appearance.v1"
+function applyRemoteAppearance(){
+ let pref={};try{pref=JSON.parse(localStorage.getItem(REMOTE_APPEARANCE_KEY))||{}}catch(_){}
+ const size=["standard","compact","large"].includes(pref.size)?pref.size:"standard",position=pref.position==="above"?"above":"below";
+ const grid=document.getElementById("tvGrid"),home=document.getElementById("presetHome"),sizeInput=document.getElementById("remoteSize"),posInput=document.getElementById("presetPosition");
+ if(sizeInput)sizeInput.value=size;if(posInput)posInput.value=position;
+ if(!grid||!home||!home.parentNode||!grid.parentNode)return;
+ grid.dataset.size=size;
+ if(position==="above")grid.parentNode.insertBefore(home,grid);
+ else {const studio=document.querySelector(".tv-studio");if(studio&&studio.children[0]&&home!==studio.children[0].nextSibling)studio.insertBefore(home,studio.children[0].nextSibling);}
+}
+function changeRemoteAppearance(){const size=document.getElementById("remoteSize").value,position=document.getElementById("presetPosition").value;try{localStorage.setItem(REMOTE_APPEARANCE_KEY,JSON.stringify({size,position}))}catch(_){}applyRemoteAppearance()}
+function openLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=null;document.getElementById("configLayer").classList.add("open");applyRemoteAppearance();renderConfig()}
 function closeLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=null;document.getElementById("configLayer").classList.remove("open");renderTV()}
 function resetLayout(e){if(e){e.preventDefault();e.stopPropagation()}layout=DEFAULT.slice();selectedSlot=null;saveLayout();renderTV();renderConfig()}
 const PICTURE_MENU=[
@@ -484,8 +509,8 @@ const PICTURE_MENU=[
  ["映像信号",[["HDRモード","hdrMode"],["HDMIビデオレンジ",null]]],
  ["色詳細設定",[["色温度詳細設定：ベーシック",null],["色温度詳細設定：マルチポイント",null],["各色詳細設定",null]]]
 ]
-const PIC_PRESET_IDS=["day","night","movie"],PIC_PRESET_NAMES={day:"昼",night:"夜",movie:"映画"}
-let pictureMap={},savedPresets={day:false,night:false,movie:false},pictureConnected=false
+const PIC_PRESET_IDS=["day","night","movie","extra1","extra2","extra3","extra4","extra5"],PIC_PRESET_NAMES={day:"昼",night:"夜",movie:"映画",extra1:"追加1",extra2:"追加2",extra3:"追加3",extra4:"追加4",extra5:"追加5"}
+let pictureMap={},savedPresets={day:false,night:false,movie:false},pictureConnected=false,presetDetails={},editingPreset=null
 function pictureEscape(t){return String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
 
 const QUICK_APPS=[["youtube","YouTube"],["netflix","Netflix"],["prime","Amazonプライム"],["unext","U-NEXT"],["proton","Proton VPNを開く"]]
@@ -632,11 +657,43 @@ function renderBrightness(){
  if(okay){input.min=data.min;input.max=data.max;input.step=data.step;input.value=data.value;v.textContent="現在の明るさ "+data.value}
  else v.textContent="明るさの直接操作は未対応。テレビのクイック設定で調整してください。"
 }
+function presetName(key){return presetDetails[key]?.name||PIC_PRESET_NAMES[key]}
+function renderPresetEditor(key){
+ editingPreset=key;
+ const editor=document.getElementById("presetEditor");if(!editor)return;
+ editor.hidden=false;
+ const prior=presetDetails[key],values=Object.fromEntries((prior?.settings||[]).map(x=>[x.target,x.value]));
+ let markup='<h3>画質ショートカット編集</h3><label>名前<input type="text" maxlength="24" id="presetName" value="'+pictureEscape(presetName(key))+'"></label><p class="pic-manual">適用したい項目だけにチェック。画質モードだけでも登録できます。</p>';
+ const labels=Object.fromEntries(PICTURE_MENU.flatMap(g=>g[1].filter(x=>x[1]).map(x=>[x[1],x[0]])));
+ for(const [target,info] of Object.entries(pictureMap)){
+  if(!info.available)continue;
+  const chosen=Object.prototype.hasOwnProperty.call(values,target),value=chosen?values[target]:info.value,enabled=prior?chosen:target==="pictureMode";
+  markup+='<div class="preset-edit-row"><label><input type="checkbox" data-preset-check="'+target+'" '+(enabled?'checked':'')+'>'+pictureEscape(labels[target]||target)+'</label>';
+  if(info.min!==null&&info.max!==null&&info.step>0)markup+='<input type="number" data-preset-value="'+target+'" min="'+info.min+'" max="'+info.max+'" step="'+info.step+'" value="'+pictureEscape(value)+'">';
+  else {markup+='<select data-preset-value="'+target+'">';for(const option of info.options||[])markup+='<option value="'+pictureEscape(option)+'"'+(String(option)===String(value)?' selected':'')+'>'+pictureEscape(pictureOptionLabel(target,option))+'</option>';markup+='</select>'}
+  markup+='</div>';
+ }
+ if(prior&&prior.settings.some(x=>!pictureMap[x.target]?.available))markup+='<p class="pic-manual">未取得の既存設定を保護します。再取得してください。</p>';
+ markup+='<div class="quick-buttons"><button class="tool" onclick="commitPresetEditor(event)">'+(prior?'上書き保存':'登録')+'</button><button class="tool" onclick="cancelPresetEditor()">閉じる</button></div>';
+ editor.innerHTML=markup;
+}
+function cancelPresetEditor(){editingPreset=null;const editor=document.getElementById("presetEditor");if(editor){editor.hidden=true;editor.innerHTML=""}}
+function commitPresetEditor(e){
+ e.preventDefault();if(!editingPreset||!pictureConnected)return;
+ const key=editingPreset,prior=presetDetails[key],status=document.getElementById("shortcutsStatus");
+ if(prior&&prior.settings.some(x=>!pictureMap[x.target]?.available)){status.textContent="既存設定を保護しました。未取得項目があります。";return}
+ const name=document.getElementById("presetName").value.trim(),settings=[];
+ document.querySelectorAll("[data-preset-check]").forEach(el=>{if(el.checked){const target=el.dataset.presetCheck,input=document.querySelector('[data-preset-value="'+target+'"]');if(input)settings.push({target,value:String(input.value)})}});
+ if(!name||!settings.length){status.textContent="名前と適用項目を指定してください";return}
+ status.textContent="登録内容を検証中…";
+ nativeAction("picture","edit","画質プリセット登録",JSON.stringify({key,name,settings}));
+}
 function renderPicturePresets(){
- const root=document.getElementById("picturePresets");if(!root)return
+ const root=document.getElementById("picturePresets");if(!root)return;
  root.innerHTML=PIC_PRESET_IDS.map(key=>{
- const isSaved=Boolean(savedPresets[key])
- return '<div class="pic-preset"><div><strong>'+PIC_PRESET_NAMES[key]+'</strong><div class="pic-manual">'+(isSaved?'登録済み':'未登録')+'</div></div><button '+(!pictureConnected?'disabled':'')+' onclick="savePicturePreset(event,&quot;'+key+'&quot;)">保存</button><button '+(!pictureConnected||!isSaved?'disabled':'')+' onclick="loadPicturePreset(event,&quot;'+key+'&quot;)">呼出</button></div>'
+  const isSaved=Boolean(savedPresets[key]),prior=presetDetails[key],mode=prior?.settings?.find(x=>x.target==="pictureMode")?.value;
+  const detail=isSaved?(mode?pictureOptionLabel("pictureMode",mode)+" / ":"")+(prior?prior.settings.length+"項目":"登録済み"):"未登録";
+  return '<div class="pic-preset"><div><strong>'+pictureEscape(presetName(key))+'</strong><div class="pic-manual">'+pictureEscape(detail)+'</div></div><button '+(!pictureConnected?'disabled':'')+' onclick="renderPresetEditor(&quot;'+key+'&quot;)">編集</button><button '+(!pictureConnected?'disabled':'')+' onclick="savePicturePreset(event,&quot;'+key+'&quot;)">現在を保存</button><button '+(!pictureConnected||!isSaved?'disabled':'')+' onclick="loadPicturePreset(event,&quot;'+key+'&quot;)">呼出</button></div>'
  }).join("")
 }
 function savePicturePreset(e,key){
@@ -658,7 +715,7 @@ function showPictureStatus(result){
   pictureConnected=true
   const picture=result.picture
   pictureMap={};for(const item of picture.entries||[])pictureMap[item.target]=item
-  savedPresets=picture.saved||savedPresets
+  savedPresets=picture.saved||savedPresets;presetDetails=picture.presets||presetDetails;if(picture.edited===editingPreset)cancelPresetEditor()
   if(status)status.textContent=picture.message||"現在値を取得しました"
   if(shortStatus)shortStatus.textContent=picture.message||"ショートカットを確認しました"
   renderPictureMenu();renderBrightness();renderPicturePresets();quickModeButtons('quickPictureModes');quickModeButtons('quickPictureModesPanel');renderTVStudio()
@@ -680,9 +737,8 @@ function renderTVStudio(){
   if(ok){range.min=entry.min;range.max=entry.max;range.step=entry.step;range.value=entry.value;value.textContent=entry.value}
   else value.textContent='--';
  }
- for(const [key,id] of [['day','tvPresetDay'],['night','tvPresetNight'],['movie','tvPresetMovie']]){
-  const button=document.getElementById(id);if(button)button.disabled=!pictureConnected||!savedPresets[key];
- }
+ const home=document.getElementById("presetHome");
+ if(home)home.innerHTML=PIC_PRESET_IDS.filter((key,i)=>i<3||savedPresets[key]).map(key=>'<button '+(!pictureConnected||!savedPresets[key]?'disabled':'')+' onclick="loadPicturePreset(event,&quot;'+key+'&quot;)">'+pictureEscape(presetName(key))+'</button>').join("");
 }
 function previewTVCompact(e,target){const id=target==='brightness'?'tvBrightnessVal':'tvContrastVal';document.getElementById(id).textContent=e.target.value}
 function commitTVCompact(e,target){
@@ -781,7 +837,7 @@ function bindLightHoldButtons(){
   })
 }
 function openRemote(device){window.location.href=REMOTES[device]}
-bindLightHoldButtons();renderTV();renderTVStudio();requestMode();requestAC();try{setPanel(localStorage.getItem(PANEL_KEY)||"tv")}catch(_){setPanel("tv")}nativeAction("tvApps","list","アプリ一覧");if(activePanel==="tv")probePictureScene();pollTimer=setInterval(requestMode,1600);acTimer=setInterval(requestAC,30000);window.addEventListener("beforeunload",()=>{if(pollTimer)clearInterval(pollTimer);if(acTimer)clearInterval(acTimer)})
+bindLightHoldButtons();renderTV();renderTVStudio();try{applyRemoteAppearance()}catch(_){}requestMode();requestAC();try{setPanel(localStorage.getItem(PANEL_KEY)||"tv")}catch(_){setPanel("tv")}nativeAction("tvApps","list","アプリ一覧");if(activePanel==="tv")probePictureScene();pollTimer=setInterval(requestMode,1600);acTimer=setInterval(requestAC,30000);window.addEventListener("beforeunload",()=>{if(pollTimer)clearInterval(pollTimer);if(acTimer)clearInterval(acTimer)})
 </script></body></html>`
 
 function secure(key){return Keychain.contains(key)?Keychain.get(key):""}
@@ -793,12 +849,12 @@ function rememberMode(mode,action){const now=Date.now();modeState={mode,navigati
 function noteAction(action){if(action==="pause"){rememberMode("hybrid",action);return}if(action==="play"){rememberMode("media",action);return}if(action==="stop"){rememberMode("navigation",action);return}if(modeState.mode==="hybrid"&&HYBRID_KEEP_ACTIONS.has(action)){rememberMode("hybrid",action);return}if(NAV_ACTIONS.has(action))rememberMode("navigation",action);else if(MEDIA_ACTIONS.has(action))rememberMode("media",action)}
 async function sonyJSON(service,method){const r=new Request("http://"+sonyHost()+"/sony/"+service);r.method="POST";r.headers={"Content-Type":"application/json","X-Auth-PSK":sonyPSK()};r.body=JSON.stringify({method,params:[],id:1,version:"1.0"});return JSON.parse(await r.loadString())}
 const PICTURE_TARGETS=["pictureMode","autoPictureMode","lightSensor","brightness","contrast","autoLocalDimming","xtendedDynamicRange","color","colorTemperature","colorSpace","sharpness","hdrMode"]
-const PICTURE_PRESET_KEYS=["day","night","movie"]
+const PICTURE_PRESET_KEYS=["day","night","movie","extra1","extra2","extra3","extra4","extra5"]
 const PICTURE_PRESET_PREFIX="yos.bravia.scriptable.picture-user-preset.v2."
-async function sonyVideoJSON(method,params){
+async function sonyVideoJSON(method,params,version="1.0"){
  const r=new Request("http://"+sonyHost()+"/sony/video");r.method="POST";r.timeoutInterval=8
  r.headers={"Content-Type":"application/json","X-Auth-PSK":sonyPSK()}
- r.body=JSON.stringify({method,params,id:1,version:"1.0"})
+ r.body=JSON.stringify({method,params,id:1,version})
  const data=JSON.parse(await r.loadString())
  if(data&&data.error)throw Error("BRAVIA画質API拒否："+String(data.error[0]||"不明"))
  if(!data||!Array.isArray(data.result))throw Error("BRAVIA画質応答が不明です")
@@ -856,20 +912,42 @@ function picturePublic(entry){
  return{target:entry.target,value:String(entry.currentValue??""),available:valid,
   min:range?range.min:null,max:range?range.max:null,step:range?range.step:null,options:range?[]:opts}
 }
+function readPicturePreset(key){
+ if(!PICTURE_PRESET_KEYS.includes(key)||!Keychain.contains(PICTURE_PRESET_PREFIX+key))return null;
+ try{const p=JSON.parse(Keychain.get(PICTURE_PRESET_PREFIX+key));if(p?.schema!==2||!Array.isArray(p.settings)||!p.settings.length||p.settings.length>PICTURE_TARGETS.length||p.settings.some(x=>!x||!PICTURE_TARGETS.includes(x.target)||typeof x.value!=="string")||new Set(p.settings.map(x=>x.target)).size!==p.settings.length)return null;return {name:typeof p.name==="string"?p.name.slice(0,24):"",settings:p.settings}}catch(_){return null}
+}
+function picturePresetDetails(){return Object.fromEntries(PICTURE_PRESET_KEYS.map(k=>[k,readPicturePreset(k)]))}
 function pictureSavedFlags(){return Object.fromEntries(PICTURE_PRESET_KEYS.map(k=>[k,Keychain.contains(PICTURE_PRESET_PREFIX+k)]))}
-async function pictureProbe(message){
- const map=await pictureAll()
+async function pictureProbe(message,existing){
+ const map=existing||await pictureAll()
  const entries=PICTURE_TARGETS.filter(t=>map.has(t)).map(t=>picturePublic(map.get(t)))
- return{entries,saved:pictureSavedFlags(),message:message||("BRAVIAから"+entries.length+"項目を取得。調整できない項目はテレビのクイック設定を使用してください。")}
+ return{entries,saved:pictureSavedFlags(),presets:picturePresetDetails(),message:message||("BRAVIAから"+entries.length+"項目を取得。調整できない項目はテレビのクイック設定を使用してください。")}
 }
 async function writePicture(target,value){
  if(!PICTURE_TARGETS.includes(target))throw Error("この画質項目は安全な直接操作に非対応です")
  const settings=await pictureAll(),entry=settings.get(target)
  if(!validPictureValue(entry,value))throw Error("テレビが許可していない設定値です："+target)
- if(String(entry.currentValue)===String(value))return
+ if(String(entry.currentValue)===String(value))return false
  await sonyVideoJSON("setPictureQualitySettings",[{settings:[{target,value:String(value)}]}])
  const checked=(await pictureAll()).get(target)
  if(!checked||(String(checked.currentValue)!==String(value)&&!(Number.isFinite(Number(value))&&Number(checked.currentValue)===Number(value))))throw Error("テレビ側で反映確認できませんでした："+target)
+ return true
+}
+async function editPicturePreset(payload){
+ if(!payload||!PICTURE_PRESET_KEYS.includes(payload.key)||typeof payload.name!=="string"||!payload.name.trim()||payload.name.trim().length>24||!Array.isArray(payload.settings)||!payload.settings.length||payload.settings.length>PICTURE_TARGETS.length)throw Error("登録内容が不正です");
+ const prior=readPicturePreset(payload.key),supported=await pictureAll(),seen=new Set(),settings=[];
+ if(Keychain.contains(PICTURE_PRESET_PREFIX+payload.key)&&!prior)throw Error("既存設定の形式が不明なため保護しました");
+ if(prior&&prior.settings.some(x=>!validPictureValue(supported.get(x.target),x.value)))throw Error("既存の保存項目が現在利用できないため保護しました");
+ for(const item of payload.settings){
+  if(!item||typeof item.value!=="string"||seen.has(item.target)||!validPictureValue(supported.get(item.target),item.value))throw Error("テレビが許可していない登録値です");
+  seen.add(item.target);settings.push({target:item.target,value:item.value});
+ }
+ const record=JSON.stringify({schema:2,name:payload.name.trim(),created:new Date().toISOString(),settings});
+ const storage=PICTURE_PRESET_PREFIX+payload.key;
+ if(Keychain.contains(storage))Keychain.set(storage+".previous",Keychain.get(storage));
+ Keychain.set(storage,record);
+ if(Keychain.get(storage)!==record)throw Error("登録の読戻しに失敗しました");
+ return {...await pictureProbe("画質ショートカットを登録しました。テレビは変更していません。",supported),edited:payload.key};
 }
 async function pictureSave(key){
  if(!PICTURE_PRESET_KEYS.includes(key))throw Error("保存先が不明です")
@@ -879,8 +957,9 @@ async function pictureSave(key){
   if(e&&validPictureValue(e,e.currentValue))saved.push({target,value:String(e.currentValue)})
  }
  if(!saved.length)throw Error("保存可能な画質項目を取得できません。保存を行いません")
- Keychain.set(PICTURE_PRESET_PREFIX+key,JSON.stringify({schema:2,created:new Date().toISOString(),settings:saved}))
- return pictureProbe("現在の画質"+saved.length+"項目を「"+({day:"昼",night:"夜",movie:"映画"}[key])+"」に保存しました。設定変更はしていません。")
+ const storage=PICTURE_PRESET_PREFIX+key,prior=readPicturePreset(key);if(Keychain.contains(storage)){if(!prior)throw Error("既存設定を保護しました");if(prior.settings.some(x=>!saved.some(y=>x.target===y.target)))throw Error("既存設定の一部が未取得のため上書きしません");Keychain.set(storage+".previous",Keychain.get(storage))}
+ Keychain.set(storage,JSON.stringify({schema:2,name:prior?.name||"",created:new Date().toISOString(),settings:saved}))
+ return pictureProbe("現在の画質"+saved.length+"項目を「"+(readPicturePreset(key)?.name||({day:"昼",night:"夜",movie:"映画"}[key])||key)+"」に保存しました。設定変更はしていません。")
 }
 async function pictureLoad(key){
  if(!PICTURE_PRESET_KEYS.includes(key)||!Keychain.contains(PICTURE_PRESET_PREFIX+key))throw Error("保存済み設定がありません")
@@ -897,12 +976,26 @@ async function pictureLoad(key){
  }
  list.sort((a,b)=>Number(b.target==="pictureMode")-Number(a.target==="pictureMode"))
  let changed=0
- try{for(const item of list){if(String(supported.get(item.target).currentValue)===item.value)continue;await writePicture(item.target,item.value);changed++}}
+ try{for(const item of list){if(await writePicture(item.target,item.value))changed++}}
  catch(e){throw Error("画質の一部だけ変更された可能性があります（"+changed+"件確認済み）。"+String(e.message||e))}
- return pictureProbe("保存済み「"+({day:"昼",night:"夜",movie:"映画"}[key])+"」を呼び出しました。"+changed+"項目を変更・読戻し確認しました。")
+ return pictureProbe("保存済み「"+(readPicturePreset(key)?.name||({day:"昼",night:"夜",movie:"映画"}[key])||key)+"」を呼び出しました。"+changed+"項目を変更・読戻し確認しました。")
+}
+// Explicit user-initiated discovery only: never send settings or change startup.
+async function discoverExtraPictureTargets(){
+ const output=[];
+ for(const version of ["1.0","1.1"]){
+  try{
+   const data=await sonyVideoJSON("getPictureQualitySettings",[{target:""}],version);
+   const raw=flattenPicture(data.result);
+   const extras=[...new Set(raw.filter(e=>e.isAvailable!==false&&typeof e.target==="string"&&!PICTURE_TARGETS.includes(e.target)).map(e=>e.target))].slice(0,30);
+   output.push("v"+version+"："+(extras.length?extras.join("、"):"追加対象なし"));
+  }catch(_){output.push("v"+version+"：取得不可（非対応または通信失敗）")}
+ }
+ return{...await pictureProbe(),message:"読み取り専用調査｜"+output.join(" / ")+"。追加対象の変更可否は未検証。"};
 }
 async function pictureAction(action,slot){
  if(action==="probe")return pictureProbe()
+ if(action==="discover")return discoverExtraPictureTargets()
  if(action==="set"){
   let payload
   try{payload=JSON.parse(String(slot||""))}catch(_){throw Error("設定内容が不正です")}
@@ -910,6 +1003,7 @@ async function pictureAction(action,slot){
   await writePicture(payload.target,payload.value)
   return pictureProbe("「"+payload.target+"」を変更し、テレビの値を確認しました")
  }
+ if(action==="edit"){let payload;try{payload=JSON.parse(String(slot))}catch(_){throw Error("登録内容が不正です")}return editPicturePreset(payload)}
  if(action==="save")return pictureSave(slot)
  if(action==="load")return pictureLoad(slot)
  throw Error("不明な画質操作です")
