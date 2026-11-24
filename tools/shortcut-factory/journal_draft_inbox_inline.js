@@ -79,7 +79,7 @@ function validProvenance(raw){
   if(parts.length!==2)return false;
   const [draft,research]=parts.map(s=>s.trim());
   if(!research.startsWith('YOS_RESEARCH_ABSTRACT_V1')||!research.includes('自動公開禁止'))return false;
-  const doiSet=s=>new Set((s.match(/https:\/\/doi\.org\/10\.\d{4,9}\/[^\s<>【】]+/gi)||[]).map(x=>x.toLowerCase()));
+  const doiSet=s=>new Set((s.match(/https:\/\/(?:doi\.org\/10\.\d{4,9}\/|www\.theguardian\.com\/|www\.bbc\.(?:com|co\.uk)\/)[^\s<>【】]+/gi)||[]).map(x=>x.replace(/^https:\/\/doi\.org\/.*$/i,m=>m.toLowerCase())));
   const sources=doiSet(research),citations=doiSet(draft);
   return sources.size===3&&citations.size===3&&[...citations].every(x=>sources.has(x))&&
     (research.match(/^資料[123]｜/gm)||[]).length===3;
