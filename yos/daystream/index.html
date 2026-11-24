@@ -488,6 +488,31 @@ html body.yos-daystream-web{background:var(--bg);color:var(--text);background-at
  #moveEvidence a:not([hidden]){color:var(--accent)}
 }
 @media(max-width:350px){.timeline{--card-inset:49px}.timeline .axis{left:36px}.timeline .tick{left:33px}.timeline .hour span{font-size:11px}.timeline .card[data-flow-tone]{padding-inline:7px 3px;gap:4px}.timeline .card .card-icon,.timeline .card.short-row .card-icon{width:16px;flex-basis:16px}.timeline .card .card-icon svg{width:15px}}
+
+/* Approved full-day overview: slim rows, every hour, scroll only when needed. */
+body.yos-daystream-web .top::before{content:'DAYSTREAM';display:block;margin:0 0 4px 4px;font-size:10px;font-weight:700;letter-spacing:.18em;color:var(--muted)}
+body.yos-daystream-web.flow-editing .top::before{display:none}
+.flow-date-pill{background:transparent;border:0;box-shadow:none}
+.flow-date-row #dateTitle{font-size:clamp(15px,4.5vw,19px);font-weight:720}
+.timeline-legend{margin-top:5px;gap:10px}
+.timeline-wrap{margin-top:12px}
+.timeline[data-density=overview] .hour span{top:-7px;font-size:11px;line-height:14px;color:var(--muted)}
+.timeline[data-density=overview] .hour::after{content:'';position:absolute;left:var(--card-inset);right:0;top:0;border-top:1px dotted var(--line);opacity:.65}
+.timeline[data-density=overview] .card.yos-foreground[data-flow-tone]{border-radius:7px;padding:2px 5px 2px 8px;gap:5px}
+.timeline[data-density=overview] .card.yos-foreground .card-icon{width:16px;height:16px;flex:0 0 16px}
+.timeline[data-density=overview] .card.yos-foreground .card-icon svg{width:15px;height:15px}
+.timeline[data-density=overview] .card.yos-foreground .task-drag-grip{width:38px;min-width:38px;flex:0 0 38px;height:100%;min-height:0;font-size:16px;align-self:stretch}
+.timeline[data-density=overview] .card.yos-foreground :is(.task-copy,.event-copy){flex:1 1 0%;width:auto;min-width:0;height:100%;gap:2px}
+.timeline[data-density=overview] .card.yos-foreground :is(.task-copy,.event-copy) b{font-size:12.5px;line-height:16px;font-weight:650;max-width:100%;min-width:0}
+.timeline[data-density=overview] .card.yos-foreground .task-meta{flex:none;gap:4px;max-width:100%}
+.timeline[data-density=overview] .card.yos-foreground .task-meta small{font-size:10.5px;line-height:13px;font-weight:550;font-variant-numeric:tabular-nums}
+.timeline[data-density=overview] .card.yos-foreground .layer-status{width:12px;height:12px}
+.timeline[data-density=overview] .card.yos-foreground.compact-line :is(.task-copy,.event-copy){flex-direction:row;align-items:center;justify-content:flex-start;gap:6px}
+.timeline[data-density=overview] .card.yos-foreground.compact-line :is(.task-copy,.event-copy) b{flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timeline[data-density=overview] .card.yos-foreground.compact-wrap :is(.task-copy,.event-copy){flex-direction:column;justify-content:center;align-items:flex-start}
+.timeline[data-density=overview] .card.yos-foreground.compact-wrap :is(.task-copy,.event-copy) b{flex:none;white-space:normal;overflow-wrap:anywhere}
+.timeline[data-density=overview] .card.yos-foreground .fixed-label{font-size:9px}
+.timeline[data-density=overview] .card.yos-foreground[data-notion="1"]>.fixed-label{width:1px;height:1px}
 </style><script src="./source-adapters.js"></script><script src="../../life/calendar/native-bridge.js"></script></head><body class="yos-daystream-web">
 <div class="app">
   <div class="top">
@@ -1227,10 +1252,19 @@ function yosReadableTaskHeight(item){
  const lines=Math.max(1,Math.ceil([...String(item.t||'')].length/approxChars));
  return Math.max(yosTaskDurationHeight(item.d),18*lines+25);
 }
-function yosReadableCardHeight(item){
- return yosReadableTaskHeight(item);
+function yosOverviewCard(item,width=window.innerWidth){
+ const base=item.d<=5?26:item.d<=15?28:item.d<=30?30:item.d<=60?32:item.d<=120?34:36;
+ // Conservative space budget includes the timeline gutter, icon, grip, collision
+ // indicator and a possible long-window inset. Wide Japanese glyphs count fully.
+ const usable=Math.max(96,Math.min(610,width)-174);
+ const titlePixels=[...String(item.t||'')].reduce((sum,c)=>sum+(/[\x00-\x7F]/.test(c)?7.5:13),0);
+ const inline=titlePixels+98<=usable;
+ return {inline,height:inline?base:Math.max(base,16*Math.max(1,Math.ceil(titlePixels/(usable-6)))+22)};
 }
-const yosCardGap=5;
+function yosReadableCardHeight(item){
+ return density==='overview'?yosOverviewCard(item).height:yosReadableTaskHeight(item);
+}
+const yosCardGap=4;
 function yosBackdropRows(rows){
  // Connected intervals share the smallest available lane across the cluster.
  const layout=new Map();
@@ -1280,6 +1314,74 @@ function yosReadableAxis(rows,baseScale,backdrops){
  return {coordinate,minuteAt,backdrops,groups};
 }
 
+// The overview is a monotone time map. Hour labels never collapse, short
+// tasks get a readable slot, and only an over-capacity day grows vertically.
+function yosOverviewAxis(rows,targetHeight,backdrops,width=window.innerWidth){
+ const groups=new Map();
+ for(const row of rows){
+  if(backdrops.has(row))continue;
+  if(!groups.has(row.s))groups.set(row.s,[]);
+  groups.get(row.s).push(row);
+ }
+ const starts=[...groups.keys()].sort((a,b)=>a-b);
+ const knots=new Set([0,1440,...starts]);
+ for(let hour=0;hour<=24;hour++)knots.add(hour*60);
+ const minutes=[...knots].sort((a,b)=>a-b),indices=new Map(minutes.map((m,i)=>[m,i]));
+ const requirements=new Map();
+ for(let i=0;i<starts.length;i++){
+  const from=starts[i],to=starts[i+1]??1440;
+  const height=groups.get(from).reduce((sum,row)=>sum+yosOverviewCard(row,width).height+yosCardGap,0);
+  requirements.set(indices.get(to),{from:indices.get(from),height});
+ }
+ function positions(hourPx){
+  const pixels=[0];
+  for(let i=1;i<minutes.length;i++){
+   let y=pixels[i-1]+(minutes[i]-minutes[i-1])*hourPx/60;
+   const required=requirements.get(i);
+   if(required)y=Math.max(y,pixels[required.from]+required.height);
+   pixels.push(y);
+  }
+  return pixels;
+ }
+ const minHour=16;
+ let low=minHour,high=Math.max(minHour,targetHeight/24);
+ let pixels=positions(low);
+ if(pixels.at(-1)<=targetHeight){
+  for(let i=0;i<22;i++){
+   const mid=(low+high)/2,candidate=positions(mid);
+   if(candidate.at(-1)<=targetHeight){low=mid;pixels=candidate}else high=mid;
+  }
+ }
+ const coordinate=minute=>{
+  const m=Math.max(0,Math.min(1440,minute));let lo=0,hi=minutes.length-1;
+  while(hi-lo>1){const mid=(lo+hi)>>1;if(minutes[mid]<=m)lo=mid;else hi=mid}
+  return pixels[lo]+(pixels[hi]-pixels[lo])*(m-minutes[lo])/(minutes[hi]-minutes[lo]);
+ };
+ const minuteAt=height=>{
+  const y=Math.max(0,Math.min(pixels.at(-1),height));let lo=0,hi=pixels.length-1;
+  while(hi-lo>1){const mid=(lo+hi)>>1;if(pixels[mid]<=y)lo=mid;else hi=mid}
+  return minutes[lo]+(minutes[hi]-minutes[lo])*(y-pixels[lo])/(pixels[hi]-pixels[lo]);
+ };
+ return {coordinate,minuteAt,backdrops,groups};
+}
+function yosOverviewBudget(){
+ const viewport=document.documentElement.clientHeight||window.innerHeight;
+ const app=document.querySelector('.app'),wrap=tl.parentElement,dock=document.querySelector('.dock'),add=document.getElementById('addBtn');
+ const cssNumber=(el,name)=>parseFloat(getComputedStyle(el)[name])||0;
+ const top=tl.getClientRects().length?tl.getBoundingClientRect().top+window.scrollY:180;
+ const reserve=Math.max(cssNumber(app,'paddingBottom'),dock?.offsetHeight||0,add?.offsetHeight?viewport-add.getBoundingClientRect().top+6:0);
+ return Math.max(0,Math.floor(viewport-top-reserve-cssNumber(wrap,'marginBottom')-12));
+}
+let overviewFitFrame=0,overviewFitStamp='';
+function scheduleOverviewFit(){
+ if(overviewFitFrame)return;
+ overviewFitFrame=requestAnimationFrame(()=>{
+  overviewFitFrame=0;
+  if(density!=='overview'||!elasticEnabled||!tl.getClientRects().length||tl.querySelector('.drag-preview,.press-armed'))return;
+  const stamp=window.innerWidth+':'+yosOverviewBudget();
+  if(stamp!==overviewFitStamp)render();
+ });
+}
 let elasticEnabled=true,elasticAxis=null;
 const yFor=m=>elasticEnabled&&elasticAxis?elasticAxis.coordinate(m):m/60*scale;
 const minuteAtY=y=>elasticEnabled&&elasticAxis?elasticAxis.minuteAt(y):y/scale*60;
@@ -1646,7 +1748,7 @@ function setTab(name){
  else if(calendarMode==='week')renderWeekAgenda();
  renderDayAllDay();
  for(const [tab,id] of [['task','taskPanel'],['analysis','review'],['records','recordsPanel'],['ai','aiPanel']])document.getElementById(id).classList.toggle('show',name===tab);
- renderLists();if(name==='task')yosRenderSources();if(name!=='timeline')window.scrollTo({top:0,behavior:'smooth'});
+ renderLists();if(name==='task')yosRenderSources();if(name!=='timeline')window.scrollTo({top:0,behavior:'smooth'});else scheduleOverviewFit();
 }
 function renderLists(){
  for(const [id,subset] of [['taskList',items.filter(x=>x.kind==='task')],['recordsList',items.filter(x=>x.done)]]){
@@ -2063,15 +2165,18 @@ function render(){
  latestCompatibility=yosDayCompatibility(items);
  const sorted=[...items].filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
  const backdrops=yosBackdropRows(sorted);
- elasticAxis=elasticEnabled?yosReadableAxis(sorted,scale,backdrops):null;
+ tl.dataset.density=density;
+ const budget=density==='overview'?yosOverviewBudget():0;
+ overviewFitStamp=window.innerWidth+':'+budget;
+ elasticAxis=elasticEnabled?(density==='overview'?yosOverviewAxis(sorted,budget,backdrops):yosReadableAxis(sorted,scale,backdrops)):null;
  tl.querySelectorAll('.hour,.card,.tick').forEach(n=>n.remove());
  const bottom=yFor(1440);
  let lastLabel=-24;
- for(let h=0;h<=24;h++){
+ for(let h=0;h<=(density==='overview'?23:24);h++){
   const y=yFor(h*60);
-  if(h!==24&&(y-lastLabel<22||bottom-y<20))continue;
+  if(density!=='overview'&&h!==24&&(y-lastLabel<22||bottom-y<20))continue;
   const el=document.createElement('div');el.className='hour';el.style.top=y+'px';
-  el.innerHTML='<span>'+fmt(h*60).replace(/^0(?=\d)/,'')+'</span>';tl.append(el);lastLabel=y;
+  el.innerHTML='<span>'+fmt(h*60)+'</span>';tl.append(el);lastLabel=y;
  }
  // Keep short cards readable and pack simultaneous starts above interval backdrops.
  const visualOffsets=new Map();const groups=new Map();
@@ -2150,7 +2255,10 @@ function render(){
    if(item.t==='睡眠'||item.t==='就寝')el.classList.add('sleep');
    if(['朝の準備','朝食','昼食','夕食','入浴'].includes(item.t))el.classList.add('neutral');
    if(height<30&&!isTask)el.classList.add('tiny');
-   if(density==='overview')el.classList.add('compact');
+   if(density==='overview'){
+    el.classList.add('compact');
+    if(!backdrop)el.classList.add(yosOverviewCard(item).inline?'compact-line':'compact-wrap');
+   }
    if(searchText&&!item.t.toLocaleLowerCase().includes(searchText))el.style.display='none';
    el.dataset.id=String(item.id);if(item.done)el.classList.add('done');tl.append(el);
    const tick=document.createElement('div');tick.className='tick';tick.dataset.flowTone=theme;tick.style.top=(natural-3)+'px';tl.append(tick);
@@ -2164,5 +2272,13 @@ document.getElementById('closeFocus').onclick=()=>{zoom=null;deleteConfirmId=nul
 if(Array.isArray(stored)){note.textContent='保存済み時間割を表示 · Notion Tasks '+yosStatusWord(taskSource.status);}
 else if(calendarRows.length){note.textContent=(boot.calendarSource==='user-file'?'手動取込のApple予定 ':boot.calendarSource==='scriptable-on-device'?'iPhone端末からの取込予定 ':boot.calendarSource==='yos-life-local'?'保存済みMY WAY予定 ':'Appleカレンダー ')+calendarRows.length+'件を読み取り'+(yosTestCount(todayISO)?' · テスト'+yosTestCount(todayISO)+'件は非表示':'')+' · 端末内で追加・編集';}
 else{note.textContent='端末内の予定はありません · 右上の追加から登録';}
-yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');setInterval(updateNow,60000);setInterval(yosRenderLearningHints,60000);
+yosDefaultStart();yosRefreshTestToggle();renderWeek();render();renderDayAllDay();updateReview();yosRenderSources();setCalendarMode('day');
+window.addEventListener('resize',scheduleOverviewFit);
+if(typeof ResizeObserver==='function'){
+ const observer=new ResizeObserver(scheduleOverviewFit);
+ for(const selector of ['.top','.calendar-modes','.native-tools','.flow-tools','#dayAllDay','#compatStatus','#gestureHelp','.dock']){
+  const node=document.querySelector(selector);if(node)observer.observe(node);
+ }
+}
+setInterval(updateNow,60000);setInterval(yosRenderLearningHints,60000);
 </script><script src="./task-wizard.js"></script></body></html>

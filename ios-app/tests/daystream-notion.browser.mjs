@@ -43,6 +43,10 @@ try{
   const tones=await page.locator('#tl .card.task[data-notion="1"]').evaluateAll(nodes=>nodes.map(el=>el.dataset.flowTone));
   assert.ok(new Set(tones).size>=3,'synced cards must not be green-only: '+tones);
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),null,'preview never writes a plan');
+  assert.deepEqual(await page.locator('#tl .hour span').allTextContents(),Array.from({length:24},(_,i)=>String(i).padStart(2,'0')+':00'),'all 24 hours visible in standard view');
+  await page.waitForFunction(()=>document.querySelector('#tl').getBoundingClientRect().bottom<=document.querySelector('.dock').getBoundingClientRect().top+1);
+  const slim=await page.locator('#tl .card.yos-foreground').evaluateAll(nodes=>nodes.map(x=>x.offsetHeight));
+  assert.ok(slim.every(h=>h>=26&&h<=42),'normal rows stay compact: '+slim);
   // Native iPhone request: release directly saves; only the selected card moves.
   const dragCard=page.locator('#tl .card.task[data-notion="1"]').filter({hasText:'歯磨き'});
   await page.evaluate(()=>{window.__dragDebug=[];for(const kind of ['pointerdown','pointermove','pointerup','pointercancel','mousedown','mousemove','mouseup','dragstart'])document.addEventListener(kind,e=>window.__dragDebug.push({kind,y:e.clientY,x:e.clientX,target:e.target?.className,button:e.button,pointerId:e.pointerId}),true)});

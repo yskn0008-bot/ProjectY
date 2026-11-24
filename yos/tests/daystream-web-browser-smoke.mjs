@@ -353,7 +353,7 @@ try{
    const item=byId.get(id);
    assert.equal(item.foreground,true,'full-width task '+id);
    assert.ok(item.width>width*.6,'title and hours have enough horizontal space: '+id);
-   assert.equal(item.whiteSpace,'normal','allow title line wraps: '+id);
+   assert.ok(['normal','nowrap'].includes(item.whiteSpace),'compact rows or wrapped long titles: '+id);
    assert.equal(item.textOK,true,'title not cropped: '+id);
    assert.equal(item.timeOK,true,'full start-end times visible: '+id);
   }
@@ -363,8 +363,8 @@ try{
 
   // Slender short tasks, progressively thicker longer tasks; text-overflow
   // protection is always allowed to increase the height if needed.
-  for(const [id,height,band] of [[2110,50,'xs'],[2101,52,'sm'],[2108,54,'md'],[2111,58,'lg'],[2112,62,'xl']]){
-   assert.equal(byId.get(id).thickness,height,'duration-based visible bar height: '+id);
+  for(const [id,height,band] of [[2110,26,'xs'],[2101,28,'sm'],[2108,30,'md'],[2111,32,'lg'],[2112,34,'xl']]){
+   assert.ok(byId.get(id).thickness>=height&&byId.get(id).thickness<=54,'compact bar or necessary wrapping: '+id);
    assert.equal(byId.get(id).band,band,'duration class matches stored duration: '+id);
   }
   assert.ok(byId.get(2105).thickness>byId.get(2110).thickness,
@@ -384,7 +384,7 @@ try{
   }
   assert.equal(byId.get(2108).color,byId.get(2110).color,'advice preserves the task category');
   assert.equal(byId.get(2102).color,byId.get(2110).color,'conflicts preserve the task category');
-  assert.equal(byId.get(2110).radius,'11px','compact contiguous task keeps a gentle rounded edge');
+  assert.equal(byId.get(2110).radius,'7px','compact task keeps a quiet rounded edge');
 
   const distinct=await p.locator('#tl [data-id="2100"], #tl [data-id="2102"], #tl [data-id="2110"]').evaluateAll(nodes=>nodes.map(el=>({
    id:Number(el.dataset.id),background:getComputedStyle(el).backgroundColor,
@@ -410,6 +410,7 @@ try{
 
 
 
+  assert.deepEqual(await p.locator('#tl .hour span').allTextContents(),Array.from({length:24},(_,i)=>String(i).padStart(2,'0')+':00'));
   const visible=cells.filter(c=>!c.backdrop).sort((a,b)=>a.top-b.top);
   for(let i=1;i<visible.length;i++)assert.ok(visible[i].top>=visible[i-1].bottom-2,'dense tasks do not cover one another: '+visible[i-1].id+'/'+visible[i].id);
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no sideways overflow');
