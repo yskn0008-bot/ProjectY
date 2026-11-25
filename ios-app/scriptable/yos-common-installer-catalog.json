@@ -13,8 +13,8 @@
       "id": "journal",
       "name": "YOS JOURNAL",
       "path": "ios-app/scriptable/YOS JOURNAL.js",
-      "commit": "f1d64169f9be3e8bba9134171c867fcf74c753cc",
-      "sha256": "fe553a5809f9ff0e7b010033617f98da006fea192b513466705b00b440d889ed"
+      "commit": "14d68e51132026d4acdd9b2c662e6557979ae351",
+      "sha256": "b4199afa5a94c3b24cda8f9d97e20c5cac9a5cf8d4ccdc92f0ecddc7d2ccea5b"
     },
     {
       "id": "daystream-preview",
@@ -232,8 +232,8 @@
       "id": "aion-output",
       "name": "YOS AION OUTPUT",
       "path": "ios-app/scriptable/YOS AION OUTPUT.js",
-      "commit": "eaae4c9baa8e50141fb442f0e9091f0a1ddb2532",
-      "sha256": "1082ceefbbe65ccbff64563a0ff5a285b1322c5ac2e448b21eff83134ecb900b"
+      "commit": "c5bf94ee22d3a534b5231f9260021e95efb35000",
+      "sha256": "3369d8450453632cd6d84765d65a43b78633086052ab152f2b7d8cada7026094"
     }
   ]
 }
