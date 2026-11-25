@@ -25,7 +25,7 @@ def validate_research_boundary(script):
         "r.onRedirect=()=>null;",
         "r.headers={Authorization:'Bearer '+token,'Notion-Version':'2025-09-03',Accept:'application/json'};",
         "return historyFromBlocks(blocks);",
-        "const seen=new Set(history);",
+        "const seen=new Set(history.seen);",
         "await reviewedHistory()",
     )
     if not all(x in script for x in required):

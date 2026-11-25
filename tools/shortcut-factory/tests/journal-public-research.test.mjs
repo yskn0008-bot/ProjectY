@@ -5,7 +5,7 @@ const source=await readFile(new URL('../journal_public_research_inline.js',impor
 const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
 const b=(type,t,url)=>({type,[type]:{rich_text:[{plain_text:t,...(url?{href:url}:{})}]}});
 function historyFixture(dois=['10.1234/old1','10.1234/old2','10.1234/old3']){
- const list=[b('heading_2','YOS JOURNAL｜2026.11.24 TUE'),b('paragraph','見出し'),b('paragraph','導入'),b('paragraph','本人用の非公開読書版。原著の主要箇所と照合済み。外部公開・配信は行っていない。')];
+ const list=[b('heading_2','YOS JOURNAL｜'+new Date(Date.now()+9*3600000-86400000).toISOString().slice(0,10).replace(/-/g,'.')),b('paragraph','見出し'),b('paragraph','導入'),b('paragraph','本人用の非公開読書版。原著の主要箇所と照合済み。外部公開・配信は行っていない。')];
  for(let i=1;i<=3;i++)list.push({type:'divider'},b('heading_3','0'+i+' / CULTURE｜記事'),...['概要','本文','日常への視点','研究の限界'].map(t=>b('paragraph',t)),b('paragraph','原著論文','https://doi.org/'+dois[i-1]));
  list.push({type:'divider'},b('paragraph','UNRELATED PRIVATE CONTENT'));return list;
 }
@@ -82,4 +82,13 @@ test('complete paginated history remains supported',async()=>{
 test('same DOI across search topics is not sent twice',async()=>{
  const r=await run({duplicate:true,rows:1});assert.equal(r.out,'YOS_RESEARCH_HOLD_V1:THREE_VALID_SOURCES_UNAVAILABLE');
  assert.equal(r.publicUrls.filter(x=>x.endsWith('fullTextXML')).length,1);
+});
+
+test('already-issued JST day stops before public retrieval and before either GPT call',async()=>{
+ const h=historyFixture();h[0].heading_2.rich_text[0].plain_text='YOS JOURNAL｜'+new Date(Date.now()+9*3600000).toISOString().slice(0,10).replace(/-/g,'.');
+ const r=await run({history:h});assert.equal(r.out,'YOS_RESEARCH_HOLD_V1:TODAY_ALREADY_ISSUED');assert.equal(r.publicUrls.length,0);
+});
+test('capacity preflight stops before public retrieval without losing old content',async()=>{
+ const h=historyFixture();while(h.length<2980)h.push(b('paragraph','unrelated'));
+ const r=await run({history:h});assert.equal(r.out,'YOS_RESEARCH_HOLD_V1:READING_CAPACITY');assert.equal(r.publicUrls.length,0);
 });

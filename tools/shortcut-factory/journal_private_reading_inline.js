@@ -54,7 +54,7 @@ function readingBlock(type,content,url){
  return {object:'block',type,[type]:type==='divider'?{}:{rich_text:[{type:'text',text:{content,...(url?{link:{url}}:{})}}]}};
 }
 function allEditions(blocks){
- if(!Array.isArray(blocks)||blocks.length>500)failReading('READER_CAPACITY');
+ if(!Array.isArray(blocks)||blocks.length>MAX_REVIEW_BLOCKS)failReading('READER_CAPACITY');
  const starts=blocks.map((b,i)=>b?.type==='heading_2'&&HEAD.test(text(b))?i:-1).filter(i=>i>=0);
  if(!starts.length)failReading('READING_HISTORY_ABSENT');
  const editions=starts.map((i,n)=>parseReviewedEdition(blocks.slice(i,starts[n+1]??blocks.length)));
@@ -85,6 +85,7 @@ async function readingBlocks(page,token,maxPages,deadline){
   const b=await readingRequest(page,token,'GET',cursor);
   if(!Array.isArray(b.results)||typeof b.has_more!=='boolean')failReading('READ_INVALID');
   list.push(...b.results);
+  if(list.length>maxPages*100||Date.now()>deadline)failReading('READ_CAPACITY_OR_TIMEOUT');
   if(!b.has_more)return list;
   if(typeof b.next_cursor!=='string'||!b.next_cursor||b.next_cursor===cursor)failReading('READ_CURSOR');
   cursor=b.next_cursor;
@@ -100,14 +101,14 @@ async function reflectReading(input){
  const inbox=inspectDrafts(await readingBlocks(INBOX_ID,token,30,deadline));
  const found=inbox.filter(d=>d.receipt===p.receipt);
  if(found.length!==1||found[0].content!==p.raw)failReading('INBOX_READBACK_MISMATCH');
- const before=await readingBlocks(PAGE,token,5,deadline),editions=allEditions(before);
+ const before=await readingBlocks(PAGE,token,MAX_REVIEW_PAGES,deadline),editions=allEditions(before);
  if(sameEdition(editions,p.edition))return 'YOS_JOURNAL_READING_VERIFIED:ALREADY_SAVED';
  const links=new Set(editions.flatMap(e=>e.articles.map(a=>a.link.toLowerCase())));
  if(p.edition.articles.some(a=>links.has(a.link.toLowerCase())))failReading('PREVIOUS_SOURCE');
- if(before.length+p.rows.length>500)failReading('READER_CAPACITY');
+ if(before.length+p.rows.length>MAX_REVIEW_BLOCKS)failReading('READER_CAPACITY');
  const fm=FileManager.local(),lock=fm.joinPath(fm.documentsDirectory(),'YOS-JOURNAL-READING-'+p.edition.issuedOn+'.pending');
  if(fm.fileExists(lock))failReading('PREVIOUS_APPEND_UNCONFIRMED');
- const check=await readingBlocks(PAGE,token,5,deadline);
+ const check=await readingBlocks(PAGE,token,MAX_REVIEW_PAGES,deadline);
  if(JSON.stringify(check)!==JSON.stringify(before)||fm.fileExists(lock)||Date.now()>deadline)failReading('HISTORY_CHANGED');
  // Single existing workflow only; Notion has no compare-and-swap for append.
  // Preserve the pending marker even on a network failure; a later run
@@ -115,7 +116,7 @@ async function reflectReading(input){
  fm.writeString(lock,p.receipt);
  if(fm.readString(lock)!==p.receipt)failReading('LOCAL_RECEIPT_FAILED');
  await readingRequest(PAGE,token,'PATCH','',p.rows);
- const after=allEditions(await readingBlocks(PAGE,token,5,Date.now()+12000));
+ const after=allEditions(await readingBlocks(PAGE,token,MAX_REVIEW_PAGES,Date.now()+25000));
  if(!sameEdition(after,p.edition))failReading('APPEND_READBACK_MISMATCH');
  for(const e of editions)if(!sameEdition(after,e))failReading('OLD_EDITION_CHANGED');
  return 'YOS_JOURNAL_READING_VERIFIED:SAVED_AND_READBACK';
