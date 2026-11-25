@@ -28,6 +28,29 @@ async function exercise(source){
  result=await main(p,Bad);check(result.status==="held","missing bridge result");
  const AF=Object.getPrototypeOf(async function(){}).constructor;let out,done=0;await new AF("args","config","WebView","Script",source)({shortcutParameter:p},{runsInApp:true},WV,{setShortcutOutput:s=>out=JSON.parse(s),complete:()=>done++});check(out.route.route==="model"&&done===1,"whole script");
  check(!/\b(?:Request|Keychain|FileManager|fetch|XMLHttpRequest|localStorage)\b/.test(source),"no network/storage APIs");check(!/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|(?:sk-|ntn_|secret_)[A-Za-z0-9_-]{15,}|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/i.test(source),"no private identifiers or tokens");
+
+ const metaPacket={answer:"本文全体\n**重要**\n末尾",currentUser:"質問",history:[],choices:["詳細"],canSave:false,presentation:{mode:"decide",title:"判断する内容",summary:"短い要約",sources:["<img src=x onerror=alert(1)>"],canSave:true,action:"delete"}};
+ const getMeta=new Function(source.slice(0,cut)+";return {displayMeta,demoPacket}")();
+ const m=getMeta.displayMeta(metaPacket);const h=pageHTML({...parseOutput(metaPacket),display:m,demo:false});const script=h.match(/<script>([\s\S]+?)<\/script>/)[1];
+ nodes.clear();let jump=0,resize;
+ doc.getElementById("actions").scrollIntoView=()=>jump++;
+ w.visualViewport={height:520,scale:1,addEventListener:(k,cb)=>resize=cb};
+ const vars={};doc.documentElement.style={setProperty:(k,v)=>vars[k]=v,removeProperty:k=>delete vars[k]};
+ new Function("document","window",script)(doc,w);
+ check(nodes.get("mode").textContent==="判断する"&&nodes.get("title").textContent==="判断する内容","display metadata mode");
+ check(nodes.get("summary").textContent==="短い要約"&&nodes.get("answer").hidden,"explicit summary");
+ nodes.get("viewToggle").onclick();check(!nodes.get("answer").hidden&&nodes.get("answer").children.some(n=>n.textContent==="末尾"),"full text retained");
+ check(nodes.get("answer").children.some(n=>n.children.some(c=>c.tag==="strong"&&c.textContent==="重要")),"safe bold");
+ check(nodes.get("sources").children[0].textContent==="<img src=x onerror=alert(1)>"&&!h.includes("<img src=x onerror=alert(1)>"),"source literal");
+ check(nodes.get("save").hidden,"metadata cannot grant save");
+ doc.getElementById("settingsPanel").hidden=true;nodes.get("settings").onclick();check(!nodes.get("settingsPanel").hidden,"settings opens");nodes.get("settings").onclick();check(nodes.get("settingsPanel").hidden,"settings closes");
+ nodes.get("jump").onclick();check(jump===1&&w.aionResult===null,"jump without selection");
+ nodes.get("density").onclick();check(vars["--lh"]==="1.60","spacious");nodes.get("density").onclick();check(vars["--lh"]==="1.42","compact");
+ check(vars["--viewport-height"]==="520px","viewport");w.visualViewport.height=300;resize();check(vars["--viewport-height"]==="300px","resize");w.visualViewport.scale=2;resize();check(vars["--viewport-height"]===undefined,"zoom fallback");
+ check(getMeta.displayMeta({presentation:{mode:"invalid",summary:"x".repeat(1801),sources:[null,{}]}}).mode==="read"&&getMeta.displayMeta({}).summary==="","invalid metadata fallback");
+ check(getMeta.demoPacket().presentation.summary.length>0&&!getMeta.demoPacket().canSave,"demo uses features without save");
+ check(h.includes("OUTPUT · v4")&&h.includes('id="jump"'),"version and action navigation");
+ check(routeOutput({...metaPacket,canSave:true},decideOutput(parseOutput({...metaPacket,canSave:true}),{confirmed:true,action:"save"})).packet.rawText===metaPacket.answer,"save original");
  return passed;
 }
 test('AION OUTPUT local display, choices, context and safety',async()=>{const source=await readFile(new URL('../scriptable/YOS AION OUTPUT.js',import.meta.url),'utf8');const passed=await exercise(source);console.log(passed.length+' checks: '+passed.join(', '));});
