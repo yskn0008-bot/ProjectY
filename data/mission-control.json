@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-25T16:01:20+09:00",
+  "updated_at": "2026-11-25T16:02:50+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,14 +23,14 @@
       "updated_at": "2026-11-24T18:25:55Z"
     },
     {
-      "id": "github-pr-960",
-      "title": "PR #960 AION OUTPUT: explicit confirmation, compact spacing and cream theme",
+      "id": "github-pr-930",
+      "title": "PR #930 YOS ファイル調査｜Siri対応・iCloud Drive読み取り専用棚卸し",
       "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/960",
-      "updated_at": "2026-11-25T03:53:53Z"
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/930",
+      "updated_at": "2026-11-23T21:43:21Z"
     },
     {
       "id": "github-pr-931",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/961",
-      "updated_at": "2026-11-25T07:00:43Z"
+      "updated_at": "2026-11-25T07:02:02Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-25T03:54:23Z"
+      "updated_at": "2026-11-25T07:02:03Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-d209e89ac0f7",
+      "title": "Merge pull request #960 from yskn0008-bot/aion/output-confirm-cream-20261125",
+      "completed_at": "2026-11-25T07:01:58Z",
+      "result": "GitHub mainへ反映（d209e89）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d209e89ac0f75e11986396956821659310b51daa"
+    },
+    {
+      "id": "github-commit-a12fc427b0e3",
+      "title": "Pin approved AION OUTPUT revision without changing other targets",
+      "completed_at": "2026-11-25T03:53:04Z",
+      "result": "GitHub mainへ反映（a12fc42）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a12fc427b0e3d36af390b4f89173a097b3b2dc5f"
+    },
+    {
+      "id": "github-commit-0f1d48fbe769",
+      "title": "Cover explicit confirmation and compact reading layout",
+      "completed_at": "2026-11-25T03:52:57Z",
+      "result": "GitHub mainへ反映（0f1d48f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/0f1d48fbe769ab8d51f9f02683864b9dcf9e5a45"
+    },
+    {
+      "id": "github-commit-3264de8b362f",
+      "title": "Improve AION OUTPUT explicit confirmation and cream reading theme",
+      "completed_at": "2026-11-25T03:52:54Z",
+      "result": "GitHub mainへ反映（3264de8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3264de8b362fe572d13af52e121f653873d9a7ee"
+    },
+    {
       "id": "github-commit-7960a43b5581",
       "title": "Merge pull request #955 from yskn0008-bot/journal/private-history-dedup-20261125",
       "completed_at": "2026-11-25T03:43:35Z",
       "result": "GitHub mainへ反映（7960a43）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/7960a43b55816497437019ef0d2ee227ce19078d"
-    },
-    {
-      "id": "github-commit-412444cd0afc",
-      "title": "Connect reviewed JOURNAL draft to existing private reading page with exact Inbox readback and disclosed GPT excerpt scope",
-      "completed_at": "2026-11-25T03:33:00Z",
-      "result": "GitHub mainへ反映（412444c）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/412444cd0afc5b37863ecf60c379ad57aab7c48f"
-    },
-    {
-      "id": "github-commit-f269f9d9c98f",
-      "title": "Merge pull request #958 from yskn0008-bot/aion/common-output-release",
-      "completed_at": "2026-11-25T03:14:02Z",
-      "result": "GitHub mainへ反映（f269f9d）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f269f9d9c98f03e7f3e42cbee256cfbd3c951d29"
-    },
-    {
-      "id": "github-commit-98938dfe0b10",
-      "title": "Preserve current TAXI catalog pin in approved AION OUTPUT integration",
-      "completed_at": "2026-11-25T03:11:30Z",
-      "result": "GitHub mainへ反映（98938df）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/98938dfe0b106d526f39e2ba70de6271563daece"
-    },
-    {
-      "id": "github-commit-9c3bbf2b7693",
-      "title": "YOS TAXI: compact pages, calendar targets and verified source acquisition",
-      "completed_at": "2026-11-25T03:10:11Z",
-      "result": "GitHub mainへ反映（9c3bbf2）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9c3bbf2b769327679d6da81d23542216b3d28f49"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #960をレビューして公開判断する",
+      "next_action": "PR #950をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-25T16:01:20+09:00",
+      "last_update": "2026-11-25T16:02:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 79件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 78件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-25T16:01:20+09:00",
+      "last_update": "2026-11-25T16:02:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -379,7 +379,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #960をレビューして公開判断する",
+      "next_action": "PR #950をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-25T16:01:20+09:00",
+      "last_update": "2026-11-25T16:02:50+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "3597d7cc4d4197325a27d9fc73507bfa39a4d7e17a9248128f34860016d6baeb"
+  "github_snapshot_hash": "ec03ab72e56bdc2d664efa4d92231077bed6656bd70bcad1a03b417e69076640"
 }
