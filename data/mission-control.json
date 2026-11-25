@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-26T01:35:34+09:00",
+  "updated_at": "2026-11-26T01:40:10+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,6 +12,16 @@
     ]
   },
   "inbox": [
+    {
+      "id": "github-pr-950",
+      "title": "PR #950 feat(lifestyle): verified 12-screen Scriptable release candidate",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/950",
+      "updated_at": "2026-11-24T18:25:55Z"
+    },
     {
       "id": "github-pr-963",
       "title": "PR #963 YOS TAXI: compact layout, confirmed consultation and private Notion source resolution",
@@ -43,14 +53,14 @@
       "updated_at": "2026-11-25T15:35:52Z"
     },
     {
-      "id": "github-pr-978",
-      "title": "PR #978 YOS 操作｜UNIFIED v0.3 隔離診断・共通Installer登録",
+      "id": "github-pr-976",
+      "title": "PR #976 YOS DISCOVERY｜共通Installer必須ヘッダー修復",
       "type": "GitHub PR",
       "status": "review",
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/978",
-      "updated_at": "2026-11-25T15:50:52Z"
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/976",
+      "updated_at": "2026-11-25T16:39:31Z"
     },
     {
       "id": "github-pr-832",
@@ -61,6 +71,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/832",
       "updated_at": "2026-11-25T07:25:34Z"
+    },
+    {
+      "id": "github-pr-961",
+      "title": "PR #961 AION notification bridge: privacy-safe legacy migration and verified receipts",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/961",
+      "updated_at": "2026-11-25T07:05:58Z"
     },
     {
       "id": "github-pr-971",
@@ -81,26 +101,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/973",
       "updated_at": "2026-11-25T16:32:41Z"
-    },
-    {
-      "id": "github-pr-976",
-      "title": "PR #976 YOS DISCOVERY｜共通Installer必須ヘッダー修復",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/976",
-      "updated_at": "2026-11-25T15:37:51Z"
-    },
-    {
-      "id": "github-pr-977",
-      "title": "PR #977 Factory Core: retain primary native build and eliminate two proven redundant builds",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/977",
-      "updated_at": "2026-11-25T15:41:45Z"
     },
     {
       "id": "github-pr-979",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-25T16:32:42Z"
+      "updated_at": "2026-11-25T16:38:54Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,20 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-3967bafb7923",
+      "title": "Retain primary native build and reduce redundant native CI (#977)",
+      "completed_at": "2026-11-25T16:39:16Z",
+      "result": "GitHub mainへ反映（3967baf）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3967bafb79237bd086a63ac1231906492ed94096"
+    },
+    {
+      "id": "github-commit-fd4049c99cdc",
+      "title": "YOS 操作｜UNIFIED v0.3 隔離診断・共通Installer登録 (#978)",
+      "completed_at": "2026-11-25T16:39:13Z",
+      "result": "GitHub mainへ反映（fd4049c）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fd4049c99cdc2748042f4704a7e43ee9a774677a"
+    },
+    {
       "id": "github-commit-86d89b3dac48",
       "title": "Serialize shared installer catalog releases with an exact Git lease (#975)",
       "completed_at": "2026-11-25T15:39:31Z",
@@ -234,20 +248,6 @@
       "completed_at": "2026-11-25T14:41:09Z",
       "result": "GitHub mainへ反映（3dc4930）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/3dc49304cd89c348fb5b2539d82b16d46d570b7c"
-    },
-    {
-      "id": "github-commit-c44d794320b0",
-      "title": "Exercise verified orphan restoration and protected failure cases",
-      "completed_at": "2026-11-25T13:23:03Z",
-      "result": "GitHub mainへ反映（c44d794）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c44d794320b04b350bc6162ff7a1866252e0e51f"
-    },
-    {
-      "id": "github-commit-c90fcbd64ad9",
-      "title": "Pin existing installer repair to verified remote recovery candidate",
-      "completed_at": "2026-11-25T13:23:00Z",
-      "result": "GitHub mainへ反映（c90fcbd）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c90fcbd64ad9428d55f9fd6a93337b7407658de4"
     },
     {
       "id": "complete-002",
@@ -274,7 +274,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #968をレビューして公開判断する",
+      "next_action": "PR #976をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-26T01:35:34+09:00",
+      "last_update": "2026-11-26T01:40:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 85件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 83件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-26T01:35:34+09:00",
+      "last_update": "2026-11-26T01:40:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -379,7 +379,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #968をレビューして公開判断する",
+      "next_action": "PR #976をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-26T01:35:34+09:00",
+      "last_update": "2026-11-26T01:40:10+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "c2cd958a5ff20e5c5e9bfe9dea2f3af1e9ebe34955c4554557ba179aac7d8967"
+  "github_snapshot_hash": "22ca8af350f26de1fe0ee9e57a900377d2b445c6af99ca913ce8889d3e212c9d"
 }
