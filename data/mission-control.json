@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-26T00:28:40+09:00",
+  "updated_at": "2026-11-26T00:30:36+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -53,6 +53,16 @@
       "updated_at": "2026-11-25T07:25:34Z"
     },
     {
+      "id": "github-pr-943",
+      "title": "PR #943 TAXI: private Notion sales import without sign-in",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/943",
+      "updated_at": "2026-11-24T11:14:24Z"
+    },
+    {
       "id": "github-pr-947",
       "title": "PR #947 BRAVIA｜追加画質調査ボタンの応答・タイムアウト修正",
       "type": "GitHub PR",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-25T15:24:19Z"
     },
     {
-      "id": "github-pr-972",
-      "title": "PR #972 Factory Core: defer external providers until release",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/972",
-      "updated_at": "2026-11-25T15:27:55Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-25T15:24:20Z"
+      "updated_at": "2026-11-25T15:29:31Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-1d797d5d63a3",
+      "title": "Gate Factory external providers by development stage (#972)",
+      "completed_at": "2026-11-25T15:29:37Z",
+      "result": "GitHub mainへ反映（1d797d5）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1d797d5d63a3e0e40fb14fc80a6bf1eec4c18991"
+    },
+    {
       "id": "github-commit-3dc49304cd89",
       "title": "Merge pull request #970 from yskn0008-bot/fix/installer-remote-test-orphan",
       "completed_at": "2026-11-25T14:41:09Z",
@@ -241,13 +248,6 @@
       "completed_at": "2026-11-25T13:22:57Z",
       "result": "GitHub mainへ反映（5de675a）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5de675a5efe55445f7b7728669370b17802f4863"
-    },
-    {
-      "id": "github-commit-abbe5ee41ad3",
-      "title": "Restore verified remote TEST body through existing installer recovery",
-      "completed_at": "2026-11-25T13:22:36Z",
-      "result": "GitHub mainへ反映（abbe5ee）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/abbe5ee41ad3b09bc3d3a32414975e72cdbd6aa7"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-26T00:28:40+09:00",
+      "last_update": "2026-11-26T00:30:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 80件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 79件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-26T00:28:40+09:00",
+      "last_update": "2026-11-26T00:30:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-26T00:28:40+09:00",
+      "last_update": "2026-11-26T00:30:36+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "aece90a687846754aba0bfab467a0fd1d060d5295ccf8d01d69ffbaccb2648e8"
+  "github_snapshot_hash": "5df8e3a73c3e711a543959f8f1ec49d802bf51d2b5d5880344e89b212405cf0f"
 }
