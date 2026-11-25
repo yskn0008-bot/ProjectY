@@ -156,10 +156,18 @@ test('ACTUAL rendered Scriptable WebView script parses and starts the remote but
     appendChild(node){this.children.push(node);return node}
     addEventListener(type,handler){this.handlers=this.handlers||{};this.handlers[type]=handler}
     setAttribute(){}
+    removeAttribute(){}
+    append(...nodes){this.children.push(...nodes)}
+    replaceChildren(...nodes){this.children=[...nodes]}
+    before(){}
+    after(){}
+    insertBefore(node){return node}
+    querySelector(key){this.queries ||= new Map();if(!this.queries.has(key))this.queries.set(key,new Node());return this.queries.get(key)}
+    querySelectorAll(key){if(key==='.home-fixed-keys')return [this.querySelector('row0'),this.querySelector('row1')];if(key==='button'){if(!this.children.length)this.children=Array.from({length:4},()=>new Node());return this.children}return []}
   }
   const document={
     getElementById(id){if(!nodes.has(id))nodes.set(id,new Node());return nodes.get(id)},
-    createElement(){return new Node()},querySelectorAll(){return []},
+    createElement(){return new Node()},querySelector(key){return this.getElementById(key)},querySelectorAll(){return []},
     addEventListener(){},hidden:false
   };
   const window={location:{href:''},addEventListener(){}};
@@ -169,7 +177,8 @@ test('ACTUAL rendered Scriptable WebView script parses and starts the remote but
   const ui=launch(window,document,localStorage,()=>1,()=>{},()=>1,()=>{});
   assert.ok(nodes.get('tvGrid').children.length>=2,'navigation buttons must render');
   assert.equal(nodes.get('modeBadge').textContent,'カーソル','mode must not stay 判定中');
-  assert.ok(window.location.href.includes('__action?'),'initial status request expected');
+  assert.equal(window.location.href,'','HOME startup must not dispatch a native action before explicit selection');
+  assert.equal(nodes.get('tvAppScroll').children.length,8,'eight initial lower slots must render');
   ui.showQuickStatus({ok:true,quick:{
     picture:{entries:[{target:'pictureMode',value:'custom',available:true,
       options:['custom','standard'],min:null,max:null,step:null}],saved:{day:false},message:'読取成功'},
