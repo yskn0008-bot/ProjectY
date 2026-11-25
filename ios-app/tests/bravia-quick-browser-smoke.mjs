@@ -12,9 +12,9 @@ assert.ok(!html.includes('\u0000'));
 // WKWebView cancels native bridge navigations synchronously in shouldAllowRequest.
 // HTTP 204 is not equivalent to that behavior in standalone WebKit.
 // Substitute only the native transport before the real startup code runs.
-const boundary='bindLightHoldButtons();renderTV();renderTVStudio();try{applyRemoteAppearance()}catch(_){}requestMode();';
+const boundary='window.location.href="/__action?device="+encodeURIComponent(device)+"&action="+encodeURIComponent(action||"")+"&label="+encodeURIComponent(label||"")+"&slot="+encodeURIComponent(slot||"")+"&n="+nonce';
 assert.equal(html.split(boundary).length,2);
-const browserHTML=html.replace(boundary,'window.sent=[];nativeAction=(device,action,label,slot="")=>window.sent.push({device,action,label,slot});'+boundary);
+const browserHTML=html.replace(boundary,'(window.sent||(window.sent=[])).push({device,action,label,slot})').replace('<script>','<script>window.sent=[];');
 const origin='https://yos-remote.local/';
 for(const [name,engine] of Object.entries({chromium,webkit})){
  const browser=await engine.launch({headless:true});
@@ -31,24 +31,24 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   await page.goto(origin,{waitUntil:'domcontentloaded'});
   assert.deepEqual(errors,[],'startup JavaScript errors');
   assert.equal(await page.locator('#tvGrid button').count(),12,'startup renders all keys');
-  assert.ok(await page.evaluate(()=>window.sent.some(x=>x.device==='picture'&&x.action==='probe')),'startup probes via native bridge');
+  assert.equal(await page.evaluate(()=>window.sent.length),0,'startup has no native side effect');
+  await page.locator('[data-home-kind="device"][data-home-id="tv"]').click();
+  assert.equal(await page.evaluate(()=>window.sent.filter(x=>x.device==='home'&&x.action==='layoutLoad').length),1);
+  await page.evaluate(()=>nativeResult({ok:true,home:true,kind:'layoutLoad',record:{raw:null,value:null}}));
   await page.evaluate(()=>{
    window.sent=[];
-   nativeAction=(device,action,label,slot='')=>window.sent.push({device,action,label,slot});
    nativeResult({ok:true,picture:{entries:[
     {target:'pictureMode',available:true,state:'ready',value:'standard',options:['standard','cinema'],min:null,max:null,step:null},
     {target:'brightness',available:true,state:'ready',value:'50',options:[],min:0,max:100,step:1},
     {target:'contrast',available:true,state:'ready',value:'100',options:[],min:0,max:100,step:1},
     {target:'color',available:false,state:'failed',value:'',options:[],min:null,max:null,step:null}
    ],saved:{day:false,night:false,movie:false},message:'test'}});
-   nativeResult({ok:true,apps:['YouTube','Netflix','Prime Video','U-NEXT','Spotify'].map((title,index)=>({title,index}))});
+   nativeResult({ok:true,apps:['YouTube','Netflix','Prime Video','U-NEXT','Spotify',...Array.from({length:22},(_,i)=>'App '+i)].map((title,index)=>({title,index}))});
   });
   assert.equal(await page.locator('#modeBadge').textContent(),'カーソル');
   assert.equal(await page.locator('#tvGrid button').count(),12);
-  for(const tab of ['light','ac','floor','tv']){
-   await page.locator('[data-tab="'+tab+'"]').click();
-   assert.equal(await page.locator('.remote-panel.active').getAttribute('data-panel'),tab);
-  }
+  for(const tab of ['light','ac','floor']){await page.locator('#homePageSwitch [data-next]').click();assert.equal(await page.locator('.remote-panel.active').getAttribute('data-panel'),tab)}
+  for(const tab of ['ac','light','tv']){await page.locator('#homePageSwitch [data-prev]').click();assert.equal(await page.locator('.remote-panel.active').getAttribute('data-panel'),tab)}
   const slider=page.locator('#tvBrightness');
   assert.equal(await slider.isEnabled(),true);
   await slider.scrollIntoViewIfNeeded();
@@ -69,9 +69,21 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   assert.equal(JSON.parse(commands[0].slot).value,preview);
   await page.locator('#tvAppScroll').scrollIntoViewIfNeeded();
   const appMetrics=await page.locator('#tvAppScroll').evaluate(e=>({width:e.clientWidth,scroll:e.scrollWidth,height:e.querySelector('button').getBoundingClientRect().height}));
-  assert.ok(appMetrics.scroll>appMetrics.width&&appMetrics.height>=44);
+  assert.ok(appMetrics.scroll<=appMetrics.width+1&&appMetrics.height>=44);
+  assert.equal(await page.locator('#tvAppScroll button:visible').count(),8);
+  await page.locator('#homeLauncherHandle').click();assert.equal(await page.locator('#tvAppScroll button:visible').count(),27);
+  await page.locator('#homeLauncherHandle').click();assert.equal(await page.locator('#tvAppScroll button:visible').count(),8);
   await page.evaluate(()=>openPictureEditor());
   assert.ok((await page.locator('#pictureGroups').textContent()).includes('テレビで設定'));
+  await page.evaluate(()=>window.sent.length=0);
+  await page.locator('#discoverPictureButton').click();
+  assert.equal(await page.locator('#discoverPictureButton').isDisabled(),true);
+  assert.match(await page.locator('#discoverPictureStatus').textContent(),/問い合わせ中/);
+  assert.equal(await page.evaluate(()=>window.sent.filter(x=>x.device==='picture'&&x.action==='discover').length),1);
+  await page.evaluate(()=>nativeResult({ok:true,picture:{discovery:true,message:'v1.1：API拒否（12）'}}));
+  assert.equal(await page.locator('#discoverPictureButton').isEnabled(),true);
+  assert.match(await page.locator('#discoverPictureStatus').textContent(),/API拒否/);
+  assert.equal(await page.locator('#tvBrightness').isEnabled(),true);
   await page.evaluate(()=>closePictureEditor());
   // Verify saved-mode editing uses the existing native action boundary and does not apply settings.
   await page.evaluate(()=>openShortcuts());
@@ -88,10 +100,35 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   await page.locator('#remoteSize').selectOption('compact');
   await page.locator('#presetPosition').selectOption('above');
   assert.equal(await page.locator('#tvGrid').getAttribute('data-size'),'compact');
-  assert.equal(await page.evaluate(()=>document.getElementById('presetHome').nextElementSibling.id),'tvGrid');
+  assert.equal(await page.evaluate(()=>document.getElementById('presetHome').nextElementSibling.classList.contains('home-fixed-keys')),true);
   await page.locator('#presetPosition').selectOption('below');
   await page.evaluate(()=>closeLayoutEditor());
   assert.equal(await page.locator('#tvGrid button').count(),12);
+  // New HOME layout: long press must enter edit without sending a device command.
+  await page.evaluate(()=>window.sent.length=0);
+  const upper0=page.locator('[data-home-slot="upper:0"]'),upper1=page.locator('[data-home-slot="upper:1"]');
+  await upper0.scrollIntoViewIfNeeded();let a=await upper0.boundingBox(),b=await upper1.boundingBox();
+  await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();await page.waitForTimeout(650);await page.mouse.up();
+  assert.equal(await page.locator('#homeUnifiedEditor').isVisible(),true);
+  assert.equal(await page.evaluate(()=>window.sent.filter(x=>!['homeStopHolds','tvHoldStop','lightHoldStop'].includes(x.device)).length),0);
+  const first=await upper0.textContent(),second=await upper1.textContent();
+  a=await upper0.boundingBox();b=await upper1.boundingBox();
+  await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:8});await page.mouse.up();
+  assert.equal(await upper0.textContent(),second);assert.equal(await upper1.textContent(),first);
+  await page.locator('#homeUnifiedEditor label').filter({hasText:'フリック 右'}).locator('select').selectOption('volumeUp');
+  await page.locator('#homeUnifiedEditor').getByText('変更を保存',{exact:true}).click();
+  const save=await page.evaluate(()=>window.sent.filter(x=>x.device==='home'&&x.action==='layoutSave'));
+  assert.equal(save.length,1);const packet=JSON.parse(save[0].slot);
+  assert.equal(packet.next.layout.upper[0].action,'home');assert.equal(packet.next.flick.flick.right,'volumeUp');
+  await page.evaluate(x=>nativeResult({ok:true,home:true,kind:'layoutSave',record:{raw:JSON.stringify(x.next),value:x.next}}),packet);
+  assert.equal(await page.locator('#homeUnifiedEditor').isVisible(),false);
+  await page.evaluate(()=>window.sent.length=0);
+  const pad=page.locator('#homeFlickPad');await pad.scrollIntoViewIfNeeded();const p=await pad.boundingBox();
+  await page.mouse.move(p.x+p.width*.25,p.y+p.height*.5);await page.mouse.down();await page.mouse.move(p.x+p.width*.75,p.y+p.height*.5,{steps:8});await page.mouse.up();
+  assert.equal(await page.evaluate(()=>window.sent.filter(x=>x.device==='tv'&&x.action==='volumeUp').length),1);
+  await page.evaluate(()=>window.sent.length=0);
+  await upper0.click();assert.equal(await page.evaluate(()=>window.sent.filter(x=>x.device==='home'&&x.action==='layoutRun').length),1);
+  await page.evaluate(()=>nativeResult({ok:true,home:true,kind:'layoutRun',message:'fixture'}));
   assert.deepEqual(errors,[]);
   console.log(name+' actual cooked HTML / 12 keys / 4 panels / drag commit once / apps / error PASS');
   await context.close();
