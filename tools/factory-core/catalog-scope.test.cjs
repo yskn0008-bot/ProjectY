@@ -65,7 +65,11 @@ test('real Git remote: two competing publishers, stale lease rejected, replan re
   const candidateB=cp(original);Object.assign(candidateB.targets[1],{commit:integrated,sha256:digest('new B')});
   g('checkout','-b','candidate/a');put(cat,JSON.stringify(candidateA));const a=commit('reviewed A pin');
   g('checkout','--detach',integrated);g('checkout','-b','candidate/b');put(cat,JSON.stringify(candidateB));const b=commit('reviewed B pin');
+  g('checkout','--detach',integrated);
+  g('checkout','-b','candidate/local-pin');put('local-only.txt','not on remote');const localOnly=commit('local object');
+  const unreachable=cp(candidateA);unreachable.targets[0].commit=localOnly;put(cat,JSON.stringify(unreachable));const localCandidate=commit('unreachable pin');
   g('checkout','--detach',integrated);g('remote','add','origin',remote);
+  assert.throws(()=>prepareCatalogCommit(work,integrated,base,localCandidate,'a'),/reviewed pin must be reachable/);
   g('push','origin',integrated+':refs/heads/integration/release');
   const before=g('status','--porcelain');
   const staged=prepareCatalogCommit(work,integrated,base,a,'a');
