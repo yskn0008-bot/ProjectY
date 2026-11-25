@@ -247,6 +247,7 @@ async function recoverRemoteTest(){
  if(paths.filter(x=>x.fm.fileExists(x.receipt)).length!==1||!fm.fileExists(item.receipt)||await readFile(fm,item.receipt)!==raw)
    throw Error('管理記録が変わりました。変更しません');
  assertAbsent();
+ if(paths.filter(x=>x.fm.fileExists(x.receipt)).length!==1||!fm.fileExists(item.receipt))throw Error('管理記録が変わりました。変更しません');
  fm.writeString(item.target,source);
  if(await readFile(fm,item.target)!==source||await readFile(fm,item.receipt)!==raw)
    throw Error('復元の読戻しが一致しません。管理記録は変更していません。既存ファイルを保護してください');
