@@ -238,7 +238,7 @@ async function refreshPrivate(force=false){
    if(data.source!=='notion-reviewed-private'||!validatePrivate(data.edition))throw Error('invalid edition');
    const changed=JSON.stringify(privateEdition)!==JSON.stringify(data.edition);
    privateEdition=data.edition;privateLastRead=Date.now();
-   privateBtn.textContent='非公開号を閉じる';privateMessage('Notion非公開読書版 '+privateEdition.issuedOn+' · 同期済み');
+   privateBtn.textContent='非公開号を閉じる';privateMessage('Notion非公開読書版 '+privateEdition.issuedOn+' · 同期済み'+(privateEdition.reviewScope==='gpt_original_excerpt_checked'?'｜原著抜粋・GPT照合（全文独立審査なし）':''));
    if(changed){todayRequest=null;route();}
   }catch(_){if(generation===privateGeneration){const had=!!privateEdition;privateEdition=null;todayRequest=null;privateMessage('Notionの最新号を確認できません。既刊を表示します。');if(had)route();}}
  })().finally(()=>{privateRefresh=null;});

@@ -1,5 +1,6 @@
 // Read only the existing private, editorial-reviewed JOURNAL reading page.
 const PAGE='4215ca88-2895-816f-bdd3-c48c6cf700ae';
+const AUTO_REVIEW_MARK="本人用の非公開読書版。原著抜粋とGPTの執筆前・最終照合を実施。全文の独立審査は未実施。外部公開・配信は行っていない。";
 const HEAD=/^YOS JOURNAL｜(\d{4})\.(\d{2})\.(\d{2})(?:\s|$)/u;
 const STORY=/^0([123])\s*\/\s*([A-Z]+)｜(.+)$/u;
 const text=b=>(b?.[b.type]?.rich_text||[]).map(x=>x.plain_text??x.text?.content??'').join('');
@@ -15,7 +16,7 @@ export function parseReviewedEdition(blocks){
  let {i,date:issuedOn}=candidates[0];
  const dt=new Date(issuedOn+'T00:00:00Z');if(!Number.isFinite(+dt)||dt.toISOString().slice(0,10)!==issuedOn)throw Error('date invalid');
  const header=blocks.slice(i+1,i+4).map(text);
- if(header.length!==3||!header[0]||!header[1]||header[2]!=='本人用の非公開読書版。原著の主要箇所と照合済み。外部公開・配信は行っていない。')throw Error('review marker absent');
+ if(header.length!==3||!header[0]||!header[1]||!['本人用の非公開読書版。原著の主要箇所と照合済み。外部公開・配信は行っていない。',AUTO_REVIEW_MARK].includes(header[2]))throw Error('review marker absent');
  i+=4;const articles=[];
  for(let n=1;n<=3;n++){
   if(blocks[i]?.type==='divider')i++;
@@ -29,7 +30,7 @@ export function parseReviewedEdition(blocks){
   articles.push({category:s[2],title:s[3],summary,reason,action:action.replace(/^日常への視点[：:]\s*/u,''),caveat:caveat.replace(/^研究の限界[：:]\s*/u,''),source,link:url,keyPoints:[]});
  }
  if(blocks[i]?.type!=='divider'||new Set(articles.map(a=>a.link.toLowerCase())).size!==3)throw Error('edition boundary invalid');
- return {issuedOn,headline:header[0],lead:header[1],articles};
+ return {issuedOn,headline:header[0],lead:header[1],articles,...(header[2]===AUTO_REVIEW_MARK?{reviewScope:'gpt_original_excerpt_checked'}:{})};
 }
 export function createJournalReader({authorize,notionToken,origins,fetcher=fetch}){
  return async request=>{

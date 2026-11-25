@@ -41,9 +41,16 @@ def patch(path:Path,script_path:Path):
     targets=[(i,a) for i,a in enumerate(actions) if a.get('WFWorkflowActionIdentifier')==INTENT and a.get('WFWorkflowActionParameters',{}).get('script')==SCRIPT_MARKER]
     if len(targets)!=1:raise SystemExit('expected exactly one inline placeholder')
     idx,target=targets[0]
-    if idx<1 or actions[idx-1].get('WFWorkflowActionIdentifier')!='is.workflow.actions.documentpicker.save':
-        raise SystemExit('inline handoff must immediately follow iCloud backup')
-    save=actions[idx-1].get('WFWorkflowActionParameters',{})
+    if idx<1:raise SystemExit('missing preceding draft backup')
+    if actions[idx-1].get('WFWorkflowActionIdentifier')=='is.workflow.actions.documentpicker.save' and actions[idx-1].get('WFWorkflowActionParameters',{}).get('WFInput',{}).get('Value',{}).get('OutputName')=='draftText':
+        save=actions[idx-1]['WFWorkflowActionParameters']
+    else:
+        # New review-first candidate backs up draft before the separate checker.
+        drafts=[a['WFWorkflowActionParameters'] for a in actions[:idx] if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.documentpicker.save' and 'YOS-JOURNAL-GPT-DRAFT-' in repr(a.get('WFWorkflowActionParameters',{}))]
+        finals=[a['WFWorkflowActionParameters'] for a in actions[:idx] if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.documentpicker.save' and 'YOS-JOURNAL-GPT-FINALCHECK-' in repr(a.get('WFWorkflowActionParameters',{}))]
+        if len(drafts)!=1 or len(finals)!=1 or finals[0].get('WFInput',{}).get('Value',{}).get('OutputName')!='finalReviewText' or 'YOS_FINAL_REVIEW_PASS_V1' not in repr(actions[:idx]):
+            raise SystemExit('missing draft backup or independent final check')
+        save=drafts[0]
     if save.get('WFSaveFileOverwrite') is not False or save.get('WFAskWhereToSave') is not False:
         raise SystemExit('unsafe save action')
     attachment=save.get('WFInput')
@@ -111,7 +118,7 @@ def recovery(path:Path,out:Path):
     script=p['script']['Value']['string']
     marker="try{await main();}\nfinally{Script.complete();}"
     assert script.count(marker)==1
-    wrapper="async function recover(){\n  const folder=await DocumentPicker.openFolder();\n  if(typeof folder!=='string'||!folder) return '選択キャンセル。未送信。';\n  const fm=FileManager.local();\n  const names=fm.listContents(folder);\n  const byKind={DRAFT:new Map(),RESEARCH:new Map()};\n  for(const name of names){\n    const m=/^YOS-JOURNAL-GPT-(DRAFT|RESEARCH)-(\\d{4}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-\\d{2})\\.(txt|md)$/.exec(name);\n    if(!m)continue;\n    const rows=byKind[m[1]];\n    if(rows.has(m[2]))rows.set(m[2],null);\n    else rows.set(m[2],name);\n  }\n  const stamp=[...byKind.DRAFT.keys()].sort().reverse()[0];\n  if(!stamp||!byKind.DRAFT.get(stamp)||!byKind.RESEARCH.get(stamp))\n    return '最新原稿と同時刻の研究資料が揃っていません。未送信。';\n  const read=async name=>{\n    const path=fm.joinPath(folder,name);\n    if(!fm.fileExists(path)||fm.isDirectory(path))throw Error('FILE_NOT_FOUND');\n    const cloud=FileManager.iCloud();\n    await cloud.downloadFileFromiCloud(path);\n    const str=fm.readString(path);\n    if(typeof str!=='string'||!str.trim())throw Error('EMPTY_FILE');\n    return str.replace(/^\\uFEFF/,'').trim();\n  };\n  const draft=await read(byKind.DRAFT.get(stamp));\n  const research=await read(byKind.RESEARCH.get(stamp));\n  if(!research.startsWith('YOS_RESEARCH_ABSTRACT_V1')||!research.includes('自動公開禁止')||\n     !draft.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1')||!draft.includes('公開不可・要審査'))\n    return '原稿と資料の形式が一致しません。未送信。';\n  const combined=draft+'\\n\\n<<YOS_JOURNAL_RESEARCH_PROVENANCE_V1>>\\n\\n'+research;\n  const a=new Alert();a.title='YOS JOURNAL 非公開保存';a.message=stamp+' の保存済み原稿をNotionへ送ります。記事生成・公開はしません。';\n  a.addAction('保存');a.addCancelAction('キャンセル');\n  if(await a.presentAlert()!==0)return 'キャンセル。未送信。';\n  const r=await transfer(combined);\n  return 'YOS_JOURNAL_NOTION_'+r.status.toUpperCase()+':'+r.reason;\n}\ntry{\n  let msg;\n  try{msg=await recover();}catch(e){msg='復旧未確認：'+String(e?.message||e).slice(0,80);}\n  const a=new Alert();a.title='YOS JOURNAL';a.message=msg;a.addAction('OK');await a.presentAlert();\n}finally{Script.complete();}\n"
+    wrapper="async function recover(){\n  const folder=await DocumentPicker.openFolder();\n  if(typeof folder!=='string'||!folder) return '選択キャンセル。未送信。';\n  const fm=FileManager.local();\n  const names=fm.listContents(folder);\n  const byKind={DRAFT:new Map(),RESEARCH:new Map()};\n  for(const name of names){\n    const m=/^YOS-JOURNAL-GPT-(DRAFT|RESEARCH)-(\\d{4}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-\\d{2})\\.(txt|md)$/.exec(name);\n    if(!m)continue;\n    const rows=byKind[m[1]];\n    if(rows.has(m[2]))rows.set(m[2],null);\n    else rows.set(m[2],name);\n  }\n  const stamp=[...byKind.DRAFT.keys()].sort().reverse()[0];\n  if(!stamp||!byKind.DRAFT.get(stamp)||!byKind.RESEARCH.get(stamp))\n    return '最新原稿と同時刻の研究資料が揃っていません。未送信。';\n  const read=async name=>{\n    const path=fm.joinPath(folder,name);\n    if(!fm.fileExists(path)||fm.isDirectory(path))throw Error('FILE_NOT_FOUND');\n    const cloud=FileManager.iCloud();\n    await cloud.downloadFileFromiCloud(path);\n    const str=fm.readString(path);\n    if(typeof str!=='string'||!str.trim())throw Error('EMPTY_FILE');\n    return str.replace(/^\\uFEFF/,'').trim();\n  };\n  const draft=await read(byKind.DRAFT.get(stamp));\n  const research=await read(byKind.RESEARCH.get(stamp));\n  if(!/^YOS_RESEARCH_(?:ABSTRACT|APPROVED)_V1\\r?\\n/.test(research)||!research.includes('自動公開禁止')||\n     !draft.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1')||!draft.includes('公開不可・要審査'))\n    return '原稿と資料の形式が一致しません。未送信。';\n  const combined=draft+'\\n\\n<<YOS_JOURNAL_RESEARCH_PROVENANCE_V1>>\\n\\n'+research;\n  const a=new Alert();a.title='YOS JOURNAL 非公開保存';a.message=stamp+' の保存済み原稿をNotionへ送ります。記事生成・公開はしません。';\n  a.addAction('保存');a.addCancelAction('キャンセル');\n  if(await a.presentAlert()!==0)return 'キャンセル。未送信。';\n  const r=await transfer(combined);\n  return 'YOS_JOURNAL_NOTION_'+r.status.toUpperCase()+':'+r.reason;\n}\ntry{\n  let msg;\n  try{msg=await recover();}catch(e){msg='復旧未確認：'+String(e?.message||e).slice(0,80);}\n  const a=new Alert();a.title='YOS JOURNAL';a.message=msg;a.addAction('OK');await a.presentAlert();\n}finally{Script.complete();}\n"
     p['script']['Value']['string']=script.replace(marker,wrapper)
     p['parameter']=''
     p['runInApp']=True
@@ -122,7 +129,7 @@ def recovery(path:Path,out:Path):
     print('JOURNAL recovery-only Shortcut generated; iPhone folder access not verified')
 
 
-def convert_to_clarity(path:Path):
+def convert_to_clarity(path:Path, reflection_source=None, reader_source=None, inbox_source=None):
     """Replace only the verified private writer with the existing named Bridge.
     Run after the old candidate validator; diagnostic/recovery artifacts remain unchanged.
     """
@@ -143,6 +150,46 @@ def convert_to_clarity(path:Path):
         raise SystemExit('unexpected handoff mode')
     def literal(s):
         return {'Value':{'string':s},'WFSerializationType':'WFTextTokenString'}
+    # Only the new review-first workflow needs the extra offline provenance gate.
+    # Existing legacy conversion path stays identical.
+    final_actions=[a for a in actions[:idx] if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.documentpicker.save' and 'YOS-JOURNAL-GPT-FINALCHECK-' in repr(a.get('WFWorkflowActionParameters',{}))]
+    gate=None
+    if final_actions:
+        if len(final_actions)!=1 or attachment.get('OutputName')!='journalBoundText':
+            raise SystemExit('invalid final check binding')
+        review=final_actions[0]['WFWorkflowActionParameters']['WFInput']
+        rt=review.get('Value',{})
+        if review.get('WFSerializationType')!='WFTextTokenAttachment' or rt.get('OutputName')!='finalReviewText' or not rt.get('OutputUUID'):
+            raise SystemExit('invalid final review receipt')
+        # Bind exact original draft+research and the actual independent GPT result.
+        sep='\n<<YOS_FINAL_REVIEW_RECEIPT_V1>>\n'
+        bound_id=str(uuid.uuid4()).upper()
+        bound={'WFWorkflowActionIdentifier':'is.workflow.actions.gettext','WFWorkflowActionParameters':{
+            'UUID':bound_id,'CustomOutputName':'journalFinalCheckInput','WFTextActionText':{'WFSerializationType':'WFTextTokenString','Value':{
+            'string':'\ufffc'+sep+'\ufffc','attachmentsByRange':{'{0, 1}':copy.deepcopy(attachment),'{'+str(len(sep)+1)+', 1}':copy.deepcopy(rt)}}}}}
+        old_script=prior['script']['Value']['string']
+        begin=old_script.index('function validProvenance(raw)')
+        end=old_script.index('async function transfer(input)',begin)
+        gate_js=old_script[begin:end]+"""
+try{
+ const input=args.shortcutParameter;
+ const parts=typeof input==='string'?input.split('\\n<<YOS_FINAL_REVIEW_RECEIPT_V1>>\\n'):[];
+ const raw=parts[0]||'';
+ const evidence=raw.split('<<YOS_JOURNAL_RESEARCH_PROVENANCE_V1>>');
+ const ok=parts.length===2&&parts[1].trim()==='YOS_FINAL_REVIEW_PASS_V1'&&
+   raw.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1')&&raw.includes('公開不可・要審査')&&
+   evidence.length===2&&evidence[1].trim().startsWith('YOS_RESEARCH_APPROVED_V1\\n')&&validProvenance(raw);
+ Script.setShortcutOutput(ok?raw+'\\n\\n<<YOS_FINAL_REVIEW_RECEIPT_V1>>\\nYOS_FINAL_REVIEW_PASS_V1':'YOS_FINAL_REVIEW_HOLD_V1');
+}catch(_){Script.setShortcutOutput('YOS_FINAL_REVIEW_HOLD_V1');}
+finally{Script.complete();}
+"""
+        gate_id=str(uuid.uuid4()).upper()
+        gate=copy.deepcopy(actions[idx])
+        gp=gate['WFWorkflowActionParameters']
+        gp['UUID']=gate_id;gp['CustomOutputName']='journalFinalBoundText'
+        gp['script']={'WFSerializationType':'WFTextTokenString','Value':{'string':gate_js}}
+        gp['parameter']={'WFSerializationType':'WFTextTokenAttachment','Value':{'Type':'ActionOutput','OutputUUID':bound_id,'OutputName':'journalFinalCheckInput'}}
+        attachment={'Type':'ActionOutput','OutputUUID':gate_id,'OutputName':'journalFinalBoundText'}
     raw={'WFSerializationType':'WFTextTokenString','Value':{'string':'\ufffc','attachmentsByRange':{'{0, 1}':copy.deepcopy(attachment)}}}
     packet={'source':literal('journal'),'captureId':literal('journal:auto'),'routeMode':literal('raw-only'),'rawText':raw}
     dictionary_id=str(uuid.uuid4()).upper()
@@ -153,15 +200,53 @@ def convert_to_clarity(path:Path):
     runner['WFWorkflowActionIdentifier']='dk.simonbs.Scriptable.ParameterizedRunScriptIntent'
     p=runner['WFWorkflowActionParameters'];del p['script'];p['fileName']='YOS Clarity Inbox Bridge'
     p['parameter']={'WFSerializationType':'WFTextTokenAttachment','Value':{'Type':'ActionOutput','OutputUUID':dictionary_id,'OutputName':'journalClarityPacket'}}
-    actions[idx:idx+1]=[dictionary,runner]
+    replacement=([bound,gate] if gate else [])+[dictionary,runner]
+    actions[idx:idx+1]=replacement
     encoded=plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False)
     read=plistlib.loads(encoded)
     check=read['WFWorkflowActions'];old=original['WFWorkflowActions']
-    assert check[:idx]==old[:idx] and check[idx+2:]==old[idx+1:]
+    assert check[:idx]==old[:idx] and check[idx+len(replacement):]==old[idx+1:]
     assert all(read[k]==v for k,v in original.items() if k!='WFWorkflowActions')
-    assert check[idx]==dictionary and check[idx+1]==runner
-    assert check[idx]['WFWorkflowActionParameters']['WFItems']['Value']['WFDictionaryFieldValueItems'][-1]['WFValue']==raw
-    assert 'script' not in check[idx+1]['WFWorkflowActionParameters']
+    assert check[idx:idx+len(replacement)]==replacement
+    assert check[idx+len(replacement)-2]['WFWorkflowActionParameters']['WFItems']['Value']['WFDictionaryFieldValueItems'][-1]['WFValue']==raw
+    assert 'script' not in check[idx+len(replacement)-1]['WFWorkflowActionParameters']
+
+    # Connect only the review-first candidate's existing native post-Inbox action.
+    reflection=[j for j,a in enumerate(actions) if a.get('WFWorkflowActionIdentifier')==INTENT and '__YOS_JOURNAL_REFLECT_INLINE__' in repr(a.get('WFWorkflowActionParameters',{}).get('script'))]
+    if reflection:
+        if len(reflection)!=1 or not all((reflection_source,reader_source,inbox_source)) or not gate:
+            raise SystemExit('reflection source/binding incomplete')
+        j=reflection[0]
+        target=actions[j]['WFWorkflowActionParameters']
+        if target.get('parameter')!='__YOS_JOURNAL_REFLECT_INPUT__' or target.get('runInApp') is not False or target.get('ShowWhenRun') is not False:
+            raise SystemExit('reflection target mismatch')
+        receipt_saves=[a['WFWorkflowActionParameters'] for a in actions[:j] if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.documentpicker.save' and 'YOS-JOURNAL-GPT-INBOX-RECEIPT-' in repr(a.get('WFWorkflowActionParameters',{}))]
+        if len(receipt_saves)!=1 or receipt_saves[0]['WFInput'].get('WFSerializationType')!='WFTextTokenAttachment':
+            raise SystemExit('missing exact Inbox receipt backup')
+        rt=receipt_saves[0]['WFInput']['Value']
+        if rt.get('Type')!='ActionOutput' or rt.get('OutputName')!='notionText' or not rt.get('OutputUUID') or j<=idx+len(replacement):
+            raise SystemExit('wrong Inbox receipt producer')
+        inbox=inbox_source.read_text('utf-8')
+        reader=reader_source.read_text('utf-8')
+        # Reuse existing parsers, strip only Node exports and runtime entry points.
+        inbox=inbox[inbox.index('export const INBOX_ID'):inbox.index('export async function readPrivateInbox')]
+        reader=reader[:reader.index('export function createJournalReader')]
+        app=reflection_source.read_text('utf-8')
+        script=inbox.replace('export ','')+'\n'+reader.replace('export ','')+'\n'+app
+        if not all(x in script for x in ('function inspectDrafts','function parseReviewedEdition','YOS_JOURNAL_READING_VERIFIED','INBOX_READBACK_MISMATCH','AUTO_REVIEW_MARK')):
+            raise SystemExit('missing existing parser or private readback guard')
+        sep='\n<<YOS_INBOX_RECEIPT_V1>>\n'
+        uid=str(uuid.uuid4()).upper()
+        packet={'WFWorkflowActionIdentifier':'is.workflow.actions.gettext','WFWorkflowActionParameters':{'UUID':uid,'CustomOutputName':'journalReadingBoundText','WFTextActionText':{'WFSerializationType':'WFTextTokenString','Value':{'string':'\ufffc'+sep+'\ufffc','attachmentsByRange':{'{0, 1}':copy.deepcopy(attachment),'{'+str(len(sep)+1)+', 1}':copy.deepcopy(rt)}}}}}
+        actions.insert(j,packet)
+        target['script']=literal(script)
+        target['parameter']={'WFSerializationType':'WFTextTokenAttachment','Value':{'Type':'ActionOutput','OutputUUID':uid,'OutputName':'journalReadingBoundText'}}
+        encoded=plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False)
+        read=plistlib.loads(encoded)
+        assert read['WFWorkflowActions'][j]==packet and read['WFWorkflowActions'][j+1]['WFWorkflowActionParameters']==target
+        assert '__YOS_JOURNAL_REFLECT_INLINE__' not in repr(read) and '__YOS_JOURNAL_REFLECT_INPUT__' not in repr(read)
+    elif any((reflection_source,reader_source,inbox_source)):
+        raise SystemExit('unexpected reflection args for legacy candidate')
     path.write_bytes(encoded)
     assert plistlib.loads(path.read_bytes())==read
     print('JOURNAL -> existing Clarity Bridge named action PASS (unsigned)')
@@ -171,12 +256,15 @@ if __name__=='__main__':
     ap.add_argument('shortcut',type=Path)
     ap.add_argument('--script',type=Path)
     ap.add_argument('--convert-to-clarity',action='store_true')
+    ap.add_argument('--reflection-source',type=Path)
+    ap.add_argument('--reader-source',type=Path)
+    ap.add_argument('--inbox-source',type=Path)
     ap.add_argument('--diagnostic',type=Path)
     ap.add_argument('--recovery',type=Path)
     a=ap.parse_args()
     if a.convert_to_clarity:
         if a.script or a.diagnostic or a.recovery:ap.error('conversion must follow original validation')
-        convert_to_clarity(a.shortcut)
+        convert_to_clarity(a.shortcut,a.reflection_source,a.reader_source,a.inbox_source)
         raise SystemExit(0)
     if not a.script:ap.error('--script is required for original patch')
     patch(a.shortcut,a.script)
