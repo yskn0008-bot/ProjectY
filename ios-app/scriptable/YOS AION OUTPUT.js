@@ -150,3 +150,5 @@ let result;
 try{result=await entry(args.shortcutParameter,typeof config!=="undefined"&&config.runsInApp===true,WebView)}catch(_){result={status:"held",action:"standard",reason:"runtime_failed"}}
 Script.setShortcutOutput(JSON.stringify(result));
 Script.complete();
+
+// CI scope probe only; never merge this test branch.
