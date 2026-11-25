@@ -147,3 +147,9 @@ test('unknown DOI in Markdown still flags review, without discarding the private
  const t=mock({input:raw+'\n'+urls.map(u=>'['+u+']('+u+')').join('\n')+'\n[https://doi.org/10.1234/unknown](https://doi.org/10.1234/unknown)'+provenance});await t.execute();
  assert.match(t.outputs[0],/THREE_SOURCE_PROVENANCE_MISMATCH_REVIEW_REQUIRED/);
 });
+
+test('new approved research marker preserves exact source provenance without changing legacy receipts',async()=>{
+ const packet=provenance.replace('YOS_RESEARCH_ABSTRACT_V1','YOS_RESEARCH_APPROVED_V1');
+ const t=mock({input:raw+'\n'+urls.join('\n')+packet});
+ await t.execute();assert.match(t.outputs[0],/NOTION_VERIFIED/);assert.doesNotMatch(t.outputs[0],/MISMATCH_REVIEW_REQUIRED/);
+});
