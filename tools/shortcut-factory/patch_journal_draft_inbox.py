@@ -179,7 +179,7 @@ try{
  const ok=parts.length===2&&parts[1].trim()==='YOS_FINAL_REVIEW_PASS_V1'&&
    raw.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1')&&raw.includes('公開不可・要審査')&&
    evidence.length===2&&evidence[1].trim().startsWith('YOS_RESEARCH_APPROVED_V1\\n')&&validProvenance(raw);
- Script.setShortcutOutput(ok?raw:'YOS_FINAL_REVIEW_HOLD_V1');
+ Script.setShortcutOutput(ok?raw+'\\n\\n<<YOS_FINAL_REVIEW_RECEIPT_V1>>\\nYOS_FINAL_REVIEW_PASS_V1':'YOS_FINAL_REVIEW_HOLD_V1');
 }catch(_){Script.setShortcutOutput('YOS_FINAL_REVIEW_HOLD_V1');}
 finally{Script.complete();}
 """
