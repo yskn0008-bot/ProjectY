@@ -29,3 +29,17 @@ async function testPreflight(run){
  return tests;
 }
 test("DISCOVERY public-only isolated diagnostic",async()=>{new AsyncFunction(src);const run=new Function(src.slice(0,src.indexOf("\nlet result;\n"))+"\nreturn runPreflightV2;")();assert.equal((await testPreflight(run)).length,10);assert.ok(!/Keychain|api\.notion\.com|Notification\(|Pasteboard|eval\(|new Function|importModule|FileManager\.iCloud/.test(src));assert.equal(entry.name,"YOS DISCOVERY 実行検証 TEST");assert.equal(entry.sha256,createHash("sha256").update(src,"utf8").digest("hex"));});
+
+test("DISCOVERY release passes the actual installer source-format gate",async()=>{
+ const installer=readFileSync(new URL("../scriptable/YOS Common Installer.js",import.meta.url),"utf8");
+ const start=installer.indexOf("async function install(entry){");
+ const end=installer.indexOf("  const existing=[];",start);
+ assert.ok(start>=0&&end>start);
+ const extract=name=>{const at=installer.indexOf("function "+name+"(");assert.ok(at>=0);return installer.slice(at,installer.indexOf("\n}",at)+2)};
+ const prefix=installer.slice(start,end)+"return name;\n}";
+ const gate=new Function("raw","const ROOT='https://example.invalid/';const SELF='YOS Common Installer';const isRemoteEntry=()=>false;const verifiedSource=async()=>raw;const localizedCode=(e,r)=>r;const stores=()=>[];"+extract("digest")+"\n"+extract("scriptName")+"\n"+prefix+"\nreturn install;");
+ assert.equal(await gate(src)(entry),entry.name);
+ const header="// Variables used by Scriptable.\n// icon-color: blue; icon-glyph: microscope;\n";
+ assert.ok(src.startsWith(header));
+ await assert.rejects(gate(src.slice(header.length))(entry),/GitHub元コードの形式が不一致/);
+});
