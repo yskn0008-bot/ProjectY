@@ -28,10 +28,11 @@ test('picture control renders TV-advertised range and inline contrast bar',()=>{
  assert.match(src,/for\(const target of \["pictureMode","brightness","contrast"\]\)/);
  assert.match(src,/oninput="previewTVCompact\(event,'contrast'\)" onchange="commitTVCompact\(event,'contrast'\)"/);
 });
-test('four app slots visible and extra apps horizontally scrollable',()=>{
- assert.match(src,/grid-auto-columns:calc\(\(100% - 15px\)\/4\)/);
- assert.match(src,/overflow-x:auto/);
- assert.match(src,/aria-label="BRAVIAアプリを横スクロール"/);
+test('eight custom launcher slots, expandable lower rows and legacy app access',()=>{
+ assert.ok(src.includes('grid-template-columns:repeat(4,minmax(0,1fr))'));
+ assert.ok(src.includes('home-expanded'));
+ assert.ok(src.includes('aria-label="BRAVIAアプリ一覧"'));
+ assert.ok(src.includes('homeAllApps'));
 });
 function harness(lists,opts={}){
  const calls=[],host='192.0.2.31';
@@ -90,8 +91,8 @@ test('secrets stay out of UI and startup never changes picture or VPN',()=>{
  const last=src.indexOf('</script></body></html>');
  const html=src.slice(first,last);
  assert.doesNotMatch(html,/sonyPSK\(|Keychain\.get\(/);
- assert.match(src,/nativeAction\("tvApps","list","アプリ一覧"\)/);
- assert.match(src,/if\(activePanel==="tv"\)probePictureScene\(\)/);
+ assert.ok(src.includes("yosTVGetApps"));
+ assert.ok(src.includes("scheduleHomeRemoteRead"));
  assert.doesNotMatch(media,/YOS_NOTION_INTEGRATION_TOKEN|ftp:|api\.github\.com/);
  const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
  assert.doesNotThrow(()=>new AsyncFunction(src));
@@ -105,7 +106,7 @@ test('actual cooked WebView HTML parses after HTML tokenizer normalization and h
  assert.doesNotThrow(()=>new vm.Script(js));
  assert.equal((html.match(/<section\b/g)||[]).length,(html.match(/<\/section>/g)||[]).length);
  assert.equal((html.match(/<div\b/g)||[]).length,(html.match(/<\/div>/g)||[]).length);
- assert.match(html,/<\/div><\/section>\s*<section class="card remote-panel" data-panel="light">/);
+ assert.ok(html.includes('id="homeTVExtras"'));assert.ok(html.includes('<section class="card remote-panel" data-panel="light">'));
  const regex=js.match(/\|\|\/(\[[^\]]+\])\/\.test\(value\)/);
  assert.ok(regex);
  const control=new RegExp(regex[1]);
@@ -159,4 +160,57 @@ test('editable presets preserve legacy storage, mode-only and custom value seman
  await assert.rejects(api.editPicturePreset({key:'extra1',name:'invalid',settings:[{target:'brightness',value:'999'}]}),/許可/);
  assert.equal(keys.get(prefix+'extra1'),before);
  const count=writes.length;assert.match((await api.pictureAction('discover','')).message,/futureGamma/);assert.equal(writes.length,count);
+});
+
+test('discovery button shows immediate feedback and reports a result without altering saved controls',()=>{
+ const begin=src.indexOf('let discoveryPending=false'),end=src.indexOf('function pictureEntry(',begin);
+ const els={discoverPictureButton:{},discoverPictureStatus:{}},calls=[],timers=[];
+ const api=new Function('document','nativeAction','setTimeout','clearTimeout',src.slice(begin,end)+'return{startPictureDiscovery,finishPictureDiscovery};')({getElementById:id=>els[id]},(...args)=>calls.push(args),fn=>{timers.push(fn);return 1},()=>{});
+ api.startPictureDiscovery();api.startPictureDiscovery();
+ assert.equal(calls.length,1);assert.equal(els.discoverPictureButton.disabled,true);assert.equal(els.discoverPictureStatus.hidden,false);
+ api.finishPictureDiscovery('API拒否（12）');assert.equal(els.discoverPictureButton.disabled,false);assert.equal(els.discoverPictureStatus.textContent,'API拒否（12）');
+ api.startPictureDiscovery();timers.at(-1)();assert.equal(els.discoverPictureButton.disabled,false);assert.match(els.discoverPictureStatus.textContent,/応答未確認/);
+});
+test('extra discovery uses only two bounded reads, exact v1.1 request and distinguishes API rejection',async()=>{
+ const code=src.slice(src.indexOf('const PICTURE_TARGETS='),src.indexOf('const QUICK_APP_MATCHERS='));
+ const calls=[];
+ class Request{async loadString(){const q=JSON.parse(this.body);calls.push({q,timeout:this.timeoutInterval});return q.version==='1.0'?JSON.stringify({result:[[{target:'brightness',currentValue:'30'}]]}):JSON.stringify({error:[12,'unsupported']});}}
+ const api=new Function('Request','sonyHost','sonyPSK','Keychain',code+'return{discoverExtraPictureTargets};')(Request,()=> 'example',()=> 'mock',{});
+ const result=await api.discoverExtraPictureTargets();
+ assert.equal(calls.length,2);assert.ok(calls.every(x=>x.q.method==='getPictureQualitySettings'&&x.timeout===5));
+ assert.deepEqual(calls[1].q.params,[{}]);assert.equal(result.discovery,true);assert.match(result.message,/API拒否（12）/);assert.equal(result.entries,undefined);
+});
+
+test('HOME layout store preserves existing state and rejects stale or failed writes',()=>{
+ const start=src.lastIndexOf('function unifiedSlots('),end=src.indexOf('const homeLayoutNative=',start);
+ const api=new Function(src.slice(start,end)+'return {core:unifiedSlots(yosSlotAllow,yosSlotPresets),homeLayoutStore}')();
+ const m=new Map([['legacy','keep']]);let fail=false;
+ const kc={contains:k=>m.has(k),get:k=>m.get(k),set:(k,v)=>{if(fail){fail=false;throw Error('write')}m.set(k,v)},remove:k=>m.delete(k)};
+ const store=api.homeLayoutStore(api.core,kc);
+ assert.equal(store.read().raw,null);
+ const layout=api.core.replace(api.core.initial(null),{area:'lower',index:0},{kind:'shortcut',name:'fixture'});
+ const next={schema:2,layout,flick:{pad:'middle',flick:{tap:'auto',up:'auto',down:'auto',left:'auto',right:'auto'}}};
+ const rec=store.save(null,next);assert.equal(store.read().raw,rec.raw);assert.equal(m.get('legacy'),'keep');
+ assert.throws(()=>store.save(null,next),/変更/);
+ fail=true;assert.throws(()=>store.save(rec.raw,next),/保存失敗/);assert.equal(store.read().raw,rec.raw);
+ assert.throws(()=>store.save(rec.raw,{...next,flick:{...next.flick,pad:'unknown'}}));
+});
+test('HOME execution is bound to saved slot and current unique app name',async()=>{
+ const start=src.lastIndexOf('function unifiedSlots('),end=src.indexOf('const homeLayoutNative=',start);
+ const x=src.indexOf('async function executeHomeSlot('),z=src.indexOf('async function homeNative(',x);
+ const api=new Function(src.slice(start,end)+src.slice(x,z)+'return {core:unifiedSlots(yosSlotAllow,yosSlotPresets),executeHomeSlot}')();
+ let layout=api.core.initial(null);
+ layout=api.core.replace(layout,{area:'lower',index:0},{kind:'shortcut',name:'fixture'});
+ layout=api.core.replace(layout,{area:'lower',index:1},{kind:'app',title:'YouTube'});
+ const record={raw:'current',value:{layout}},calls=[];let apps=[{index:3,title:'YouTube'}],closed=false;
+ const deps={closed:()=>closed,apps:async()=>apps,presets:()=>[],execute:async r=>{calls.push(r);return r}};
+ const req=i=>({pos:{area:'lower',index:i},slot:layout.lower[i],base:'current'});
+ await assert.rejects(api.executeHomeSlot({...req(0),slot:{kind:'shortcut',name:'different'}},record,api.core,deps));
+ await assert.rejects(api.executeHomeSlot({...req(0),base:'old'},record,api.core,deps));
+ assert.equal(calls.length,0);
+ assert.equal((await api.executeHomeSlot(req(0),record,api.core,deps)).name,'fixture');
+ assert.equal((await api.executeHomeSlot(req(1),record,api.core,deps)).title,'YouTube');
+ apps.push({index:4,title:'YouTube'});
+ await assert.rejects(api.executeHomeSlot(req(1),record,api.core,deps));
+ closed=true;await assert.rejects(api.executeHomeSlot(req(0),record,api.core,deps));assert.equal(calls.length,2);
 });
