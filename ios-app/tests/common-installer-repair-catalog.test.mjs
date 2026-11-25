@@ -90,11 +90,16 @@ async function execute({script=legacy,place='cloud',duplicate=false,missing=fals
 }
 
 test('runtime and historical fixture are immutable official SHA-256 releases',()=>{
- assert.equal(sha(official),'1fd8e27aab18c267569312689d206899ba9713eb654e7dbdd41dd2cf7b77b8d4');
+ assert.equal(sha(official),'5a26ff04b887c04c441bbf3edceefdb59c5d80948d9c28b1b3481162594ccb84');
  assert.equal(sha(legacy),'069c2a556fbdc5eb72ef9dfda5f545e41bb252baa45b59637a4f5d9f6d1ce547');
- assert.match(runtime,/510fa3f2f032eecc062df9d7d2033cf6057c6d04/);
+ assert.match(runtime,/b42590934d85972c19502251fd3f488a1cb9776c/);
 });
 
+test('previous exact official installer remains on the trusted migration allowlist',()=>{
+ const list=vm.runInNewContext(runtime.slice(0,runtime.indexOf('const PICTURE='))+';OLD_TRUSTED');
+ assert.ok(list.has('1fd8e27aab18c267569312689d206899ba9713eb654e7dbdd41dd2cf7b77b8d4'));
+ assert.ok(list.has('5cf1266228919cca10f270dc364579ecff072f9961650ddda7b1aefcd634b47f'));
+});
 test('unknown user-modified code fails closed, without network or local changes',async()=>{
  const r=await execute({script:'USER PRIVATE EDIT'});
  assert.equal(r.chosen.files.get('/cloud/'+name),'USER PRIVATE EDIT');
@@ -181,9 +186,9 @@ test('one-time repair is packaged for existing Scriptable installer and never ru
  assert.ok(entry);
  assert.equal(entry.name,'YOS Common Installer 修復');
  assert.equal(entry.path,'ios-app/scriptable/YOS Common Installer 修復.js');
- assert.equal(entry.commit,'607484f37f28eba407c5493c2d90e085a40db1ad');
+ assert.equal(entry.commit,'ec06e0ccf7ecb928e470996837fe0673af4123a8');
  assert.equal(sha(runtime),entry.sha256);
- assert.equal(sha(official),'1fd8e27aab18c267569312689d206899ba9713eb654e7dbdd41dd2cf7b77b8d4');
+ assert.equal(sha(official),'5a26ff04b887c04c441bbf3edceefdb59c5d80948d9c28b1b3481162594ccb84');
 });
 test('all existing installer catalog registrations remain present with unique identities',()=>{
  const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
@@ -211,7 +216,7 @@ test('actual historical Common Installer accepts new pinned helper through the e
   async loadString(){
    requests.push(this.url);
    if(this.url.endsWith('yos-common-installer-catalog.json'))return catalog;
-   if(this.url.includes('607484f37f28eba407c5493c2d90e085a40db1ad')&&this.url.includes('Common%20Installer%20'))return runtime;
+   if(this.url.includes('ec06e0ccf7ecb928e470996837fe0673af4123a8')&&this.url.includes('Common%20Installer%20'))return runtime;
    this.response.statusCode=404;
    return 'unapproved resource';
   }

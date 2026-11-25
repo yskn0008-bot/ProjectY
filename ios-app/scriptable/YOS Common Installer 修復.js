@@ -6,9 +6,12 @@
 // No Keychain reads/writes, telemetry, credential collection, or device commands.
 // This temporary Scriptable helper is not a second permanent installer.
 const OFFICIAL_NAME='YOS Common Installer';
-const PIN='510fa3f2f032eecc062df9d7d2033cf6057c6d04';
-const EXPECTED='1fd8e27aab18c267569312689d206899ba9713eb654e7dbdd41dd2cf7b77b8d4';
+const PIN='b42590934d85972c19502251fd3f488a1cb9776c';
+const EXPECTED='5a26ff04b887c04c441bbf3edceefdb59c5d80948d9c28b1b3481162594ccb84';
 const OLD_TRUSTED=new Set([
+ // Previous exact official installer; preserve device exports without final LF.
+ '1fd8e27aab18c267569312689d206899ba9713eb654e7dbdd41dd2cf7b77b8d4',
+ '5cf1266228919cca10f270dc364579ecff072f9961650ddda7b1aefcd634b47f',
  // Exact official 69ca7064 body without its final LF (Scriptable editor export).
  'bed6310f82c4047f81a2314a2d93b5a4fbaf2b8e44c0994be97035c25db1a74a',
  '0f0af090deec3c9c523ee885d37f4d5394321bd009f8e04962deff91ea3fc0b0',

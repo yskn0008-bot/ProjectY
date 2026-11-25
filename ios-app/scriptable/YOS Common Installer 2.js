@@ -9,6 +9,7 @@ const PRIMARY_CATALOG=ROOT+'main/ios-app/scriptable/yos-common-installer-catalog
 const CATALOG=ROOT+'main/ios-app/scriptable/yos-common-installer-2-catalog.json';
 const DATA_DIR='YOS Common Installer Data';
 const SELF='YOS Common Installer 2';
+const NOTIFICATION_LEGACY_SHA='5a8aa3e408eb85fae2f46516f6340549f3390852a0d1827775fc6b3521d402bd';
 const RESERVED_NAMES=new Set(['YOS Common Installer',SELF]);
 
 // Remote Hub is deployed as the EXISTING Japanese on-device リモコン, not a new remote.
@@ -203,7 +204,7 @@ async function recoverPending(fm,target,markerFile,receiptFile,name){
   const actualReceipt=await readJSON(fm,receiptFile);
   const receiptHash=actualReceipt?.sha256||null;
   if(p.oldHash){
-    const originalUnmanaged=name===REMOTE_NAME&&p.oldReceipt===null&&REMOTE_PRIOR_HASHES.has(p.oldHash);
+    const originalUnmanaged=p.oldReceipt===null&&((name===REMOTE_NAME&&REMOTE_PRIOR_HASHES.has(p.oldHash))||(name==='Notification Bridge'&&p.oldHash===NOTIFICATION_LEGACY_SHA));
     if(!/^[0-9a-f]{64}$/.test(p.oldHash)||typeof p.backup!=='string'||p.backup!==fm.joinPath(fm.joinPath(basePath(fm),'backups'),encodeURIComponent(name)+'-'+p.oldHash+'.txt')||!fm.fileExists(p.backup)||(!originalUnmanaged&&typeof p.oldReceipt!=='string'))throw Error('復旧用バックアップを特定できません');
     const before=await readable(fm,p.backup),previous=originalUnmanaged?null:JSON.parse(p.oldReceipt);
     const oldReceiptHash=originalUnmanaged?p.oldHash:previous.sha256;
@@ -288,13 +289,20 @@ async function install(entry){
   if(current!==null){
     const trustedPrior=isRemoteEntry(entry)&&previous===null&&REMOTE_PRIOR_HASHES.has(currentHash);
     const trustedSleepPrior=isVerifiedLegacySleep(entry,current,previous,chosen.kind);
-    if(!trustedPrior&&!trustedSleepPrior&&!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous,desiredHash);return;}
-    if(!trustedPrior&&!trustedSleepPrior&&previous.sha256!==currentHash&&!hasOnlyScriptableIconHeader(current,previous.sha256))throw Error('Scriptable内で変更されたコードです。上書きしません');
-    const approved=await confirm(trustedPrior?'既存リモコンの安全更新':trustedSleepPrior?'YOS Sleep Scene｜旧正式版の安全更新':'更新の確認',
+    const trustedNoticePrior=entry.id==='notification-bridge'&&name==='Notification Bridge'&&entry.path==='ios-app/scriptable/Notification Bridge.js'&&previous===null&&currentHash===NOTIFICATION_LEGACY_SHA;
+    if(trustedNoticePrior)for(const loc of locations)if(loc.fm!==fm&&(loc.fm.fileExists(metadataPath(loc.fm,name,'.receipt.json'))||loc.fm.fileExists(metadataPath(loc.fm,name,'.pending.json'))))throw Error('別保存先に通知の管理記録があります。変更しません');
+    if(!trustedPrior&&!trustedSleepPrior&&!trustedNoticePrior&&!receiptMatches(previous,entry,chosen.kind)){await explainReceiptConflict(entry,chosen.kind,currentHash,previous,desiredHash);return;}
+    if(!trustedPrior&&!trustedSleepPrior&&!trustedNoticePrior&&previous.sha256!==currentHash&&!hasOnlyScriptableIconHeader(current,previous.sha256))throw Error('Scriptable内で変更されたコードです。上書きしません');
+    const approved=await confirm(trustedPrior?'既存リモコンの安全更新':trustedSleepPrior?'YOS Sleep Scene｜旧正式版の安全更新':trustedNoticePrior?'Notification Bridge v0.3の安全な移行':'更新の確認',
       trustedPrior?'既知の旧版「リモコン」と完全一致しました。現在の本体をバックアップし、テレビ・照明・エアコンを保持した新しい画質機能付きリモコンに更新しますか？':
       trustedSleepPrior?'現在のYOS Sleep SceneはGitHub公開済みの初期版と完全一致します。管理記録が異なる場合も、元のコードをバックアップし、確認された配布版へ更新しますか？ 他のスクリプトは変更しません。':
+      trustedNoticePrior?'既知v0.3と完全一致。元コードをバックアップしてv0.4へ移行します。通知キュー・Notion・Keychainは変更しません。ショートカット接続は別途必要です。':
       '「'+name+'」をGitHub検証済みの版へ更新します。現在のコードをバックアップしてから変更します。','バックアップして更新');
     if(!approved)return;
+    if(trustedNoticePrior){
+      if(fm.fileExists(receiptFile)||fm.fileExists(markerFile)||digest(await readable(fm,target))!==NOTIFICATION_LEGACY_SHA)throw Error('承認後の状態が変わりました');
+      for(const loc of locations)if(loc.fm!==fm&&(loc.fm.fileExists(loc.fm.joinPath(loc.fm.documentsDirectory(),name+'.js'))||loc.fm.fileExists(metadataPath(loc.fm,name,'.receipt.json'))||loc.fm.fileExists(metadataPath(loc.fm,name,'.pending.json'))))throw Error('承認後に別保存先の競合を検出しました');
+    }
   }else if(previous){
     // Only recover an *exact* immutable release; receipt must be preserved byte for byte.
     if(!receiptMatches(previous,entry,chosen.kind)||previous.sha256!==desiredHash||previous.commit!==entry.commit){
