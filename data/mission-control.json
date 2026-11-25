@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-26T01:40:10+09:00",
+  "updated_at": "2026-11-26T01:42:31+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -12,16 +12,6 @@
     ]
   },
   "inbox": [
-    {
-      "id": "github-pr-950",
-      "title": "PR #950 feat(lifestyle): verified 12-screen Scriptable release candidate",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/950",
-      "updated_at": "2026-11-24T18:25:55Z"
-    },
     {
       "id": "github-pr-963",
       "title": "PR #963 YOS TAXI: compact layout, confirmed consultation and private Notion source resolution",
@@ -60,7 +50,17 @@
       "priority": 1,
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/976",
-      "updated_at": "2026-11-25T16:39:31Z"
+      "updated_at": "2026-11-25T16:40:29Z"
+    },
+    {
+      "id": "github-pr-981",
+      "title": "PR #981 Restore AION OUTPUT v4.1 and its verified installer pin",
+      "type": "GitHub PR",
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/981",
+      "updated_at": "2026-11-25T16:41:58Z"
     },
     {
       "id": "github-pr-832",
@@ -71,16 +71,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/832",
       "updated_at": "2026-11-25T07:25:34Z"
-    },
-    {
-      "id": "github-pr-961",
-      "title": "PR #961 AION notification bridge: privacy-safe legacy migration and verified receipts",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/961",
-      "updated_at": "2026-11-25T07:05:58Z"
     },
     {
       "id": "github-pr-971",
@@ -113,6 +103,16 @@
       "updated_at": "2026-11-25T15:51:09Z"
     },
     {
+      "id": "github-pr-980",
+      "title": "PR #980 TEST ONLY — native CI scope probe — DO NOT MERGE",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/980",
+      "updated_at": "2026-11-25T16:41:10Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-25T16:38:54Z"
+      "updated_at": "2026-11-25T16:41:59Z"
     },
     {
       "id": "github-issue-234",
@@ -274,7 +274,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #976をレビューして公開判断する",
+      "next_action": "PR #981をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-26T01:40:10+09:00",
+      "last_update": "2026-11-26T01:42:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 83件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 85件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-26T01:40:10+09:00",
+      "last_update": "2026-11-26T01:42:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -379,7 +379,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #976をレビューして公開判断する",
+      "next_action": "PR #981をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-26T01:40:10+09:00",
+      "last_update": "2026-11-26T01:42:31+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "22ca8af350f26de1fe0ee9e57a900377d2b445c6af99ca913ce8889d3e212c9d"
+  "github_snapshot_hash": "ee14068415f122f5c7c782f256525cb29d358343894b7386be5aa4dc4d2b8c7d"
 }
