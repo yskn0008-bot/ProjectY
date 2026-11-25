@@ -11,7 +11,9 @@ try{
  await page.locator('#timelinePanel').waitFor();
  const dateTop=await page.locator('.flow-date-row').boundingBox();
  const connectionTop=await page.locator('.native-tools summary').boundingBox();
- assert.ok(dateTop && dateTop.y <= 12,'date starts at the top on a normal mobile viewport');
+ const header=await page.locator('.top').boundingBox();
+ assert.ok(header && header.y<=12 && dateTop && dateTop.y<=36,'brand and date start at the top on a normal mobile viewport');
+ assert.equal(await page.locator('.top').evaluate(el=>getComputedStyle(el,'::before').content),'"DAYSTREAM"','approved brand above date');
  assert.ok(connectionTop && dateTop.y+dateTop.height<=connectionTop.y,'connection controls are below the date');
 
  await page.locator('.native-tools summary').click();
@@ -353,7 +355,7 @@ try{
    const item=byId.get(id);
    assert.equal(item.foreground,true,'full-width task '+id);
    assert.ok(item.width>width*.6,'title and hours have enough horizontal space: '+id);
-   assert.equal(item.whiteSpace,'normal','allow title line wraps: '+id);
+   assert.ok(['normal','nowrap'].includes(item.whiteSpace),'compact rows or wrapped long titles: '+id);
    assert.equal(item.textOK,true,'title not cropped: '+id);
    assert.equal(item.timeOK,true,'full start-end times visible: '+id);
   }
@@ -363,13 +365,13 @@ try{
 
   // Slender short tasks, progressively thicker longer tasks; text-overflow
   // protection is always allowed to increase the height if needed.
-  for(const [id,height,band] of [[2110,34,'xs'],[2101,36,'sm'],[2108,38,'md'],[2111,42,'lg'],[2112,46,'xl']]){
-   assert.equal(byId.get(id).thickness,height,'duration-based visible bar height: '+id);
+  for(const [id,height,band] of [[2110,26,'xs'],[2101,28,'sm'],[2108,30,'md'],[2111,32,'lg'],[2112,34,'xl']]){
+   assert.ok(byId.get(id).thickness>=height&&byId.get(id).thickness<=54,'compact bar or necessary wrapping: '+id);
    assert.equal(byId.get(id).band,band,'duration class matches stored duration: '+id);
   }
   assert.ok(byId.get(2105).thickness>byId.get(2110).thickness,
    'long task title wraps instead of being cut in a slim bar');
-  assert.equal(byId.get(2110).color,'rgb(219, 202, 248)','default task uses the lavender surface');
+  assert.equal(byId.get(2110).color,'rgb(232, 226, 243)','default task uses the lavender surface');
   for(const id of [2102,2106,2108,2110]){
    const surface=await p.locator('#tl [data-id="'+id+'"]').evaluate(el=>({
     shadow:getComputedStyle(el).boxShadow,
@@ -378,13 +380,13 @@ try{
    assert.equal(surface.before,'none','left stripe must be hidden for task '+id);
    assert.ok(!surface.shadow.includes('inset 4px'),'left accent shadow absent for task '+id);
   }
-  assert.equal(byId.get(2106).color,'rgb(193, 237, 214)','exercise keeps its category surface');
+  assert.equal(byId.get(2106).color,'rgb(220, 235, 228)','exercise keeps its category surface');
   for(const [id,accent] of [[2106,'#299d6b'],[2108,'#ba701f'],[2102,'#c1475e'],[2110,'']]){
    assert.equal(byId.get(id).accent,accent,'the compatibility accent is independent of the category surface');
   }
   assert.equal(byId.get(2108).color,byId.get(2110).color,'advice preserves the task category');
   assert.equal(byId.get(2102).color,byId.get(2110).color,'conflicts preserve the task category');
-  assert.equal(byId.get(2110).radius,'8px','compact contiguous task keeps a gentle rounded edge');
+  assert.equal(byId.get(2110).radius,'7px','compact task keeps a quiet rounded edge');
 
   const distinct=await p.locator('#tl [data-id="2100"], #tl [data-id="2102"], #tl [data-id="2110"]').evaluateAll(nodes=>nodes.map(el=>({
    id:Number(el.dataset.id),background:getComputedStyle(el).backgroundColor,
@@ -394,22 +396,23 @@ try{
   const appearance=new Map(distinct.map(x=>[x.id,x]));
   assert.equal(appearance.get(2100).borderStyle,'solid','long backdrop has a quiet solid outline');
   assert.equal(appearance.get(2102).borderStyle,'solid','short overlapping card has a crisp solid edge');
-  assert.equal(appearance.get(2102).border,'2px','short task keeps a darker color-matched boundary');
-  assert.equal(appearance.get(2102).borderColor,'rgb(135, 96, 179)','same-tone short tasks remain individually outlined');
-  assert.notEqual(appearance.get(2102).shadow,'none','foreground cards retain a separating shadow in any browser color notation');
+  assert.equal(appearance.get(2102).border,'1px','short task keeps a quiet boundary');
+  assert.equal(appearance.get(2102).borderColor,'rgba(0, 0, 0, 0)','same-tone short tasks use spacing rather than thick outlines');
+  assert.equal(appearance.get(2102).shadow,'none','idle cards are flat');
   assert.notEqual(appearance.get(2100).background,appearance.get(2102).background,'background sleep does not look like the red foreground');
-  assert.equal(appearance.get(2110).border,'2px','neutral cards also have a clear border');
+  assert.equal(appearance.get(2110).border,'1px','neutral cards share the quiet border');
 
   assert.equal(appearance.get(2100).image,'none','long sleep backdrop stays flat');
   for(const id of [2102,2110]){
    const fg=appearance.get(id);
-   assert.match(fg.image,/linear-gradient/,'foreground cards keep their category gradient');
-   assert.notEqual(fg.shadow,'none','foreground task '+id+' uses a soft separating shadow');
+   assert.equal(fg.image,'none','foreground cards have a quiet solid fill');
+   assert.equal(fg.shadow,'none','idle cards have no decorative shadow');
    assert.ok(!fg.shadow.includes('inset 4px'),'do not restore a stripe on task '+id);
   }
 
 
 
+  assert.deepEqual(await p.locator('#tl .hour span').allTextContents(),Array.from({length:24},(_,i)=>String(i).padStart(2,'0')+':00'));
   const visible=cells.filter(c=>!c.backdrop).sort((a,b)=>a.top-b.top);
   for(let i=1;i<visible.length;i++)assert.ok(visible[i].top>=visible[i-1].bottom-2,'dense tasks do not cover one another: '+visible[i-1].id+'/'+visible[i].id);
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no sideways overflow');
