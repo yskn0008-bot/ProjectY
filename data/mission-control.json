@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-25T21:58:37+09:00",
+  "updated_at": "2026-11-25T22:01:08+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -41,6 +41,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/832",
       "updated_at": "2026-11-25T07:25:34Z"
+    },
+    {
+      "id": "github-pr-931",
+      "title": "PR #931 fix(installer): issue #900 safe one-time inline recovery via existing Shortcut Factory",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/931",
+      "updated_at": "2026-11-24T01:04:30Z"
     },
     {
       "id": "github-pr-943",
@@ -93,16 +103,6 @@
       "updated_at": "2026-11-25T07:05:58Z"
     },
     {
-      "id": "github-pr-966",
-      "title": "PR #966 YOS HOME｜4家電・上下カスタムリモコン統合（TEST）",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/966",
-      "updated_at": "2026-11-25T12:54:04Z"
-    },
-    {
       "id": "github-pr-968",
       "title": "PR #968 YOS JOURNAL｜既存誌面を再利用したVercel不要の端末内読書版",
       "type": "GitHub PR",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/968",
-      "updated_at": "2026-11-25T12:57:59Z"
+      "updated_at": "2026-11-25T13:00:41Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-25T12:57:51Z"
+      "updated_at": "2026-11-25T13:00:22Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-9ddc59b68635",
+      "title": "Merge pull request #966 from yskn0008-bot/feat/yos-home-remote-integration",
+      "completed_at": "2026-11-25T13:00:28Z",
+      "result": "GitHub mainへ反映（9ddc59b）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9ddc59b6863570c81a85b149fef9048c5228fd34"
+    },
+    {
       "id": "github-commit-78eb5b5882bd",
       "title": "AION OUTPUT: restore v4 after device startup regression (#967)",
       "completed_at": "2026-11-25T12:57:44Z",
@@ -222,32 +229,25 @@
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/78eb5b5882bd9395035dd06f285de540459d0309"
     },
     {
-      "id": "github-commit-86ab6d4843c0",
-      "title": "One Enter: eliminate false owner waits and stage risk-scoped CI (#965)",
-      "completed_at": "2026-11-25T08:38:51Z",
-      "result": "GitHub mainへ反映（86ab6d4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/86ab6d4843c0633996b95fa21d22260cb9126b25"
+      "id": "github-commit-f9ca958709f3",
+      "title": "Distinguish read-only background polling from device mutations in long-press regression",
+      "completed_at": "2026-11-25T12:46:43Z",
+      "result": "GitHub mainへ反映（f9ca958）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f9ca958709f377b6219d0c69de12ca8be9a4aa1b"
     },
     {
-      "id": "github-commit-f67ddabec005",
-      "title": "AION OUTPUT v4.1: explicit send callback and safe fallback (#964)",
-      "completed_at": "2026-11-25T08:25:25Z",
-      "result": "GitHub mainへ反映（f67ddab）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f67ddabec0057cc04aa3489ba5edc49ce7a31d10"
+      "id": "github-commit-8e8e9c440291",
+      "title": "Adapt existing remote startup regression fixture to HOME DOM and explicit reads",
+      "completed_at": "2026-11-25T12:46:10Z",
+      "result": "GitHub mainへ反映（8e8e9c4）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8e8e9c4402915b68d610678359efc46120fbe1da"
     },
     {
-      "id": "github-commit-fe2e8ea95b6c",
-      "title": "AION OUTPUT v4: research-led compact reading and decision UI (#962)",
-      "completed_at": "2026-11-25T07:59:35Z",
-      "result": "GitHub mainへ反映（fe2e8ea）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fe2e8ea95b6cf24c239fa08f47b4ef3e0737d6af"
-    },
-    {
-      "id": "github-commit-aece8b7688c3",
-      "title": "Merge pull request #948 from yskn0008-bot/design/daystream-dark-focus-20261124",
-      "completed_at": "2026-11-25T07:28:56Z",
-      "result": "GitHub mainへ反映（aece8b7）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/aece8b7688c303762ab7a6593bac00673d474d6a"
+      "id": "github-commit-38b9b1845d1d",
+      "title": "Pin only existing HOME remote TEST target to verified digest",
+      "completed_at": "2026-11-25T12:44:27Z",
+      "result": "GitHub mainへ反映（38b9b18）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/38b9b1845d1ddf6da51cb9ddd7e007e5c96f8686"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-25T21:58:37+09:00",
+      "last_update": "2026-11-25T22:01:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 79件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 78件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-25T21:58:37+09:00",
+      "last_update": "2026-11-25T22:01:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-25T21:58:37+09:00",
+      "last_update": "2026-11-25T22:01:08+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "de8d2f1590f14fe8c1a3af2cce3ca69a17fe85297f6d214b675dc6ce49ed4b74"
+  "github_snapshot_hash": "6799ca7a916bfdf28720ac077b6c5d902085aa5d804d274911d98f8d841cfa2a"
 }
