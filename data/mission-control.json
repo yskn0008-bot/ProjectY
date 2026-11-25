@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-26T00:24:38+09:00",
+  "updated_at": "2026-11-26T00:28:40+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -53,16 +53,6 @@
       "updated_at": "2026-11-25T07:25:34Z"
     },
     {
-      "id": "github-pr-943",
-      "title": "PR #943 TAXI: private Notion sales import without sign-in",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/943",
-      "updated_at": "2026-11-24T11:14:24Z"
-    },
-    {
       "id": "github-pr-947",
       "title": "PR #947 BRAVIA｜追加画質調査ボタンの応答・タイムアウト修正",
       "type": "GitHub PR",
@@ -110,7 +100,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/971",
-      "updated_at": "2026-11-25T15:24:00Z"
+      "updated_at": "2026-11-25T15:24:19Z"
+    },
+    {
+      "id": "github-pr-972",
+      "title": "PR #972 Factory Core: defer external providers until release",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/972",
+      "updated_at": "2026-11-25T15:27:55Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-25T14:41:30Z"
+      "updated_at": "2026-11-25T15:24:20Z"
     },
     {
       "id": "github-issue-234",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-26T00:24:38+09:00",
+      "last_update": "2026-11-26T00:28:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 79件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 80件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-26T00:24:38+09:00",
+      "last_update": "2026-11-26T00:28:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-26T00:24:38+09:00",
+      "last_update": "2026-11-26T00:28:40+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "6dc569063f7b174555cd12c90406dfc18b72413d4da96fb6081265c8e340951e"
+  "github_snapshot_hash": "aece90a687846754aba0bfab467a0fd1d060d5295ccf8d01d69ffbaccb2648e8"
 }
