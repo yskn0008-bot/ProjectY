@@ -111,8 +111,8 @@
       "id": "daystream-notion",
       "name": "YOS DAYSTREAM Notion",
       "path": "ios-app/scriptable/YOS DAYSTREAM Notion.js",
-      "commit": "80ae63a893c57d226d1e356cd6aafc01811fce2a",
-      "sha256": "28e6b33de8557daa53057b1df79a7d334055ed19c252c740438c2c6a012b2d8e"
+      "commit": "febc454b526edd75b2c919555f95068a617adfd7",
+      "sha256": "caaef7e15498e5189dc86aa71088aa8ec78577d847a56fca71ab45d5fa191474"
     },
     {
       "id": "ikemen-magazine",

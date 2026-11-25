@@ -6,8 +6,9 @@ const html=fs.readFileSync(new URL('../yos/daystream/index.html',import.meta.url
 const native=fs.readFileSync(new URL('../ios-app/scriptable/YOS Timeline Charcoal 確認 20261111.js',import.meta.url),'utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
 const boot=scripts[0],ui=scripts[1];
-test('Web port uses the DAYSTREAM light appearance and existing navigation',()=>{
- assert.match(html,/--bg:#f4f8fd/);
+test('Web port uses system-aware DAYSTREAM appearance and existing navigation',()=>{
+ assert.match(html,/--bg:#eff1f5/);
+ assert.match(html,/@media\(prefers-color-scheme:dark\)/);
  assert.match(html,/id="timelinePanel"/);
  assert.match(html,/id="taskPanel"/);
  assert.match(html,/id="yosLearningHints"/);
@@ -25,7 +26,8 @@ test('Direct drop saves immediately, keeps explicit time edit and undo/redo',()=
  assert.match(html,/commitDraggedTime\(item,next,previousRect\)/);
  assert.doesNotMatch(html,/if\(next!==item.s\)openMoveDialog/);
  assert.match(html,/if\(!saved\)item.s=original/);
- assert.match(html,/const reactToNeighbors=\(\)=>/);
+ assert.doesNotMatch(html,/const reactToNeighbors=\(\)=>/);
+ assert.match(html,/Only the selected card may animate/);
  assert.match(html,/\.card\.drag-neighbor/);
  assert.doesNotMatch(html,/flow-ghost/,'drag must leave no outline at its former position');
  assert.match(html,/item\.d<=15&&\[\.\.\.String\(item\.t\|\|''\)\]\.length<=9\)el\.classList\.add\('short-row'\)/);
@@ -183,4 +185,23 @@ test('Additive direct task import reuses original local-storage protection and U
  assert.doesNotMatch(boot,/YOS_NOTION_INTEGRATION_TOKEN/);
  assert.equal((html.match(/id="timelinePanel"/g)||[]).length,1);
  assert.equal((html.match(/id="yosWebImport"/g)||[]).length,1);
+});
+
+
+test('Standard overview fits sparse days and expands only for dense days without hiding hours',()=>{
+ const source=html.slice(html.indexOf('const flowScale=22;'),html.indexOf('function yosOverviewBudget()'));
+ const helpers=vm.runInNewContext(source+'\n;({yosOverviewAxis,yosOverviewCard,yosBackdropRows,yosCardGap})',{window:{innerWidth:390}});
+ const {yosOverviewAxis:axisFor,yosOverviewCard:cardFor,yosBackdropRows:backdrops,yosCardGap:gap}=helpers;
+ for(const width of [320,390,402]){
+  const rows=[{s:0,d:390,t:'睡眠',kind:'task'},...Array.from({length:7},(_,i)=>({s:420+i*90,d:5,t:'タスク',kind:'task'}))];
+  const sparse=axisFor(rows,550,backdrops(rows),width);
+  assert.ok(sparse.coordinate(1440)<=550.001);
+  for(let h=0;h<24;h++)assert.ok(sparse.coordinate((h+1)*60)-sparse.coordinate(h*60)>=15.999);
+  for(let minute=0;minute<=1440;minute+=7)assert.ok(Math.abs(sparse.minuteAt(sparse.coordinate(minute))-minute)<1e-7);
+  const dense=Array.from({length:45},(_,i)=>({s:360+Math.floor(i/3)*2,d:5,t:i%3===0?'長いタスク名称も表示する':'タスク',kind:'task'}));
+  const overflow=axisFor(dense,550,backdrops(dense),width);
+  assert.ok(overflow.coordinate(1440)>550);
+  let previous=-Infinity,last=-1,offset=0;
+  for(const item of dense){if(item.s!==last){offset=0;last=item.s}const y=overflow.coordinate(item.s)+offset;assert.ok(y>=previous-1e-7);previous=y+cardFor(item,width).height;offset+=cardFor(item,width).height+gap;}
+ }
 });
