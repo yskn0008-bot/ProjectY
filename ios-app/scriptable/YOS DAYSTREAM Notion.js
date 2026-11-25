@@ -4,7 +4,7 @@
 // Existing DAYSTREAM UI with read-only Notion/iCloud inputs and a local plan.
 'use strict';
 const NOTION_KEY='YOS_NOTION_INTEGRATION_TOKEN';
-const UI_REF='6e2e70cc68d14ad707f01b44e2e6fa369af41658';
+const UI_REF='3325bccd5a864c141ae559fbee8c9a44553e1ace';
 // Stable, already-published HTTPS base for Scriptable's generated HTML.
 // Do not delete or migrate any existing DAYSTREAM localStorage keys.
 const UI_BASE_URL='https://yskn0008-bot.github.io/ProjectY/yos/daystream/';
