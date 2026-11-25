@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-25T11:09:02+09:00",
+  "updated_at": "2026-11-25T12:07:27+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -33,14 +33,14 @@
       "updated_at": "2026-11-25T01:41:14Z"
     },
     {
-      "id": "github-pr-930",
-      "title": "PR #930 YOS ファイル調査｜Siri対応・iCloud Drive読み取り専用棚卸し",
+      "id": "github-pr-958",
+      "title": "PR #958 AION: local full-screen OUTPUT and guarded installer registration",
       "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/930",
-      "updated_at": "2026-11-23T21:43:21Z"
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/958",
+      "updated_at": "2026-11-25T03:06:44Z"
     },
     {
       "id": "github-pr-931",
@@ -274,7 +274,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #957をレビューして公開判断する",
+      "next_action": "PR #958をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-25T11:09:02+09:00",
+      "last_update": "2026-11-25T12:07:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 78件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 79件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-25T11:09:02+09:00",
+      "last_update": "2026-11-25T12:07:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -379,7 +379,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #957をレビューして公開判断する",
+      "next_action": "PR #958をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-25T11:09:02+09:00",
+      "last_update": "2026-11-25T12:07:27+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "e4e033c0580799a1dcaa7b61906300db5901522c1a8ee90ac2b3fa6d3aa9f3d3"
+  "github_snapshot_hash": "9fef026692a86d2b74720ef27539e0f041bf31a270d16c3df5c87e1906d5f5fb"
 }
