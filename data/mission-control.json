@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-25T12:54:53+09:00",
+  "updated_at": "2026-11-25T16:01:20+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -31,16 +31,6 @@
       "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/960",
       "updated_at": "2026-11-25T03:53:53Z"
-    },
-    {
-      "id": "github-pr-930",
-      "title": "PR #930 YOS ファイル調査｜Siri対応・iCloud Drive読み取り専用棚卸し",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/930",
-      "updated_at": "2026-11-23T21:43:21Z"
     },
     {
       "id": "github-pr-931",
@@ -80,7 +70,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/948",
-      "updated_at": "2026-11-25T03:48:44Z"
+      "updated_at": "2026-11-25T07:00:09Z"
     },
     {
       "id": "github-pr-951",
@@ -113,6 +103,16 @@
       "updated_at": "2026-11-25T03:51:25Z"
     },
     {
+      "id": "github-pr-961",
+      "title": "PR #961 AION notification bridge: privacy-safe legacy migration and verified receipts",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/961",
+      "updated_at": "2026-11-25T07:00:43Z"
+    },
+    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-25T03:53:44Z"
+      "updated_at": "2026-11-25T03:54:23Z"
     },
     {
       "id": "github-issue-234",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-25T12:54:53+09:00",
+      "last_update": "2026-11-25T16:01:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 78件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 79件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-25T12:54:53+09:00",
+      "last_update": "2026-11-25T16:01:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-25T12:54:53+09:00",
+      "last_update": "2026-11-25T16:01:20+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "a0dc17a36c355ce8021f567e6cce712d9a286189fefa4b4154cd288d0920f0d1"
+  "github_snapshot_hash": "3597d7cc4d4197325a27d9fc73507bfa39a4d7e17a9248128f34860016d6baeb"
 }
