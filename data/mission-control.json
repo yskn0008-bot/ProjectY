@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-25T16:58:42+09:00",
+  "updated_at": "2026-11-25T17:00:19+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,16 +23,6 @@
       "updated_at": "2026-11-24T18:25:55Z"
     },
     {
-      "id": "github-pr-962",
-      "title": "PR #962 AION OUTPUT v4: research-led compact reading and decision UI",
-      "type": "GitHub PR",
-      "status": "review",
-      "priority": 1,
-      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/962",
-      "updated_at": "2026-11-25T07:30:34Z"
-    },
-    {
       "id": "github-pr-963",
       "title": "PR #963 YOS TAXI: compact layout, confirmed consultation and private Notion source resolution",
       "type": "GitHub PR",
@@ -51,6 +41,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/832",
       "updated_at": "2026-11-25T07:25:34Z"
+    },
+    {
+      "id": "github-pr-930",
+      "title": "PR #930 YOS ファイル調査｜Siri対応・iCloud Drive読み取り専用棚卸し",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/930",
+      "updated_at": "2026-11-23T21:43:21Z"
     },
     {
       "id": "github-pr-931",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-25T07:32:38Z"
+      "updated_at": "2026-11-25T07:58:29Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-fe2e8ea95b6c",
+      "title": "AION OUTPUT v4: research-led compact reading and decision UI (#962)",
+      "completed_at": "2026-11-25T07:59:35Z",
+      "result": "GitHub mainへ反映（fe2e8ea）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fe2e8ea95b6cf24c239fa08f47b4ef3e0737d6af"
+    },
+    {
       "id": "github-commit-aece8b7688c3",
       "title": "Merge pull request #948 from yskn0008-bot/design/daystream-dark-focus-20261124",
       "completed_at": "2026-11-25T07:28:56Z",
@@ -241,13 +248,6 @@
       "completed_at": "2026-11-25T07:01:58Z",
       "result": "GitHub mainへ反映（d209e89）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/d209e89ac0f75e11986396956821659310b51daa"
-    },
-    {
-      "id": "github-commit-a12fc427b0e3",
-      "title": "Pin approved AION OUTPUT revision without changing other targets",
-      "completed_at": "2026-11-25T03:53:04Z",
-      "result": "GitHub mainへ反映（a12fc42）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/a12fc427b0e3d36af390b4f89173a097b3b2dc5f"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-25T16:58:42+09:00",
+      "last_update": "2026-11-25T17:00:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 78件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 77件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-25T16:58:42+09:00",
+      "last_update": "2026-11-25T17:00:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-25T16:58:42+09:00",
+      "last_update": "2026-11-25T17:00:19+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "2fe15adc5261ae40aead7f8af4217990cf45e96557cd0bd93ca38482237a2648"
+  "github_snapshot_hash": "ba960d7f0c7a9e7d8e1cfe4a5c0f6015ad6c143b2db5f8a01d75fdb1247819da"
 }
