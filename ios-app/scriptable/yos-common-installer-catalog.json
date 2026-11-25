@@ -239,8 +239,8 @@
       "id": "discovery-preflight-test",
       "name": "YOS DISCOVERY 実行検証 TEST",
       "path": "ios-app/scriptable/YOS DISCOVERY 実行検証 TEST.js",
-      "commit": "f3cfd9f6a98450f0ac5a82f89380533f613cffd1",
-      "sha256": "4c62bab714fa4e52e6e587bba91e9c1e445fed793a3620b4cdbcff8362623a7d"
+      "commit": "767f22428d1727a91d68c0ab211129649bc1f4fa",
+      "sha256": "a809794671f190b70779a2586454007407f43b77cc9bfab5ef4af22753c2af7d"
     }
   ]
 }
