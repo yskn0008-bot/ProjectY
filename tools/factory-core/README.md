@@ -85,8 +85,8 @@ The durable state records the goal, done conditions, current phase, executed wor
 ### Done, Checker and Audit
 
 - `verification_commands` are machine-checkable Checker conditions.
-- `audit_commands` are mandatory and must be distinct from verification commands.
-- `COMPLETE` is possible only when both Verify and independent Audit pass and no human gate remains.
+- `audit_commands` are mandatory for legacy jobs, high-risk work and individually required audits, and must be distinct from verification commands. Explicit approved low/medium-risk omissions use `audit_policy` (see Loop Engine contract); record `NOT_REQUIRED`, not PASS.
+- `COMPLETE` requires Verify and all applicable Audit conditions, with no human gate remaining.
 - Physical iPhone or本人承認が必要なproduction evidenceはnever inventedし、真のhuman gateだけ `WAIT_USER` にする。
 - GitHub Actions / Vercel / provider rate limitなど本人操作で解決しない待ちは `EXTERNAL_WAIT` としてIssue #232側へparkし、別の独立作業を続ける。`EXTERNAL_WAIT` はLoop Engineの第4terminal stateではない。
 - Runtime evidence contains the exact argv, exit code, duration and bounded stdout/stderr tail for executed checks.
@@ -103,7 +103,7 @@ Recovery strategies are explicit and ordered: `retry`, `fix`, `alternative`, or 
 
 ### Terminal states
 
-- `COMPLETE`: machine done conditions and independent Audit passed; no human gate remains.
+- `COMPLETE`: machine done conditions and applicable Audit passed (or explicitly NOT_REQUIRED); no human gate remains.
 - `WAIT_USER`: code/Audit are ready, but a physical-device, production, approval, credential, purchase, publish, delete, major-data or value-judgment gate remains.
 - `FAILED_SAFE`: safe recovery/budget is exhausted or the execution contract/state is unsafe; the original clean state is restored when rollback verification succeeds.
 
@@ -134,3 +134,11 @@ Apple signing / App Store distribution, public DNS/hosting, credentials/2FA and 
 ## iPhone local fallback
 
 `YOS_Local_Fallback.js` is a self-contained Scriptable entry that does not fetch GitHub Pages or Vercel. On first run it creates local state files under `iCloud Drive/Scriptable/One Enter Factory/state/` and renders the YOS asset dashboard from those files. This is a fallback route, not a claim that the signed native YOS app has been installed.
+
+## Shared catalog and CI scope (shadow)
+Use the existing Factory Core tool `catalog-scope.cjs` to plan an update against fixed base/candidate revisions and the latest integration HEAD. It preserves all unrelated entries, rejects target drift, validates the pinned source digest, and emits a read-only plan:
+```bash
+node tools/factory-core/catalog-scope.cjs reconcile EXPECTED_HEAD BASE CANDIDATE_HEAD TARGET_ID
+node tools/factory-core/catalog-scope.cjs scope BASE HEAD
+```
+The final integration owner must serialize the shared-catalog update and use an expected-head compare-and-swap on the integration branch; the read-only plan is not a lock or an automatic merge. Recalculate on HEAD drift and preserve other registrations. The three existing native workflows log scope in shadow mode only; no build is skipped. Missing, unknown, incomplete, renamed, shared or non-ancestor changes remain full. Enable any native reduction only after real parallel CI evidence, dependency and required-check verification; do not alter branch protection. Use existing Issue #232 and Notion progress, not another queue or database.
