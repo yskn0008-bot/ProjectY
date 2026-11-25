@@ -129,7 +129,7 @@ def recovery(path:Path,out:Path):
     print('JOURNAL recovery-only Shortcut generated; iPhone folder access not verified')
 
 
-def convert_to_clarity(path:Path):
+def convert_to_clarity(path:Path, reflection_source=None, reader_source=None, inbox_source=None):
     """Replace only the verified private writer with the existing named Bridge.
     Run after the old candidate validator; diagnostic/recovery artifacts remain unchanged.
     """
@@ -210,6 +210,43 @@ finally{Script.complete();}
     assert check[idx:idx+len(replacement)]==replacement
     assert check[idx+len(replacement)-2]['WFWorkflowActionParameters']['WFItems']['Value']['WFDictionaryFieldValueItems'][-1]['WFValue']==raw
     assert 'script' not in check[idx+len(replacement)-1]['WFWorkflowActionParameters']
+
+    # Connect only the review-first candidate's existing native post-Inbox action.
+    reflection=[j for j,a in enumerate(actions) if a.get('WFWorkflowActionIdentifier')==INTENT and '__YOS_JOURNAL_REFLECT_INLINE__' in repr(a.get('WFWorkflowActionParameters',{}).get('script'))]
+    if reflection:
+        if len(reflection)!=1 or not all((reflection_source,reader_source,inbox_source)) or not gate:
+            raise SystemExit('reflection source/binding incomplete')
+        j=reflection[0]
+        target=actions[j]['WFWorkflowActionParameters']
+        if target.get('parameter')!='__YOS_JOURNAL_REFLECT_INPUT__' or target.get('runInApp') is not False or target.get('ShowWhenRun') is not False:
+            raise SystemExit('reflection target mismatch')
+        receipt_saves=[a['WFWorkflowActionParameters'] for a in actions[:j] if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.documentpicker.save' and 'YOS-JOURNAL-GPT-INBOX-RECEIPT-' in repr(a.get('WFWorkflowActionParameters',{}))]
+        if len(receipt_saves)!=1 or receipt_saves[0]['WFInput'].get('WFSerializationType')!='WFTextTokenAttachment':
+            raise SystemExit('missing exact Inbox receipt backup')
+        rt=receipt_saves[0]['WFInput']['Value']
+        if rt.get('Type')!='ActionOutput' or rt.get('OutputName')!='notionText' or not rt.get('OutputUUID') or j<=idx+len(replacement):
+            raise SystemExit('wrong Inbox receipt producer')
+        inbox=inbox_source.read_text('utf-8')
+        reader=reader_source.read_text('utf-8')
+        # Reuse existing parsers, strip only Node exports and runtime entry points.
+        inbox=inbox[inbox.index('export const INBOX_ID'):inbox.index('export async function readPrivateInbox')]
+        reader=reader[:reader.index('export function createJournalReader')]
+        app=reflection_source.read_text('utf-8')
+        script=inbox.replace('export ','')+'\n'+reader.replace('export ','')+'\n'+app
+        if not all(x in script for x in ('function inspectDrafts','function parseReviewedEdition','YOS_JOURNAL_READING_VERIFIED','INBOX_READBACK_MISMATCH','AUTO_REVIEW_MARK')):
+            raise SystemExit('missing existing parser or private readback guard')
+        sep='\n<<YOS_INBOX_RECEIPT_V1>>\n'
+        uid=str(uuid.uuid4()).upper()
+        packet={'WFWorkflowActionIdentifier':'is.workflow.actions.gettext','WFWorkflowActionParameters':{'UUID':uid,'CustomOutputName':'journalReadingBoundText','WFTextActionText':{'WFSerializationType':'WFTextTokenString','Value':{'string':'\ufffc'+sep+'\ufffc','attachmentsByRange':{'{0, 1}':copy.deepcopy(attachment),'{'+str(len(sep)+1)+', 1}':copy.deepcopy(rt)}}}}}
+        actions.insert(j,packet)
+        target['script']=literal(script)
+        target['parameter']={'WFSerializationType':'WFTextTokenAttachment','Value':{'Type':'ActionOutput','OutputUUID':uid,'OutputName':'journalReadingBoundText'}}
+        encoded=plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False)
+        read=plistlib.loads(encoded)
+        assert read['WFWorkflowActions'][j]==packet and read['WFWorkflowActions'][j+1]['WFWorkflowActionParameters']==target
+        assert '__YOS_JOURNAL_REFLECT_INLINE__' not in repr(read) and '__YOS_JOURNAL_REFLECT_INPUT__' not in repr(read)
+    elif any((reflection_source,reader_source,inbox_source)):
+        raise SystemExit('unexpected reflection args for legacy candidate')
     path.write_bytes(encoded)
     assert plistlib.loads(path.read_bytes())==read
     print('JOURNAL -> existing Clarity Bridge named action PASS (unsigned)')
@@ -219,12 +256,15 @@ if __name__=='__main__':
     ap.add_argument('shortcut',type=Path)
     ap.add_argument('--script',type=Path)
     ap.add_argument('--convert-to-clarity',action='store_true')
+    ap.add_argument('--reflection-source',type=Path)
+    ap.add_argument('--reader-source',type=Path)
+    ap.add_argument('--inbox-source',type=Path)
     ap.add_argument('--diagnostic',type=Path)
     ap.add_argument('--recovery',type=Path)
     a=ap.parse_args()
     if a.convert_to_clarity:
         if a.script or a.diagnostic or a.recovery:ap.error('conversion must follow original validation')
-        convert_to_clarity(a.shortcut)
+        convert_to_clarity(a.shortcut,a.reflection_source,a.reader_source,a.inbox_source)
         raise SystemExit(0)
     if not a.script:ap.error('--script is required for original patch')
     patch(a.shortcut,a.script)

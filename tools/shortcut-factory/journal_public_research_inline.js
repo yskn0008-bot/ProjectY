@@ -33,7 +33,7 @@ function historyFromBlocks(blocks){
   const b=blocks[i],m=b?.type==='heading_2'&&/^YOS JOURNAL｜(\d{4})\.(\d{2})\.(\d{2})(?:\s|$)/u.exec(textOf(b));
   if(!m)continue;
   const date=m.slice(1).join('-');
-  if(dates.has(date)||textOf(blocks[i+3])!=='本人用の非公開読書版。原著の主要箇所と照合済み。外部公開・配信は行っていない。')throw Error('HISTORY_EDITION_INVALID');
+  if(dates.has(date)||!['本人用の非公開読書版。原著の主要箇所と照合済み。外部公開・配信は行っていない。',"本人用の非公開読書版。原著抜粋とGPTの執筆前・最終照合を実施。全文の独立審査は未実施。外部公開・配信は行っていない。"].includes(textOf(blocks[i+3])))throw Error('HISTORY_EDITION_INVALID');
   dates.add(date);let cursor=i+4;
   for(let n=1;n<=3;n++){
    if(blocks[cursor]?.type==='divider')cursor++;
@@ -75,7 +75,7 @@ async function reviewedHistory(){
 // Public full-text acquisition only. No abstract-only or RSS fallback.
 // Keep only the original article sections required for editorial screening.
 const tidy=x=>clean(String(x||'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'"));
-const safeDoi=x=>typeof x==='string'&&/^10\.\d{4,9}\/[A-Za-z0-9._;()/:+-]{1,160}$/.test(x)?x:null;
+const safeDoi=x=>typeof x==='string'&&/^10\.\d{4,9}\/[A-Za-z0-9._;()/:%-]{1,160}$/.test(x)?x:null;
 const safePmc=x=>typeof x==='string'&&/^PMC[1-9]\d{3,11}$/.test(x)?x:null;
 const POOL='YOS_RESEARCH_FULLTEXT_POOL_V1';
 function parseFullText(xml,record){
