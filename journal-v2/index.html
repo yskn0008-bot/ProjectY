@@ -31,7 +31,7 @@ p{margin:10px 0 17px}figure{margin:16px 0 20px}figure img{display:block;width:10
 .archive-filters select{min-height:44px;width:100%;background:#fff;color:#202020;font-size:16px;border:1px solid #d6d6d6;border-radius:4px;padding:0 8px}
 .archive-more{min-height:44px;margin-top:10px;background:#fff;border:1px solid #d6d6d6;padding:0 12px}
 .archive-count{font-size:12px;color:#666;margin:8px 0 3px}
-</style></head><body><header><span class="logo">YOS JOURNAL</span><button class="back" id="home" hidden>‹ 記事一覧</button></header><main id="view"><p id="status">記事を読み込んでいます…</p></main>
+</style></head><body><header><span class="logo">YOS JOURNAL</span><button class="back" id="home" hidden>‹ 記事一覧</button></header><div id="privateJournalAccess" style="max-width:720px;margin:0 auto;padding:4px 18px;text-align:right"><button type="button" id="privateJournalConnect" class="back" style="position:static">Notionの最新号</button><span id="privateJournalStatus" role="status" style="display:block;font-size:11px"></span><div id="privateJournalSignIn"></div></div><main id="view"><p id="status">記事を読み込んでいます…</p></main>
 <script>
 (()=>{'use strict';
 const view=document.getElementById('view'),home=document.getElementById('home'),latestUrl='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json',editionsBase='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/journal/editions/';
@@ -47,6 +47,7 @@ const media=[
 let issue=null,items=[],todayIssue=null,todayRequest=null,routeVersion=0;
 const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
 const editions=new Map();
+let privateEdition=null,privateToken='',privateRefresh=null,privateConfig=null,privateLastRead=0,privateGeneration=0;
 let archiveIndex=null,archiveDate='',archiveGenre='',archiveLimit=24;
 const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function resolveMedia(i,edition=issue){
@@ -122,7 +123,7 @@ function renderList(){
 }
 function renderArchive(){
  home.hidden=true;document.title='YOS JOURNAL | 過去の記事';
- const list=archiveIndex.filter(edition=>edition.issuedOn<today);
+ const list=[...(privateEdition&&privateEdition.issuedOn<today?[privateEdition]:[]),...archiveIndex.filter(edition=>edition.issuedOn<today&&edition.issuedOn!==privateEdition?.issuedOn)].sort((a,b)=>b.issuedOn.localeCompare(a.issuedOn));
  const genres=[...new Set(list.flatMap(edition=>edition.articles.map(genre)))].sort((a,b)=>a.localeCompare(b,'ja'));
  const options=(values,all,selected)=>'<option value="">'+all+'</option>'+values.map(v=>'<option value="'+safe(v)+'"'+(v===selected?' selected':'')+'>'+safe(v)+'</option>').join('');
  view.innerHTML=editionNav(true)+'<h1>過去の記事</h1><div class="archive-filters"><label>ジャンル<select id="archiveGenre">'+options(genres,'すべて',archiveGenre)+'</select></label><label>発行日<select id="archiveDate">'+options(list.map(x=>x.issuedOn),'すべて',archiveDate)+'</select></label></div><p id="archiveCount" class="archive-count" aria-live="polite"></p><div id="cards" class="list"></div><button id="archiveMore" class="archive-more" type="button" hidden>さらに表示</button>'+footer;
@@ -146,9 +147,10 @@ for(let n=0;n<d.sections.length;n++){const sec=d.sections[n];parts+='<h2>'+safe(
 parts+=(issue.issuedOn==='2026-11-12'&&i===5?'<p class="note">参考にしたSmartlog記事は「PR」表記のある記事です。商品紹介や印象に関する提案は、公式な医学的根拠とは区別してください。</p>':'')+'<h2>この記事で押さえること</h2><ul>'+((a.keyPoints||[]).map(t=>'<li>'+safe(t)+'</li>').join(''))+'</ul><p class="note">'+safe(a.caveat||'')+'</p><div class="source">出典：'+safe(a.source||'')+'<br><a href="'+safe(a.link||'#')+'" target="_blank" rel="noopener noreferrer">公式・参考情報を読む ↗</a></div>'+(items.length>1?'<div class="related"><b>次の記事も読む</b><button id="nextStory">'+safe(items[(i+1)%items.length].title)+' →</button></div>':'')+'</article>';
 view.innerHTML=parts;imageFallback(view);const next=document.getElementById('nextStory');if(next)next.onclick=()=>{location.hash=issueArticleHash(issue,(i+1)%items.length)};window.scrollTo(0,0)}
 function editionOK(x,date){
- return x?.issuedOn===date&&Array.isArray(x.articles)&&x.articles.length>0;
+ return x?.issuedOn===date&&Array.isArray(x.articles)&&(date>='2026-11-23'?x.articles.length===3:x.articles.length>0);
 }
 async function readEdition(date,retryLatest=false){
+ if(privateEdition?.issuedOn===date)return privateEdition;
  if(editions.has(date))return editions.get(date);
  for(const url of (retryLatest?[editionsBase+date+'.json',latestUrl]:[editionsBase+date+'.json'])){
   try{
@@ -199,6 +201,81 @@ async function route(){
   if(version===routeVersion)view.innerHTML=editionNav(archive)+'<p class="notice">記事を読み込めませんでした。ページを再読み込みしてください。</p>';
  }
 }
+// Reuse the existing YOS Google identity gate; no Notion secret or private
+// edition is persisted in browser storage, URLs, or service-worker caches.
+const privateApi='https://project-y-yos-ai.vercel.app';
+const privateSite='https://yskn0008-bot.github.io';
+const privateBtn=document.getElementById('privateJournalConnect');
+const privateStatus=document.getElementById('privateJournalStatus');
+const privateHost=document.getElementById('privateJournalSignIn');
+const privateMessage=s=>{privateStatus.textContent=s;};
+function clearPrivate(message){
+ privateGeneration++;privateToken='';privateEdition=null;todayRequest=null;
+ privateBtn.textContent='Notionの最新号';privateHost.replaceChildren();privateMessage(message);route();
+}
+async function privateFetch(path,token=''){
+ const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),15000);
+ try{return await fetch(privateApi+path,{method:'GET',headers:{Accept:'application/json',...(token?{Authorization:'Bearer '+token}:{})},cache:'no-store',credentials:'omit',redirect:'error',referrerPolicy:'no-referrer',signal:controller.signal});}finally{clearTimeout(timeout);}
+}
+function validatePrivate(x){
+ return x&&/^\d{4}-\d{2}-\d{2}$/.test(x.issuedOn)&&x.issuedOn<=today&&Array.isArray(x.articles)&&x.articles.length===3&&
+  x.articles.every(a=>a&&['category','title','summary','reason','action','caveat','source','link'].every(k=>typeof a[k]==='string'&&a[k].length>0&&a[k].length<=8000)&&/^https:\/\/doi\.org\/10\.\d{4,9}\/[A-Za-z0-9._;()/:%-]{1,300}$/.test(a.link)&&Array.isArray(a.keyPoints)&&a.keyPoints.length===0)&&
+  new Set(x.articles.map(a=>a.link.toLowerCase())).size===3;
+}
+async function refreshPrivate(force=false){
+ if(!privateToken)return;
+ if(privateRefresh)return privateRefresh;
+ if(!force&&Date.now()-privateLastRead<60000)return;
+ const generation=privateGeneration,token=privateToken;
+ privateRefresh=(async()=>{
+  try{
+   const response=await privateFetch('/api/yos/intake?mode=journal-reader',token);
+   if(generation!==privateGeneration)return;
+   if(response.status===401){clearPrivate('本人確認の期限が切れました。');return;}
+   if(!response.ok)throw Error('read failed');
+   const data=await response.json();
+   if(generation!==privateGeneration)return;
+   if(data.source!=='notion-reviewed-private'||!validatePrivate(data.edition))throw Error('invalid edition');
+   const changed=JSON.stringify(privateEdition)!==JSON.stringify(data.edition);
+   privateEdition=data.edition;privateLastRead=Date.now();
+   privateBtn.textContent='非公開号を閉じる';privateMessage('Notion非公開読書版 '+privateEdition.issuedOn+' · 同期済み');
+   if(changed){todayRequest=null;route();}
+  }catch(_){if(generation===privateGeneration){const had=!!privateEdition;privateEdition=null;todayRequest=null;privateMessage('Notionの最新号を確認できません。既刊を表示します。');if(had)route();}}
+ })().finally(()=>{privateRefresh=null;});
+ return privateRefresh;
+}
+function loadPrivateGoogle(){
+ if(window.google?.accounts?.id)return Promise.resolve(window.google.accounts.id);
+ return new Promise((resolve,reject)=>{
+  const script=document.createElement('script');script.src='https://accounts.google.com/gsi/client';script.async=true;script.referrerPolicy='strict-origin-when-cross-origin';
+  const timeout=setTimeout(()=>reject(Error('Google timeout')),15000);
+  script.onload=()=>{clearTimeout(timeout);window.google?.accounts?.id?resolve(window.google.accounts.id):reject(Error('Google unavailable'));};
+  script.onerror=()=>{clearTimeout(timeout);reject(Error('Google unavailable'));};document.head.appendChild(script);
+ });
+}
+privateBtn.addEventListener('click',async()=>{
+ if(privateToken){clearPrivate('非公開号を閉じました。');return;}
+ if(location.origin!==privateSite){privateMessage('正規のJOURNALサイトから本人確認してください。');return;}
+ if(privateConfig)return;
+ privateConfig=true;privateBtn.disabled=true;privateMessage('本人確認を準備しています。');
+ try{
+  const [response,gsi]=await Promise.all([privateFetch('/api/yos/public-config'),loadPrivateGoogle()]);
+  if(!response.ok)throw Error('config unavailable');
+  const {googleClientId}=await response.json();
+  if(typeof googleClientId!=='string'||!/^[A-Za-z0-9_.-]+\.apps\.googleusercontent\.com$/.test(googleClientId))throw Error('config invalid');
+  gsi.initialize({client_id:googleClientId,auto_select:false,itp_support:true,use_fedcm_for_prompt:true,callback:async result=>{
+   if(typeof result?.credential!=='string'||!result.credential||result.credential.length>8192){privateMessage('本人確認できませんでした。');return;}
+   privateGeneration++;privateToken=result.credential;privateHost.replaceChildren();privateMessage('Notionから取得中');await refreshPrivate(true);
+  }});
+  privateHost.replaceChildren();gsi.renderButton(privateHost,{type:'standard',theme:'outline',size:'medium',text:'continue_with'});
+  privateMessage('Googleで本人確認すると非公開の最新号を読み込めます。');
+ }catch(_){privateMessage('本人確認を利用できません。既刊はそのまま読めます。');}
+ finally{privateConfig=null;privateBtn.disabled=false;}
+});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshPrivate(true);});
+window.addEventListener('online',()=>refreshPrivate(true));
+setInterval(()=>{if(document.visibilityState==='visible')refreshPrivate();},60000);
+
 home.addEventListener('click',()=>{location.hash=issue?.issuedOn===today?'#today':'#archive'});
 window.addEventListener('hashchange',route);
 route();

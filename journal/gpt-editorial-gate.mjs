@@ -10,6 +10,7 @@ import { readFile, writeFile, access } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { jstDate } from './daily-public-issue.mjs';
+import { validateIndependentDossier } from './reviewed-evidence-gate.mjs';
 
 const DAY_MS = 86400000;
 const ALLOWED_LANES = new Set(['ACTION', 'DIRECTION', 'DISCOVERY']);
@@ -61,9 +62,13 @@ export function validateCandidate(candidate, { now = new Date(), recent = [] } =
   text(issue.headline, 'cover headline', 12, 160);
   text(issue.lead, 'cover lead', 20, 500);
   text(issue.edition, 'edition', 4, 80);
-  if (!Array.isArray(issue.articles) || issue.articles.length < 1 || issue.articles.length > 6) refuse('invalid article count');
+  // The one-story 2026-11-20 feature is historical. Every future issue must
+  // contain three independently useful stories before any publication path.
+  if (!Array.isArray(issue.articles) || (issue.issuedOn >= '2026-11-23'
+    ? issue.articles.length !== 3 : issue.articles.length < 1 || issue.articles.length > 6))
+    refuse('future issues require exactly three articles');
   if (!Array.isArray(candidate.verification) || candidate.verification.length !== issue.articles.length) refuse('verification count mismatch');
-  const links = new Set();
+  const links = new Set(), titles = new Set(), summaries = new Set();
   const prior = new Set(recent.flatMap(x => x?.articles || []).map(x => x?.link).filter(Boolean));
   for (const [i, a] of issue.articles.entries()) {
     allowKeys(a, ['category', 'editorialLane', 'title', 'summary', 'reason', 'action', 'caveat', 'source', 'sourceDate', 'link', 'image', 'imageCaption', 'imageKind', 'keyPoints'], 'article');
@@ -71,6 +76,10 @@ export function validateCandidate(candidate, { now = new Date(), recent = [] } =
     if (!ALLOWED_LANES.has(a.editorialLane)) refuse('invalid editorial lane');
     text(a.title, 'article title', 10, 160);
     text(a.summary, 'article summary', 45, 950);
+    const titleKey = a.title.normalize('NFKC').replace(/[\s\p{P}\p{S}]/gu, '').toLowerCase();
+    const summaryKey = a.summary.normalize('NFKC').replace(/[\s\p{P}\p{S}]/gu, '').toLowerCase();
+    if (titles.has(titleKey) || summaries.has(summaryKey)) refuse('duplicate article content');
+    titles.add(titleKey); summaries.add(summaryKey);
     text(a.reason, 'generalized relevance', 20, 320);
     text(a.action, 'next step', 10, 300);
     text(a.caveat, 'caveat', 15, 420);
@@ -84,7 +93,7 @@ export function validateCandidate(candidate, { now = new Date(), recent = [] } =
     for (const item of a.keyPoints) text(item, 'key point', 3, 170);
 
     const review = candidate.verification[i];
-    allowKeys(review, ['link', 'checkedOn', 'sourceType', 'sourceDateStatus', 'evidence', 'limitations', 'audienceMatch'], 'verification');
+    allowKeys(review, ['link', 'checkedOn', 'sourceType', 'sourceDateStatus', 'evidence', 'limitations', 'audienceMatch', 'reviewClaimIds'], 'verification');
     if (httpsLink(review.link, 'verification source') !== link) refuse('source verification link mismatch');
     if (!day(review.checkedOn) || ageInDays(today, review.checkedOn) < 0 || ageInDays(today, review.checkedOn) > 2) refuse('source check outdated or in future');
     if (!['official', 'primary', 'editorial'].includes(review.sourceType)) refuse('unsupported source type');
@@ -92,6 +101,18 @@ export function validateCandidate(candidate, { now = new Date(), recent = [] } =
     text(review.evidence, 'evidence description', 25, 450);
     text(review.limitations, 'scope/uncertainty', 10, 320);
     text(review.audienceMatch, 'why it matters', 20, 280);
+    if (issue.issuedOn >= '2026-11-23' && review.reviewClaimIds === undefined)
+      refuse('independent review claim references required for every future article');
+    if (review.reviewClaimIds !== undefined) {
+      if (!Array.isArray(review.reviewClaimIds) || review.reviewClaimIds.length < 1 || review.reviewClaimIds.length > 12)
+        refuse('invalid independent review claim references');
+      const refs = new Set();
+      for (const id of review.reviewClaimIds) {
+        if (typeof id !== 'string' || !/^C[1-9][0-9]*$/.test(id) || refs.has(id))
+          refuse('invalid or duplicate independent review claim reference');
+        refs.add(id);
+      }
+    }
     // The source is checked *by the GPT editor* via its browsing tools. A text
     // declaration is NOT independently verified by this local schema check.
   }
@@ -124,9 +145,22 @@ export async function prepareFiles(candidate, rootPath, { now = new Date() } = {
   const issue = publicIssue(candidate, { now, recent });
   return { issue, paths: [datedPath, scriptDatedPath, latestPath], serialized: JSON.stringify(issue, null, 2) + '\n' };
 }
-export async function writePrepared(candidate, rootPath, { now = new Date(), approved = false } = {}) {
+export async function writePrepared(candidate, rootPath, { now = new Date(), approved = false, dossier } = {}) {
   if (!approved) refuse('explicit editorial review approval required');
   const result = await prepareFiles(candidate, rootPath, { now });
+  if (result.issue.issuedOn >= '2026-11-23') {
+    if (!dossier) refuse('independent three-article dossier required');
+    const review = validateIndependentDossier(dossier);
+    if (review.disposition !== 'editor_approval_and_publication_gate_required' || dossier.reviewedOn !== jstDate(now))
+      refuse('current independent review and editor approval required');
+    for (const [i, article] of result.issue.articles.entries()) {
+      const source = dossier.sources.find(s=>new URL(s.url).href === new URL(article.link).href);
+      const refs = candidate.verification[i].reviewClaimIds;
+      if (!source || candidate.verification[i].checkedOn !== dossier.reviewedOn || !refs?.length ||
+        refs.some(id=>!dossier.claims.some(c=>c.id===id && c.sourceId===source.id && c.status==='supported_in_study')))
+        refuse('article lacks independently reviewed source claims: '+(i+1));
+    }
+  }
   await writeFile(result.paths[0], result.serialized, { flag: 'wx' });
   await writeFile(result.paths[1], result.serialized, { flag: 'wx' });
   await writeFile(result.paths[2], result.serialized);
@@ -140,15 +174,21 @@ async function cli() {
   const rootIndex = args.indexOf('--root');
   const root = rootIndex >= 0 ? resolve(args[rootIndex + 1]) : resolve(dirname(fileURLToPath(import.meta.url)), '..');
   if (args.includes('--validate-only')) {
-    validateCandidate(candidate);
-    console.log('Candidate fields and public-data patterns passed; source claims still need independent review.');
+    // Archival PR candidates may be inspected later without reopening their
+    // publication window. prepareFiles/writePrepared still require today.
+    const asOf = candidate?.issue?.issuedOn;
+    if (!day(asOf)) refuse('invalid candidate date');
+    validateCandidate(candidate, { now: new Date(asOf + 'T03:00:00Z') });
+    console.log('Dated structural validation only ('+asOf+'); freshness and original claims require current independent review before publication.');
     return;
   }
   const prepared = await prepareFiles(candidate, root);
   console.log('Candidate structurally valid: ' + prepared.issue.issuedOn + ', stories=' + prepared.issue.articles.length + '. Source fact-checking remains the GPT editor responsibility.');
   if (args.includes('--write')) {
     if (!args.includes('--approved-review')) refuse('publication requires --approved-review after checking original sources');
-    await writePrepared(candidate, root, { approved: true });
+    const dossierIndex = args.indexOf('--dossier');
+    const dossier = dossierIndex >= 0 ? JSON.parse(await readFile(resolve(args[dossierIndex + 1]), 'utf8')) : undefined;
+    await writePrepared(candidate, root, { approved: true, dossier });
     console.log('Wrote three issue files into working branch. Publishing still requires a reviewed GitHub PR.');
   }
 }

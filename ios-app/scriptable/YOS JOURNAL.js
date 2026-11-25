@@ -5,7 +5,7 @@
 const fm=FileManager.local(),dir=fm.joinPath(fm.documentsDirectory(),"YOS-JOURNAL"),file=fm.joinPath(dir,"latest.json");
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl=s=>{const v=String(s||"").trim();return /^https?:\/\/[^\s<>"\x27]+$/i.test(v)?v:""};
-const valid=x=>{if(!x||!Array.isArray(x.articles))throw Error("articles 配列が必要です");const articles=x.articles.slice(0,15).map(a=>({category:String(a.category||"FEATURE"),title:String(a.title||""),summary:String(a.summary||""),reason:String(a.reason||""),action:String(a.action||""),source:String(a.source||""),link:safeUrl(a.link),image:safeUrl(a.image)})).filter(a=>a.title&&a.link);if(!articles.length)throw Error("表示できる記事がありません");return {date:String(x.date||"発行日未確認"),issuedOn:/^\d{4}-\d{2}-\d{2}$/.test(x.issuedOn||"")?x.issuedOn:"",lead:String(x.lead||""),headline:String(x.headline||""),articles}};
+const valid=x=>{if(!x||!Array.isArray(x.articles))throw Error("articles 配列が必要です");if(x.issuedOn>="2026-11-23"&&x.articles.length!==3)throw Error("この号は3記事が揃っていません");const articles=x.articles.slice(0,15).map(a=>({category:String(a.category||"FEATURE"),title:String(a.title||""),summary:String(a.summary||""),reason:String(a.reason||""),action:String(a.action||""),source:String(a.source||""),link:safeUrl(a.link),image:safeUrl(a.image)})).filter(a=>a.title&&a.link);if(!articles.length||(x.issuedOn>="2026-11-23"&&articles.length!==3))throw Error("表示できる記事が揃っていません");return {date:String(x.date||"発行日未確認"),issuedOn:/^\d{4}-\d{2}-\d{2}$/.test(x.issuedOn||"")?x.issuedOn:"",lead:String(x.lead||""),headline:String(x.headline||""),articles}};
 let issue=null,warning="";
 try{
  let incoming=args.shortcutParameter;

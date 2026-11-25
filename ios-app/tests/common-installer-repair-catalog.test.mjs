@@ -90,9 +90,9 @@ async function execute({script=legacy,place='cloud',duplicate=false,missing=fals
 }
 
 test('runtime and historical fixture are immutable official SHA-256 releases',()=>{
- assert.equal(sha(official),'0f0af090deec3c9c523ee885d37f4d5394321bd009f8e04962deff91ea3fc0b0');
+ assert.equal(sha(official),'1fd8e27aab18c267569312689d206899ba9713eb654e7dbdd41dd2cf7b77b8d4');
  assert.equal(sha(legacy),'069c2a556fbdc5eb72ef9dfda5f545e41bb252baa45b59637a4f5d9f6d1ce547');
- assert.match(runtime,/8bb289519b0f4f6c907b27f336a623bc5669e669/);
+ assert.match(runtime,/510fa3f2f032eecc062df9d7d2033cf6057c6d04/);
 });
 
 test('unknown user-modified code fails closed, without network or local changes',async()=>{
@@ -181,9 +181,9 @@ test('one-time repair is packaged for existing Scriptable installer and never ru
  assert.ok(entry);
  assert.equal(entry.name,'YOS Common Installer 修復');
  assert.equal(entry.path,'ios-app/scriptable/YOS Common Installer 修復.js');
- assert.equal(entry.commit,'cc7a0f91c4e5b758b290f7098aae417b57c631c7');
+ assert.equal(entry.commit,'607484f37f28eba407c5493c2d90e085a40db1ad');
  assert.equal(sha(runtime),entry.sha256);
- assert.equal(sha(official),'0f0af090deec3c9c523ee885d37f4d5394321bd009f8e04962deff91ea3fc0b0');
+ assert.equal(sha(official),'1fd8e27aab18c267569312689d206899ba9713eb654e7dbdd41dd2cf7b77b8d4');
 });
 test('all existing installer catalog registrations remain present with unique identities',()=>{
  const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
@@ -211,7 +211,7 @@ test('actual historical Common Installer accepts new pinned helper through the e
   async loadString(){
    requests.push(this.url);
    if(this.url.endsWith('yos-common-installer-catalog.json'))return catalog;
-   if(this.url.includes('cc7a0f91c4e5b758b290f7098aae417b57c631c7')&&this.url.includes('Common%20Installer%20'))return runtime;
+   if(this.url.includes('607484f37f28eba407c5493c2d90e085a40db1ad')&&this.url.includes('Common%20Installer%20'))return runtime;
    this.response.statusCode=404;
    return 'unapproved resource';
   }
@@ -235,4 +235,113 @@ test('actual historical Common Installer accepts new pinned helper through the e
  const record=cloud.files.get('/cloud/YOS Common Installer Data/'+encodeURIComponent('YOS Common Installer 修復')+'.receipt.json');
  assert.ok(record);
  assert.equal(JSON.parse(record).id,'common-installer-repair');
+});
+
+test('new installer validates the extension globally and installs only the pinned TAXI source',async()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
+ const taxi=fs.readFileSync(new URL('../scriptable/YOS TAXI.js',import.meta.url),'utf8');
+ const extension=catalog.additional_targets;
+ assert.equal(catalog.targets.length,30);
+ assert.ok(extension.length>=2&&extension.length<=30);
+ const entry=extension.find(x=>x.id==='yos-taxi');
+ assert.ok(entry);
+ const memory=extension.find(x=>x.id==='aion-memory-read');
+ assert.ok(memory);
+ assert.equal(memory.name,'YOS CORE Memory Read');
+ assert.equal(memory.path,'ios-app/scriptable/YOS CORE Memory Read.js');
+ const memorySource=fs.readFileSync(new URL('../scriptable/YOS CORE Memory Read.js',import.meta.url),'utf8');
+ assert.equal(sha(memorySource),memory.sha256);
+ assert.match(memorySource,/^\/\/ YOS_SCRIPT_NAME: YOS CORE Memory Read$/m);
+ const output=extension.find(x=>x.id==='aion-output');
+ assert.ok(output);
+ assert.equal(output.name,'YOS AION OUTPUT');
+ assert.equal(output.path,'ios-app/scriptable/YOS AION OUTPUT.js');
+ assert.equal(sha(fs.readFileSync(new URL('../scriptable/YOS AION OUTPUT.js',import.meta.url),'utf8')),output.sha256);
+ assert.equal(entry.id,'yos-taxi');assert.equal(entry.name,'YOS TAXI');
+ assert.equal(sha(taxi),entry.sha256);
+ assert.match(taxi,/^\/\/ YOS_SCRIPT_NAME: YOS TAXI$/m);
+ assert.doesNotMatch(taxi,/const SEED|43050|21950|14750/);
+ const getValidation=(source)=>vm.runInNewContext(source.slice(0,source.indexOf('async function get('))+';validateCatalog');
+ assert.equal(getValidation(legacy)(catalog).length,30);
+ assert.equal(getValidation(official)(catalog).length,30+extension.length);
+ assert.throws(()=>getValidation(official)({...catalog,additional_targets:[catalog.targets[0]]}));
+ assert.throws(()=>getValidation(official)({...catalog,additional_targets:[null]}));
+ assert.throws(()=>getValidation(official)({...catalog,additional_targets:'bad'}));
+ const cloud=store('/cloud'),local=store('/local'),alerts=[],opened=[],requests=[];
+ cloud.files.set('/cloud/YOS Common Installer.js',official);
+ cloud.files.set('/cloud/unrelated.js','protected');
+ cloud.remove=p=>{cloud.deletions.push(p);cloud.files.delete(p);};
+ local.remove=p=>{local.deletions.push(p);local.files.delete(p);};
+ class Request{constructor(url){this.url=url;this.response={statusCode:200};}async loadString(){requests.push(this.url);if(this.url.endsWith('yos-common-installer-catalog.json'))return JSON.stringify(catalog);if(this.url.includes(entry.commit)&&this.url.includes('YOS%20TAXI.js'))return taxi;this.response.statusCode=404;return 'unapproved';}}
+ class Alert{addAction(){}addCancelAction(){}async presentAlert(){alerts.push(this.title);return 0;}}
+ const ctx={FileManager:{iCloud:()=>cloud,local:()=>local},Request,Alert,Script:{complete:()=>{}},args:{queryParameters:{script:'yos-taxi'}},Safari:{open:x=>opened.push(x)}};
+ await new vm.Script('(async()=>{\n'+official+'\n})()').runInNewContext(ctx,{timeout:6000});
+ assert.equal(cloud.files.get('/cloud/YOS TAXI.js'),taxi);
+ assert.equal(cloud.files.get('/cloud/unrelated.js'),'protected');
+ assert.equal(cloud.files.get('/cloud/YOS Common Installer.js'),official);
+ assert.equal(local.writes.length,0);assert.equal(requests.length,2);
+ assert.match(alerts.at(-1),/登録完了/);
+});
+
+test('device-reported pink magic legacy header and missing final LF upgrade safely',async()=>{
+ const raw=legacy.slice(0,-1);
+ const header='// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: pink; icon-glyph: magic;\n';
+ const installed=header+raw;
+ assert.equal(sha(installed),'88e8803881057a50fc743a57b6c770586d4b8c2b6f3e14999a9bc2150b1475de');
+ const r=await execute({script:installed});
+ assert.equal(r.chosen.files.get('/cloud/'+name),official);
+ const backups=[...r.chosen.files.entries()].filter(([p])=>p.includes('bootstrap-backups'));
+ assert.equal(backups.length,1);assert.equal(backups[0][1],installed);
+ const rejected=await execute({script:installed+'\n// user edit'});
+ assert.equal(rejected.chosen.writes.length,0);
+ assert.equal(rejected.requests.length,0);
+});
+
+test('installer installs only the pinned AION memory reader and preserves TAXI and Clarity',async()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
+ const entry=catalog.additional_targets.find(x=>x.id==='aion-memory-read');
+ const source=fs.readFileSync(new URL('../scriptable/YOS CORE Memory Read.js',import.meta.url),'utf8');
+ assert.equal(sha(source),entry.sha256);
+ const cloud=store('/cloud'),local=store('/local'),alerts=[],requests=[];
+ cloud.files.set('/cloud/YOS Common Installer.js',official);
+ cloud.files.set('/cloud/YOS TAXI.js','protected-taxi');
+ cloud.files.set('/cloud/YOS Clarity Inbox Bridge.js','protected-clarity');
+ cloud.remove=p=>{cloud.deletions.push(p);cloud.files.delete(p);};
+ local.remove=p=>{local.deletions.push(p);local.files.delete(p);};
+ class Request{constructor(url){this.url=url;this.response={statusCode:200};}async loadString(){requests.push(this.url);if(this.url.endsWith('yos-common-installer-catalog.json'))return JSON.stringify(catalog);if(this.url.includes(entry.commit)&&this.url.includes('YOS%20CORE%20Memory%20Read.js'))return source;this.response.statusCode=404;return 'unapproved';}}
+ class Alert{addAction(){}addCancelAction(){}async presentAlert(){alerts.push(this.title);return 0;}}
+ const ctx={FileManager:{iCloud:()=>cloud,local:()=>local},Request,Alert,Script:{complete:()=>{}},args:{queryParameters:{script:'aion-memory-read'}},Safari:{open:()=>{}}};
+ await new vm.Script('(async()=>{\n'+official+'\n})()').runInNewContext(ctx,{timeout:6000});
+ assert.equal(cloud.files.get('/cloud/YOS CORE Memory Read.js'),source);
+ assert.equal(cloud.files.get('/cloud/YOS TAXI.js'),'protected-taxi');
+ assert.equal(cloud.files.get('/cloud/YOS Clarity Inbox Bridge.js'),'protected-clarity');
+ assert.equal(cloud.files.get('/cloud/YOS Common Installer.js'),official);
+ assert.equal(local.writes.length,0);
+ assert.equal(requests.length,2);
+ assert.match(alerts.at(-1),/登録完了/);
+});
+
+test('installer installs pinned AION OUTPUT without modifying memory reader or Clarity',async()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
+ const entry=catalog.additional_targets.find(x=>x.id==='aion-output');
+ const source=fs.readFileSync(new URL('../scriptable/YOS AION OUTPUT.js',import.meta.url),'utf8');
+ assert.equal(sha(source),entry.sha256);
+ const cloud=store('/cloud'),local=store('/local'),alerts=[],requests=[];
+ cloud.files.set('/cloud/YOS Common Installer.js',official);
+ cloud.files.set('/cloud/YOS CORE Memory Read.js','protected-memory');
+ cloud.files.set('/cloud/YOS Clarity Inbox Bridge.js','protected-clarity');
+ cloud.files.set('/cloud/YOS TAXI.js','protected-taxi');
+ cloud.remove=p=>{cloud.deletions.push(p);cloud.files.delete(p);};
+ local.remove=p=>{local.deletions.push(p);local.files.delete(p);};
+ class Request{constructor(url){this.url=url;this.response={statusCode:200};}async loadString(){requests.push(this.url);if(this.url.endsWith('yos-common-installer-catalog.json'))return JSON.stringify(catalog);if(this.url.includes(entry.commit)&&this.url.includes('YOS%20AION%20OUTPUT.js'))return source;this.response.statusCode=404;return 'unapproved';}}
+ class Alert{addAction(){}addCancelAction(){}async presentAlert(){alerts.push(this.title);return 0;}}
+ const ctx={FileManager:{iCloud:()=>cloud,local:()=>local},Request,Alert,Script:{complete:()=>{}},args:{queryParameters:{script:'aion-output'}},Safari:{open:()=>{}}};
+ await new vm.Script('(async()=>{\n'+official+'\n})()').runInNewContext(ctx,{timeout:6000});
+ assert.equal(cloud.files.get('/cloud/YOS AION OUTPUT.js'),source);
+ assert.equal(cloud.files.get('/cloud/YOS CORE Memory Read.js'),'protected-memory');
+ assert.equal(cloud.files.get('/cloud/YOS Clarity Inbox Bridge.js'),'protected-clarity');
+ assert.equal(cloud.files.get('/cloud/YOS TAXI.js'),'protected-taxi');
+ assert.equal(cloud.files.get('/cloud/YOS Common Installer.js'),official);
+ assert.equal(local.writes.length,0);assert.equal(requests.length,2);
+ assert.match(alerts.at(-1),/登録完了/);
 });

@@ -1,0 +1,48 @@
+#define name YOS JOURNAL 朝刊確認
+#define color blue
+#define inputs text
+
+#include 'actions/text'
+#include 'actions/calendar'
+#include 'actions/web'
+#include 'actions/documents'
+
+// DRAFT: iPhone shortcut for checking an already published YOS JOURNAL issue.
+// This does NOT generate, edit, approve or publish articles.
+// Manual: opens the existing approved JOURNAL web reader.
+// Automation input: YOS_JOURNAL_AUTO_V1; silent unless today's issue exists.
+// No credentials, private Notion data, third-party service or new database.
+// Do not enable automatic notification until the current GPT editorial
+// completion notice is disabled or deduplicated after device acceptance.
+
+@incoming = "{ShortcutInput}"
+@autoMode = "manual"
+if @incoming contains "YOS_JOURNAL_AUTO_V1" {
+    @autoMode = "auto"
+}
+
+const todayKey = formatDate(currentDate(), "Custom", "yyyy-MM-dd")
+const issueData = downloadURL("https://raw.githubusercontent.com/yskn0008-bot/ProjectY/main/ios-app/scriptable/journal/latest.json")
+const issueText = getText(issueData)
+
+// Match the JSON field itself, not just a date elsewhere in an article.
+const datePattern = text("\"issuedOn\"\\s*:\\s*\"{todayKey}\"")
+const dateMatches = matchText(datePattern, issueText)
+
+if @autoMode == "auto" {
+    // The 2026-11-19 issue contains three articles explicitly rejected by the reader.
+    // Do not re-notify that edition.
+    if todayKey == "2026-11-19" {
+        stop()
+    }
+    if dateMatches {
+        showNotification("今日の新号が公開されました。いつものYOS JOURNALから読めます。", "YOS JOURNAL")
+    }
+    stop()
+}
+
+if !dateMatches {
+    alert("今日の新号はまだ確認できません。既存JOURNALでは公開済みの号を閲覧できます。", "YOS JOURNAL")
+}
+openURL("https://yskn0008-bot.github.io/ProjectY/journal-v2/")
+stop()

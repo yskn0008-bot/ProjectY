@@ -1,0 +1,70 @@
+name: Shortcut Factory Installer 2
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/shortcut-factory/**installer-2**'
+      - 'tools/shortcut-factory/**installer_2**'
+      - 'tools/shortcut-factory/shortcuts/YOS Common Installer 2 導入.cherri'
+      - '.github/workflows/shortcut-factory-installer-2.yml'
+permissions:
+  contents: read
+jobs:
+  build-installer-2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check sources and safety tests
+        run: |
+          set -euo pipefail
+          node --test ios-app/tests/common-installer-2.test.mjs
+          node --test tools/shortcut-factory/tests/common-installer-2-bootstrap.test.mjs
+          python3 tools/shortcut-factory/validate_secret_free.py 'tools/shortcut-factory/inline/common-installer-2-bootstrap.js' 'tools/shortcut-factory/shortcuts/YOS Common Installer 2 導入.cherri'
+      - name: Install existing pinned Cherri
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip' -o /tmp/cherri.zip
+          printf '%s  %s\n' '7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9' /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          sudo install -m 0755 "$(find /tmp/cherri -type f -name cherri -print -quit)" /usr/local/bin/cherri
+      - name: Compile and validate single action
+        run: |
+          set -euo pipefail
+          cd tools/shortcut-factory/shortcuts
+          cherri 'YOS Common Installer 2 導入.cherri' --skip-sign --debug
+          cd ../../..
+          python3 'tools/shortcut-factory/patch_common_installer_2_inline.py' 'tools/shortcut-factory/shortcuts/YOS Common Installer 2 導入_unsigned.shortcut'
+          mkdir -p tools/shortcut-factory/artifacts
+          cp 'tools/shortcut-factory/shortcuts/YOS Common Installer 2 導入_unsigned.shortcut' 'tools/shortcut-factory/artifacts/installer-2-unsigned.shortcut'
+      - name: Sign with existing HubSign adapter
+        run: |
+          python3 tools/clarity-factory/sign_with_hubsign.py --input tools/shortcut-factory/artifacts/installer-2-unsigned.shortcut --output 'tools/shortcut-factory/artifacts/YOS Common Installer 2 導入.shortcut' --name 'YOS Common Installer 2 導入'
+      - name: Verify signed action against reviewed source
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check --quiet lzfse
+          python3 - <<'PY'
+          from pathlib import Path
+          import plistlib,lzfse
+          data=Path('tools/shortcut-factory/artifacts/YOS Common Installer 2 導入.shortcut').read_bytes()
+          assert data[:4]==b'AEA1'
+          pos=data.find(b'bvx',12+int.from_bytes(data[8:12],'little'))
+          assert pos>=0
+          raw=lzfse.decompress(data[pos:])
+          start=raw.find(b'bplist00')
+          assert start>=0
+          a=plistlib.loads(raw[start:])['WFWorkflowActions']
+          assert len(a)==1 and a[0]['WFWorkflowActionIdentifier']=='dk.simonbs.Scriptable.RunScriptInlineIntent'
+          p=a[0]['WFWorkflowActionParameters']
+          assert p['runInApp'] is True
+          assert p['script']['Value']['string']==Path('tools/shortcut-factory/inline/common-installer-2-bootstrap.js').read_text('utf-8')
+          print('Signed single action matches reviewed code')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-2-iphone
+          path: 'tools/shortcut-factory/artifacts/YOS Common Installer 2 導入.shortcut'
+          if-no-files-found: error
+          retention-days: 14

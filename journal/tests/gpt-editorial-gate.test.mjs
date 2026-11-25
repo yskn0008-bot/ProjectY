@@ -32,6 +32,53 @@ function candidate() {
   };
 }
 function rejects(edit, match, opts={}) { const x=candidate(); edit(x); assert.throws(() => validateCandidate(x,{now:NOW,...opts}), match); }
+const FUTURE = new Date('2026-11-24T00:20:00Z');
+function futureCandidate() {
+  const x=candidate(); x.issue.issuedOn='2026-11-24'; x.issue.date='2026.11.24 / TUE';
+  x.issue.articles=[0,1,2].map((i)=>({...x.issue.articles[0],
+    title:`独立した話題${i+1}について公式情報から確かめる。`,
+    summary:`別々の原典にある情報${i+1}を読み、対象と条件を把握するための記事。${x.issue.articles[0].summary}`,
+    link:`https://www.pref.okinawa.lg.jp/kurashikankyo/story-${i+1}`}));
+  x.verification=x.issue.articles.map((a,i)=>({...x.verification[0],link:a.link,checkedOn:'2026-11-24',reviewClaimIds:[`C${i+1}`]}));
+  return x;
+}
+test('future editions require exactly three distinct articles at every candidate boundary',()=>{
+  const x=futureCandidate(); assert.equal(validateCandidate(x,{now:FUTURE}),true);
+  for (const count of [0,1,2,4]) {
+    const y=structuredClone(x); y.issue.articles.length=count; y.verification.length=count;
+    if(count===4){y.issue.articles.push({...x.issue.articles[0],link:'https://www.pref.okinawa.lg.jp/four',title:'第四の記事は掲載不可',summary:'四つ目の独立した内容。'+x.issue.articles[0].summary});y.verification.push({...x.verification[0],link:'https://www.pref.okinawa.lg.jp/four'});}
+    assert.throws(()=>validateCandidate(y,{now:FUTURE}),/exactly three/);
+  }
+  const repeated=structuredClone(x); repeated.issue.articles[1].title=x.issue.articles[0].title;
+  assert.throws(()=>validateCandidate(repeated,{now:FUTURE}),/duplicate article/);
+  const split=structuredClone(x); split.issue.articles[1].summary=x.issue.articles[0].summary;
+  assert.throws(()=>validateCandidate(split,{now:FUTURE}),/duplicate article/);
+  const unchecked=structuredClone(x);delete unchecked.verification[2].reviewClaimIds;
+  assert.throws(()=>validateCandidate(unchecked,{now:FUTURE}),/independent review claim/);
+});
+test('approved future writer still needs a current independent three-article dossier',async()=>tmpRoot(async(root)=>{
+  await assert.rejects(()=>writePrepared(futureCandidate(),root,{now:FUTURE,approved:true}),/independent three-article dossier/);
+  await assert.rejects(()=>readFile(join(root,'journal/editions/2026-11-24.json')),/ENOENT/);
+}));
+test('a three-article future issue requires a supported claim from each matching original source',async()=>tmpRoot(async(root)=>{
+  const c=futureCandidate();
+  const sample=JSON.parse(await readFile(new URL('../reviewed-evidence/2026-11-20-first-impressions.public.json',import.meta.url),'utf8'));
+  sample.reviewedOn='2026-11-24';sample.articleAssessment.publishDecision='requires_editor_approval';
+  sample.sources=c.issue.articles.map((a,i)=>({...sample.sources[0],id:`S${i+1}`,url:a.link}));
+  sample.claims=c.issue.articles.map((_,i)=>({...sample.claims[0],id:`C${i+1}`,sourceId:`S${i+1}`}));
+  const mismatch=structuredClone(sample);mismatch.claims[2].status='unresolved';
+  await assert.rejects(()=>writePrepared(c,root,{now:FUTURE,approved:true,dossier:mismatch}),/article lacks independently reviewed source claims: 3/);
+  await assert.rejects(()=>readFile(join(root,'journal/editions/2026-11-24.json')),/ENOENT/);
+  const result=await writePrepared(c,root,{now:FUTURE,approved:true,dossier:sample});
+  const outputs=await Promise.all(result.paths.map(p=>readFile(p,'utf8')));
+  assert.equal(new Set(outputs).size,1);assert.equal(JSON.parse(outputs[0]).articles.length,3);
+}));
+test('future issue cannot reach review bundle or branch writer with two articles',async()=>tmpRoot(async(root)=>{
+  const x=futureCandidate();x.issue.articles.pop();x.verification.pop();
+  await assert.rejects(()=>prepareFiles(x,root,{now:FUTURE}),/exactly three/);
+  await assert.rejects(()=>writePrepared(x,root,{now:FUTURE,approved:true}),/exactly three/);
+  await assert.rejects(()=>readFile(join(root,'journal/editions/2026-11-24.json')),/ENOENT/);
+}));
 
 test('allows an independently reviewed public-source format with no private data', () => {
   const v=candidate(); assert.equal(validateCandidate(v,{now:NOW}),true);

@@ -58,7 +58,7 @@ export async function collect({fetcher=fetch,now=new Date()}={}){
  const seen=new Set();return {working,items:picked.sort((a,b)=>b._score-a._score).filter(x=>{if(seen.has(x.link))return false;seen.add(x.link);return true;})};
 }
 export function validateIssue(issue,now=new Date()){
- if(issue?.issuedOn!==jstDate(now)||!Array.isArray(issue.articles)||issue.articles.length<1||issue.articles.length>4)throw Error('invalid date/count');
+ if(issue?.issuedOn!==jstDate(now)||!Array.isArray(issue.articles)||issue.articles.length!==3)throw Error('invalid date/count: exactly three articles required');
  const used=new Set(),today=Date.parse(issue.issuedOn+'T00:00:00Z');
  for(const a of issue.articles){const source=SOURCES.find(s=>s.name===a.source);if(!source||!trusted(a.link,source)||used.has(a.link))throw Error('invalid/duplicate source');used.add(a.link);
   if(!LANES.some(l=>l.name===a.category&&l.lane===a.editorialLane&&l.pattern.test(a.title)))throw Error('unmatched category');
@@ -71,8 +71,9 @@ export function validateIssue(issue,now=new Date()){
 }
 export function makeIssue(candidates,{now=new Date(),previousLinks=[]}={}){
  const blocked=new Set(previousLinks),articles=[];
- for(const a of candidates){if(blocked.has(a.link)||PRIVATE.test(JSON.stringify(a)))continue;const {_score,...rest}=a;articles.push(rest);blocked.add(a.link);if(articles.length===4)break;}
- if(!articles.length)return null;
+ const titles=new Set();
+ for(const a of candidates){const titleKey=a.title.normalize('NFKC').replace(/[\s\p{P}\p{S}]/gu,'').toLowerCase();if(blocked.has(a.link)||titles.has(titleKey)||PRIVATE.test(JSON.stringify(a)))continue;const {_score,...rest}=a;articles.push(rest);blocked.add(a.link);titles.add(titleKey);if(articles.length===3)break;}
+ if(articles.length!==3)return null;
  const issuedOn=jstDate(now),weekday=['SUN','MON','TUE','WED','THU','FRI','SAT'][new Date(issuedOn+'T00:00:00Z').getUTCDay()];
  const issue={issuedOn,date:issuedOn.replace(/-/g,'.')+' / '+weekday,headline:articles[0].title,lead:'公式の新着情報から、実際に確認する価値のある話題だけを紹介。記事の条件は原文で確かめてください。',edition:'OFFICIAL SOURCE EDIT',articles};
  validateIssue(issue,now);return issue;
@@ -85,7 +86,7 @@ export async function build({fetcher=fetch,now=new Date(),rootPath=ROOT}={}){
  const history=await Promise.all([readJSON(resolve(rootPath,'ios-app/scriptable/journal/latest.json')),readJSON(resolve(rootPath,'journal/editions',jstDate(new Date(now.getTime()-DAY))+'.json')),readJSON(resolve(rootPath,'journal/editions',jstDate(new Date(now.getTime()-2*DAY))+'.json'))]);
  const previousLinks=history.flatMap(x=>x?.articles||[]).map(x=>x.link).filter(Boolean);
  const got=await collect({fetcher,now});if(!got.working)return {status:'sources-unavailable',issue:null};
- const issue=makeIssue(got.items,{now,previousLinks});return issue?{status:'ready',issue}:{status:'no-eligible-new-articles',issue:null};
+ const issue=makeIssue(got.items,{now,previousLinks});return issue?{status:'ready',issue}:{status:'three-eligible-articles-not-available',issue:null};
 }
 export async function writeIssue(issue,rootPath=ROOT,now=new Date()){
  validateIssue(issue,now);
