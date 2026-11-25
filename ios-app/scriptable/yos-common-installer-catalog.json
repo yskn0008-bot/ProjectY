@@ -13,8 +13,8 @@
       "id": "journal",
       "name": "YOS JOURNAL",
       "path": "ios-app/scriptable/YOS JOURNAL.js",
-      "commit": "c85b9a346de2c364af04248be082e8f99d2d8eae",
-      "sha256": "0d9590eea650aceb083af13573eb284bc256a7e5fa66f726dc38f2b56a3f67eb"
+      "commit": "f1d64169f9be3e8bba9134171c867fcf74c753cc",
+      "sha256": "fe553a5809f9ff0e7b010033617f98da006fea192b513466705b00b440d889ed"
     },
     {
       "id": "daystream-preview",
