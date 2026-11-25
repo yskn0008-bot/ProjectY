@@ -42,3 +42,51 @@ test('native shadow is narrow and fails closed for unknown, incomplete and share
  assert.equal(classifyGitDiff('.','invalid','invalid'),'full');
  assert.throws(()=>planCatalogUpdate('.','invalid','invalid','invalid',id));
 });
+
+test('real Git remote: two competing publishers, stale lease rejected, replan retains both pins',()=>{
+ const os=require('node:os'),{execFileSync}=require('node:child_process'),{createHash}=require('node:crypto');
+ const {prepareCatalogCommit,publishCatalogCommit}=require('./catalog-scope.cjs');
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'yos-catalog-race-'));
+ const work=path.join(root,'work'),remote=path.join(root,'remote.git');
+ const run=(cwd,...args)=>execFileSync('git',args,{cwd,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
+ const g=(...args)=>run(work,...args);
+ const sha=()=>g('rev-parse','HEAD');
+ const put=(p,s)=>{const pth=path.join(work,p);fs.mkdirSync(path.dirname(pth),{recursive:true});fs.writeFileSync(pth,s);};
+ const digest=s=>createHash('sha256').update(s).digest('hex');
+ const commit=m=>{g('add','.');g('commit','-m',m);return sha();};
+ try{
+  fs.mkdirSync(work);run(root,'init','--bare',remote);g('init');g('config','user.name','Test');g('config','user.email','test@example.invalid');
+  const pa='ios-app/scriptable/A.js',pb='ios-app/scriptable/B.js';
+  put(pa,'old A');put(pb,'old B');const oldSource=commit('old source');
+  const original={schema:1,targets:[{id:'a',path:pa,commit:oldSource,sha256:digest('old A')},{id:'b',path:pb,commit:oldSource,sha256:digest('old B')}],additional_targets:[]};
+  put(cat,JSON.stringify(original));const base=commit('base catalog');
+  put(pa,'new A');put(pb,'new B');const integrated=commit('reviewed sources');
+  const candidateA=cp(original);Object.assign(candidateA.targets[0],{commit:integrated,sha256:digest('new A')});
+  const candidateB=cp(original);Object.assign(candidateB.targets[1],{commit:integrated,sha256:digest('new B')});
+  g('checkout','-b','candidate/a');put(cat,JSON.stringify(candidateA));const a=commit('reviewed A pin');
+  g('checkout','--detach',integrated);g('checkout','-b','candidate/b');put(cat,JSON.stringify(candidateB));const b=commit('reviewed B pin');
+  g('checkout','--detach',integrated);
+  g('checkout','-b','candidate/local-pin');put('local-only.txt','not on remote');const localOnly=commit('local object');
+  const unreachable=cp(candidateA);unreachable.targets[0].commit=localOnly;put(cat,JSON.stringify(unreachable));const localCandidate=commit('unreachable pin');
+  g('checkout','--detach',integrated);g('remote','add','origin',remote);
+  assert.throws(()=>prepareCatalogCommit(work,integrated,base,localCandidate,'a'),/reviewed pin must be reachable/);
+  g('push','origin',integrated+':refs/heads/integration/release');
+  const before=g('status','--porcelain');
+  const staged=prepareCatalogCommit(work,integrated,base,a,'a');
+  assert.equal(g('diff','--name-only',integrated,staged.commit),cat);
+  assert.equal(g('status','--porcelain'),before);
+  const stale=prepareCatalogCommit(work,integrated,base,b,'b');
+  const first=publishCatalogCommit(work,'integration/release',integrated,base,a,'a');
+  assert.equal(sha(),integrated);
+  assert.throws(()=>g('push','--force-with-lease=refs/heads/integration/release:'+integrated,'origin',stale.commit+':refs/heads/integration/release'));
+  assert.throws(()=>publishCatalogCommit(work,'integration/release',integrated,base,b,'b'),/remote integration HEAD changed/);
+  assert.throws(()=>publishCatalogCommit(work,'main',integrated,base,b,'b'),/dedicated integration branch/);
+  g('checkout','--detach',first.commit);
+  const second=publishCatalogCommit(work,'integration/release',first.commit,base,b,'b');
+  const final=JSON.parse(g('show',second.commit+':'+cat));
+  assert.deepEqual(final.targets,[candidateA.targets[0],candidateB.targets[1]]);
+  assert.equal(g('diff','--name-only',first.commit,second.commit),cat);
+  assert.throws(()=>prepareCatalogCommit(work,first.commit,base,a,'a'),/target changed/);
+  assert.equal(run(remote,'rev-parse','refs/heads/integration/release'),second.commit);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
