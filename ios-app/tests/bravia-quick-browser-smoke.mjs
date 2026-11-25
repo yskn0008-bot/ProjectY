@@ -110,7 +110,8 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   await upper0.scrollIntoViewIfNeeded();let a=await upper0.boundingBox(),b=await upper1.boundingBox();
   await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();await page.waitForTimeout(650);await page.mouse.up();
   assert.equal(await page.locator('#homeUnifiedEditor').isVisible(),true);
-  assert.equal(await page.evaluate(()=>window.sent.filter(x=>!['homeStopHolds','tvHoldStop','lightHoldStop'].includes(x.device)).length),0);
+  const duringLongPress=await page.evaluate(()=>window.sent.filter(x=>!['homeStopHolds','tvHoldStop','lightHoldStop','homeRead'].includes(x.device)&&!(x.device==='system'&&['refreshMode','refreshAC'].includes(x.action))));
+  assert.deepEqual(duringLongPress,[],'long press must never send a device mutation');
   const first=await upper0.textContent(),second=await upper1.textContent();
   a=await upper0.boundingBox();b=await upper1.boundingBox();
   await page.mouse.move(a.x+a.width/2,a.y+a.height/2);await page.mouse.down();await page.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:8});await page.mouse.up();
