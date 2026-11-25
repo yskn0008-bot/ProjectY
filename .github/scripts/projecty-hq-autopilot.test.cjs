@@ -650,3 +650,30 @@ test('expired EXTERNAL_WAIT reruns only the deferred failed workflow and does no
   assert.equal(api.calls.filter((call) => call.path === '/actions/runs/501/rerun-failed-jobs').length, 1);
   assert.equal(api.calls.filter((call) => call.path === '/issues/4/comments').length, 0);
 });
+
+test('parked external wait leaves the recovery slot for another target', async () => {
+  const now = Date.parse('2026-08-21T20:00:00Z');
+  const old = '2026-08-21T18:00:00Z';
+  const retryAt = '2026-08-21T21:00:00Z';
+  const state = { version: 4, targets: {
+    'PR#1': { head: HEAD, phase: 'EXTERNAL_WAIT', failures: {}, seen: [], progressAt: old, externalWait: { retryAt, reason: 'rate limit' } },
+    'PR#2': { head: 'd'.repeat(40), phase: 'RUNNING', failures: {}, seen: [], progressAt: old, runningSince: old },
+  }};
+  const pr1=ownerPr({number:1, mergeable_state:'behind'});
+  const pr2=ownerPr({number:2,head:{sha:'d'.repeat(40),ref:'feature-two',repo:{full_name:REPOSITORY}}});
+  const api=recordingApi((requestPath,options)=>{
+    if(requestPath.startsWith('/issues/232/comments')&&!options.method)return [managedComment(state,5)];
+    if(requestPath==='/pulls/1')return pr1;
+    if(requestPath==='/pulls/2')return pr2;
+    if(requestPath==='/issues/2/comments'&&options.method==='POST')return {id:10};
+    if(requestPath.startsWith('/pulls/2/files'))return [{filename:'docs/a.md'}];
+    if(requestPath.startsWith('/actions/runs?'))return {workflow_runs:[]};
+    if(requestPath==='/issues/comments/5'&&options.method==='PATCH')return {};
+    throw new Error('unexpected request '+requestPath);
+  });
+  const result=await processEvent({api,eventName:'schedule',payload:{},now,repository:REPOSITORY,owner:OWNER});
+  assert.equal(result.recovery.action,'REQUEST_STATUS');
+  assert.equal(result.state.targets['PR#1'].phase,'EXTERNAL_WAIT');
+  assert.equal(result.state.targets['PR#2'].phase,'AWAITING_DIRECT_TOOL');
+  assert.equal(api.calls.filter(c=>c.path==='/issues/1/comments').length,0);
+});

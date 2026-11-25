@@ -119,7 +119,7 @@ One Enterは「回答すること」ではなく、受入条件を満たすと�
 - 同一failureはfingerprintで追跡し、同じ失敗を理由なく繰り返さない。同一路線が改善しない場合は別の安全なstrategyへ切り替える。
 - 案件全体にtotal recovery、same failure、active execution、変更path数のhard budgetを持つ。scope違反またはbudget超過はfail closedとし、clean startからの変更は安全な開始点へrollbackしてから停止する。
 - 最終状態は **COMPLETE / WAIT_USER / FAILED_SAFE** のいずれかだけとする。途中状態を完成扱いしない。
-- **COMPLETE** はmachine-checkable done conditionsと独立AuditがPASSし、human gateが残っていない場合だけ。
+- **COMPLETE** はmachine-checkable done conditionsと必要な独立AuditがPASSし、human gateが残っていない場合だけ。低・中リスクの別監査不要は承認済み方針・個別条件と整合する明示job契約に限り、NOT_REQUIREDと理由を記録する。旧job・高リスク・個別必須監査は維持。不要をPASSと記録しない。
 - **WAIT_USER** はAI側で可能な実装・Verify・Auditを終えたうえで、不可逆変更、本番公開、外部送信、購入・課金、削除、資格情報、重大データ変更、本人の価値判断、physical iPhone、本番実測等の本人専用gateだけが残る場合。
 - **FAILED_SAFE** は安全な回復経路またはbudgetを使い切り、既存の正常状態を保持またはrollback確認して停止した場合。
 - failure → 原因 → 対応 → 再検証結果は既存state / Issue / PR evidenceへ残し、新しいfailure DBを増やさない。
@@ -137,3 +137,6 @@ PRへ記録する最小証拠：
 - 配布版、Productionと対象端末の確認状態。
 - 残課題、待ち理由、次の一手、戻し方。
 本人には利用入口、本人だけの操作、重大な判断だけを返す。GitHubメールや開発ログの巡回を本人の仕事にしない。既存名称・秘密・データ・権限境界を守る。
+
+## 2026-11-25 開発待機削減
+GitHubは正式コード・版・復旧・共通Installer配布元。進捗は既存Notion、開発・局所検証は利用可能な実行環境を優先。管理同期、対象外deploy、一律の別AI監査は製品の合格条件にしない。ただし管理機能自体の変更・必要な検査・強制保護設定は維持。外部待ちはIssue #232の既存EXTERNAL_WAITと再開条件で管理し、独立工程を進める。公開前に固定版、秘密検査、最新mainとの差分・共有登録保持、必要な検査と復旧を確認する。

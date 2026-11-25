@@ -83,12 +83,27 @@ def load_job(path: Path) -> dict[str, Any]:
         raise ConfigError("verification_commands must contain at least one command")
     raw["verification_commands"] = [argv(x, f"verification_commands[{i}]") for i, x in enumerate(checks)]
 
+    # Preserve the normalized legacy job hash and the default required audit.
+    policy = raw.get("audit_policy")
+    if "audit_policy" in raw:
+        if not isinstance(policy, dict) or policy.get("mode") not in {"required", "not_required"}:
+            raise ConfigError("audit_policy must explicitly specify required or not_required")
     audit = raw.get("audit_commands")
-    if not isinstance(audit, list) or not audit:
-        raise ConfigError("audit_commands must contain at least one independent checker command")
-    raw["audit_commands"] = [argv(x, f"audit_commands[{i}]") for i, x in enumerate(audit)]
-    if raw["audit_commands"] == raw["verification_commands"]:
-        raise ConfigError("audit_commands must be distinct from verification_commands")
+    if policy and policy["mode"] == "not_required":
+        if policy.get("risk") not in {"low", "medium"}:
+            raise ConfigError("audit omission requires low or medium risk")
+        for key in ("reason", "approval_reference", "verification_evidence"):
+            if not isinstance(policy.get(key), str) or not policy[key].strip():
+                raise ConfigError(f"audit omission requires {key}")
+        if audit != []:
+            raise ConfigError("cannot omit an explicitly configured audit; audit_commands must be []")
+        raw["audit_commands"] = []
+    else:
+        if not isinstance(audit, list) or not audit:
+            raise ConfigError("audit_commands must contain at least one independent checker command")
+        raw["audit_commands"] = [argv(x, f"audit_commands[{i}]") for i, x in enumerate(audit)]
+        if raw["audit_commands"] == raw["verification_commands"]:
+            raise ConfigError("audit_commands must be distinct from verification_commands")
 
     strategies = raw.get("recovery_strategies")
     legacy_recovery = raw.get("recovery_command")
@@ -636,6 +651,28 @@ def run_loop(
             failure_class = pending
         else:
             failure_class = "verification_failed"
+
+        if verify_ok and not job["audit_commands"]:
+            # Only an explicitly validated omission policy can reach this branch.
+            # Not required is not a successful independent audit.
+            state["audit_disposition"] = {
+                "status": "NOT_REQUIRED",
+                "policy": job["audit_policy"],
+            }
+            state["audit_verified"] = False
+            state["code_verified"] = True
+            state["failure_reason"] = None
+            state["same_failure_count"] = 0
+            state["last_failure_fingerprint"] = None
+            state["unknowns"] = list(job["human_gates"])
+            final_scope = _scope_now(job, repo, start_head)
+            state["scope"] = final_scope
+            if not final_scope["ok"]:
+                state["code_verified"] = False
+                return _failed_safe(job, state, repo, "scope_violation", "scope violation after verification", checkpoint)
+            if job["human_gates"]:
+                return _finalize(state, "WAIT_USER", None, "complete the minimum human gate(s)", checkpoint)
+            return _finalize(state, "COMPLETE", None, "none", checkpoint)
 
         if verify_ok:
             state["phase"] = "AUDIT"

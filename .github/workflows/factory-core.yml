@@ -8,6 +8,9 @@ on:
       - "AGENTS.md"
       - ".github/scripts/projecty-development-supervisor.cjs"
       - ".github/scripts/projecty-development-supervisor.test.cjs"
+      - ".github/scripts/projecty-hq-autopilot.cjs"
+      - ".github/scripts/projecty-hq-autopilot.test.cjs"
+      - ".github/scripts/projecty-hq-yos-decision.cjs"
       - ".github/workflows/factory-core.yml"
   workflow_dispatch:
 
@@ -38,6 +41,9 @@ jobs:
 
       - name: ProjectY development supervisor contract
         run: node --test .github/scripts/projecty-development-supervisor.test.cjs
+
+      - name: Shared catalog and native scope contract
+        run: node --test tools/factory-core/catalog-scope.test.cjs
 
       - name: Bounded recovery synthetic E2E
         shell: bash

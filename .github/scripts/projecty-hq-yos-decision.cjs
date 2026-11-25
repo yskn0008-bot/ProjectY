@@ -228,7 +228,7 @@ async function run({ api, fetchImpl = fetch, environment = process.env, endpoint
   const supervisor = deterministicDecision({ target: key, targetState, alreadyAttempted: supervisorAlreadyAttempted });
   if (supervisor) {
     const supervisorDecision = toLegacyDecision(supervisor, request.currentHead);
-    const supervisorDecisionFingerprint = supervisor.decision === 'WAIT_USER' || supervisor.decision === 'COMPLETE'
+    const supervisorDecisionFingerprint = ['WAIT_USER', 'COMPLETE', 'FAILED_SAFE'].includes(supervisor.decision)
       ? supervisorStopFingerprint
       : supervisorAutoFingerprint;
     const freshPr = await api.request(`/pulls/${prNumber}`);

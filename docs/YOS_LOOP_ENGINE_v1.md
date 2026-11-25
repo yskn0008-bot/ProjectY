@@ -116,7 +116,7 @@ physical iPhone / productionなどAIだけで確認できない条件はhuman ga
 - Checker: `verification_commands`
 - Audit: `audit_commands`
 
-Auditは必須で、Checkerと同じcommand集合は契約エラーにする。
+Auditは既存jobと高リスク・個別必須案件で必須。Checkerと同じcommand集合は契約エラーにする。低・中リスクのみ、本人承認済み方針に従って `audit_policy` を明示し、mode=not_required、risk=low/medium、reason、approval_reference、verification_evidenceを保持し、audit_commands=[] とする。これは信頼された担当者が作るjob契約であり、リスク分類自体を自動認定しない。既に指定された監査は省略できない。省略時は NOT_REQUIRED と記録し、audit_verified=false のまま。
 
 Auditは説明ではなく、実物、diff、test、log、runtime evidenceを優先して判定する。
 
@@ -183,13 +183,13 @@ workspaceがcleanへ戻ったことを確認してから `FAILED_SAFE` にする
 ### COMPLETE
 
 - Verify PASS
-- independent Audit PASS
+- independent Audit PASS、または明示されたリスク別契約で NOT_REQUIRED
 - human gateなし
 - scope / budget OK
 
 ### WAIT_USER
 
-AI側で可能な実装・Verify・Auditは完了したが、
+AI側で可能な実装・Verify・必要なAuditは完了したが、
 本人にしかできない操作・判断・承認・real-world確認が残る。
 
 例:
