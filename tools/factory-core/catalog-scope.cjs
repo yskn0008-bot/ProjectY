@@ -69,6 +69,8 @@ function prepareCatalogCommit(repo,expectedHead,base,candidateHead,id){
  const target=[...plan.catalog.targets,...plan.catalog.additional_targets].find(x=>x.id===id);
  const bytes=execFileSync('git',['show',expectedHead+':'+target.path],{cwd:repo,maxBuffer:16*1024*1024});
  if(createHash('sha256').update(bytes).digest('hex')!==target.sha256)throw Error('integration source differs from reviewed pin');
+ // The pin must be durable on the remote, not an unpushed local Git object.
+ try{git(repo,'merge-base','--is-ancestor',target.commit,expectedHead);}catch(_){throw Error('reviewed pin must be reachable from integration HEAD');}
  const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'yos-catalog-index-'));
  try{
@@ -99,7 +101,7 @@ function publishCatalogCommit(repo,branch,expectedHead,base,candidateHead,id){
  // Exact lease is required even if a concurrent writer rewinds the ref.
  // prepareCatalogCommit creates a direct child, so no intentional history rewrite.
  if(git(repo,'rev-list','--parents','-n','1',result.commit).trim()!==result.commit+' '+expectedHead)throw Error('unexpected commit parent');
- git(repo,'push','--force-with-lease='+ref+':'+expectedHead,'origin',result.commit+':'+ref);
+ git(repo,'push','--no-follow-tags','--recurse-submodules=no','--force-with-lease='+ref+':'+expectedHead,'origin',result.commit+':'+ref);
  if(git(repo,'ls-remote','--refs','origin',ref).trim()!==result.commit+'\t'+ref)throw Error('published ref changed; inspect before retry');
  return result;
 }
