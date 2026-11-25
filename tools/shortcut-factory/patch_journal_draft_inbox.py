@@ -41,9 +41,16 @@ def patch(path:Path,script_path:Path):
     targets=[(i,a) for i,a in enumerate(actions) if a.get('WFWorkflowActionIdentifier')==INTENT and a.get('WFWorkflowActionParameters',{}).get('script')==SCRIPT_MARKER]
     if len(targets)!=1:raise SystemExit('expected exactly one inline placeholder')
     idx,target=targets[0]
-    if idx<1 or actions[idx-1].get('WFWorkflowActionIdentifier')!='is.workflow.actions.documentpicker.save':
-        raise SystemExit('inline handoff must immediately follow iCloud backup')
-    save=actions[idx-1].get('WFWorkflowActionParameters',{})
+    if idx<1:raise SystemExit('missing preceding draft backup')
+    if actions[idx-1].get('WFWorkflowActionIdentifier')=='is.workflow.actions.documentpicker.save' and actions[idx-1].get('WFWorkflowActionParameters',{}).get('WFInput',{}).get('Value',{}).get('OutputName')=='draftText':
+        save=actions[idx-1]['WFWorkflowActionParameters']
+    else:
+        # New review-first candidate backs up draft before the separate checker.
+        drafts=[a['WFWorkflowActionParameters'] for a in actions[:idx] if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.documentpicker.save' and 'YOS-JOURNAL-GPT-DRAFT-' in repr(a.get('WFWorkflowActionParameters',{}))]
+        finals=[a['WFWorkflowActionParameters'] for a in actions[:idx] if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.documentpicker.save' and 'YOS-JOURNAL-GPT-FINALCHECK-' in repr(a.get('WFWorkflowActionParameters',{}))]
+        if len(drafts)!=1 or len(finals)!=1 or finals[0].get('WFInput',{}).get('Value',{}).get('OutputName')!='finalReviewText' or 'YOS_FINAL_REVIEW_PASS_V1' not in repr(actions[:idx]):
+            raise SystemExit('missing draft backup or independent final check')
+        save=drafts[0]
     if save.get('WFSaveFileOverwrite') is not False or save.get('WFAskWhereToSave') is not False:
         raise SystemExit('unsafe save action')
     attachment=save.get('WFInput')
@@ -143,6 +150,46 @@ def convert_to_clarity(path:Path):
         raise SystemExit('unexpected handoff mode')
     def literal(s):
         return {'Value':{'string':s},'WFSerializationType':'WFTextTokenString'}
+    # Only the new review-first workflow needs the extra offline provenance gate.
+    # Existing legacy conversion path stays identical.
+    final_actions=[a for a in actions[:idx] if a.get('WFWorkflowActionIdentifier')=='is.workflow.actions.documentpicker.save' and 'YOS-JOURNAL-GPT-FINALCHECK-' in repr(a.get('WFWorkflowActionParameters',{}))]
+    gate=None
+    if final_actions:
+        if len(final_actions)!=1 or attachment.get('OutputName')!='journalBoundText':
+            raise SystemExit('invalid final check binding')
+        review=final_actions[0]['WFWorkflowActionParameters']['WFInput']
+        rt=review.get('Value',{})
+        if review.get('WFSerializationType')!='WFTextTokenAttachment' or rt.get('OutputName')!='finalReviewText' or not rt.get('OutputUUID'):
+            raise SystemExit('invalid final review receipt')
+        # Bind exact original draft+research and the actual independent GPT result.
+        sep='\n<<YOS_FINAL_REVIEW_RECEIPT_V1>>\n'
+        bound_id=str(uuid.uuid4()).upper()
+        bound={'WFWorkflowActionIdentifier':'is.workflow.actions.gettext','WFWorkflowActionParameters':{
+            'UUID':bound_id,'CustomOutputName':'journalFinalCheckInput','WFTextActionText':{'WFSerializationType':'WFTextTokenString','Value':{
+            'string':'\ufffc'+sep+'\ufffc','attachmentsByRange':{'{0, 1}':copy.deepcopy(attachment),'{'+str(len(sep)+1)+', 1}':copy.deepcopy(rt)}}}}}
+        old_script=prior['script']['Value']['string']
+        begin=old_script.index('function validProvenance(raw)')
+        end=old_script.index('async function transfer(input)',begin)
+        gate_js=old_script[begin:end]+"""
+try{
+ const input=args.shortcutParameter;
+ const parts=typeof input==='string'?input.split('\\n<<YOS_FINAL_REVIEW_RECEIPT_V1>>\\n'):[];
+ const raw=parts[0]||'';
+ const evidence=raw.split('<<YOS_JOURNAL_RESEARCH_PROVENANCE_V1>>');
+ const ok=parts.length===2&&parts[1].trim()==='YOS_FINAL_REVIEW_PASS_V1'&&
+   raw.slice(0,260).includes('YOS_EDITORIAL_DRAFT_V1')&&raw.includes('公開不可・要審査')&&
+   evidence.length===2&&evidence[1].trim().startsWith('YOS_RESEARCH_APPROVED_V1\\n')&&validProvenance(raw);
+ Script.setShortcutOutput(ok?raw:'YOS_FINAL_REVIEW_HOLD_V1');
+}catch(_){Script.setShortcutOutput('YOS_FINAL_REVIEW_HOLD_V1');}
+finally{Script.complete();}
+"""
+        gate_id=str(uuid.uuid4()).upper()
+        gate=copy.deepcopy(actions[idx])
+        gp=gate['WFWorkflowActionParameters']
+        gp['UUID']=gate_id;gp['CustomOutputName']='journalFinalBoundText'
+        gp['script']={'WFSerializationType':'WFTextTokenString','Value':{'string':gate_js}}
+        gp['parameter']={'WFSerializationType':'WFTextTokenAttachment','Value':{'Type':'ActionOutput','OutputUUID':bound_id,'OutputName':'journalFinalCheckInput'}}
+        attachment={'Type':'ActionOutput','OutputUUID':gate_id,'OutputName':'journalFinalBoundText'}
     raw={'WFSerializationType':'WFTextTokenString','Value':{'string':'\ufffc','attachmentsByRange':{'{0, 1}':copy.deepcopy(attachment)}}}
     packet={'source':literal('journal'),'captureId':literal('journal:auto'),'routeMode':literal('raw-only'),'rawText':raw}
     dictionary_id=str(uuid.uuid4()).upper()
@@ -153,15 +200,16 @@ def convert_to_clarity(path:Path):
     runner['WFWorkflowActionIdentifier']='dk.simonbs.Scriptable.ParameterizedRunScriptIntent'
     p=runner['WFWorkflowActionParameters'];del p['script'];p['fileName']='YOS Clarity Inbox Bridge'
     p['parameter']={'WFSerializationType':'WFTextTokenAttachment','Value':{'Type':'ActionOutput','OutputUUID':dictionary_id,'OutputName':'journalClarityPacket'}}
-    actions[idx:idx+1]=[dictionary,runner]
+    replacement=([bound,gate] if gate else [])+[dictionary,runner]
+    actions[idx:idx+1]=replacement
     encoded=plistlib.dumps(root,fmt=plistlib.FMT_XML,sort_keys=False)
     read=plistlib.loads(encoded)
     check=read['WFWorkflowActions'];old=original['WFWorkflowActions']
-    assert check[:idx]==old[:idx] and check[idx+2:]==old[idx+1:]
+    assert check[:idx]==old[:idx] and check[idx+len(replacement):]==old[idx+1:]
     assert all(read[k]==v for k,v in original.items() if k!='WFWorkflowActions')
-    assert check[idx]==dictionary and check[idx+1]==runner
-    assert check[idx]['WFWorkflowActionParameters']['WFItems']['Value']['WFDictionaryFieldValueItems'][-1]['WFValue']==raw
-    assert 'script' not in check[idx+1]['WFWorkflowActionParameters']
+    assert check[idx:idx+len(replacement)]==replacement
+    assert check[idx+len(replacement)-2]['WFWorkflowActionParameters']['WFItems']['Value']['WFDictionaryFieldValueItems'][-1]['WFValue']==raw
+    assert 'script' not in check[idx+len(replacement)-1]['WFWorkflowActionParameters']
     path.write_bytes(encoded)
     assert plistlib.loads(path.read_bytes())==read
     print('JOURNAL -> existing Clarity Bridge named action PASS (unsigned)')
