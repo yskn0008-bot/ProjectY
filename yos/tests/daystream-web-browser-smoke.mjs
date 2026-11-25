@@ -339,7 +339,7 @@ try{
   await p.reload({waitUntil:'domcontentloaded'});
   const cells=await p.locator('#tl .card').evaluateAll(nodes=>nodes.map(node=>{
    const r=node.getBoundingClientRect(),b=node.querySelector('b'),time=node.querySelector('small');
-   return {id:Number(node.dataset.id),top:r.top,bottom:r.bottom,width:r.width,
+   return {id:Number(node.dataset.id),top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,parallel:node.classList.contains('parallel-card'),
     backdrop:node.classList.contains('yos-backdrop'),foreground:node.classList.contains('yos-foreground'),
     thickness:r.height,band:node.dataset.durationBand||'',radius:getComputedStyle(node).borderRadius,
     title:b.textContent,time:time.textContent,color:getComputedStyle(node).backgroundColor,
@@ -354,7 +354,7 @@ try{
   for(const id of [2101,2102,2103,2104,2105,2106,2107,2108,2110,2111,2112]){
    const item=byId.get(id);
    assert.equal(item.foreground,true,'full-width task '+id);
-   assert.ok(item.width>width*.6,'title and hours have enough horizontal space: '+id);
+   assert.ok(item.width>width*(item.parallel ? .28 : .6),'title and hours have enough horizontal space: '+id);
    assert.ok(['normal','nowrap'].includes(item.whiteSpace),'compact rows or wrapped long titles: '+id);
    assert.equal(item.textOK,true,'title not cropped: '+id);
    assert.equal(item.timeOK,true,'full start-end times visible: '+id);
@@ -414,7 +414,8 @@ try{
 
   assert.deepEqual(await p.locator('#tl .hour span').allTextContents(),Array.from({length:24},(_,i)=>String(i).padStart(2,'0')+':00'));
   const visible=cells.filter(c=>!c.backdrop).sort((a,b)=>a.top-b.top);
-  for(let i=1;i<visible.length;i++)assert.ok(visible[i].top>=visible[i-1].bottom-2,'dense tasks do not cover one another: '+visible[i-1].id+'/'+visible[i].id);
+  for(let i=0;i<visible.length;i++)for(let j=i+1;j<visible.length;j++){const a=visible[i],b=visible[j];assert.ok(a.bottom<=b.top+1||b.bottom<=a.top+1||a.right<=b.left+1||b.right<=a.left+1,'no rectangle collision '+a.id+'/'+b.id);}
+  for(const [a,b] of [[2102,2103],[2104,2105]]){assert.equal(byId.get(a).parallel,true);assert.equal(byId.get(b).parallel,true);assert.ok(byId.get(a).right<=byId.get(b).left+1||byId.get(b).right<=byId.get(a).left+1);}
   assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no sideways overflow');
   const grip=p.locator('#tl [data-id="2102"] .task-drag-grip');
   // iPhone has a fixed bottom navigation bar: position the grip in the visible center,

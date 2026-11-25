@@ -70,15 +70,16 @@ try{
   await page.waitForTimeout(90);
   const dragDebug=await dragCard.evaluate(el=>({active:el.classList.contains('drag-preview'),css:el.className,transform:el.style.transform,scroll:scrollY}));
   assert.equal(dragDebug.active,true,'bar lifts under the finger: '+JSON.stringify({dragDebug,events:await page.evaluate(()=>window.__dragDebug)}));
-  assert.equal(await page.locator('#tl .card.drag-neighbor').count(),0,'other bars never move during drag');
-  assert.deepEqual(await page.locator('#tl .card:not(.drag-preview)').evaluateAll(nodes=>nodes.map(x=>[x.dataset.id,x.offsetTop,x.style.transform])),otherPositions);
+  const yielded=await page.locator('#tl .card.drag-neighbor').evaluateAll(nodes=>nodes.map(x=>Math.abs(parseFloat(x.style.getPropertyValue('--yos-yield')))));
+  assert.ok(yielded.length<=2&&yielded.every(x=>x<=28),'only nearby bars yield temporarily');
+  assert.deepEqual(await page.evaluate(()=>items.filter(x=>x.t!=='歯磨き').map(x=>[x.id,x.s,x.d])),beforeOther,'preview never changes other task times');
   assert.equal(await page.locator('#flowDragHint').isVisible(),false,'no floating drag warning');
   await page.mouse.up();
   assert.equal(await page.locator('#moveDialog').isVisible(),false,'drop never opens placement advice');
   assert.notEqual(await page.evaluate(()=>items.find(x=>x.t==='歯磨き').s),beforeDrag,'drop saves the new time');
   assert.deepEqual(await page.evaluate(()=>items.filter(x=>x.t!=='歯磨き').map(x=>[x.id,x.s,x.d])),beforeOther,'other task times remain unchanged');
-  const foreground=await page.locator('#tl .card.yos-foreground').evaluateAll(nodes=>nodes.map(x=>({top:x.offsetTop,bottom:x.offsetTop+x.offsetHeight})).sort((a,b)=>a.top-b.top));
-  for(let i=1;i<foreground.length;i++)assert.ok(foreground[i].top>=foreground[i-1].bottom,'cards never cover adjacent text');
+  const foreground=await page.locator('#tl .card.yos-foreground').evaluateAll(nodes=>nodes.map(x=>({top:x.offsetTop,bottom:x.offsetTop+x.offsetHeight,left:x.offsetLeft,right:x.offsetLeft+x.offsetWidth})));
+  for(let i=0;i<foreground.length;i++)for(let j=i+1;j<foreground.length;j++){const a=foreground[i],b=foreground[j];assert.ok(a.bottom<=b.top+1||b.bottom<=a.top+1||a.right<=b.left+1||b.right<=a.left+1,'no rectangle collision');}
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),null,'direct Notion drag never changes the manual plan');
   assert.equal(await page.locator('#moveToast').isVisible(),true,'compact confirmation appears after saving');
   await page.locator('#moveUndo').click();
@@ -100,6 +101,7 @@ try{
   assert.equal(await page.locator('#moveDialog').isVisible(),false,'overlapping drop does not open placement advice');
   assert.equal(await page.evaluate(()=>placementAt(items.find(x=>x.t==='起床'),items.find(x=>x.t==='起床').s).overlaps.some(x=>x.t==='歯磨き')),true,'collision is retained without moving the other task');
   assert.equal(await page.locator('#tl .card.task').filter({hasText:'起床'}).locator('.layer-status').innerText(),'！');
+  assert.equal(await startCard.evaluate(el=>el.classList.contains('parallel-card')),true,'overlapping tasks use parallel lanes');
   await page.locator('#moveUndo').click();
   assert.equal(await page.evaluate(()=>items.find(x=>x.t==='起床').s),clashStart,'overlapping drop can be undone');
   await startCard.locator('.task-drag-grip').click();
@@ -127,7 +129,12 @@ try{
   assert.equal(await page.locator('#yosNotionEditSheet').count(),0);
   assert.equal(await page.locator('#yosNotionMoveBar').count(),0);
   await page.emulateMedia({colorScheme:'dark'});
-  assert.equal(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor),'rgb(17, 19, 24)');
+  assert.equal(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor),'rgb(79, 84, 91)');
+  const darkEdge=await page.locator('#tl .card.yos-foreground').first().evaluate(el=>({color:getComputedStyle(el).borderTopColor,width:getComputedStyle(el).borderTopWidth}));
+  assert.equal(darkEdge.width,'1px');assert.notEqual(darkEdge.color,'rgba(0, 0, 0, 0)');
+  assert.equal(await page.locator('#moveImpactDetails').count(),1,'compact disclosure keeps original impact information');
+  assert.equal(await page.locator('#moveEvidence').evaluate(el=>el.tagName),'DETAILS');
+  assert.equal(await page.evaluate(()=>yosMotionFrames(100).length),33,'settle uses sampled spring motion');
   await page.emulateMedia({colorScheme:'light'});
   assert.equal(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor),'rgb(239, 241, 245)');
   const colors=await page.locator('#tl .card.task').evaluateAll(cards=>cards.map(c=>getComputedStyle(c).backgroundColor));
