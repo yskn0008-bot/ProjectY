@@ -45,6 +45,14 @@ try{
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),store),null,'preview never writes a plan');
   assert.deepEqual(await page.locator('#tl .hour span').allTextContents(),Array.from({length:24},(_,i)=>String(i).padStart(2,'0')+':00'),'all 24 hours visible in standard view');
   await page.waitForFunction(()=>document.querySelector('#tl').getBoundingClientRect().bottom<=document.querySelector('.dock').getBoundingClientRect().top+1);
+  // A viewport/header refit must retain the exact card elements (pointer ownership).
+  await page.evaluate(()=>{window.__stableFitCard=document.querySelector('#tl .card.yos-foreground');window.__beforeFitStamp=overviewFitStamp});
+  await page.setViewportSize({width,height:860});
+  await page.waitForFunction(()=>overviewFitStamp!==window.__beforeFitStamp);
+  assert.equal(await page.evaluate(()=>window.__stableFitCard===document.querySelector('#tl .card.yos-foreground')),true,'viewport refit preserves card identity');
+  await page.evaluate(()=>{window.__beforeFitStamp=overviewFitStamp});
+  await page.setViewportSize({width,height:844});
+  await page.waitForFunction(()=>overviewFitStamp!==window.__beforeFitStamp);
   const slim=await page.locator('#tl .card.yos-foreground').evaluateAll(nodes=>nodes.map(x=>x.offsetHeight));
   assert.ok(slim.every(h=>h>=26&&h<=42),'normal rows stay compact: '+slim);
   // Native iPhone request: release directly saves; only the selected card moves.

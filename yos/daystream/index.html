@@ -497,6 +497,8 @@ body.yos-daystream-web.flow-editing .top::before{display:none}
 .timeline-legend{margin-top:5px;gap:10px}
 .timeline-wrap{margin-top:12px}
 .timeline[data-density=overview] .hour span{top:-7px;font-size:11px;line-height:14px;color:var(--muted)}
+.timeline[data-density=overview] .tick{left:40px}
+@media(max-width:350px){.timeline[data-density=overview] .tick{left:33px}}
 .timeline[data-density=overview] .hour::after{content:'';position:absolute;left:var(--card-inset);right:0;top:0;border-top:1px dotted var(--line);opacity:.65}
 .timeline[data-density=overview] .card.yos-foreground[data-flow-tone]{border-radius:7px;padding:2px 5px 2px 8px;gap:5px}
 .timeline[data-density=overview] .card.yos-foreground .card-icon{width:16px;height:16px;flex:0 0 16px}
@@ -1372,14 +1374,42 @@ function yosOverviewBudget(){
  const reserve=Math.max(cssNumber(app,'paddingBottom'),dock?.offsetHeight||0,add?.offsetHeight?viewport-add.getBoundingClientRect().top+6:0);
  return Math.max(0,Math.floor(viewport-top-reserve-cssNumber(wrap,'marginBottom')-12));
 }
-let overviewFitFrame=0,overviewFitStamp='';
+let overviewFitFrame=0,overviewFitStamp='',activeTimelineGestures=0;
+// Resizing a header or viewport changes geometry only. Never remove/recreate
+// cards in an observer: a touch or browser locator may already own that node.
+function refitOverviewInPlace(budget,stamp){
+ const sorted=[...items].filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.d)&&x.d>0&&x.s>=0&&x.s+x.d<=1440).sort((a,b)=>a.s-b.s||a.id-b.id);
+ const cards=[...tl.querySelectorAll('.card')],ticks=[...tl.querySelectorAll('.tick')],hours=[...tl.querySelectorAll('.hour')];
+ if(cards.length!==sorted.length||ticks.length!==sorted.length||hours.length!==24||cards.some((card,i)=>card.dataset.id!==String(sorted[i].id)))return;
+ const backdrops=yosBackdropRows(sorted),offsets=new Map();
+ elasticAxis=yosOverviewAxis(sorted,budget,backdrops);
+ let lastBottom=-2;
+ for(let i=0;i<sorted.length;i++){
+  const item=sorted[i],card=cards[i],natural=yFor(item.s),backdrop=backdrops.has(item);
+  const height=backdrop?Math.max(1,yFor(item.s+item.d)-natural-2):yosOverviewCard(item).height;
+  const offset=backdrop?0:(offsets.get(item.s)||0);
+  if(!backdrop){
+   offsets.set(item.s,offset+height+yosCardGap);
+   const inline=yosOverviewCard(item).inline;
+   card.classList.toggle('compact-line',inline);
+   card.classList.toggle('compact-wrap',!inline);
+  }
+  card.classList.toggle('tiny',height<30&&!(item.kind==='task'&&!item.f));
+  card.style.top=(natural+offset)+'px';card.style.height=height+'px';
+  ticks[i].style.top=(natural-3)+'px';
+  lastBottom=Math.max(lastBottom,natural+offset+height);
+ }
+ hours.forEach((hour,i)=>hour.style.top=yFor(i*60)+'px');
+ tl.style.height=(Math.max(yFor(1440),lastBottom)+12)+'px';
+ overviewFitStamp=stamp;updateNow();
+}
 function scheduleOverviewFit(){
  if(overviewFitFrame)return;
  overviewFitFrame=requestAnimationFrame(()=>{
   overviewFitFrame=0;
-  if(density!=='overview'||!elasticEnabled||!tl.getClientRects().length||tl.querySelector('.drag-preview,.press-armed'))return;
-  const stamp=window.innerWidth+':'+yosOverviewBudget();
-  if(stamp!==overviewFitStamp)render();
+  if(density!=='overview'||!elasticEnabled||!tl.getClientRects().length||activeTimelineGestures||tl.querySelector('.drag-preview,.press-armed'))return;
+  const budget=yosOverviewBudget(),stamp=window.innerWidth+':'+budget;
+  if(stamp!==overviewFitStamp)refitOverviewInPlace(budget,stamp);
  });
 }
 let elasticEnabled=true,elasticAxis=null;
@@ -2056,6 +2086,7 @@ function wireTaskGestures(el,item){
  const begin=(x,y,id,fromGrip)=>{
   if(gesture)return;
   gesture={id,x,y,startX:x,startY:y,scrollY:window.scrollY,fromGrip,mode:fromGrip?'armed':'tap'};
+  activeTimelineGestures++;
   if(id!=='touch'){
    // Follow the pointer across neighboring cards even when capture is lost.
    document.addEventListener('pointermove',trackPointer,{passive:false});
@@ -2107,7 +2138,8 @@ function wireTaskGestures(el,item){
    el.style.transform='translate3d(0,'+offset()+'px,0)';
    previousRect=el.getBoundingClientRect();
   }
-  gesture=null;dragHint.hidden=true;clearTimers();cancelAnimationFrame(paintFrame);paintFrame=0;
+  gesture=null;activeTimelineGestures=Math.max(0,activeTimelineGestures-1);scheduleOverviewFit();
+  dragHint.hidden=true;clearTimers();cancelAnimationFrame(paintFrame);paintFrame=0;
   document.removeEventListener('pointermove',trackPointer);
   document.removeEventListener('pointerup',releasePointer);
   document.removeEventListener('pointercancel',cancelPointer);

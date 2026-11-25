@@ -11,7 +11,9 @@ try{
  await page.locator('#timelinePanel').waitFor();
  const dateTop=await page.locator('.flow-date-row').boundingBox();
  const connectionTop=await page.locator('.native-tools summary').boundingBox();
- assert.ok(dateTop && dateTop.y <= 12,'date starts at the top on a normal mobile viewport');
+ const header=await page.locator('.top').boundingBox();
+ assert.ok(header && header.y<=12 && dateTop && dateTop.y<=36,'brand and date start at the top on a normal mobile viewport');
+ assert.equal(await page.locator('.top').evaluate(el=>getComputedStyle(el,'::before').content),'"DAYSTREAM"','approved brand above date');
  assert.ok(connectionTop && dateTop.y+dateTop.height<=connectionTop.y,'connection controls are below the date');
 
  await page.locator('.native-tools summary').click();
