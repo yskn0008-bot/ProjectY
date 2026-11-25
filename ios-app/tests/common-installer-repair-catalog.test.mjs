@@ -242,15 +242,23 @@ test('new installer validates the extension globally and installs only the pinne
  const taxi=fs.readFileSync(new URL('../scriptable/YOS TAXI.js',import.meta.url),'utf8');
  const extension=catalog.additional_targets;
  assert.equal(catalog.targets.length,30);
- assert.equal(extension.length,1);
- const entry=extension[0];
+ assert.ok(extension.length>=2&&extension.length<=30);
+ const entry=extension.find(x=>x.id==='yos-taxi');
+ assert.ok(entry);
+ const memory=extension.find(x=>x.id==='aion-memory-read');
+ assert.ok(memory);
+ assert.equal(memory.name,'YOS CORE Memory Read');
+ assert.equal(memory.path,'ios-app/scriptable/YOS CORE Memory Read.js');
+ const memorySource=fs.readFileSync(new URL('../scriptable/YOS CORE Memory Read.js',import.meta.url),'utf8');
+ assert.equal(sha(memorySource),memory.sha256);
+ assert.match(memorySource,/^\/\/ YOS_SCRIPT_NAME: YOS CORE Memory Read$/m);
  assert.equal(entry.id,'yos-taxi');assert.equal(entry.name,'YOS TAXI');
  assert.equal(sha(taxi),entry.sha256);
  assert.match(taxi,/^\/\/ YOS_SCRIPT_NAME: YOS TAXI$/m);
  assert.doesNotMatch(taxi,/const SEED|43050|21950|14750/);
  const getValidation=(source)=>vm.runInNewContext(source.slice(0,source.indexOf('async function get('))+';validateCatalog');
  assert.equal(getValidation(legacy)(catalog).length,30);
- assert.equal(getValidation(official)(catalog).length,31);
+ assert.equal(getValidation(official)(catalog).length,30+extension.length);
  assert.throws(()=>getValidation(official)({...catalog,additional_targets:[catalog.targets[0]]}));
  assert.throws(()=>getValidation(official)({...catalog,additional_targets:[null]}));
  assert.throws(()=>getValidation(official)({...catalog,additional_targets:'bad'}));
@@ -282,4 +290,28 @@ test('device-reported pink magic legacy header and missing final LF upgrade safe
  const rejected=await execute({script:installed+'\n// user edit'});
  assert.equal(rejected.chosen.writes.length,0);
  assert.equal(rejected.requests.length,0);
+});
+
+test('installer installs only the pinned AION memory reader and preserves TAXI and Clarity',async()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
+ const entry=catalog.additional_targets.find(x=>x.id==='aion-memory-read');
+ const source=fs.readFileSync(new URL('../scriptable/YOS CORE Memory Read.js',import.meta.url),'utf8');
+ assert.equal(sha(source),entry.sha256);
+ const cloud=store('/cloud'),local=store('/local'),alerts=[],requests=[];
+ cloud.files.set('/cloud/YOS Common Installer.js',official);
+ cloud.files.set('/cloud/YOS TAXI.js','protected-taxi');
+ cloud.files.set('/cloud/YOS Clarity Inbox Bridge.js','protected-clarity');
+ cloud.remove=p=>{cloud.deletions.push(p);cloud.files.delete(p);};
+ local.remove=p=>{local.deletions.push(p);local.files.delete(p);};
+ class Request{constructor(url){this.url=url;this.response={statusCode:200};}async loadString(){requests.push(this.url);if(this.url.endsWith('yos-common-installer-catalog.json'))return JSON.stringify(catalog);if(this.url.includes(entry.commit)&&this.url.includes('YOS%20CORE%20Memory%20Read.js'))return source;this.response.statusCode=404;return 'unapproved';}}
+ class Alert{addAction(){}addCancelAction(){}async presentAlert(){alerts.push(this.title);return 0;}}
+ const ctx={FileManager:{iCloud:()=>cloud,local:()=>local},Request,Alert,Script:{complete:()=>{}},args:{queryParameters:{script:'aion-memory-read'}},Safari:{open:()=>{}}};
+ await new vm.Script('(async()=>{\n'+official+'\n})()').runInNewContext(ctx,{timeout:6000});
+ assert.equal(cloud.files.get('/cloud/YOS CORE Memory Read.js'),source);
+ assert.equal(cloud.files.get('/cloud/YOS TAXI.js'),'protected-taxi');
+ assert.equal(cloud.files.get('/cloud/YOS Clarity Inbox Bridge.js'),'protected-clarity');
+ assert.equal(cloud.files.get('/cloud/YOS Common Installer.js'),official);
+ assert.equal(local.writes.length,0);
+ assert.equal(requests.length,2);
+ assert.match(alerts.at(-1),/登録完了/);
 });
