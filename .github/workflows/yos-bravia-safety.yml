@@ -15,9 +15,19 @@ jobs:
         working-directory: ios-app
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Native scope shadow (no build skipping)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        working-directory: .
+        run: |
+          scope="$(node tools/factory-core/catalog-scope.cjs scope "$BASE_SHA" "$HEAD_SHA" 2>/dev/null || echo full)"
+          printf 'native_scope_shadow=%s; native_build=unchanged\n' "$scope"
       - run: npm install
       - run: npm test
       - run: npm run prepare:web
