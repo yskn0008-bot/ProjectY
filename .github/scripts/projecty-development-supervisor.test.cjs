@@ -51,7 +51,7 @@ test('bounded recovery exhaustion becomes FAILED_SAFE when no safe route remains
   });
   assert.equal(decision.decision, 'FAILED_SAFE');
   assert.equal(decision.allowedAction, null);
-  assert.equal(shouldNotify(decision), true);
+  assert.equal(shouldNotify(decision), false);
   const mapped = toLegacyDecision(decision, 'a'.repeat(40));
   assert.equal(mapped.decision, 'HOLD');
 });
@@ -60,7 +60,9 @@ test('same unresolved problem gets one deterministic supervisor attempt only', (
   const first = deterministicDecision({ targetState: { phase: 'NEEDS_YOS', failures: { a: { failureClass: 'TASK_STALLED' } } } });
   const second = deterministicDecision({ targetState: { phase: 'NEEDS_YOS', failures: { a: { failureClass: 'TASK_STALLED' } } }, alreadyAttempted: true });
   assert.equal(first.decision, 'CONTINUE');
-  assert.equal(second.decision, 'WAIT_USER');
+  assert.equal(second.decision, 'FAILED_SAFE');
+  assert.equal(toLegacyDecision(second, 'a'.repeat(40)).decision, 'HOLD');
+  assert.equal(shouldNotify(second), false);
 });
 
 test('fingerprint ignores head changes and stays tied to the development problem', () => {
@@ -80,4 +82,12 @@ test('legacy mapping never grants merge, deploy, credential or destructive actio
 test('contract validation rejects missing objective or criteria', () => {
   assert.throws(() => normalizeTaskContract({ completionCriteria: ['x'] }));
   assert.throws(() => normalizeTaskContract({ objective: 'x', completionCriteria: [] }));
+});
+
+test('external wait stays owned by the existing recovery scheduler', () => {
+  assert.equal(deterministicDecision({ targetState: { phase: 'EXTERNAL_WAIT', next: 'deploy rate limit' }, alreadyAttempted: true }), null);
+});
+test('independent machine criteria precede a remaining human gate', () => {
+  const state = completionState({ objective: 'ship', completionCriteria: [{ description: 'device', userOnly: true }, { description: 'tests' }] });
+  assert.equal(state.decision, 'CONTINUE');
 });
