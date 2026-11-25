@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-25T21:28:24+09:00",
+  "updated_at": "2026-11-25T21:45:21+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -41,16 +41,6 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/832",
       "updated_at": "2026-11-25T07:25:34Z"
-    },
-    {
-      "id": "github-pr-930",
-      "title": "PR #930 YOS ファイル調査｜Siri対応・iCloud Drive読み取り専用棚卸し",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/930",
-      "updated_at": "2026-11-23T21:43:21Z"
     },
     {
       "id": "github-pr-931",
@@ -111,6 +101,16 @@
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/961",
       "updated_at": "2026-11-25T07:05:58Z"
+    },
+    {
+      "id": "github-pr-966",
+      "title": "PR #966 YOS HOME｜4家電・上下カスタムリモコン統合（TEST）",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/966",
+      "updated_at": "2026-11-25T12:44:48Z"
     },
     {
       "id": "github-issue-10",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-25T21:28:24+09:00",
+      "last_update": "2026-11-25T21:45:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 77件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 78件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-25T21:28:24+09:00",
+      "last_update": "2026-11-25T21:45:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-25T21:28:24+09:00",
+      "last_update": "2026-11-25T21:45:21+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "5db0fbf1fa9a80afabbf6338abf270a11659c26f6e5befd3a44ae44408d55df0"
+  "github_snapshot_hash": "bc389c2a460e14bd5e5a6ffd16708dddb7ced77980071f71ff3024ab7ae829fe"
 }
