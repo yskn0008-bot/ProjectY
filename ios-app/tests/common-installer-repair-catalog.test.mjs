@@ -252,6 +252,11 @@ test('new installer validates the extension globally and installs only the pinne
  const memorySource=fs.readFileSync(new URL('../scriptable/YOS CORE Memory Read.js',import.meta.url),'utf8');
  assert.equal(sha(memorySource),memory.sha256);
  assert.match(memorySource,/^\/\/ YOS_SCRIPT_NAME: YOS CORE Memory Read$/m);
+ const output=extension.find(x=>x.id==='aion-output');
+ assert.ok(output);
+ assert.equal(output.name,'YOS AION OUTPUT');
+ assert.equal(output.path,'ios-app/scriptable/YOS AION OUTPUT.js');
+ assert.equal(sha(fs.readFileSync(new URL('../scriptable/YOS AION OUTPUT.js',import.meta.url),'utf8')),output.sha256);
  assert.equal(entry.id,'yos-taxi');assert.equal(entry.name,'YOS TAXI');
  assert.equal(sha(taxi),entry.sha256);
  assert.match(taxi,/^\/\/ YOS_SCRIPT_NAME: YOS TAXI$/m);
@@ -313,5 +318,30 @@ test('installer installs only the pinned AION memory reader and preserves TAXI a
  assert.equal(cloud.files.get('/cloud/YOS Common Installer.js'),official);
  assert.equal(local.writes.length,0);
  assert.equal(requests.length,2);
+ assert.match(alerts.at(-1),/登録完了/);
+});
+
+test('installer installs pinned AION OUTPUT without modifying memory reader or Clarity',async()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
+ const entry=catalog.additional_targets.find(x=>x.id==='aion-output');
+ const source=fs.readFileSync(new URL('../scriptable/YOS AION OUTPUT.js',import.meta.url),'utf8');
+ assert.equal(sha(source),entry.sha256);
+ const cloud=store('/cloud'),local=store('/local'),alerts=[],requests=[];
+ cloud.files.set('/cloud/YOS Common Installer.js',official);
+ cloud.files.set('/cloud/YOS CORE Memory Read.js','protected-memory');
+ cloud.files.set('/cloud/YOS Clarity Inbox Bridge.js','protected-clarity');
+ cloud.files.set('/cloud/YOS TAXI.js','protected-taxi');
+ cloud.remove=p=>{cloud.deletions.push(p);cloud.files.delete(p);};
+ local.remove=p=>{local.deletions.push(p);local.files.delete(p);};
+ class Request{constructor(url){this.url=url;this.response={statusCode:200};}async loadString(){requests.push(this.url);if(this.url.endsWith('yos-common-installer-catalog.json'))return JSON.stringify(catalog);if(this.url.includes(entry.commit)&&this.url.includes('YOS%20AION%20OUTPUT.js'))return source;this.response.statusCode=404;return 'unapproved';}}
+ class Alert{addAction(){}addCancelAction(){}async presentAlert(){alerts.push(this.title);return 0;}}
+ const ctx={FileManager:{iCloud:()=>cloud,local:()=>local},Request,Alert,Script:{complete:()=>{}},args:{queryParameters:{script:'aion-output'}},Safari:{open:()=>{}}};
+ await new vm.Script('(async()=>{\n'+official+'\n})()').runInNewContext(ctx,{timeout:6000});
+ assert.equal(cloud.files.get('/cloud/YOS AION OUTPUT.js'),source);
+ assert.equal(cloud.files.get('/cloud/YOS CORE Memory Read.js'),'protected-memory');
+ assert.equal(cloud.files.get('/cloud/YOS Clarity Inbox Bridge.js'),'protected-clarity');
+ assert.equal(cloud.files.get('/cloud/YOS TAXI.js'),'protected-taxi');
+ assert.equal(cloud.files.get('/cloud/YOS Common Installer.js'),official);
+ assert.equal(local.writes.length,0);assert.equal(requests.length,2);
  assert.match(alerts.at(-1),/登録完了/);
 });
