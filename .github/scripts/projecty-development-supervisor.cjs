@@ -46,8 +46,8 @@ function normalizeTaskContract(value = {}) {
 function completionState(contract) {
   const task = normalizeTaskContract(contract);
   const requiredUser = task.completionCriteria.find((criterion) => criterion.userOnly && !criterion.verified);
-  if (requiredUser) return { decision: 'WAIT_USER', reason: requiredUser.description, allowedAction: null, task };
   const incomplete = task.completionCriteria.filter((criterion) => !criterion.verified);
+  if (requiredUser && incomplete.every((criterion) => criterion.userOnly)) return { decision: 'WAIT_USER', reason: requiredUser.description, allowedAction: null, task };
   if (!incomplete.length) return { decision: 'COMPLETE', reason: 'all completion criteria are verified', allowedAction: null, task };
   return { decision: 'CONTINUE', reason: `${incomplete.length} completion criteria remain`, allowedAction: null, task };
 }
@@ -76,12 +76,15 @@ function deterministicDecision({ target, targetState = {}, alreadyAttempted = fa
   const next = String(targetState.next || '');
   const failure = failureClass(targetState);
 
+  // Issue #232 owns external wait and its bounded resume schedule.
+  if (phase === 'EXTERNAL_WAIT') return null;
+
   if (USER_ONLY_RE.test(next) || CONFLICT_RE.test(next) || failure === 'BRANCH_CONFLICT') {
     return { decision: 'WAIT_USER', reason: next || failure || 'human-only development boundary', allowedAction: null };
   }
 
   if (alreadyAttempted) {
-    return { decision: 'WAIT_USER', reason: 'deterministic supervisor recovery was already attempted for the same unresolved problem', allowedAction: null };
+    return { decision: 'FAILED_SAFE', reason: 'bounded supervisor recovery exhausted; no human-only action identified', allowedAction: null };
   }
 
   const actionByFailure = {
@@ -142,7 +145,7 @@ function toLegacyDecision(decision, targetHead) {
 }
 
 function shouldNotify(decision) {
-  return Boolean(decision && (decision.decision === 'WAIT_USER' || decision.decision === 'FAILED_SAFE' || decision.decision === 'COMPLETE'));
+  return Boolean(decision && (decision.decision === 'WAIT_USER' || decision.decision === 'COMPLETE'));
 }
 
 module.exports = {
