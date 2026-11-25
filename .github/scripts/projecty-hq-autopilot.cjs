@@ -361,6 +361,9 @@ async function processEvent({ api, eventName, payload = {}, dryRun = false, now 
     const key = targetKey(pr);
     const target = compactTarget(state.targets[key], pr, now); state.targets[key] = target;
     if (eventName === 'schedule') {
+      // A parked external dependency must not consume the recovery slot for
+      // another independent target, including when main moves meanwhile.
+      if (target.phase === 'EXTERNAL_WAIT' && now < Date.parse(target.externalWait?.retryAt || target.progressAt || 0)) continue;
       const branch = branchCondition(pr);
       if (!selected && branch === 'BRANCH_CONFLICT') {
         target.phase = 'NEEDS_YOS'; target.next = 'branch conflict requires scoped human review'; selected = { key, target, action: 'NEEDS_YOS' };
