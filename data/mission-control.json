@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-25T22:04:48+09:00",
+  "updated_at": "2026-11-25T22:16:41+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -53,6 +53,16 @@
       "updated_at": "2026-11-25T07:25:34Z"
     },
     {
+      "id": "github-pr-931",
+      "title": "PR #931 fix(installer): issue #900 safe one-time inline recovery via existing Shortcut Factory",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/931",
+      "updated_at": "2026-11-24T01:04:30Z"
+    },
+    {
       "id": "github-pr-943",
       "title": "PR #943 TAXI: private Notion sales import without sign-in",
       "type": "GitHub PR",
@@ -103,16 +113,6 @@
       "updated_at": "2026-11-25T07:05:58Z"
     },
     {
-      "id": "github-pr-969",
-      "title": "PR #969 YOS DISCOVERY｜既存共通Installer・公開資料実機診断",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/969",
-      "updated_at": "2026-11-25T13:03:44Z"
-    },
-    {
       "id": "github-issue-10",
       "title": "Issue #10 Mission Control v2：GitHubのIssue・PR・Commitを自動集約する",
       "type": "GitHub Issue",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-25T13:03:58Z"
+      "updated_at": "2026-11-25T13:15:45Z"
     },
     {
       "id": "github-issue-234",
@@ -215,39 +215,39 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-fa618dd2b0fa",
+      "title": "Merge pull request #969 from yskn0008-bot/discovery/scriptable-preflight-release",
+      "completed_at": "2026-11-25T13:15:48Z",
+      "result": "GitHub mainへ反映（fa618dd）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/fa618dd2b0fa51e4e3b0fb8eb33df43333265041"
+    },
+    {
+      "id": "github-commit-f23d9b80b47a",
+      "title": "Append DISCOVERY diagnostic without altering other catalog entries",
+      "completed_at": "2026-11-25T13:01:32Z",
+      "result": "GitHub mainへ反映（f23d9b8）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f23d9b80b47a7dd5ef9de472ebea5cb990003b47"
+    },
+    {
+      "id": "github-commit-1e5ebcccce91",
+      "title": "Test DISCOVERY diagnostic and distribution digest",
+      "completed_at": "2026-11-25T13:01:29Z",
+      "result": "GitHub mainへ反映（1e5ebcc）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/1e5ebcccce911b2cbc41ed4f2d3d87f0bbae556e"
+    },
+    {
+      "id": "github-commit-f3cfd9f6a984",
+      "title": "Add approved isolated DISCOVERY device diagnostic on current main",
+      "completed_at": "2026-11-25T13:01:27Z",
+      "result": "GitHub mainへ反映（f3cfd9f）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f3cfd9f6a98450f0ac5a82f89380533f613cffd1"
+    },
+    {
       "id": "github-commit-9ddc59b68635",
       "title": "Merge pull request #966 from yskn0008-bot/feat/yos-home-remote-integration",
       "completed_at": "2026-11-25T13:00:28Z",
       "result": "GitHub mainへ反映（9ddc59b）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/9ddc59b6863570c81a85b149fef9048c5228fd34"
-    },
-    {
-      "id": "github-commit-78eb5b5882bd",
-      "title": "AION OUTPUT: restore v4 after device startup regression (#967)",
-      "completed_at": "2026-11-25T12:57:44Z",
-      "result": "GitHub mainへ反映（78eb5b5）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/78eb5b5882bd9395035dd06f285de540459d0309"
-    },
-    {
-      "id": "github-commit-f9ca958709f3",
-      "title": "Distinguish read-only background polling from device mutations in long-press regression",
-      "completed_at": "2026-11-25T12:46:43Z",
-      "result": "GitHub mainへ反映（f9ca958）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/f9ca958709f377b6219d0c69de12ca8be9a4aa1b"
-    },
-    {
-      "id": "github-commit-8e8e9c440291",
-      "title": "Adapt existing remote startup regression fixture to HOME DOM and explicit reads",
-      "completed_at": "2026-11-25T12:46:10Z",
-      "result": "GitHub mainへ反映（8e8e9c4）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/8e8e9c4402915b68d610678359efc46120fbe1da"
-    },
-    {
-      "id": "github-commit-38b9b1845d1d",
-      "title": "Pin only existing HOME remote TEST target to verified digest",
-      "completed_at": "2026-11-25T12:44:27Z",
-      "result": "GitHub mainへ反映（38b9b18）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/38b9b1845d1ddf6da51cb9ddd7e007e5c96f8686"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-25T22:04:48+09:00",
+      "last_update": "2026-11-25T22:16:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 79件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 78件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-25T22:04:48+09:00",
+      "last_update": "2026-11-25T22:16:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-25T22:04:48+09:00",
+      "last_update": "2026-11-25T22:16:41+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "0053644818c24b40b87bae8e973acee41a7eff3fa15abbf23b398617a8cfa42a"
+  "github_snapshot_hash": "ce07672a68b1f1c387e2af498280750abe7d720a4666f03ae7def5ddb4f6dd22"
 }
