@@ -7,8 +7,9 @@ import {execFileSync} from 'node:child_process';
 const web=await readFile(new URL('../../journal-v2/index.html',import.meta.url),'utf8');
 const scriptable=await readFile(new URL('../../ios-app/scriptable/YOS JOURNAL.js',import.meta.url),'utf8');
 const editionOK=runInNewContext(web.match(/function editionOK\(x,date\)\{[\s\S]*?\n\}/)?.[0]+';editionOK');
-const consumer=scriptable.slice(scriptable.indexOf('const safeUrl='),scriptable.indexOf('let issue=null'));
-const valid=runInNewContext(consumer+';valid');
+const helpers=scriptable.match(/^const validDate=.*;$/m)?.[0]+'\n'+scriptable.match(/^const httpLink=.*;$/m)?.[0]+'\n'+scriptable.match(/^function legacyEdition\(value,today\)\{[\s\S]*?^\}/m)?.[0];
+const consumer=runInNewContext(helpers+';legacyEdition');
+const valid=x=>consumer(x,'2026-11-25');
 const article={category:'TEST',title:'独立した記事',summary:'出典を確認した本文',link:'https://example.org/article'};
 const issue=(date,n)=>({issuedOn:date,articles:Array.from({length:n},()=>({...article}))});
 
@@ -17,12 +18,13 @@ test('Web and Scriptable reject incomplete future issues while retaining approve
   assert.equal(valid(issue('2026-11-20',1)).articles.length,1);
   for(const n of [1,2,4]){
     assert.equal(editionOK(issue('2026-11-24',n),'2026-11-24'),false);
-    assert.throws(()=>valid(issue('2026-11-24',n)),/3記事/);
+    assert.equal(valid(issue('2026-11-24',n)),null);
   }
   assert.equal(editionOK(issue('2026-11-24',3),'2026-11-24'),true);
   assert.equal(valid(issue('2026-11-24',3)).articles.length,3);
   const missing=issue('2026-11-24',3);missing.articles[2].link='';
-  assert.throws(()=>valid(missing),/揃っていません/);
+  assert.equal(valid(missing),null);
+  assert.equal(valid(issue('2026-11-26',3)),null);
 });
 
 test('voice generation rejects partial future issues before contacting synthesis engine',()=>{
