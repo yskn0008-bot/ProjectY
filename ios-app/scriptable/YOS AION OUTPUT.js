@@ -52,8 +52,8 @@ function pageHTML(packet){
  
  /* Shared AION visual refinement. */
  header{padding:6px 16px;gap:8px;flex-wrap:nowrap}header strong{font-size:17px;letter-spacing:.15em;line-height:1.2}header strong small{display:block;font-size:10px;letter-spacing:.02em;font-weight:400;margin-top:3px}#settings{font-size:13px;color:var(--muted);border:0;background:transparent;padding:0 8px}#settingsPanel{flex:none;padding:4px 16px 8px;border-bottom:1px solid var(--line);display:flex;gap:4px;flex-wrap:wrap}#settingsPanel button{font-size:13px;flex:1}main{padding:18px 18px 16px}h1{font-size:1.4em;font-weight:700;line-height:1.32;letter-spacing:.005em;margin:5px 0 10px}.eyebrow{font-size:11px;font-weight:650;letter-spacing:.12em;color:var(--accent)}.summary{border-left:0;padding:0;line-height:var(--lh);margin:0 0 6px;font-size:1.08em}#viewToggle{border:0;background:transparent;padding:0;margin:0;color:var(--accent);font-size:13px}#sourceBox{margin:0}#sourceBox summary{font-size:13px;padding:11px 0}section{margin-top:12px;padding-top:10px}section h2{font-size:14px;color:var(--muted);font-weight:650;letter-spacing:.03em;margin:0 0 6px}#choices{border-top:1px solid var(--line);margin-bottom:10px}#choices button{display:flex;align-items:center;gap:10px;min-height:44px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;margin:0;padding:10px 2px;line-height:1.35}#choices button::before{content:'';flex:0 0 17px;width:17px;height:17px;border:1.5px solid var(--muted);border-radius:50%;box-sizing:border-box}#choices button[aria-pressed="true"]{box-shadow:none;color:var(--accent);font-weight:650}#choices button[aria-pressed="true"]::before{border:5px solid var(--accent)}#followLabel{font-size:13px;color:var(--muted)}textarea{display:block;margin:4px 0 6px;min-height:64px;border-radius:12px;padding:10px 12px}.row{gap:4px}.row button{font-size:13px;border:0;background:transparent;color:var(--accent);padding:6px 8px}.row button[aria-pressed="true"]{border:1px solid var(--accent);border-radius:8px}.note{font-size:12px}.confirmbar{padding:7px 16px calc(8px + env(safe-area-inset-bottom));}#status{font-size:12px;line-height:1.4;margin:0 auto 5px;max-width:760px;min-height:17px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.footerRow{display:flex;gap:8px;max-width:760px;margin:auto}#jump{font-size:13px;flex:0 0 84px;color:var(--accent);background:transparent}#send{flex:1;min-width:0;font-size:16px;border:0;border-radius:12px;letter-spacing:.05em}#send:active,#jump:active{opacity:.8}button:active{opacity:.8}@media(max-height:340px){header{padding:0 12px}main{padding:8px 12px}.confirmbar{padding:3px 12px}#status{-webkit-line-clamp:1}}
- </style></head><body><header><strong>AION <small>OUTPUT · v4.1</small></strong><button id="settings" type="button" aria-expanded="false" aria-controls="settingsPanel">表示設定</button></header><div id="settingsPanel" hidden><button id="density" aria-label="行間切替">行間</button><button id="minus" aria-label="文字を小さく">A−</button><button id="plus" aria-label="文字を大きく">A＋</button><button id="theme" aria-label="配色切替">配色</button></div><main id="scroll"><div id="demoNote" hidden>表示テスト：GPTやNotionには接続しません。</div><p class="eyebrow" id="mode"></p><h1 id="title"></h1><div id="summary" class="summary" hidden></div><button id="viewToggle" type="button" hidden>全文を表示</button><article id="answer"></article><details id="sourceBox" hidden><summary>参考情報・出典</summary><div id="sources"></div></details><section id="actions"><h2>次の操作</h2><div id="choices"></div><label id="followLabel" for="follow">追加質問・自由入力</label><textarea id="follow" maxlength="4000" placeholder="続きを入力"></textarea><div class="row"><button id="standard">標準対話へ</button><button id="save">保存を依頼</button><button id="finish">終了</button></div><p class="note">保存・実行は次の処理で確認します。</p></section></main><footer class="confirmbar"><p id="status" role="status" class="note">選択または入力して送信してください。</p><div class="footerRow"><button id="jump" type="button">操作へ ↓</button><button id="send" type="button">送信</button></div></footer><script>
- const packet=${data};const $=id=>document.getElementById(id);let size=16,theme=0,pending=null,spacious=false,submitted=false;window.aionResult=null;window.aionDeliver=null;
+ </style></head><body><header><strong>AION <small>OUTPUT · v4</small></strong><button id="settings" type="button" aria-expanded="false" aria-controls="settingsPanel">表示設定</button></header><div id="settingsPanel" hidden><button id="density" aria-label="行間切替">行間</button><button id="minus" aria-label="文字を小さく">A−</button><button id="plus" aria-label="文字を大きく">A＋</button><button id="theme" aria-label="配色切替">配色</button></div><main id="scroll"><div id="demoNote" hidden>表示テスト：GPTやNotionには接続しません。</div><p class="eyebrow" id="mode"></p><h1 id="title"></h1><div id="summary" class="summary" hidden></div><button id="viewToggle" type="button" hidden>全文を表示</button><article id="answer"></article><details id="sourceBox" hidden><summary>参考情報・出典</summary><div id="sources"></div></details><section id="actions"><h2>次の操作</h2><div id="choices"></div><label id="followLabel" for="follow">追加質問・自由入力</label><textarea id="follow" maxlength="4000" placeholder="続きを入力"></textarea><div class="row"><button id="standard">標準対話へ</button><button id="save">保存を依頼</button><button id="finish">終了</button></div><p class="note">保存・実行は次の処理で確認します。</p></section></main><footer class="confirmbar"><p id="status" role="status" class="note">選択または入力して確定してください。</p><div class="footerRow"><button id="jump" type="button">操作へ ↓</button><button id="send" type="button">確定</button></div></footer><script>
+ const packet=${data};const $=id=>document.getElementById(id);let size=16,theme=0,pending=null,spacious=false;window.aionResult=null;
  const answer=$("answer"),meta=packet.display||{mode:"read",title:"回答",summary:"",sources:[]};
  $("mode").textContent=({read:"読む",decide:"判断する",act:"行動する"})[meta.mode]||"読む";
  $("title").textContent=meta.title;
@@ -87,19 +87,14 @@ function pageHTML(packet){
  $("minus").onclick=()=>change(-1);$("plus").onclick=()=>change(1);
  $("theme").onclick=()=>{theme=(theme+1)%3;document.documentElement.dataset.theme=["","dark","light"][theme]};
  const controls=[];
- function choose(event,label,button){if(submitted)return;pending={event,label};window.aionResult=null;for(const c of controls){if(c.setAttribute)c.setAttribute("aria-pressed",c===button?"true":"false")} $("send").textContent="送信";$("status").textContent=label+"（未送信）";if($("status").setAttribute)$("status").setAttribute("title",label);}
+ function choose(event,label,button){pending={event,label};window.aionResult=null;for(const c of controls){if(c.setAttribute)c.setAttribute("aria-pressed",c===button?"true":"false")} $("send").textContent="確定";$("status").textContent=label+"（未確定）";if($("status").setAttribute)$("status").setAttribute("title",label);}
  packet.choices.forEach((choice,index)=>{const button=document.createElement("button");button.type="button";button.textContent=choice;controls.push(button);button.onclick=()=>choose({action:"choice",index},"選択 "+(index+1)+"："+choice,button);$("choices").appendChild(button)});
  $("follow").oninput=()=>{const text=$("follow").value;choose(text.trim()?{action:"text",text}:null,text.trim()?"追加質問":"入力なし",null)};
  $("send").onclick=()=>{
-  if(submitted)return;
   if(!pending?.event){window.aionResult=null;$("status").textContent="選択または入力してください。";return}
   const event=pending.event;
   if(event.action==="text"&&(!event.text.trim()||event.text.length>4000)){window.aionResult=null;$("status").textContent="入力内容を確認してください。";return}
-  submitted=true;window.aionResult={confirmed:true,...event};
-  $("send").disabled=true;$("follow").disabled=true;for(const c of controls)c.disabled=true;
-  $("send").textContent=packet.demo?"テスト受付済み":"送信受付済み";
-  $("status").textContent=(packet.demo?"表示テスト：":"送信受付：")+pending.label+"。画面が閉じない場合はCloseで戻ってください。";
-  if(typeof window.aionDeliver==="function"){try{window.aionDeliver()}catch(_){}}
+  window.aionResult={confirmed:true,...event};$("send").textContent="確定済み";$("status").textContent=(packet.demo?"テスト成功：":"確定済み：")+pending.label+"。画面の完了／閉じるで戻ります。";
  };
  for(const [id,action,label] of [["standard","standard","標準対話"],["save","save","保存依頼"],["finish","finish","終了"]]){
   const button=$(id);controls.push(button);if(id==="save")button.hidden=!packet.canSave;
@@ -112,21 +107,11 @@ async function main(input,WebView,demo=false){
  const packet=parseOutput(input);
  if(!packet.ok)return {status:"held",action:"standard",reason:packet.reason};
  try{
-  const view=new WebView();await view.loadHTML(pageHTML({...packet,display:displayMeta(input),demo:demo===true}));
-  // Official callback returns on Send without waiting for native Close.
-  // Script.complete() ends the shortcut; whether the native sheet dismisses is a device acceptance gate.
-  const closed=Promise.resolve(view.present(true)).then(()=>({kind:"closed"}));
-  const bridge="window.aionDeliver = function(){ const value=window.aionResult; if(value){window.aionDeliver=null;completion(JSON.stringify(value));} }; if(window.aionResult)window.aionDeliver();";
-  const sent=Promise.resolve().then(()=>view.evaluateJavaScript(bridge,true)).then(value=>({kind:"sent",value}),()=>({kind:"unavailable"}));
-  const first=await Promise.race([closed,sent]);
-  if(first.kind==="sent"&&typeof first.value==="string"){
-   try{const e=JSON.parse(first.value);if(e&&e.confirmed===true){return decideOutput(packet,e)}}catch(_){}
-  }
-  // Callback unavailable, invalid, or user dismissed: preserve the original read-after-close fallback.
-  if(first.kind!=="closed")await closed;
+  const view=new WebView();await view.loadHTML(pageHTML({...packet,display:displayMeta(input),demo:demo===true}));await view.present(true);
   const event=await view.evaluateJavaScript("JSON.stringify(window.aionResult || null)");
   if(typeof event!=="string")throw Error("invalid bridge result");
-  return decideOutput(packet,JSON.parse(event));
+  const parsed=JSON.parse(event);
+  return decideOutput(packet,parsed);
  }catch(_){return {status:"held",action:"standard",reason:"display_or_bridge_failed",answer:packet.answer}}
 }
 
@@ -146,7 +131,7 @@ function routeOutput(input,viewer){
  return normal("unknown_action");
 }
 
-function demoPacket(){return {answer:"画面の見やすさと操作を試すための架空の回答です。\n\n# 今日からできること\n**表示設定**で文字サイズ・行間・配色を変更できます。\n\n"+Array.from({length:8},(_,i)=>"## "+(i+1)+". 表示確認\nこの文章は架空のテストです。下部の「操作へ」で選択肢や自由入力へ移動できます。").join("\n\n"),choices:["もう少し詳しく","別の方法を比較する","自由入力を試す"],canSave:false,presentation:{mode:"read",title:"共通OUTPUTの表示テスト",summary:"表示設定から読みやすさを調整できます。全文を展開し、選択または自由入力を送信してみてください。",sources:["架空の参考情報（表示テスト用）"]}}}
+function demoPacket(){return {answer:"画面の見やすさと操作を試すための架空の回答です。\n\n# 今日からできること\n**表示設定**で文字サイズ・行間・配色を変更できます。\n\n"+Array.from({length:8},(_,i)=>"## "+(i+1)+". 表示確認\nこの文章は架空のテストです。下部の「操作へ」で選択肢や自由入力へ移動できます。").join("\n\n"),choices:["もう少し詳しく","別の方法を比較する","自由入力を試す"],canSave:false,presentation:{mode:"read",title:"共通OUTPUTの表示テスト",summary:"表示設定から読みやすさを調整できます。全文を展開し、選択または自由入力を確定してみてください。",sources:["架空の参考情報（表示テスト用）"]}}}
 async function entry(input,runsInApp,WebView){
  if((input===null||input===undefined||input==="")&&runsInApp===true){
   const viewer=await main(demoPacket(),WebView,true);
