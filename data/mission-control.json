@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-26T00:36:38+09:00",
+  "updated_at": "2026-11-26T00:40:29+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -63,16 +63,6 @@
       "updated_at": "2026-11-25T07:25:34Z"
     },
     {
-      "id": "github-pr-951",
-      "title": "PR #951 Private daily hint native Shortcut candidate",
-      "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/951",
-      "updated_at": "2026-11-24T16:21:23Z"
-    },
-    {
       "id": "github-pr-953",
       "title": "PR #953 YOS DISCOVERY｜自動研究コア・非公開保存契約・Factory実行検証候補",
       "type": "GitHub PR",
@@ -110,7 +100,17 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/973",
-      "updated_at": "2026-11-25T15:35:46Z"
+      "updated_at": "2026-11-25T15:37:31Z"
+    },
+    {
+      "id": "github-pr-976",
+      "title": "PR #976 YOS DISCOVERY｜共通Installer必須ヘッダー修復",
+      "type": "GitHub PR",
+      "status": "draft",
+      "priority": 2,
+      "next_action": "未確認条件を満たすまでDraftのまま維持する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/976",
+      "updated_at": "2026-11-25T15:37:51Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-25T15:35:54Z"
+      "updated_at": "2026-11-25T15:39:23Z"
     },
     {
       "id": "github-issue-234",
@@ -215,6 +215,13 @@
   ],
   "recently_completed": [
     {
+      "id": "github-commit-86d89b3dac48",
+      "title": "Serialize shared installer catalog releases with an exact Git lease (#975)",
+      "completed_at": "2026-11-25T15:39:31Z",
+      "result": "GitHub mainへ反映（86d89b3）",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/86d89b3dac48cfdbac78d23ab1e4414a3c1d2c9e"
+    },
+    {
       "id": "github-commit-1d797d5d63a3",
       "title": "Gate Factory external providers by development stage (#972)",
       "completed_at": "2026-11-25T15:29:37Z",
@@ -241,13 +248,6 @@
       "completed_at": "2026-11-25T13:23:00Z",
       "result": "GitHub mainへ反映（c90fcbd）",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/c90fcbd64ad9428d55f9fd6a93337b7407658de4"
-    },
-    {
-      "id": "github-commit-5de675a5efe5",
-      "title": "Recheck cross-storage receipt immediately before restoring remote TEST",
-      "completed_at": "2026-11-25T13:22:57Z",
-      "result": "GitHub mainへ反映（5de675a）",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/commit/5de675a5efe55445f7b7728669370b17802f4863"
     },
     {
       "id": "complete-002",
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-26T00:36:38+09:00",
+      "last_update": "2026-11-26T00:40:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 81件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 82件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-26T00:36:38+09:00",
+      "last_update": "2026-11-26T00:40:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-26T00:36:38+09:00",
+      "last_update": "2026-11-26T00:40:29+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "de3873c4bd26f552dd60c7ca0d91f4caddca8788cd845429d53e210bc0326d54"
+  "github_snapshot_hash": "58e11920f6d915e1daa0bb3714244442c987e22d1e7782e774820a9681227aff"
 }
