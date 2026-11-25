@@ -16,9 +16,9 @@ def validate(path):
     ask=[i for i,v in enumerate(ids) if str(v).endswith('askllm')]
     saves=[i for i,v in enumerate(ids) if v=='is.workflow.actions.documentpicker.save']
     inline=[i for i,v in enumerate(ids) if v==INTENT]
-    if len(ask)!=2 or len(saves)!=4 or len(inline)!=3:
-        raise AssertionError(f"expected two GPT, four backups, and three Scriptable: {len(ask),len(saves),len(inline)}")
-    if not (inline[0]<saves[0]<ask[0]<saves[1]<inline[1]<saves[2]<ask[1]<saves[3]<inline[2]):
+    if len(ask)!=3 or len(saves)!=5 or len(inline)!=3:
+        raise AssertionError(f"expected three GPT, five backups, and three Scriptable: {len(ask),len(saves),len(inline)}")
+    if not (inline[0]<saves[0]<ask[0]<saves[1]<inline[1]<saves[2]<ask[1]<saves[3]<ask[2]<saves[4]<inline[2]):
         raise AssertionError("unexpected source pool->reviewer->offline selection->approved evidence->writer->private Notion order")
     scripts=[]
     for i in inline:
@@ -45,8 +45,8 @@ def validate(path):
         raise AssertionError('private archive must preserve source review and never-publish state')
     if 'YOS_RESEARCH_APPROVED_V1' not in repr(root) or '公開不可・要審査' not in repr(root):
         raise AssertionError("missing editorial safety prompts")
-    pool,p1,research,p2=[actions[i]['WFWorkflowActionParameters'] for i in saves]
-    for p in (pool,research,p1,p2):
+    pool,p1,research,p2,final=[actions[i]['WFWorkflowActionParameters'] for i in saves]
+    for p in (pool,research,p1,p2,final):
         if p.get('WFAskWhereToSave') is not False or p.get('WFSaveFileOverwrite') is not False:
             raise AssertionError("iCloud backup is prompting or overwriting")
     if 'YOS-JOURNAL-GPT-RESEARCH-' not in repr(research) or 'YOS-JOURNAL-GPT-WRITER-' not in repr(p1) or 'YOS-JOURNAL-GPT-DRAFT-' not in repr(p2):
@@ -64,6 +64,10 @@ def validate(path):
         raise AssertionError('exact reviewer and pool binding missing')
     if actions[inline[1]]['WFWorkflowActionParameters']['parameter']['Value'].get('OutputUUID')!=rb['UUID']:
         raise AssertionError('wrong review input')
+    if 'YOS-JOURNAL-GPT-FINALCHECK-' not in repr(final) or final['WFInput']['Value'].get('OutputName')!='finalReviewText':
+        raise AssertionError('final check backup missing')
+    if 'YOS_FINAL_REVIEW_PASS_V1' not in repr(actions[ask[2]:inline[2]]) or 'YOS_FINAL_REVIEW_HOLD_V1' not in repr(actions[ask[2]:inline[2]]):
+        raise AssertionError('independent final review gate missing')
     bound=actions[inline[2]-1]
     bp=bound['WFWorkflowActionParameters']
     if bound['WFWorkflowActionIdentifier']!='is.workflow.actions.gettext' or bp.get('WFTextActionText')!=provenance_parameter(actions,p2['WFInput']):
@@ -76,7 +80,7 @@ def validate(path):
     # to be inferred as an ActionOutput by the compiler, compiler checks only.
     if 'researchText' not in repr(root):
         raise AssertionError('GPT prompt must embed research material variable')
-    return {"actions":len(actions),"gpt":2,"scriptable":3,"save":4}
+    return {"actions":len(actions),"gpt":3,"scriptable":3,"save":5}
 
 if __name__=="__main__":
     p=argparse.ArgumentParser()
