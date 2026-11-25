@@ -227,6 +227,13 @@
       "path": "ios-app/scriptable/YOS CORE Memory Read.js",
       "commit": "05ed6a1525ef85ea4ba7994db60236fc4154fb90",
       "sha256": "776686d8edd81b9924985ed585bf9c69c7238d1568d9ea9198c22ab9e5e8468a"
+    },
+    {
+      "id": "aion-output",
+      "name": "YOS AION OUTPUT",
+      "path": "ios-app/scriptable/YOS AION OUTPUT.js",
+      "commit": "54a4716dd2b82104f813b9b4f86087a08d7229c3",
+      "sha256": "e893eefdc367e539690bf74fd6fe8e06af4bf4964cf0fb8cbb35ce6b36ddecf8"
     }
   ]
 }
