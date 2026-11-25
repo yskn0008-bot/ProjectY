@@ -222,26 +222,39 @@ body{padding:0 8px}
 .config-slot.selected{border-color:#438eff;background:#24384f}.palette-key.used{opacity:.45}.palette-key:disabled{opacity:.25}.palette-key .picon{font-size:18px;color:#438eff}.palette-key .plabel{font-size:10px}
 .section-label{font-size:11px;font-weight:800;color:#8e8e93;margin:4px 0 7px}
 @media(max-height:800px){.page{padding-top:max(52px,calc(env(safe-area-inset-top) + 2px));gap:4px}.tv-card:before{top:-29px;height:30px}.top-shortcuts{top:-26px;height:23px}.card{padding:6px 8px 7px}.head{height:24px;margin-bottom:4px}.title{font-size:17px}.grid{gap:5px}}
-</style></head><body><div class="page"><nav class="device-tabs" aria-label="リモコン切り替え"><button class="device-tab active" data-tab="tv" onclick="setPanel('tv')"><span class="tab-icon">▣</span>テレビ</button><button class="device-tab" data-tab="light" onclick="setPanel('light')"><span class="tab-icon">☀</span>照明</button><button class="device-tab" data-tab="ac" onclick="setPanel('ac')"><span class="tab-icon">❄</span>エアコン</button><button class="device-tab" data-tab="floor" onclick="setPanel('floor')"><span class="tab-icon">◉</span>ランプ</button></nav>
-<section class="card tv-card remote-panel active" data-panel="tv"><div class="top-shortcuts"><button class="top-shortcut" onclick="sendTVShortcut(event,'input','入力')">↪︎ 入力</button><button class="top-shortcut" onclick="sendTVShortcut(event,'home','ホーム')">⌂ ホーム</button></div><div class="head"><div class="title" onclick="openRemote('tv')">BRAVIA</div><div class="tools"><span id="modeBadge" class="mode-badge">判定中</span><button class="tool" onclick="openPictureEditor(event)">画質</button><button class="tool" onclick="openLayoutEditor(event)">配置</button><button class="tool" onclick="sendMenu(event)">MENU</button></div></div><div id="tvGrid" class="grid grid-3"></div>
-<div class="picture-quick">
+#yosHome{box-sizing:border-box;background:#101522;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;height:100dvh;max-width:530px;margin:auto;padding:max(72px,env(safe-area-inset-top)) 14px max(10px,env(safe-area-inset-bottom));display:grid;grid-template-rows:32px 22px minmax(132px,3fr) 22px minmax(88px,1.8fr) minmax(0,auto) 58px;gap:10px;overflow:hidden}#yosHome *{box-sizing:border-box}#yosHome header{display:flex;align-items:center;justify-content:space-between}#yosHome h1{font-size:22px;margin:0;letter-spacing:-.03em}#yosHome h2{font-size:14px;color:#aab5ce;font-weight:500;margin:0;align-self:end}#yosHome button{font:inherit;color:#fff;border:0;min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}#yosHome svg{width:24px;height:24px;stroke:#c4c7ff;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}#yosHome .homeGear{background:none;min-height:44px;min-width:44px}#yosHome .homeScenes,#yosHome .homeDevices{display:grid;gap:9px;min-height:0}#yosHome .homeScenes{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr))}#yosHome .homeDevices{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr))}#yosHome .homeTile,#yosHome .homeDevice{background:#222b42;border-radius:18px;min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;font-size:clamp(12px,3.8vw,17px)}#yosHome .homeTile{flex-direction:column}#yosHome .homeDevice{justify-content:flex-start;padding-inline:10px;gap:7px;text-align:left}#yosHome .homeDevice span{flex:1;line-height:1.2}#yosHome .homeDevice svg:last-child{width:16px}#yosHome nav{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #30394c;padding-top:6px}#yosHome .homeNav{display:grid;place-items:center;align-content:center;gap:3px;background:none;color:#aab5ce;font-size:12px}#yosHome .homeNav.active{color:#c4c7ff}#yosHome button:focus-visible{outline:2px solid #c4c7ff;outline-offset:-2px}#yosHome button:disabled{opacity:.5}#homeFeedback{font-size:12px;color:#aab5ce;max-height:36px;overflow:auto}#homeFeedback:empty{display:none}@media(max-height:650px){#yosHome{gap:6px;padding-left:10px;padding-right:10px;grid-template-rows:28px 18px minmax(132px,3fr) 18px minmax(88px,1.8fr) minmax(0,auto) 48px}#yosHome .homeTile,#yosHome .homeDevice{border-radius:14px}#yosHome svg{width:21px;height:21px}}
+#yosHome[hidden],#homeSettings[hidden],#homeDetailNav[hidden],.page[hidden]{display:none!important}
+#yosHome nav{grid-row:7}#homeFeedback{grid-row:6}
+#homeDetailNav{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:6px 12px max(8px,env(safe-area-inset-bottom));background:#101522;z-index:3}
+#homeDetailNav button,#homeSettings button{min-height:44px;background:#222b42;color:white;border:1px solid #30394c;border-radius:12px}
+#homeDetailNav button[aria-current="page"],#homeSettings button[aria-pressed="true"]{border-color:#c4c7ff;color:#c4c7ff}
+body:has(#homeDetailNav:not([hidden])) .page{height:calc(100dvh - 66px - env(safe-area-inset-bottom))}
+#homeSettings{background:#101522;color:#fff;height:calc(100dvh - 66px - env(safe-area-inset-bottom));max-width:530px;margin:auto;padding:max(72px,env(safe-area-inset-top)) 12px 10px;overflow:auto}
+#homeSettings h1{font-size:22px;margin:0 0 6px}#homeSettings p{font-size:12px;color:#aab5ce;margin:6px 0}
+#homeModeTabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}#homeSettingRows>div{display:grid;grid-template-columns:1.2fr repeat(3,1fr);gap:5px;align-items:center;margin:8px 0;font-size:13px}
+#homeSave,#homeReload{width:100%;margin-top:6px}
+#homeFlickPad{touch-action:none;display:grid;place-items:center;min-height:58px;margin:4px 0;background:#222b42;color:#c4c7ff;border:1px solid #414c67;border-radius:16px;font-size:13px;user-select:none}
+@media(max-height:650px){#yosHome{padding-top:max(58px,env(safe-area-inset-top));gap:5px}#homeSettings{padding-top:max(58px,env(safe-area-inset-top))}}
+#homePageSwitch{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;text-align:center;touch-action:none;min-height:44px;color:#c4c7ff}#homePageSwitch button{min-height:44px;border:0;background:transparent;color:inherit;font-size:24px}#homePageSwitch button:disabled{opacity:.25}#homePageSwitch output{pointer-events:none}.remote-panel{background:#171c26!important;box-shadow:none!important}#homeFlickPad{min-height:100px}#homeLauncherHandle{width:100%;min-height:44px;touch-action:none;background:#222936;color:#e4e8f1;border:1px solid #414957;border-radius:12px}#tvAppScroll{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-flow:row!important;grid-auto-columns:auto!important;grid-auto-rows:minmax(44px,auto);overflow:hidden!important;scroll-snap-type:none;gap:5px}#tvAppScroll>*:nth-child(n+9){display:none!important}#tvAppScroll.home-expanded{grid-template-columns:repeat(3,minmax(0,1fr));max-height:240px;overflow-y:auto!important;overflow-x:hidden!important}#tvAppScroll.home-expanded>*:nth-child(n+9){display:block!important}#tvAppScroll>*{min-width:0!important;max-width:100%;overflow:hidden} .home-fixed-keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:4px 0}.home-fixed-keys button{min-height:44px;background:#252c38;color:#edf0f6;border:1px solid #414957;border-radius:10px;font-size:12px}.tv-card .top-shortcuts{display:none!important}.tv-card:before{display:none!important}#homeCustomKeys summary{min-height:44px;display:flex;align-items:center;color:#c4c7ff;font-size:13px}#homeFlickPad{min-height:120px} #homeTVExtras>summary{display:flex;align-items:center;justify-content:center;min-height:44px;color:#c4c7ff;font-size:13px;cursor:pointer}#homeTVExtras[open]{border-top:1px solid #30394c}#homeTVExtras .compact-adjust{display:grid;grid-template-columns:78px minmax(0,1fr) 35px;align-items:center;gap:7px;margin:4px 0}#homeTVExtras .compact-adjust input{width:100%;min-width:0;min-height:44px;accent-color:#70a9eb}#homeLayoutEditor label{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;color:#e4e8f1;font-size:13px}#homeLayoutEditor select{min-height:44px;max-width:58%;background:#222b42;color:white;border:1px solid #414957;border-radius:8px}#homeLayoutEditor button{min-height:44px} .tv-card .homePower{min-width:44px;min-height:44px}.tv-card .head{height:auto;min-height:44px;gap:4px}.tv-card .head .tools{flex-wrap:wrap;justify-content:flex-end}.tv-card .head .tool{min-height:44px}.tv-card .tv-studio{margin-top:5px;padding-top:5px}.tv-card .tv-studio .scene-picks{margin-bottom:2px}.tv-card #presetHome button{min-height:44px}.home-launcher-bar{display:grid;grid-template-columns:minmax(0,1fr) 60px;gap:5px;align-items:center}.home-launcher-bar .tool{min-height:44px}#homeFlickPad{min-height:clamp(84px,14dvh,136px)}#tvAppScroll{padding-bottom:2px}.tv-card:has(#homeTVExtras:not([open])){scrollbar-width:none} .home-layout-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;margin:4px 0}.home-layout-bar button,#homeUnifiedEditor button,#homeUnifiedEditor select,#homeUnifiedEditor input{min-height:44px;color:#fff;background:#252c38;border:1px solid #414957;border-radius:8px;padding:5px}#homeUnifiedEditor[hidden]{display:none!important}#homeUnifiedEditor{display:grid;gap:5px;padding:8px;border:1px solid #626d9b;border-radius:12px;margin:5px 0}#homeUnifiedEditor label{display:flex;align-items:center;justify-content:space-between;gap:5px}#homeUnifiedEditor select,#homeUnifiedEditor input{max-width:100%;min-width:0}#homeUnifiedEditor [hidden]{display:none!important}.home-selected{outline:2px solid #aab9ff!important}body:has(#homeUnifiedEditor:not([hidden])) [data-home-slot]{touch-action:none} [data-home-slot]{user-select:none;overflow-wrap:anywhere} #homeAllApps summary{min-height:44px;display:flex;align-items:center}#homeAllApps>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;max-height:240px;overflow-y:auto}#homeAllApps button{min-height:44px;overflow-wrap:anywhere;background:#252c38;color:white;border:1px solid #414957;border-radius:8px}</style></head><body><section id="yosHome" aria-label="YOS HOME"><header><h1>YOS HOME</h1><button type="button" class="homeGear" data-home-kind="nav" data-home-id="settings" aria-label="設定"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-gear"></use></svg></button></header><h2>生活モード</h2><div class="homeScenes"><button type="button" class="homeTile" data-home-kind="scene" data-home-id="departure" aria-label="外出"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-departure"></use></svg><span>外出</span></button><button type="button" class="homeTile" data-home-kind="scene" data-home-id="arrival" aria-label="帰宅"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-arrival"></use></svg><span>帰宅</span></button><button type="button" class="homeTile" data-home-kind="scene" data-home-id="sleep" aria-label="就寝"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-sleep"></use></svg><span>就寝</span></button><button type="button" class="homeTile" data-home-kind="scene" data-home-id="wake" aria-label="起床"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-wake"></use></svg><span>起床</span></button><button type="button" class="homeTile" data-home-kind="scene" data-home-id="night" aria-label="夜"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-night"></use></svg><span>夜</span></button><button type="button" class="homeTile" data-home-kind="scene" data-home-id="movie" aria-label="映画"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-movie"></use></svg><span>映画</span></button><button type="button" class="homeTile" data-home-kind="scene" data-home-id="relax" aria-label="リラックス"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-relax"></use></svg><span>リラックス</span></button><button type="button" class="homeTile" data-home-kind="scene" data-home-id="clean" aria-label="掃除"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-clean"></use></svg><span>掃除</span></button><button type="button" class="homeTile" data-home-kind="scene" data-home-id="focus" aria-label="集中"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-focus"></use></svg><span>集中</span></button></div><h2>家電リモコン</h2><div class="homeDevices"><button type="button" class="homeDevice" data-home-kind="device" data-home-id="tv" aria-label="テレビ"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-tv"></use></svg><span>テレビ</span><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-chevron"></use></svg></button><button type="button" class="homeDevice" data-home-kind="device" data-home-id="light" aria-label="天井照明"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-light"></use></svg><span>天井照明</span><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-chevron"></use></svg></button><button type="button" class="homeDevice" data-home-kind="device" data-home-id="ac" aria-label="エアコン"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-ac"></use></svg><span>エアコン</span><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-chevron"></use></svg></button><button type="button" class="homeDevice" data-home-kind="device" data-home-id="floor" aria-label="フロアランプ"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-floor"></use></svg><span>フロアランプ</span><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-chevron"></use></svg></button></div><output id="homeFeedback" role="status" aria-live="polite"></output><nav aria-label="画面切替"><button type="button" class="homeNav active" data-home-kind="nav" data-home-id="home" aria-label="ホーム"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-arrival"></use></svg><span>ホーム</span></button><button type="button" class="homeNav" data-home-kind="nav" data-home-id="remote" aria-label="リモコン"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-controls"></use></svg><span>リモコン</span></button><button type="button" class="homeNav" data-home-kind="nav" data-home-id="settings" aria-label="設定"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#icon-gear"></use></svg><span>設定</span></button></nav></section><svg aria-hidden="true" style="position:absolute;width:0;height:0"><symbol id="icon-tv" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol><symbol id="icon-light" viewBox="0 0 24 24"><path d="M9 18h6m-6-3h6m-6-3a7 7 0 1 1 6 0l-1 3h-4l-1-3Z"/><path d="M10 21h4"/></symbol><symbol id="icon-ac" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="10" rx="2"/><path d="M6 11h12m-12 8v-2m6 4v-4m6 2v-2"/></symbol><symbol id="icon-floor" viewBox="0 0 24 24"><path d="M8 4h8l3 8H5zM12 12v9m-5 0h10"/></symbol><symbol id="icon-departure" viewBox="0 0 24 24"><path d="M10 4H5v16h5m3-12 4 4-4 4m-5-4h13"/></symbol><symbol id="icon-arrival" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9H3zM9 20v-7h6v7"/></symbol><symbol id="icon-sleep" viewBox="0 0 24 24"><path d="M20 16a8 8 0 0 1-12-12 8 8 0 1 0 12 12Z"/></symbol><symbol id="icon-wake" viewBox="0 0 24 24"><path d="M2 19h20M4 15h3m2-6 1 3m9-3-2 3m0 3h3M8 16a4 4 0 0 1 8 0M12 3v4"/></symbol><symbol id="icon-night" viewBox="0 0 24 24"><path d="M20 16a8 8 0 0 1-12-12 8 8 0 1 0 12 12Zm-3-12v6m-3-3h6"/></symbol><symbol id="icon-movie" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m10 0h4M3 15h4m10 0h4m-11-9 0 0m6 4-4 3V10l4 3Z"/></symbol><symbol id="icon-relax" viewBox="0 0 24 24"><path d="M4 10h15v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM19 11h2v4l-3 2M8 3c-3 2 2 3 0 5M13 3c-3 2 2 3 0 5"/></symbol><symbol id="icon-clean" viewBox="0 0 24 24"><path d="m12 2 2.1 5.9L20 10l-5.9 2.1L12 18l-2.1-5.9L4 10l5.9-2.1L12 2ZM20 16l1 2-1 2-1-2-2-2 3 0Z"/></symbol><symbol id="icon-focus" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><circle cx="12" cy="12" r="3"/></symbol><symbol id="icon-gear" viewBox="0 0 24 24"><path d="m10 2-.4 2-2 1-2-.8-2 3 1.5 1.7v2.2L3.5 13l2 3 2-.8 2 1 .5 2h4l.4-2 2-1 2 .8 2-3-1.5-1.7V9l1.5-1.8-2-3-2 .8-2-1L14 2h-4Z"/><circle cx="12" cy="10" r="2"/></symbol><symbol id="icon-stack" viewBox="0 0 24 24"><path d="m12 2 9 6-9 6-9-6 9-6Zm-9 11 9 6 9-6m-18 4 9 5 9-5"/></symbol><symbol id="icon-controls" viewBox="0 0 24 24"><path d="M3 5h18M3 12h18M3 19h18"/><path d="M8 3v4m8 3v4m-6 3v4"/></symbol><symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol></svg><nav id="homeDetailNav" hidden aria-label="画面切替"><button data-detail="home">ホーム</button><button data-detail="remote">リモコン</button><button data-detail="settings">設定</button></nav><section id="homeSettings" hidden><h1>生活モード設定</h1><p>家電ごとに ON／OFF／維持を選択。保存のみでは操作しません。</p><div id="homeModeTabs"></div><div id="homeSettingRows"></div><p id="homeSettingStatus" role="status" aria-live="polite"></p><button id="homeSave" disabled>設定を保存</button><button id="homeReload">設定を読み直す（未保存変更は破棄）</button></section><div class="page" hidden><nav id="homePageSwitch" aria-label="左右スライドで家電切替"><button data-prev aria-label="前の家電">‹</button><output aria-live="polite">テレビ 1/4</output><button data-next aria-label="次の家電">›</button></nav>
+<section class="card tv-card remote-panel active" data-panel="tv"><div class="top-shortcuts"><button class="top-shortcut" onclick="sendTVShortcut(event,'input','入力')">↪︎ 入力</button><button class="top-shortcut" onclick="sendTVShortcut(event,'home','ホーム')">⌂ ホーム</button></div><div class="head"><div class="title" onclick="openRemote('tv')">BRAVIA</div><div class="tools"><button type="button" class="tool homePower" aria-label="テレビ電源" onclick="sendTVShortcut(event,'power','電源')">⏻</button><span id="modeBadge" class="mode-badge">判定中</span><button class="tool" onclick="openPictureEditor(event)">画質</button><button class="tool" onclick="openLayoutEditor(event)">配置</button><button class="tool" onclick="sendMenu(event)">MENU</button></div></div><div class="home-fixed-keys"><button onclick="sendTVShortcut(event,'back','戻る')">戻る</button><button onclick="sendTVShortcut(event,'home','ホーム')">ホーム</button><button onclick="sendTVShortcut(event,'quick','クイック')">クイック</button><button onclick="sendTVShortcut(event,'input','入力')">入力</button></div><div id="homeFlickPad" role="button" tabindex="0" aria-label="フリック操作・タップで決定または再生">上下左右フリック　・　タップ</div><div class="home-fixed-keys"><button onclick="sendTVShortcut(event,'volumeDown','音量−')">音量−</button><button onclick="sendTVShortcut(event,'mute','消音')">消音</button><button onclick="sendTVShortcut(event,'volumeUp','音量＋')">音量＋</button><button onclick="sendTVShortcut(event,'stop','停止')">停止</button></div>
+
+
+<div class="tv-studio" aria-label="BRAVIA クイックスタジオ">
+ 
+ <span id="homePresetAnchor" hidden></span><div class="scene-picks" id="presetHome"><button onclick="loadPicturePreset(event,'day')" id="tvPresetDay" disabled>昼</button><button onclick="loadPicturePreset(event,'night')" id="tvPresetNight" disabled>夜</button><button onclick="loadPicturePreset(event,'movie')" id="tvPresetMovie" disabled>映画</button></div>
+ <div class="compact-adjust"><label for="tvBrightness">明るさ</label><input id="tvBrightness" type="range" min="0" max="100" value="0" disabled oninput="previewTVCompact(event,'brightness')" onchange="commitTVCompact(event,'brightness')"><output id="tvBrightnessVal">--</output></div>
+ 
+ <div class="home-launcher-bar"><button id="homeLauncherHandle" type="button" aria-expanded="false" aria-controls="tvAppScroll">アプリ一覧　⌃</button>
+ <button class="tool" onclick="nativeAction('tvApps','list','アプリ一覧')">更新</button></div>
+ <div id="tvAppScroll" class="tv-app-scroll" aria-label="BRAVIAアプリ一覧"><button onclick="nativeAction('tvApps','list','アプリ一覧')">アプリ取得</button></div>
+ 
+ 
+</div><details id="homeTVExtras"><summary>詳細操作・配置編集</summary><div class="tv-studio home-extra-content"><details id="homeCustomKeys"><summary>カスタム操作・長押し</summary><div id="tvGrid" class="grid grid-3"></div></details><div class="picture-quick">
   <button onclick="openQuickEditor(event)">⚡ メディア</button>
   <button onclick="sendTVShortcut(event,'pictureOff','消画')">▣ 消画</button>
   <button onclick="openShortcuts(event)">☆ 保存画質</button>
-</div>
-<div id="quickPictureModes" class="quick-modes" aria-label="画質モード切替"><span class="pic-manual">画質モードを確認中…</span></div>
-<div class="tv-studio" aria-label="BRAVIA クイックスタジオ">
- <h3>PICTURE · 画質プリセット</h3>
- <div class="scene-picks" id="presetHome"><button onclick="loadPicturePreset(event,'day')" id="tvPresetDay" disabled>昼</button><button onclick="loadPicturePreset(event,'night')" id="tvPresetNight" disabled>夜</button><button onclick="loadPicturePreset(event,'movie')" id="tvPresetMovie" disabled>映画</button></div>
- <div class="compact-adjust"><label for="tvBrightness">明るさ</label><input id="tvBrightness" type="range" min="0" max="100" value="0" disabled oninput="previewTVCompact(event,'brightness')" onchange="commitTVCompact(event,'brightness')"><output id="tvBrightnessVal">--</output></div>
- <div class="compact-adjust"><label for="tvContrast">コントラスト</label><input id="tvContrast" type="range" min="0" max="100" value="0" disabled oninput="previewTVCompact(event,'contrast')" onchange="commitTVCompact(event,'contrast')"><output id="tvContrastVal">--</output></div>
- <h3 style="margin-top:11px">APPS · 左右スクロール</h3>
- <button class="tool" onclick="nativeAction('tvApps','list','アプリ一覧')">一覧更新</button>
- <div id="tvAppScroll" class="tv-app-scroll" aria-label="BRAVIAアプリを横スクロール"><button onclick="nativeAction('tvApps','list','アプリ一覧')">アプリ取得</button></div>
- <div class="tv-text-entry"><input id="tvTextInput" type="text" maxlength="140" placeholder="テレビで入力欄を開いて文字入力" aria-label="BRAVIAへ送るテキスト"><button onclick="sendTVText(event)">送信</button></div>
- <p class="tv-studio-note">文字はテレビの検索欄が開いているときのみ。パスワード等の機密情報は入力しないでください。</p>
- <div class="tv-extra-line"><button onclick="openTVVPN(event)">VPNアプリ</button><span class="tv-extra-status" id="tvExtraStatus">VPNのON/OFFは接続アプリの対応確認後</span></div>
-</div></section>
+</div><div id="quickPictureModes" class="quick-modes" aria-label="画質モード切替"><span class="pic-manual">画質モードを確認中…</span></div><div class="compact-adjust"><label for="tvContrast">コントラスト</label><input id="tvContrast" type="range" min="0" max="100" value="0" disabled oninput="previewTVCompact(event,'contrast')" onchange="commitTVCompact(event,'contrast')"><output id="tvContrastVal">--</output></div><div class="tv-text-entry"><input id="tvTextInput" type="text" maxlength="140" placeholder="テレビで入力欄を開いて文字入力" aria-label="BRAVIAへ送るテキスト"><button onclick="sendTVText(event)">送信</button></div>
+ <p class="tv-studio-note">文字はテレビの検索欄が開いているときのみ。パスワード等の機密情報は入力しないでください。</p><div class="tv-extra-line"><button onclick="openTVVPN(event)">VPNアプリ</button><span class="tv-extra-status" id="tvExtraStatus">VPNのON/OFFは接続アプリの対応確認後</span></div></div></details></section>
 <section class="card remote-panel" data-panel="light"><div class="head"><div class="title" onclick="openRemote('light')">照明</div><div class="brand">Panasonic</div></div><div class="grid grid-3">${makeButtons("light", LIGHT_BUTTONS)}</div></section>
 <section class="card remote-panel" data-panel="ac"><div class="head"><div class="title" onclick="openRemote('ac')">エアコン</div><div class="ac-meta"><span id="acTemp" class="ac-temp">--°</span><span class="brand">SHARP</span></div></div><div class="grid grid-4">${makeButtons("ac", AC_BUTTONS)}</div></section>
 <section class="card floor-card remote-panel" data-panel="floor">
@@ -291,7 +304,7 @@ body{padding:0 8px}
   <p class="config-help">画質項目を一覧化。実際に変更できるものはテレビから取得した値と範囲を使用します。非対応項目はテレビ本体で設定してください。</p>
   <div id="pictureGroups"></div>
   <p id="pictureStatus" class="pic-status" aria-live="polite">未接続。画質の確認中です。</p>
-  <button class="tool" onclick="probePictureScene(event)">現在の設定を再取得</button><button class="tool" onclick="nativeAction(&quot;picture&quot;,&quot;discover&quot;,&quot;追加項目の調査&quot;)">追加画質項目を調査</button>
+  <button class="tool" onclick="probePictureScene(event)">現在の設定を再取得</button><button class="tool" id="discoverPictureButton" onclick="startPictureDiscovery(event)">追加画質項目を調査</button><p id="discoverPictureStatus" class="pic-status" role="status" aria-live="polite" hidden></p>
   <button class="tool" onclick="sendTVShortcut(event,'quick','クイック設定')">テレビのクイック設定</button>
 </div></div>
 <div id="brightLayer" class="config-layer" role="dialog" aria-modal="true" aria-label="BRAVIA明るさバー"><div class="config-card">
@@ -314,9 +327,9 @@ const LAYOUT_KEY="yos.remote.tv.buttons.v52"
 let mode="navigation",nonce=0,pollTimer=null,acTimer=null,selectedSlot=null,gestureSuppressUntil=0
 const PANEL_KEY="yos.remote.selected-panel.v1"
 let activePanel="tv"
-function setPanel(name){if(!["tv","light","ac","floor"].includes(name))return;stopActiveHolds();activePanel=name;document.querySelectorAll(".remote-panel").forEach(el=>el.classList.toggle("active",el.dataset.panel===name));document.querySelectorAll(".device-tab").forEach(el=>{const active=el.dataset.tab===name;el.classList.toggle("active",active);el.setAttribute("aria-selected",active?"true":"false")});try{localStorage.setItem(PANEL_KEY,name)}catch(_){}if(name==="floor")nativeAction("floor","refresh","状態取得")}
+function setPanel(name){if(!["tv","light","ac","floor"].includes(name))return;stopActiveHolds();activePanel=name;document.querySelectorAll(".remote-panel").forEach(el=>el.classList.toggle("active",el.dataset.panel===name));document.querySelectorAll(".device-tab").forEach(el=>{const active=el.dataset.tab===name;el.classList.toggle("active",active);el.setAttribute("aria-selected",active?"true":"false")});try{localStorage.setItem(PANEL_KEY,name)}catch(_){}scheduleHomeRemoteRead(name)}
 function sendFloor(action,value=""){nativeAction("floor",action,String(value))}
-function stopActiveHolds(){nativeAction("tvHoldStop","","");nativeAction("lightHoldStop","","")}
+function stopActiveHolds(){nativeAction("homeStopHolds","","")}
 function meta(action){return ACTIONS.find(item=>item.action===action)}
 function validAction(action){return ACTIONS.some(item=>item.action===action)}
 function loadLayout(){let saved=[];try{saved=JSON.parse(localStorage.getItem(LAYOUT_KEY))}catch(_){}const clean=Array.isArray(saved)?saved.filter(validAction).slice(0,12):[];for(const action of DEFAULT){if(clean.length>=12)break;if(!clean.includes(action))clean.push(action)}for(const item of ACTIONS){if(clean.length>=12)break;if(!clean.includes(item.action))clean.push(item.action)}return clean.slice(0,12)}
@@ -340,7 +353,8 @@ function displayAction(index,baseAction){
   if(mode==="hybrid"&&(role==="up"||role==="down"))return CROSS_NAV[role]
   return baseAction
 }
-function nativeAction(device,action,label,slot=""){nonce++;window.location.href="/__action?device="+encodeURIComponent(device)+"&action="+encodeURIComponent(action||"")+"&label="+encodeURIComponent(label||"")+"&slot="+encodeURIComponent(slot||"")+"&n="+nonce}
+let homeLayoutEditing=false,homeLauncherShow=null;
+function nativeAction(device,action,label,slot=""){if(homeLayoutEditing&&!(device==="home"&&action==="layoutSave")&&!["homeStopHolds","tvHoldStop","lightHoldStop"].includes(device))return;nonce++;window.location.href="/__action?device="+encodeURIComponent(device)+"&action="+encodeURIComponent(action||"")+"&label="+encodeURIComponent(label||"")+"&slot="+encodeURIComponent(slot||"")+"&n="+nonce}
 function swipeAction(dx,dy){
   if(Math.max(Math.abs(dx),Math.abs(dy))<SWIPE_THRESHOLD)return null
   return Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy>0?"down":"up")
@@ -493,8 +507,8 @@ function applyRemoteAppearance(){
  if(sizeInput)sizeInput.value=size;if(posInput)posInput.value=position;
  if(!grid||!home||!home.parentNode||!grid.parentNode)return;
  grid.dataset.size=size;
- if(position==="above")grid.parentNode.insertBefore(home,grid);
- else {const studio=document.querySelector(".tv-studio");if(studio&&studio.children[0]&&home!==studio.children[0].nextSibling)studio.insertBefore(home,studio.children[0].nextSibling);}
+ const first=document.querySelector(".home-fixed-keys"),anchor=document.getElementById("homePresetAnchor");
+ if(position==="above"&&first)first.before(home);else if(anchor)anchor.after(home);
 }
 function changeRemoteAppearance(){const size=document.getElementById("remoteSize").value,position=document.getElementById("presetPosition").value;try{localStorage.setItem(REMOTE_APPEARANCE_KEY,JSON.stringify({size,position}))}catch(_){}applyRemoteAppearance()}
 function openLayoutEditor(e){if(e){e.preventDefault();e.stopPropagation()}selectedSlot=null;document.getElementById("configLayer").classList.add("open");applyRemoteAppearance();renderConfig()}
@@ -592,6 +606,22 @@ function closeBrightnessBar(e){if(e){e.preventDefault();e.stopPropagation()}docu
 function openShortcuts(e){if(e){e.preventDefault();e.stopPropagation()}document.getElementById("shortcutsLayer").classList.add("open");renderPicturePresets();probePictureScene()}
 function closeShortcuts(e){if(e){e.preventDefault();e.stopPropagation()}document.getElementById("shortcutsLayer").classList.remove("open")}
 function probePictureScene(e){if(e){e.preventDefault();e.stopPropagation()}for(const id of ["pictureStatus","shortcutsStatus"]){const el=document.getElementById(id);if(el)el.textContent="テレビから設定を読み取り中…"}nativeAction("picture","probe","画質対応確認")}
+let discoveryPending=false,discoveryTimer=null;
+function finishPictureDiscovery(message){
+ discoveryPending=false;if(discoveryTimer!==null)clearTimeout(discoveryTimer);discoveryTimer=null;
+ const button=document.getElementById("discoverPictureButton"),status=document.getElementById("discoverPictureStatus");
+ if(button){button.disabled=false;button.textContent="追加画質項目を調査"}
+ if(status){status.hidden=false;status.textContent=message}
+}
+function startPictureDiscovery(e){
+ if(e){e.preventDefault();e.stopPropagation()}if(discoveryPending)return;
+ discoveryPending=true;
+ const button=document.getElementById("discoverPictureButton"),status=document.getElementById("discoverPictureStatus");
+ if(button){button.disabled=true;button.textContent="調査中…"}
+ if(status){status.hidden=false;status.textContent="テレビへ問い合わせ中。設定は変更しません。"}
+ discoveryTimer=setTimeout(()=>finishPictureDiscovery("応答未確認。テレビとの通信状況を確認してください。"),25000);
+ nativeAction("picture","discover","追加項目の調査");
+}
 function pictureEntry(target){return pictureMap[target]||null}
 function pictureModeLabel(target,value){
  if(target!=="pictureMode")return String(value)
@@ -710,6 +740,8 @@ function loadPicturePreset(e,key){
  nativeAction("picture","load","呼出",key)
 }
 function showPictureStatus(result){
+ if(result?.picture?.discovery===true){finishPictureDiscovery(result.picture.message);return}
+ if(result?.discoveryError){finishPictureDiscovery("調査失敗："+result.message);return}
  const status=document.getElementById("pictureStatus"),shortStatus=document.getElementById("shortcutsStatus")
  if(result&&result.picture){
   pictureConnected=true
@@ -786,6 +818,7 @@ function setFloorState(s){
   if(Number.isFinite(Number(s.hue)))hue.value=s.hue
 }
 function nativeResult(result){
+  if(result&&result.home){homeResult(result);return}
   showPictureStatus(result)
   showQuickStatus(result)
   if(result&&Array.isArray(result.apps))displayTVApps(result.apps)
@@ -797,7 +830,7 @@ function nativeResult(result){
   if(result&&Object.prototype.hasOwnProperty.call(result,"ac"))setACState(result.ac)
   if(result&&Object.prototype.hasOwnProperty.call(result,"floor"))setFloorState(result.floor)
 }
-function requestMode(){nativeAction("system","refreshMode","")}function requestAC(){nativeAction("system","refreshAC","")}
+function requestMode(){if(!discoveryPending)nativeAction("system","refreshMode","")}function requestAC(){if(!discoveryPending)nativeAction("system","refreshAC","")}
 function sendMenu(e){e.preventDefault();e.stopPropagation();nativeAction("tv","menu","MENU")}
 function sendTVShortcut(e,action,label){e.preventDefault();e.stopPropagation();nativeAction("tv",action,label)}
 function sendOther(e,device,action,label){e.preventDefault();e.stopPropagation();nativeAction(device,action,label)}
@@ -837,7 +870,232 @@ function bindLightHoldButtons(){
   })
 }
 function openRemote(device){window.location.href=REMOTES[device]}
-bindLightHoldButtons();renderTV();renderTVStudio();try{applyRemoteAppearance()}catch(_){}requestMode();requestAC();try{setPanel(localStorage.getItem(PANEL_KEY)||"tv")}catch(_){setPanel("tv")}nativeAction("tvApps","list","アプリ一覧");if(activePanel==="tv")probePictureScene();pollTimer=setInterval(requestMode,1600);acTimer=setInterval(requestAC,30000);window.addEventListener("beforeunload",()=>{if(pollTimer)clearInterval(pollTimer);if(acTimer)clearInterval(acTimer)})
+const yosHomeRoute=function(kind,id,busy=false){if(kind==="scene"&&["departure","arrival","sleep","wake","night","movie","relax","clean","focus"].includes(id)){if(busy)return null;return id==="sleep"?{type:"shortcut",name:"おやすみマン"}:{type:"scene",mode:id}}if(kind==="device"&&["tv","light","ac","floor"].includes(id))return{type:"panel",device:id};if(kind==="nav"&&["home","remote","settings"].includes(id))return{type:"view",view:id};return null};
+// 実際のnative通信はOne Enterの既存キューに接続。自動実行しない。
+let homeBusy=false,homeTimer=null,homeView="home",homePrefs=null,homeBase=null,homeDirty=false,homeEditMode="departure",homeRemoteReadTimer=null;
+const homeLabels={departure:"外出",arrival:"帰宅",sleep:"就寝",wake:"起床",night:"夜",movie:"映画",relax:"リラックス",clean:"掃除",focus:"集中"};
+const homeDevices={tv:"テレビ",light:"天井照明",ac:"エアコン",floor:"フロアランプ"};
+function homeStatus(message){document.getElementById(homeView==="settings"?"homeSettingStatus":"homeFeedback").textContent=message}
+function homeButtons(){
+ document.querySelectorAll("#yosHome button,#homeDetailNav button,#homeSettings button").forEach(b=>b.disabled=homeBusy);
+ document.getElementById("homeSave").disabled=homeBusy||!homeDirty||!homePrefs;
+}
+function homeSend(action,slot=""){
+ if(homeBusy)return;
+ homeBusy=true;homeButtons();homeStatus("処理中…");
+ homeTimer=setTimeout(()=>homeStatus("応答未確認。自動再送しません。画面を閉じて確認してください。"),30000);
+ nativeAction("home",action,"",slot);
+}
+let homeLayoutReply=()=>{};
+function homeResult(r){
+ if(homeTimer!==null)clearTimeout(homeTimer);homeTimer=null;homeBusy=false;
+ if(r.kind==="layoutLoad"||r.kind==="layoutSave"||r.kind==="layoutRun"){homeLayoutReply(r);homeButtons();return}
+ if(r.ok&&r.prefs){homePrefs=JSON.parse(JSON.stringify(r.prefs));homeBase=JSON.parse(JSON.stringify(r.prefs));homeDirty=false;drawHomeSettings()}
+ homeStatus(r.message||"結果未確認");homeButtons();
+}
+function drawHomeSettings(){
+ const tabs=document.getElementById("homeModeTabs"),rows=document.getElementById("homeSettingRows");
+ tabs.replaceChildren();rows.replaceChildren();if(!homePrefs)return;
+ for(const [id,label] of Object.entries(homeLabels)){
+  const b=document.createElement("button");b.textContent=label;b.setAttribute("aria-pressed",String(id===homeEditMode));b.onclick=()=>{if(!homeBusy){homeEditMode=id;drawHomeSettings();homeButtons()}};tabs.appendChild(b);
+ }
+ for(const [id,label] of Object.entries(homeDevices)){
+  const row=document.createElement("div"),name=document.createElement("span");name.textContent=label;row.appendChild(name);
+  for(const [value,label] of [["on","ON"],["off","OFF"],["keep","維持"]]){
+   const b=document.createElement("button");b.textContent=label;b.setAttribute("aria-pressed",String(homePrefs[homeEditMode][id]===value));b.onclick=()=>{if(!homeBusy){homePrefs[homeEditMode][id]=value;homeDirty=true;drawHomeSettings();homeButtons()}};row.appendChild(b);
+  }rows.appendChild(row);
+ }
+ homeButtons();
+}
+function homeShow(view,device){
+ if(homeBusy||homeLayoutEditing||!["home","remote","settings"].includes(view))return;
+ if(homeRemoteReadTimer!==null)clearTimeout(homeRemoteReadTimer);
+ if(homeView==="remote"&&view!=="remote")stopActiveHolds();
+ homeView=view;
+ document.getElementById("yosHome").hidden=view!=="home";document.querySelector(".page").hidden=view!=="remote";
+ document.getElementById("homeSettings").hidden=view!=="settings";document.getElementById("homeDetailNav").hidden=view==="home";
+ document.querySelectorAll("#homeDetailNav button").forEach(b=>b.setAttribute("aria-current",b.dataset.detail===view?"page":"false"));
+ if(view==="remote"){setPanel(device||activePanel);if(activePanel==="tv")document.dispatchEvent(new Event("home-layout-read"))}
+ else if(view==="settings"&&!homePrefs)homeSend("load");
+}
+function scheduleHomeRemoteRead(device){
+ if(homeRemoteReadTimer!==null)clearTimeout(homeRemoteReadTimer);
+ homeRemoteReadTimer=setTimeout(()=>{if(homeView==="remote"&&activePanel===device&&!homeBusy&&!homeLayoutEditing)nativeAction("homeRead",device,"")},250);
+}
+document.querySelectorAll("#yosHome [data-home-kind]").forEach(b=>b.addEventListener("click",()=>{
+ if(homeBusy)return;const r=yosHomeRoute(b.dataset.homeKind,b.dataset.homeId,homeBusy);if(!r)return;
+ if(r.type==="scene"){if(homeDirty){homeStatus("未保存の設定があります。保存してから実行してください");return}homeSend("run",r.mode)}
+ else if(r.type==="shortcut")homeSend("sleep",r.name);else if(r.type==="panel")homeShow("remote",r.device);else if(r.type==="view")homeShow(r.view);
+}));
+document.querySelectorAll("#homeDetailNav button").forEach(b=>b.onclick=()=>homeShow(b.dataset.detail));
+document.getElementById("homeSave").onclick=()=>{if(homeDirty&&homePrefs)homeSend("save",JSON.stringify({base:homeBase,next:homePrefs}))};
+document.getElementById("homeReload").onclick=()=>homeSend("load");
+const yosRemoteGesture = function(s){
+ if(!s||!["tv","light","ac","floor"].includes(s.panel)||s.cancelled||s.multitouch||s.busy||s.dialog||s.stale||![s.dx,s.dy,s.ms].every(Number.isFinite)||s.ms<0)return null;
+ const x=Math.abs(s.dx),y=Math.abs(s.dy),h=x>=1.35*y&&x>0,v=y>=1.35*x&&y>0,dir=h?(s.dx>0?"right":"left"):v?(s.dy>0?"down":"up"):null;
+ if(s.region==="pad"){
+  if(s.panel!=="tv")return null;
+  if(Math.max(x,y)<=8&&s.ms<=500)return {kind:"tvRole",role:"center"};
+  if(Math.max(x,y)>=24&&dir)return {kind:"tvRole",role:dir};
+  return null;
+ }
+ if(s.region==="surface"&&h&&x>=64&&s.ms<=900){
+  const pages=["tv","light","ac","floor"],n=pages.indexOf(s.panel)+(s.dx<0?1:-1);
+  return pages[n]?{kind:"panel",panel:pages[n]}:null;
+ }
+ if(s.region==="launcherHandle"&&s.panel==="tv"&&v&&y>=64&&s.ms<=900){
+  if(s.dy<0&&!s.expanded)return {kind:"launcher",expanded:true};
+  if(s.dy>0&&s.expanded)return {kind:"launcher",expanded:false};
+ }
+ return null;
+};
+let homeCustomFlick=(role,m)=>nativeAction("homeFlick",role,"",m);
+function installHomeFlick(){
+ const pad=document.getElementById("homeFlickPad"),surface=document.getElementById("homePageSwitch");let p=null;
+ const pages=["tv","light","ac","floor"];
+ function sync(){surface.querySelector("output").textContent=homeDevices[activePanel]+" "+(pages.indexOf(activePanel)+1)+"/4";surface.querySelector("[data-prev]").disabled=activePanel==="tv";surface.querySelector("[data-next]").disabled=activePanel==="floor"}
+ function change(panel){if(pages.includes(panel)&&!homeBusy&&homeView==="remote")setPanel(panel)}
+ function bind(el,region){
+ el.addEventListener("pointerdown",e=>{if(p){p.multitouch=true;return}if(!e.isPrimary||homeBusy||homeView!=="remote"||e.target.closest("button,input,select,textarea,a"))return;p={id:e.pointerId,x:e.clientX,y:e.clientY,t:Date.now(),panel:activePanel,mode,region};try{el.setPointerCapture(e.pointerId)}catch(_){}});
+ el.addEventListener("pointercancel",()=>{p=null});el.addEventListener("lostpointercapture",()=>{p=null});
+ el.addEventListener("pointerup",e=>{if(!p||p.id!==e.pointerId)return;const q=p;p=null;const r=yosRemoteGesture({region:q.region,panel:q.panel,dx:e.clientX-q.x,dy:e.clientY-q.y,ms:Date.now()-q.t,multitouch:q.multitouch,busy:homeBusy,stale:homeView!=="remote"||activePanel!==q.panel||mode!==q.mode});if(!r)return;if(r.kind==="panel")change(r.panel);if(r.kind==="tvRole")homeCustomFlick(r.role==="center"?"tap":r.role,q.mode)});
+ }
+ bind(pad,"pad");bind(surface,"surface");
+ surface.querySelector("[data-prev]").onclick=()=>change(pages[pages.indexOf(activePanel)-1]);
+ surface.querySelector("[data-next]").onclick=()=>change(pages[pages.indexOf(activePanel)+1]);
+ pad.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&!homeBusy&&homeView==="remote"&&activePanel==="tv"){e.preventDefault();homeCustomFlick("tap",mode)}});
+ const original=setPanel;setPanel=function(name){original(name);sync()};sync();
+}
+installHomeFlick();
+
+function installHomeLauncher(){
+ const handle=document.getElementById("homeLauncherHandle"),apps=document.getElementById("tvAppScroll");let expanded=false,p=null,suppress=0;
+ function show(value){expanded=value;if(!value)apps.scrollTop=0;apps.classList.toggle("home-expanded",value);handle.setAttribute("aria-expanded",String(value));handle.textContent=value?"アプリ一覧　⌄":"アプリ一覧　⌃"}
+ function allowed(){return homeView==="remote"&&activePanel==="tv"&&!homeBusy&&!homeLayoutEditing}
+ handle.addEventListener("pointerdown",e=>{if(p){p.multitouch=true;return}if(!allowed()||!e.isPrimary)return;p={id:e.pointerId,x:e.clientX,y:e.clientY,t:Date.now()};try{handle.setPointerCapture(e.pointerId)}catch(_){}});
+ handle.addEventListener("pointercancel",()=>{p=null;suppress=Date.now()+700});
+ handle.addEventListener("lostpointercapture",()=>{if(p){p=null;suppress=Date.now()+700}});
+ handle.addEventListener("pointerup",e=>{if(!p||p.id!==e.pointerId)return;const q=p;p=null;const dx=e.clientX-q.x,dy=e.clientY-q.y;if(q.multitouch||Math.max(Math.abs(dx),Math.abs(dy))>8)suppress=Date.now()+700;const r=yosRemoteGesture({panel:"tv",region:"launcherHandle",expanded,dx,dy,ms:Date.now()-q.t,multitouch:q.multitouch,stale:!allowed()});if(r&&r.kind==="launcher")show(r.expanded)});
+ handle.addEventListener("click",()=>{if(allowed()&&Date.now()>=suppress)show(!expanded)});
+ const original=setPanel;setPanel=function(name){if(name!=="tv")show(false);original(name)};
+ homeLauncherShow=show;show(false);
+}
+installHomeLauncher();
+
+function unifiedSlots(allow,presets){
+ const defaults=["back","home","quick","input","volumeDown","mute","volumeUp","stop"];
+ const scenes=["departure","arrival","sleep","wake","night","movie","relax","clean","focus"];
+ const icons=["default","power","home","tv","sun","moon","lamp","snow","play","stop","volume","star","film","bolt","shortcut"];
+ const safeText=(v,n)=>typeof v==="string"&&v.length>0&&v.length<=n&&v.trim()===v&&!/[\\x00-\\x1f\\x7f]/.test(v);
+ const own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
+ function clean(x){
+  if(x===null)return null;if(!x||typeof x!=="object"||Array.isArray(x))throw Error("invalid slot");
+  const o={kind:x.kind};
+  if(x.kind==="remote"){if(!own(allow,x.device)||!allow[x.device].includes(x.action))throw Error("invalid command");o.device=x.device;o.action=x.action}
+  else if(x.kind==="app"){if(!safeText(x.title,60))throw Error("invalid app");o.title=x.title}
+  else if(x.kind==="shortcut"){if(!safeText(x.name,100))throw Error("invalid shortcut");o.name=x.name}
+  else if(x.kind==="scene"){if(!scenes.includes(x.mode))throw Error("invalid scene");o.mode=x.mode}
+  else if(x.kind==="preset"){if(!presets.includes(x.id))throw Error("invalid preset");o.id=x.id}
+  else throw Error("invalid kind");
+  if(x.label!==undefined){if(!safeText(x.label,24))throw Error("invalid label");o.label=x.label}
+  if(x.icon!==undefined){if(!icons.includes(x.icon))throw Error("invalid icon");o.icon=x.icon}
+  return o;
+ }
+ function validate(x){
+  if(!x||x.schema!==1||!Array.isArray(x.upper)||x.upper.length!==8||!Array.isArray(x.lower)||x.lower.length<8||x.lower.length>48||typeof x.seeded!=="boolean")throw Error("invalid layout");
+  return {schema:1,upper:x.upper.map(clean),lower:x.lower.map(clean),seeded:x.seeded};
+ }
+ function initial(old){return validate({schema:1,upper:defaults.map((a,i)=>({kind:"remote",device:"tv",action:allow.tv.includes(old?.slots?.[i])?old.slots[i]:a})),lower:Array(8).fill(null),seeded:false})}
+ function load(raw,old){return raw===null?initial(old):validate(JSON.parse(raw))}
+ function seed(state,apps){let o=validate(state);if(o.seeded)return o;let names=apps.filter(a=>safeText(a?.title,60)).map(a=>a.title);let uniq=names.filter((n,i)=>names.indexOf(n)===i&&names.lastIndexOf(n)===i);if(!uniq.length)return o;o.lower=Array.from({length:Math.max(8,Math.min(48,uniq.length))},(_,i)=>uniq[i]?{kind:"app",title:uniq[i]}:null);o.seeded=true;return validate(o)}
+ function at(o,r){if(!r||!["upper","lower"].includes(r.area)||!Number.isInteger(r.index)||r.index<0||r.index>=o[r.area].length)throw Error("invalid position");return o[r.area]}
+ function replace(state,r,x){let o=validate(state);at(o,r)[r.index]=clean(x);o.seeded=true;return o}
+ function swap(state,a,b){let o=validate(state),aa=at(o,a),bb=at(o,b);[aa[a.index],bb[b.index]]=[bb[b.index],aa[a.index]];o.seeded=true;return o}
+ function append(state){let o=validate(state);if(o.lower.length>=48)throw Error("full");o.lower.push(null);o.seeded=true;return o}
+ function dispatch(x,ctx){if(ctx.editing||ctx.busy||ctx.closed||!ctx.explicit)return null;let o=clean(x);if(o===null)return null;
+  if(o.kind==="remote")return {device:o.device,action:o.action};
+  if(o.kind==="app"){let found=ctx.apps.filter(a=>a.title===o.title);if(found.length!==1||!Number.isSafeInteger(found[0].index)||found[0].index<0)return null;return {device:"tvApps",action:"launchByTitle",title:o.title}}
+  if(o.kind==="shortcut")return {device:"home",action:"launchShortcut",name:o.name};
+  if(o.kind==="scene")return {device:"home",action:o.mode==="sleep"?"sleep":"run",slot:o.mode==="sleep"?"おやすみマン":o.mode};
+  if(o.kind==="preset")return ctx.savedPresets.includes(o.id)?{device:"picture",action:"load",slot:o.id}:null;
+  return null;
+ }
+ return {clean,validate,initial,load,seed,replace,swap,append,dispatch,icons};
+}
+const yosSlotAllow={"tv":["power","input","home","quick","menu","back","up","down","left","right","confirm","volumeDown","mute","volumeUp","channelDown","channelUp","rewind","play","fastForward","pause","stop","prev","next","pictureOff"],"light":["on","off","all","bright","dark","night"],"ac":["cool","dry","heat","stop","tempDown","tempUp","fan","wind"],"floor":["on","off"]};
+const yosSlotPresets=["day","night","movie","extra1","extra2","extra3","extra4","extra5"];
+function unifiedHomeUI(){
+ const root=document.querySelector('[data-panel="tv"]'),pad=document.getElementById("homeFlickPad"),rows=Array.from(root.querySelectorAll(".home-fixed-keys")),upper=rows.flatMap(r=>Array.from(r.querySelectorAll("button"))),lower=document.getElementById("tvAppScroll");
+ const core=unifiedSlots(yosSlotAllow,yosSlotPresets),roles=["tap","up","down","left","right"],defaults=["back","home","quick","input","volumeDown","mute","volumeUp","stop"];
+ const old={slots:defaults,flick:Object.fromEntries(roles.map(r=>[r,"auto"])),pad:"middle"};
+ try{const x=JSON.parse(localStorage.getItem("yos.remote.home.custom.v1"));if(x){old.slots=defaults.map((a,i)=>yosSlotAllow.tv.includes(x.slots?.[i])?x.slots[i]:a);old.pad=["top","middle","bottom"].includes(x.pad)?x.pad:"middle";old.flick=Object.fromEntries(roles.map(r=>[r,yosSlotAllow.tv.includes(x.flick?.[r])?x.flick[r]:"auto"]))}}catch(_){}
+ let saved={schema:2,layout:core.initial(old),flick:{pad:old.pad,flick:old.flick}},draft=null,base=null,loaded=false,pending=false,apps=[],selected=null;
+ const node=(tag,text,parent)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(parent)parent.append(e);return e};
+ const bar=node("div",undefined);bar.className="home-layout-bar";rows[0].before(bar);
+ const edit=node("button","配置編集",bar),status=node("output","設定未読込",bar);status.setAttribute("role","status");
+ const panel=node("section",undefined);panel.id="homeUnifiedEditor";panel.hidden=true;rows[1].after(panel);
+ const title=node("h3","上下の配置・フリック",panel),hint=node("p","枠を選択して登録。編集中はドラッグで交換できます。",panel);
+ const slotType=node("select",undefined,panel),choice=node("select",undefined,panel),name=node("input",undefined,panel),label=node("input",undefined,panel),ico=node("select",undefined,panel);
+ name.placeholder="ショートカットの正確な名前";name.maxLength=100;label.placeholder="表示名（任意）";label.maxLength=24;
+ function options(el,arr){el.replaceChildren();for(const [v,l] of arr){const o=node("option",l,el);o.value=v}}
+ options(slotType,[["remote","リモコン操作"],["app","テレビアプリ"],["shortcut","iPhoneショートカット"],["scene","生活モード"],["preset","保存画質"],["empty","空き枠"]]);
+ const glyph={default:"",power:"⏻",home:"⌂",tv:"▣",sun:"☀",moon:"☾",lamp:"◉",snow:"❄",play:"▷",stop:"□",volume:"♪",star:"☆",film:"▤",bolt:"ϟ",shortcut:"↗"};
+ options(ico,core.icons.map(x=>[x,(glyph[x]||"自動")+" "+x]));
+ const labels={light:{on:"点灯",off:"消灯",all:"全灯",bright:"明るい",dark:"暗い",night:"常夜灯"},ac:{cool:"冷房",dry:"除湿",heat:"暖房",stop:"停止",tempDown:"温度−",tempUp:"温度＋",fan:"風量",wind:"風向"},floor:{on:"点灯",off:"消灯"}};
+ const opLabel=(d,a)=>d==="tv"?(meta(a)?.label||({"pictureOff":"消画"}[a])||a):(labels[d]?.[a]||a);
+ const presetLabel={day:"昼",night:"夜",movie:"映画",extra1:"追加1",extra2:"追加2",extra3:"追加3",extra4:"追加4",extra5:"追加5"};
+ function caption(x){if(!x)return "＋ 空き";return (glyph[x.icon]||"")+" "+(x.label||(x.kind==="remote"?homeDevices[x.device]+" "+opLabel(x.device,x.action):x.kind==="app"?x.title:x.kind==="shortcut"?x.name:x.kind==="scene"?homeLabels[x.mode]:presetLabel[x.id]))}
+ function refreshChoices(){let entries=[];switch(slotType.value){case"remote":entries=Object.entries(yosSlotAllow).flatMap(([d,as])=>as.map(a=>[d+":"+a,homeDevices[d]+" "+opLabel(d,a)]));break;case"app":entries=apps.filter((a,i)=>apps.findIndex(x=>x.title===a.title)===i&&apps.filter(x=>x.title===a.title).length===1).map(a=>[a.title,a.title]);break;case"scene":entries=Object.entries(homeLabels);break;case"preset":entries=yosSlotPresets.map(id=>[id,presetLabel[id]]);break}
+ options(choice,entries);choice.hidden=["empty","shortcut"].includes(slotType.value);name.hidden=slotType.value!=="shortcut";label.hidden=ico.hidden=slotType.value==="empty";
+ }
+ slotType.onchange=refreshChoices;
+ const assign=node("button","選択枠へ登録",panel),add=node("button","下段に空き枠追加",panel);
+ const fcontrols=roles.map(r=>{const l=node("label","フリック "+({tap:"中央",up:"上",down:"下",left:"左",right:"右"}[r]),panel),e=node("select",undefined,l);options(e,[["auto","自動"],...yosSlotAllow.tv.map(a=>[a,opLabel("tv",a)])]);return e});
+ const pl=node("label","パッド位置",panel),position=node("select",undefined,pl);options(position,[["top","上"],["middle","中央"],["bottom","下"]]);
+ const save=node("button","変更を保存",panel),cancel=node("button","取消",panel),reset=node("button","初期配置に戻す",panel),reload=node("button","保存済み配置を再読込",bar);
+ function setSelected(pos){if(pending)return;selected=pos;const x=draft?.layout[pos.area][pos.index];title.textContent=(pos.area==="upper"?"上段":"下段")+" "+(pos.index+1)+" の設定";slotType.value=x?.kind||"empty";refreshChoices();if(x){choice.value=x.kind==="remote"?x.device+":"+x.action:x.kind==="app"?x.title:x.kind==="scene"?x.mode:x.id||"";name.value=x.name||"";label.value=x.label||"";ico.value=x.icon||"default"}else{name.value=label.value="";ico.value="default"}render()}
+ function start(pos){if(!loaded||homeBusy||pending)return;if(!draft){stopActiveHolds();draft=JSON.parse(JSON.stringify(saved));homeLayoutEditing=true;panel.hidden=false;fcontrols.forEach((e,i)=>e.value=draft.flick.flick[roles[i]]);position.value=draft.flick.pad;if(homeLauncherShow)homeLauncherShow(true);status.textContent="編集中・家電操作停止"}setSelected(pos||{area:"upper",index:0})}
+ function finish(){draft=null;selected=null;homeLayoutEditing=false;panel.hidden=true;if(homeLauncherShow)homeLauncherShow(false);render()}
+ function updateFlick(){draft.flick={pad:position.value,flick:Object.fromEntries(roles.map((r,i)=>[r,fcontrols[i].value]))}}
+ function place(){const pos=(draft||saved).flick.pad;if(pos==="top")root.insertBefore(pad,rows[0]);else if(pos==="bottom")rows[1].after(pad);else root.insertBefore(pad,rows[1])}
+ function act(pos){if(!loaded||pending||homeBusy||draft||homeView!=="remote"||activePanel!=="tv")return;const x=saved.layout[pos.area][pos.index];if(!x){start(pos);return}homeSend("layoutRun",JSON.stringify({pos,slot:x,base}));status.textContent="処理中…"}
+ function bind(b,pos){b.dataset.homeSlot=pos.area+":"+pos.index;b.removeAttribute("onclick");b.onclick=null;let p=null,t=null,suppress=0;
+ const clear=()=>{if(t!==null)clearTimeout(t);t=null};
+ b.onpointerdown=e=>{if(!e.isPrimary||p||pending||homeBusy)return;p={id:e.pointerId,x:e.clientX,y:e.clientY};try{b.setPointerCapture(e.pointerId)}catch(_){}if(!draft)t=setTimeout(()=>{t=null;suppress=Date.now()+900;start(pos)},500)};
+ b.onpointermove=e=>{if(p&&Math.hypot(e.clientX-p.x,e.clientY-p.y)>10)clear()};
+ b.onpointercancel=b.onlostpointercapture=()=>{clear();p=null};
+ b.onpointerup=e=>{if(!p||p.id!==e.pointerId)return;const q=p;p=null;clear();if(Math.hypot(e.clientX-q.x,e.clientY-q.y)>10){suppress=Date.now()+900;if(draft){const target=document.elementFromPoint(e.clientX,e.clientY)?.closest("[data-home-slot]");if(target){const [area,i]=target.dataset.homeSlot.split(":");try{draft.layout=core.swap(draft.layout,pos,{area,index:Number(i)});setSelected({area,index:Number(i)})}catch(_){}}}}};
+ b.onclick=e=>{e.preventDefault();e.stopPropagation();if(Date.now()<suppress)return;if(draft)setSelected(pos);else act(pos)};
+ }
+ function render(){const x=(draft||saved).layout;upper.forEach((b,i)=>{const p={area:"upper",index:i};b.textContent=caption(x.upper[i]);b.disabled=!loaded||pending;b.classList.toggle("home-selected",selected?.area==="upper"&&selected.index===i);bind(b,p)});lower.replaceChildren();x.lower.forEach((slot,i)=>{const b=node("button",caption(slot),lower);b.disabled=!loaded||pending;b.classList.toggle("home-selected",selected?.area==="lower"&&selected.index===i);bind(b,{area:"lower",index:i})});edit.disabled=!loaded||pending;reload.disabled=pending||!!draft;cancel.disabled=pending;save.disabled=pending||!loaded;assign.disabled=pending||!loaded;add.disabled=pending||!loaded;reset.disabled=pending||!loaded;place()}
+ function load(){if(homeBusy||pending||draft)return;pending=true;status.textContent="読込中…";render();homeSend("layoutLoad")}
+ edit.onclick=()=>start();reload.onclick=load;cancel.onclick=()=>{if(pending||homeBusy)return;finish();status.textContent=loaded?"変更取消":"再読込してください"};
+ assign.onclick=()=>{if(!draft||!selected||pending)return;try{let x=null,k=slotType.value;if(k!=="empty"){x={kind:k};if(k==="remote"){[x.device,x.action]=choice.value.split(":")}else if(k==="app")x.title=choice.value;else if(k==="shortcut")x.name=name.value.trim();else if(k==="scene")x.mode=choice.value;else x.id=choice.value;if(label.value.trim())x.label=label.value.trim();if(ico.value!=="default")x.icon=ico.value}draft.layout=core.replace(draft.layout,selected,x);render();status.textContent="未保存"}catch(_){status.textContent="登録内容を確認してください"}};
+ add.onclick=()=>{if(!draft||pending)return;try{draft.layout=core.append(draft.layout);setSelected({area:"lower",index:draft.layout.lower.length-1})}catch(_){status.textContent="追加上限です"}};
+ reset.onclick=()=>{if(!draft||pending)return;draft={schema:2,layout:core.seed(core.initial(null),apps),flick:{pad:"middle",flick:Object.fromEntries(roles.map(r=>[r,"auto"]))}};fcontrols.forEach((e,i)=>e.value=draft.flick.flick[roles[i]]);position.value="middle";setSelected({area:"upper",index:0});status.textContent="初期配置・未保存"};
+ position.onchange=()=>{if(draft&&!pending){updateFlick();place()}};
+ save.onclick=()=>{if(!draft||pending||homeBusy||!loaded)return;updateFlick();const packet=JSON.stringify({base,next:draft});if(encodeURIComponent(packet).length>65000){status.textContent="設定が大きすぎます";return}pending=true;status.textContent="保存中…";render();homeSend("layoutSave",packet)};
+ const allApps=document.createElement("details");allApps.id="homeAllApps";const allSummary=document.createElement("summary");allSummary.textContent="全アプリ一覧";const allList=document.createElement("div");allApps.append(allSummary,allList);document.getElementById("homeTVExtras").append(allApps);displayTVApps=function(data){const rank=["youtube","netflix","prime video","amazon","disney","spotify"];const score=x=>{const i=rank.findIndex(k=>String(x.title).toLowerCase().includes(k));return i<0?100:i};apps=Array.isArray(data)?[...data].sort((a,b)=>score(a)-score(b)||String(a.title).localeCompare(String(b.title),"ja")):[];if(loaded&&!draft&&!saved.layout.seeded)saved.layout=core.seed(saved.layout,apps);allList.replaceChildren();for(const app of apps.slice(0,80)){const b=node("button",app.title,allList);b.onclick=()=>{if(!draft&&loaded&&!pending&&!homeBusy)nativeAction("tvApps","launchByTitle","アプリ起動",app.title)}}if(draft&&slotType.value==="app")refreshChoices();render()};
+ homeLayoutReply=r=>{pending=false;
+  if(r.kind==="layoutRun"){status.textContent=r.message||r.tvExtra||(r.ok?"指示送信・物理状態未確認":"操作失敗");if(r.ok)nativeResult({...r,home:false});render();return}
+  if(!r.ok){loaded=false;status.textContent=(r.message||"保存失敗")+(draft?"・取消後に再読込してください":"");render();return}
+  const rec=r.record;try{if(!rec||!(rec.raw===null||typeof rec.raw==="string"))throw Error();base=rec.raw;if(rec.value){saved={schema:2,layout:core.seed(core.validate(rec.value.layout),apps),flick:rec.value.flick}}else{saved={schema:2,layout:core.seed(core.initial(old),apps),flick:{pad:old.pad,flick:old.flick}}}loaded=true;if(draft)finish();render();status.textContent=r.kind==="layoutSave"?"保存済み":"読込済み";if(homeView==="remote"&&activePanel==="tv")scheduleHomeRemoteRead("tv")}catch(_){loaded=false;status.textContent="配置応答不正";render()}
+ };
+ homeCustomFlick=(role,m)=>{if(!loaded||draft||pending||homeBusy)return;const a=saved.flick.flick[role];if(a&&a!=="auto")nativeAction("tv",a,opLabel("tv",a));else nativeAction("homeFlick",role,"",m)};
+ const originalPanel=setPanel;setPanel=function(p){if(draft)return;originalPanel(p);if(p==="tv"&&homeView==="remote"&&!loaded&&!pending)load()};
+ document.addEventListener("home-layout-read",()=>{if(!loaded&&!pending)load()});
+ document.addEventListener("click",e=>{if(draft&&!e.target.closest("#homeUnifiedEditor,.home-layout-bar,[data-home-slot]")){e.preventDefault();e.stopImmediatePropagation()}},true);
+ render();
+}
+unifiedHomeUI();
+
+
+
+bindLightHoldButtons();renderTV();renderTVStudio();try{applyRemoteAppearance()}catch(_){}
+pollTimer=setInterval(()=>{if(homeView==="remote"&&activePanel==="tv"&&!homeBusy)requestMode()},1600);
+acTimer=setInterval(()=>{if(homeView==="remote"&&activePanel==="ac"&&!homeBusy)requestAC()},30000);
+window.addEventListener("beforeunload",()=>{if(pollTimer)clearInterval(pollTimer);if(acTimer)clearInterval(acTimer)});
+
 </script></body></html>`
 
 function secure(key){return Keychain.contains(key)?Keychain.get(key):""}
@@ -851,8 +1109,8 @@ async function sonyJSON(service,method){const r=new Request("http://"+sonyHost()
 const PICTURE_TARGETS=["pictureMode","autoPictureMode","lightSensor","brightness","contrast","autoLocalDimming","xtendedDynamicRange","color","colorTemperature","colorSpace","sharpness","hdrMode"]
 const PICTURE_PRESET_KEYS=["day","night","movie","extra1","extra2","extra3","extra4","extra5"]
 const PICTURE_PRESET_PREFIX="yos.bravia.scriptable.picture-user-preset.v2."
-async function sonyVideoJSON(method,params,version="1.0"){
- const r=new Request("http://"+sonyHost()+"/sony/video");r.method="POST";r.timeoutInterval=8
+async function sonyVideoJSON(method,params,version="1.0",timeout=8){
+ const r=new Request("http://"+sonyHost()+"/sony/video");r.method="POST";r.timeoutInterval=timeout
  r.headers={"Content-Type":"application/json","X-Auth-PSK":sonyPSK()}
  r.body=JSON.stringify({method,params,id:1,version})
  const data=JSON.parse(await r.loadString())
@@ -985,13 +1243,13 @@ async function discoverExtraPictureTargets(){
  const output=[];
  for(const version of ["1.0","1.1"]){
   try{
-   const data=await sonyVideoJSON("getPictureQualitySettings",[{target:""}],version);
-   const raw=flattenPicture(data.result);
+   const data=await sonyVideoJSON("getPictureQualitySettings",version==="1.1"?[{}]:[{target:""}],version,5);
+   const raw=flattenPicture(data.result),known=new Set(raw.filter(e=>PICTURE_TARGETS.includes(e.target)).map(e=>e.target));
    const extras=[...new Set(raw.filter(e=>e.isAvailable!==false&&typeof e.target==="string"&&!PICTURE_TARGETS.includes(e.target)).map(e=>e.target))].slice(0,30);
-   output.push("v"+version+"："+(extras.length?extras.join("、"):"追加対象なし"));
-  }catch(_){output.push("v"+version+"：取得不可（非対応または通信失敗）")}
+   output.push("v"+version+"：応答あり・既存"+known.size+"項目 / "+(extras.length?"追加候補 "+extras.join("、"):"追加対象なし"));
+  }catch(error){const code=String(error?.message||"").match(/API拒否：(\d+)/);output.push("v"+version+"："+(code?"API拒否（"+code[1]+"）":"通信失敗または応答形式不明"))}
  }
- return{...await pictureProbe(),message:"読み取り専用調査｜"+output.join(" / ")+"。追加対象の変更可否は未検証。"};
+ return{discovery:true,message:"読み取り専用調査｜"+output.join(" / ")+"。追加対象の変更可否は未検証。"};
 }
 async function pictureAction(action,slot){
  if(action==="probe")return pictureProbe()
@@ -1157,6 +1415,11 @@ async function yosTVGetApps(){
 }
 async function yosTVMediaAction(action,slot){
  if(action==='list')return {ok:true,apps:await yosTVGetApps(),tvExtra:'テレビからアプリ一覧を取得しました'};
+ if(action==='launchByTitle'){
+  if(typeof slot!=='string'||slot.length>60||!slot)throw Error('アプリ名が不正です');
+  const fresh=await yosTVGetApps(),match=fresh.filter(x=>x.title===slot);if(match.length!==1||homeClosed)throw Error('アプリを一意に特定できません');
+  return yosTVMediaAction('launch',String(match[0].index));
+ }
  if(action==='launch'){
   const index=Number(slot);
   if(!Number.isSafeInteger(index)||index<0||index>=yosTVApps.length)throw Error('アプリ選択が不正です');
@@ -1294,7 +1557,322 @@ async function controlFloor(action,value){
   await client.query({method:"set_device_info",params})
   return{ok:true,floor:await readFloor()}
 }
+
+const homeScenes=(()=>{const PREF_KEY='yos.home-scenes.presets.v1';
+const MODES=['departure','arrival','sleep','wake','night','movie','relax','clean','focus'];
+const LEGACY_MODES=['departure','arrival'];
+const DEVICES=['tv','light','ac','floor'];
+const CHOICES=['on','off','keep'];
+
+function blank(){
+  const row=()=>({tv:'keep',light:'keep',ac:'keep',floor:'keep'});
+  return {schema:1,departure:row(),arrival:row(),sleep:row(),wake:row(),night:row(),movie:row(),relax:row(),clean:row(),focus:row()};
+}
+function validated(value){
+  if(!value||value.schema!==1||typeof value!=='object')throw Error('保存形式が不正です');
+  const next=blank();
+  for(const mode of MODES){
+    // Existing v1 settings contain only departure/arrival. Missing *new* scenes stay all-keep.
+    // Do not rewrite Keychain until the user explicitly chooses Save.
+    if(value[mode]===undefined&&!LEGACY_MODES.includes(mode))continue;
+    if(!value[mode]||typeof value[mode]!=='object')throw Error('設定が不足しています');
+    for(const device of DEVICES){
+      if(!CHOICES.includes(value[mode][device]))throw Error('ON・OFF・維持以外の値は使えません');
+      next[mode][device]=value[mode][device];
+    }
+  }
+  return next;
+}
+function readPrefs(){
+  if(!Keychain.contains(PREF_KEY))return blank();
+  return validated(JSON.parse(Keychain.get(PREF_KEY)));
+}
+function savePrefs(value){
+  const next=JSON.stringify(validated(value));
+  const old=Keychain.contains(PREF_KEY)?Keychain.get(PREF_KEY):null;
+  try{
+    Keychain.set(PREF_KEY,next);
+    if(Keychain.get(PREF_KEY)!==next)throw Error('設定の保存確認に失敗しました');
+  }catch(e){
+    if(old!==null){try{Keychain.set(PREF_KEY,old)}catch(_){}}
+    throw e;
+  }
+}
+function modeFromInput(){
+  const raw=String(args.shortcutParameter||((args.queryParameters||{}).mode)||'').trim().toLowerCase();
+  if(raw==='外出'||raw==='departure')return 'departure';
+  if(raw==='帰宅'||raw==='arrival'||raw==='return')return 'arrival';
+  if(raw==='就寝'||raw==='sleep'||raw==='bedtime')return 'sleep';
+  if(raw==='起床'||raw==='wake'||raw==='morning')return 'wake';
+  if(raw==='夜'||raw==='night')return 'night';
+  if(raw==='映画'||raw==='movie')return 'movie';
+  if(raw==='リラックス'||raw==='relax')return 'relax';
+  if(raw==='掃除'||raw==='clean'||raw==='cleaning')return 'clean';
+  if(raw==='集中'||raw==='focus')return 'focus';
+  if(raw===''||raw==='remote'||raw==='リモコン')return 'remote';
+  if(raw==='edit'||raw==='設定'||raw==='settings')return null;
+  throw Error('指定できないモードです（外出・帰宅・就寝・起床・夜・映画・リラックス・掃除・集中・リモコン・設定）');
+}
+function tapoCore(){
+  let last=null;
+  for(const name of ['YOS Tapo H110 Core','リモコン/内部/Tapo共通']){
+    try{return importModule(name)}catch(e){last=e}
+  }
+  throw Error('既存Tapo共通モジュールを読み込めません: '+String(last&&last.message||last));
+}
+async function tvPower(wanted){
+  const hostKey='yos.bravia.scriptable.host',pskKey='yos.bravia.scriptable.psk';
+  if(!Keychain.contains(hostKey)||!Keychain.contains(pskKey))throw Error('BRAVIA接続設定がありません');
+  const host=String(Keychain.get(hostKey)).trim().replace(/^https?:\/\//,'').replace(/\/$/,'');
+  const psk=Keychain.get(pskKey);
+  if(!/^[a-zA-Z0-9.-]+(?::\d{1,5})?$/.test(host))throw Error('BRAVIA接続先の形式が不正です');
+  async function rpc(method,params){
+    const req=new Request('http://'+host+'/sony/system');
+    req.method='POST';req.timeoutInterval=8;
+    req.headers={'Content-Type':'application/json','X-Auth-PSK':psk};
+    req.body=JSON.stringify({method,params,id:1,version:'1.0'});
+    const data=JSON.parse(await req.loadString());
+    if(data.error)throw Error('BRAVIA応答エラー: '+JSON.stringify(data.error));
+    return data.result;
+  }
+  const status=(await rpc('getPowerStatus',[]))?.[0]?.status;
+  if(status!=='active'&&status!=='standby')throw Error('BRAVIAの電源状態が不明なため送信しません');
+  if((status==='active')===wanted)return '既に指定状態';
+  await rpc('setPowerStatus',[{status:wanted}]);
+  return '操作を送信';
+}
+async function lightPower(core,wanted){
+  const predicate=r=>/ライト|light/i.test(String(r.nickname||''))||String(r.model||'').toLowerCase()==='light';
+  await core.fireFriendly(predicate,wanted?['POWER ON','点灯']:['POWER OFF','消灯']);
+  return '操作を送信（赤外線）';
+}
+function findBooleanPower(v){
+  if(!v||typeof v!=='object')return null;
+  if(typeof v.device_on==='boolean')return v.device_on;
+  for(const child of Object.values(v)){const result=findBooleanPower(child);if(result!==null)return result}
+  return null;
+}
+async function floorPower(core,wanted){
+  const key='yos.tapo.floor.local-host';
+  if(!Keychain.contains(key))throw Error('フロアランプの接続先がありません');
+  const host=String(Keychain.get(key)).trim();
+  if(!/^(?:\d{1,3}\.){3}\d{1,3}$/.test(host))throw Error('フロアランプのIP形式が不正です');
+  const client=await core.clientForHost(host);
+  const state=findBooleanPower(await client.query({method:'get_device_info',params:null}));
+  if(state===null)throw Error('ランプの電源状態が不明なため送信しません');
+  if(state===wanted)return '既に指定状態';
+  await client.query({method:'set_device_info',params:{device_on:wanted}});
+  return '操作を送信';
+}
+function objects(value,out){
+  if(Array.isArray(value))for(const v of value)objects(v,out);
+  else if(value&&typeof value==='object'){out.push(value);for(const v of Object.values(value))objects(v,out)}
+  return out;
+}
+function sleep(ms){
+  return new Promise((resolve,reject)=>{
+    if(typeof Timer!=='undefined'&&typeof Timer.schedule==='function'){Timer.schedule(ms/1000,false,resolve);return}
+    if(typeof setTimeout==='function'){setTimeout(resolve,ms);return}
+    reject(Error('エアコン停止の再送タイマーを使えません'));
+  });
+}
+async function acPower(core,wanted){
+  const remote=core.findRemote(r=>String(r.model||'').toUpperCase()==='AC'||/エアコン|air.?con/i.test(String(r.nickname||'')));
+  if(!remote)throw Error('既存エアコンリモコンが見つかりません');
+  const client=await core.client();
+  const raw=await client.query({method:'control_child',params:{device_id:remote.device_id,requestData:{method:'get_device_info',params:null}}});
+  const info=objects(raw,[]).find(x=>typeof x.ac_status==='string'||typeof x.on==='boolean')||null;
+  if(!info)throw Error('エアコンの運転状態が不明なため送信しません');
+  const s={};
+  if(typeof info.ac_status==='string')for(const item of info.ac_status.split('_')){
+    const m=String(item).match(/^([PMTSD])(-?\d+)$/);
+    if(m)s[m[1]]=Number(m[2]);
+  }
+  for(const [key,field] of [['P','on'],['M','ac_mode'],['T','current_temp'],['S','wind_speed'],['D','wind_direct']]){
+    if(!Number.isFinite(s[key])&&info[field]!=null)s[key]=Number(info[field]);
+  }
+  if(!Number.isFinite(s.P)||!Number.isFinite(s.M))throw Error('エアコンの電源・運転モードが不明なため送信しません');
+  // Tapo's cached IR status is not a physical power sensor: always send the requested AC state.
+  function clamp(n,min,max,fallback){return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback}
+  const payload={power:wanted,on:wanted,mode:s.M,temp:clamp(s.T,18,30,26),wind_speed:clamp(s.S,0,4,0),wind_direct:clamp(s.D,0,6,6)};
+  await client.controlAc(remote.device_id,payload);
+  if(!wanted){
+    // This home's SHARP AC previously needed two OFF commands 1.2s apart.
+    await sleep(1200);
+    await client.controlAc(remote.device_id,payload);
+  }
+  return wanted?'運転モードを維持してON送信':'停止コマンドを2回送信';
+}
+async function execute(mode,prefs,canContinue=()=>true){
+  const coreNeeded=DEVICES.some(device=>device!=='tv'&&prefs[mode][device]!=='keep');
+  let core=null,coreError=null;
+  if(coreNeeded){try{core=tapoCore()}catch(e){coreError=e}}
+  const results=[];
+  for(const device of DEVICES){
+    if(!canContinue()){results.push({device,choice:prefs[mode][device],status:'中止'});continue;}
+    const choice=prefs[mode][device];
+    if(choice==='keep'){results.push({device,choice,status:'維持'});continue}
+    if(device!=='tv'&&coreError){results.push({device,choice,status:'エラー',detail:String(coreError.message||coreError)});continue}
+    try{
+      const wanted=choice==='on';
+      let detail='';
+      if(device==='tv')detail=await tvPower(wanted);
+      else if(device==='light')detail=await lightPower(core,wanted);
+      else if(device==='ac')detail=await acPower(core,wanted);
+      else detail=await floorPower(core,wanted);
+      results.push({device,choice,status:'送信',detail});
+    }catch(e){
+      results.push({device,choice,status:'エラー',detail:String(e.message||e)});
+    }
+  }
+  return results;
+}
+
+return {MODES,readPrefs,savePrefs,validated,execute};})();
+let homeQueued=false,homeClosed=false,homeSeen=0;
+function unifiedSlots(allow,presets){
+ const defaults=["back","home","quick","input","volumeDown","mute","volumeUp","stop"];
+ const scenes=["departure","arrival","sleep","wake","night","movie","relax","clean","focus"];
+ const icons=["default","power","home","tv","sun","moon","lamp","snow","play","stop","volume","star","film","bolt","shortcut"];
+ const safeText=(v,n)=>typeof v==="string"&&v.length>0&&v.length<=n&&v.trim()===v&&!/[\x00-\x1f\x7f]/.test(v);
+ const own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
+ function clean(x){
+  if(x===null)return null;if(!x||typeof x!=="object"||Array.isArray(x))throw Error("invalid slot");
+  const o={kind:x.kind};
+  if(x.kind==="remote"){if(!own(allow,x.device)||!allow[x.device].includes(x.action))throw Error("invalid command");o.device=x.device;o.action=x.action}
+  else if(x.kind==="app"){if(!safeText(x.title,60))throw Error("invalid app");o.title=x.title}
+  else if(x.kind==="shortcut"){if(!safeText(x.name,100))throw Error("invalid shortcut");o.name=x.name}
+  else if(x.kind==="scene"){if(!scenes.includes(x.mode))throw Error("invalid scene");o.mode=x.mode}
+  else if(x.kind==="preset"){if(!presets.includes(x.id))throw Error("invalid preset");o.id=x.id}
+  else throw Error("invalid kind");
+  if(x.label!==undefined){if(!safeText(x.label,24))throw Error("invalid label");o.label=x.label}
+  if(x.icon!==undefined){if(!icons.includes(x.icon))throw Error("invalid icon");o.icon=x.icon}
+  return o;
+ }
+ function validate(x){
+  if(!x||x.schema!==1||!Array.isArray(x.upper)||x.upper.length!==8||!Array.isArray(x.lower)||x.lower.length<8||x.lower.length>48||typeof x.seeded!=="boolean")throw Error("invalid layout");
+  return {schema:1,upper:x.upper.map(clean),lower:x.lower.map(clean),seeded:x.seeded};
+ }
+ function initial(old){return validate({schema:1,upper:defaults.map((a,i)=>({kind:"remote",device:"tv",action:allow.tv.includes(old?.slots?.[i])?old.slots[i]:a})),lower:Array(8).fill(null),seeded:false})}
+ function load(raw,old){return raw===null?initial(old):validate(JSON.parse(raw))}
+ function seed(state,apps){let o=validate(state);if(o.seeded)return o;let names=apps.filter(a=>safeText(a?.title,60)).map(a=>a.title);let uniq=names.filter((n,i)=>names.indexOf(n)===i&&names.lastIndexOf(n)===i);if(!uniq.length)return o;o.lower=Array.from({length:Math.max(8,Math.min(48,uniq.length))},(_,i)=>uniq[i]?{kind:"app",title:uniq[i]}:null);o.seeded=true;return validate(o)}
+ function at(o,r){if(!r||!["upper","lower"].includes(r.area)||!Number.isInteger(r.index)||r.index<0||r.index>=o[r.area].length)throw Error("invalid position");return o[r.area]}
+ function replace(state,r,x){let o=validate(state);at(o,r)[r.index]=clean(x);o.seeded=true;return o}
+ function swap(state,a,b){let o=validate(state),aa=at(o,a),bb=at(o,b);[aa[a.index],bb[b.index]]=[bb[b.index],aa[a.index]];o.seeded=true;return o}
+ function append(state){let o=validate(state);if(o.lower.length>=48)throw Error("full");o.lower.push(null);o.seeded=true;return o}
+ function dispatch(x,ctx){if(ctx.editing||ctx.busy||ctx.closed||!ctx.explicit)return null;let o=clean(x);if(o===null)return null;
+  if(o.kind==="remote")return {device:o.device,action:o.action};
+  if(o.kind==="app"){let found=ctx.apps.filter(a=>a.title===o.title);if(found.length!==1||!Number.isSafeInteger(found[0].index)||found[0].index<0)return null;return {device:"tvApps",action:"launchByTitle",title:o.title}}
+  if(o.kind==="shortcut")return {device:"home",action:"launchShortcut",name:o.name};
+  if(o.kind==="scene")return {device:"home",action:o.mode==="sleep"?"sleep":"run",slot:o.mode==="sleep"?"おやすみマン":o.mode};
+  if(o.kind==="preset")return ctx.savedPresets.includes(o.id)?{device:"picture",action:"load",slot:o.id}:null;
+  return null;
+ }
+ return {clean,validate,initial,load,seed,replace,swap,append,dispatch,icons};
+}
+const yosSlotAllow={"tv":["power","input","home","quick","menu","back","up","down","left","right","confirm","volumeDown","mute","volumeUp","channelDown","channelUp","rewind","play","fastForward","pause","stop","prev","next","pictureOff"],"light":["on","off","all","bright","dark","night"],"ac":["cool","dry","heat","stop","tempDown","tempUp","fan","wind"],"floor":["on","off"]};
+const yosSlotPresets=["day","night","movie","extra1","extra2","extra3","extra4","extra5"];
+function homeLayoutStore(core,kc){
+ const key="yos.remote.home.layout.v2", roles=["tap","up","down","left","right"];
+ function flick(x){if(!x||!["top","middle","bottom"].includes(x.pad)||!x.flick||!roles.every(r=>x.flick[r]==="auto"||yosSlotAllow.tv.includes(x.flick[r])))throw Error("不正なフリック設定");return {pad:x.pad,flick:Object.fromEntries(roles.map(r=>[r,x.flick[r]]))}}
+ function validate(x){if(x?.schema!==2)throw Error("不正な設定形式");return {schema:2,layout:core.validate(x.layout),flick:flick(x.flick)}}
+ function read(){if(!kc.contains(key))return {raw:null,value:null};const raw=kc.get(key);if(typeof raw!=="string"||raw.length>32000)throw Error("設定破損・変更しません");return {raw,value:validate(JSON.parse(raw))}}
+ function save(base,next){const old=read();if(old.raw!==base)throw Error("設定が変更されています。読み直してください");const value=validate(next),raw=JSON.stringify(value);if(raw.length>32000)throw Error("設定が大きすぎます");
+  try{kc.set(key,raw);if(kc.get(key)!==raw)throw Error("保存読戻し失敗")}catch(e){try{if(old.raw===null){if(kc.contains(key))kc.remove(key);if(kc.contains(key))throw Error("restore")}else{kc.set(key,old.raw);if(kc.get(key)!==old.raw)throw Error("restore")}}catch(_){throw Error("保存失敗・復旧未確認。再読込してください")}throw Error("保存失敗・旧設定を保持")}
+  return {raw,value}
+ }
+ return {read,save,validate};
+}
+const homeLayoutNative=homeLayoutStore(unifiedSlots(yosSlotAllow,yosSlotPresets),Keychain);
+async function executeHomeSlot(request,record,core,deps){
+ const pos=request?.pos;if(!pos||!["upper","lower"].includes(pos.area)||!Number.isInteger(pos.index)||pos.index<0||pos.index>=(pos.area==="upper"?8:48))throw Error("不正な位置");
+ const slot=core.clean(request.slot);if(slot===null||deps.closed())throw Error("未登録または画面終了");
+ if(record.raw!==request.base)throw Error("配置変更・再読込してください");
+ const saved=record.value?.layout;
+ if(saved){const initialApp=!saved.seeded&&pos.area==="lower"&&slot.kind==="app"&&saved.lower[pos.index]==null;if(!initialApp&&JSON.stringify(saved[pos.area][pos.index])!==JSON.stringify(slot))throw Error("登録内容が一致しません")}
+ else if(!((pos.area==="upper"&&slot.kind==="remote"&&slot.device==="tv"&&slot.action!=="pictureOff")||(pos.area==="lower"&&slot.kind==="app")))throw Error("先に配置を保存してください");
+ let apps=[];if(slot.kind==="app")apps=await deps.apps();
+ if(deps.closed())throw Error("画面終了");
+ const r=core.dispatch(slot,{explicit:true,editing:false,busy:false,closed:false,apps,savedPresets:deps.presets()});
+ if(!r)throw Error("現在使用できない操作です");
+ return await deps.execute(r);
+}
+async function homeNative(item){
+ const kind=item.action;
+ if(homeClosed)throw Error("画面終了");
+ stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);
+ if(homeClosed)throw Error("画面終了");
+ if(kind==="layoutRun"){
+  if(typeof item.slot!=="string"||item.slot.length>66000)throw Error("不正な配置操作");
+  const request=JSON.parse(item.slot),record=homeLayoutNative.read();
+  const result=await executeHomeSlot(request,record,unifiedSlots(yosSlotAllow,yosSlotPresets),{
+    closed:()=>homeClosed,apps:yosTVGetApps,presets:()=>PICTURE_PRESET_KEYS.filter(k=>Keychain.contains(PICTURE_PRESET_PREFIX+k)),
+    execute:async r=>{
+     if(homeClosed)throw Error("画面終了");
+     if(r.device==="tv"){await sonyAction(r.action);return {ok:true,mode:await inferMode()}}
+     if(r.device==="light"){await runExisting(CONFIG.light.actionScript,r.action);return {ok:true}}
+     if(r.device==="ac"){await runExisting(CONFIG.ac.actionScript,r.action);return {ok:true,ac:await readACSummary()}}
+     if(r.device==="floor")return controlFloor(r.action,"");
+     if(r.device==="tvApps"){const matches=yosTVApps.map((a,index)=>({...a,index})).filter(a=>a.title===r.title);if(matches.length!==1)throw Error("アプリを一意に特定できません");return yosTVMediaAction("launch",String(matches[0].index))}
+     if(r.device==="picture")return {ok:true,picture:await pictureLoad(r.slot)};
+     if(r.device==="home"&&r.action==="launchShortcut"){if(typeof Safari==="undefined"||typeof Safari.open!=="function")throw Error("ショートカット起動不可");Safari.open("shortcuts://run-shortcut?name="+encodeURIComponent(r.name));return {ok:true,message:"登録済みショートカットの起動を依頼しました"}}
+     if(r.device==="home"&&["run","sleep"].includes(r.action))return homeNative({action:r.action,slot:r.slot});
+     throw Error("未対応の操作");
+    }
+  });
+  return {...result,home:true,kind};
+ }
+ if(kind==="layoutLoad")return {ok:true,home:true,kind,record:homeLayoutNative.read(),message:"配置を読み込みました"};
+ if(kind==="layoutSave"){
+  if(typeof item.slot!=="string"||item.slot.length>66000)throw Error("設定サイズ不正");
+  const x=JSON.parse(item.slot);if(!x||!(x.base===null||typeof x.base==="string"))throw Error("設定不正");
+  return {ok:true,home:true,kind,record:homeLayoutNative.save(x.base,x.next),message:"配置を保存しました"};
+ }
+ if(kind==="load")return {ok:true,home:true,kind,prefs:homeScenes.readPrefs(),message:"設定を読み込みました"};
+ if(kind==="save"){
+  const x=JSON.parse(item.slot);
+  if(!x||typeof x!=="object"||JSON.stringify(homeScenes.readPrefs())!==JSON.stringify(homeScenes.validated(x.base)))throw Error("保存済み設定が変更されています。読み直してください");
+  const key="yos.home-scenes.presets.v1",old=Keychain.contains(key)?Keychain.get(key):null;
+  try{homeScenes.savePrefs(x.next)}catch(e){if(old===null&&Keychain.contains(key))Keychain.remove(key);throw e}
+  return {ok:true,home:true,kind,prefs:homeScenes.readPrefs(),message:"設定を保存しました。家電は操作していません"};
+ }
+ if(kind==="sleep"){
+  if(item.slot!=="おやすみマン")throw Error("未登録ショートカット");
+  if(typeof Safari==="undefined"||typeof Safari.open!=="function")throw Error("ショートカット起動不可");
+  Safari.open("shortcuts://run-shortcut?name="+encodeURIComponent("おやすみマン"));
+  return {ok:true,home:true,kind,message:"おやすみマンの起動を依頼しました"};
+ }
+ if(kind!=="run"||!homeScenes.MODES.includes(item.slot)||item.slot==="sleep")throw Error("不正な生活モード");
+ const rows=await homeScenes.execute(item.slot,homeScenes.readPrefs(),()=>!homeClosed);
+ const sent=rows.filter(x=>x.status==="送信").length,failed=rows.filter(x=>x.status==="エラー").length,stopped=rows.filter(x=>x.status==="中止").length;
+ return {ok:!failed&&!stopped,home:true,kind,message:sent+"件 指示送信 / "+failed+"件 エラー / "+stopped+"件 中止"+(!sent&&!failed&&!stopped?"（全て維持）":"。物理状態は未確認")};
+}
+function homeFlickAction(mode,dir){
+ if(!["navigation","hybrid","media"].includes(mode)||!["up","down","left","right","tap"].includes(dir))return null;
+ if(mode==="navigation")return dir==="tap"?"confirm":dir;
+ if(dir==="left")return "rewind";if(dir==="right")return "fastForward";if(dir==="tap")return "play";
+ return mode==="hybrid"?dir:null;
+}
+async function homeFlickNative(item){
+ const observed=await inferMode();
+ if(homeClosed||observed!==item.slot)return {ok:false,message:"モードが変化しました。もう一度操作してください"};
+ const action=homeFlickAction(observed,item.action);
+ if(!action)return {ok:true,mode:observed};
+ await sonyAction(action);
+ return {ok:true,mode:await inferMode()};
+}
+async function homeRemoteRead(device){
+ if(device==="ac")return {ok:true,ac:await readACSummary()};
+ if(device==="floor")return {ok:true,floor:await readFloor()};
+ if(device!=="tv")return {ok:true};
+ const result={ok:true};
+ try{result.mode=await inferMode()}catch(_){}
+ if(!homeClosed)try{result.apps=await yosTVGetApps()}catch(_){}
+ if(!homeClosed)try{result.picture=await pictureProbe()}catch(_){}
+ return result;
+}
+
 const queue=[];let running=false,web=null
-async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvApps"){result=await yosTVMediaAction(item.action,item.slot)}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
-web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);if(query.device==="tvHoldStart"){startTVHold(query.action);return false}if(query.device==="tvHoldHeartbeat"){renewTVHold(query.action);return false}if(query.device==="tvHoldStop"){stopTVHold();return false}if(query.device==="lightHoldStart"){startLightHold(query.action);return false}if(query.device==="lightHoldHeartbeat"){renewLightHold(query.action);return false}if(query.device==="lightHoldStop"){stopLightHold();return false}queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
-await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setTimeout(()=>probePictureScene(),250)") }catch(_){}try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);Script.complete()
+async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(homeClosed)break;if(item.device==="home"){result=await homeNative(item)}else if(item.device==="homeFlick"){result=await homeFlickNative(item)}else if(item.device==="homeRead"){result=await homeRemoteRead(item.action)}else if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvApps"){result=await yosTVMediaAction(item.action,item.slot)}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error),discoveryError:item.device==="picture"&&item.action==="discover",home:item.device==="home",kind:item.device==="home"?item.action:null}}if(item.device==="home")homeQueued=false;try{if(!homeClosed)await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
+web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;let query;try{query=parseQuery(url)}catch(_){return false}if(homeClosed)return false;if(query.device==="homeStopHolds"){stopTVHold();stopLightHold();return false}if(homeQueued){if(query.device==="tvHoldStop")stopTVHold();if(query.device==="lightHoldStop")stopLightHold();return false}if(query.device==="home"){const n=Number(query.n);if(!Number.isSafeInteger(n)||n<=homeSeen)return false;homeSeen=n;homeQueued=true;stopTVHold();stopLightHold()}if(query.device==="tvHoldStart"){startTVHold(query.action);return false}if(query.device==="tvHoldHeartbeat"){renewTVHold(query.action);return false}if(query.device==="tvHoldStop"){stopTVHold();return false}if(query.device==="lightHoldStart"){startLightHold(query.action);return false}if(query.device==="lightHoldHeartbeat"){renewLightHold(query.action);return false}if(query.device==="lightHoldStop"){stopLightHold();return false}queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
+await web.loadHTML(html,"https://yos-remote.local/");await web.present(true);homeClosed=true;queue.length=0;stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);Script.complete()
