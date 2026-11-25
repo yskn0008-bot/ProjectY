@@ -348,9 +348,13 @@ test('installer installs pinned AION OUTPUT without modifying memory reader or C
 
 test('remote TEST recovery restores only a verified missing body and preserves its receipt',async()=>{
  const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
- const pin=catalog.targets.find(x=>x.id==='remote-hub-quick-test');
- const source=fs.readFileSync(new URL('../scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js',import.meta.url),'utf8');
+ // Repair helper is deliberately scoped to verified historical releases.
+ // Never couple its frozen allowlist to the mutable current catalog pin.
+ const current=catalog.targets.find(x=>x.id==='remote-hub-quick-test');
+ const pin={...current,commit:'0d263b2295cc19e9a2607a9511edc4963da38b44',sha256:'0a8844f3d0092416fb5a0ecbafd9f9c7f45b47eae845ccfb370d72434f3b5b0f'};
+ const source=fs.readFileSync(new URL('fixtures/yos-remote-hub-quick-test-0d263b22.js',import.meta.url),'utf8');
  assert.equal(sha(source),pin.sha256);
+ assert.ok(runtime.includes('"'+pin.commit+'":"'+pin.sha256+'"'));
  const target=pin.name+'.js',receipt='YOS Common Installer Data/'+encodeURIComponent(pin.name)+'.receipt.json';
  const raw=JSON.stringify({schema:1,name:pin.name,id:pin.id,path:pin.path,storage:'iCloud',commit:pin.commit,sha256:pin.sha256});
  async function run({bad=false,duplicate=false,cancel=false,race=false,pending=false,network=false}={}){
@@ -370,4 +374,34 @@ test('remote TEST recovery restores only a verified missing body and preserves i
  for(const opts of [{bad:true},{duplicate:true},{cancel:true},{race:true},{pending:true},{network:true}]){
   const blocked=await run(opts);assert.equal(blocked.cloud.writes.length,0);assert.equal(blocked.opened.length,0);
  }
+});
+
+
+test('normal installer restores the latest exact remote receipt and safely updates the previous version',async()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
+ const pin=catalog.targets.find(x=>x.id==='remote-hub-quick-test');
+ const source=fs.readFileSync(new URL('../scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js',import.meta.url),'utf8');
+ const oldSource=fs.readFileSync(new URL('fixtures/yos-remote-hub-quick-test-0d263b22.js',import.meta.url),'utf8');
+ assert.equal(sha(source),pin.sha256);
+ assert.equal(sha(oldSource),'0a8844f3d0092416fb5a0ecbafd9f9c7f45b47eae845ccfb370d72434f3b5b0f');
+ const target=pin.name+'.js',receipt='YOS Common Installer Data/'+encodeURIComponent(pin.name)+'.receipt.json';
+ const raw=JSON.stringify({schema:1,name:pin.name,id:pin.id,path:pin.path,storage:'iCloud',commit:pin.commit,sha256:pin.sha256});
+ const prior=JSON.stringify({...JSON.parse(raw),commit:'0d263b2295cc19e9a2607a9511edc4963da38b44',sha256:'0a8844f3d0092416fb5a0ecbafd9f9c7f45b47eae845ccfb370d72434f3b5b0f'});
+ async function run(mode){
+  const cloud=store('/cloud',{[receipt]:mode==='restore'||mode==='cancel'?raw:prior,'unrelated.js':'protected'}),local=store('/local'),alerts=[];
+  if(mode==='update')cloud.files.set('/cloud/'+target,oldSource);
+  for(const f of [cloud,local])f.remove=p=>{f.deletions.push(p);f.files.delete(p)};
+  class Request{constructor(url){this.url=url;this.response={statusCode:200};}async loadString(){if(this.url.endsWith('yos-common-installer-catalog.json'))return JSON.stringify(catalog);assert.ok(this.url.includes(pin.commit));return source;}}
+  class Alert{addAction(a){this.action=a;}addCancelAction(){}async presentAlert(){alerts.push(this.title);return mode==='cancel'&&this.action==='本体だけ復元'?-1:0;}}
+  await new vm.Script('(async()=>{\n'+official+'\n})()').runInNewContext({FileManager:{iCloud:()=>cloud,local:()=>local},Request,Alert,Script:{complete:()=>{}},Safari:{open:()=>{}},args:{queryParameters:{script:pin.id}}},{timeout:6000});
+  assert.equal(cloud.files.get('/cloud/unrelated.js'),'protected');
+  assert.equal(local.writes.length,0);
+  return {cloud,alerts};
+ }
+ const restored=await run('restore');assert.equal(restored.cloud.files.get('/cloud/'+target),source);assert.equal(restored.cloud.files.get('/cloud/'+receipt),raw);assert.equal(restored.cloud.writes.length,1);
+ const cancelled=await run('cancel');assert.equal(cancelled.cloud.writes.length,0);assert.equal(cancelled.cloud.files.get('/cloud/'+receipt),raw);
+ const stale=await run('stale');assert.equal(stale.cloud.writes.length,0);assert.equal(stale.cloud.files.get('/cloud/'+receipt),prior);
+ const updated=await run('update');assert.equal(updated.cloud.files.get('/cloud/'+target),source);assert.equal(JSON.parse(updated.cloud.files.get('/cloud/'+receipt)).sha256,pin.sha256);
+ assert.ok([...updated.cloud.files.entries()].some(([k,v])=>k.includes('/backups/')&&v===oldSource));
+ assert.match(updated.alerts.at(-1),/更新完了/);
 });
