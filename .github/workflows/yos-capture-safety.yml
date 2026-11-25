@@ -23,14 +23,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Native scope shadow (no build skipping)
+      - name: Native scope diagnostic (contract always runs)
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         working-directory: .
         run: |
           scope="$(node tools/factory-core/catalog-scope.cjs scope "$BASE_SHA" "$HEAD_SHA" 2>/dev/null || echo full)"
-          printf 'native_scope_shadow=%s; native_build=unchanged\n' "$scope"
+          printf 'native_scope_shadow=%s; contract=unchanged\n' "$scope"
       - name: JavaScript syntax
         run: |
           node --check shell/capture-core.js
@@ -46,21 +46,72 @@ jobs:
           test -f www/capture-core.js
           test -f www/bravia.html
 
+  native-scope:
+    name: Determine redundant native build scope
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      mode: ${{ steps.classify.outputs.mode }}
+    steps:
+      - uses: actions/checkout@v4
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository }}
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Classify reviewed base and exact candidate tree
+        id: classify
+        shell: bash
+        env:
+          ELIGIBLE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          mode=full
+          if [[ "$ELIGIBLE" == true && "$BASE_SHA" =~ ^[0-9a-f]{40}$ && "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            classifier="$(mktemp "$RUNNER_TEMP/yos-scope-XXXXXX.cjs")"
+            if git show "$BASE_SHA:tools/factory-core/catalog-scope.cjs" > "$classifier" &&
+               [[ "$(git rev-parse HEAD^{tree})" == "$(git rev-parse "$HEAD_SHA^{tree}")" ]]; then
+              candidate="$(node "$classifier" scope "$BASE_SHA" "$HEAD_SHA" 2>/dev/null || echo full)"
+              if [[ "$candidate" == scriptable-only-candidate ]]; then mode="$candidate"; fi
+            fi
+            rm -f "$classifier"
+          fi
+          printf 'mode=%s\n' "$mode" >> "$GITHUB_OUTPUT"
+          printf 'Native scope: %s (primary iOS build remains mandatory)\n' "$mode" >> "$GITHUB_STEP_SUMMARY"
+
   ios-build:
-    runs-on: macos-latest
+    needs: native-scope
+    if: ${{ always() && !cancelled() }}
+    runs-on: ${{ needs.native-scope.result == 'success' && needs.native-scope.outputs.mode == 'scriptable-only-candidate' && 'ubuntu-latest' || 'macos-latest' }}
     defaults:
       run:
         working-directory: ios-app
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Record redundant build not required
+        if: runner.os != 'macOS'
+        working-directory: .
+        env:
+          SCOPE_RESULT: ${{ needs.native-scope.result }}
+          SCOPE_MODE: ${{ needs.native-scope.outputs.mode }}
+        run: |
+          test "$SCOPE_RESULT" = success
+          test "$SCOPE_MODE" = scriptable-only-candidate
+          printf 'Redundant native build NOT_RUN (exact Scriptable-only scope). Primary iOS native build and all contract tests remain required.\n' | tee -a "$GITHUB_STEP_SUMMARY"
+      - if: runner.os == 'macOS'
+        uses: actions/checkout@v4
+      - if: runner.os == 'macOS'
+        uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Install dependencies
+        if: runner.os == 'macOS'
         run: npm install --ignore-scripts
       - name: Generate Capacitor iOS project with SPM
+        if: runner.os == 'macOS'
         run: npm run native:init
       - name: Signed target configuration contract
+        if: runner.os == 'macOS'
         run: |
           test -f ios/App/App/App.entitlements
           /usr/libexec/PlistBuddy -c 'Print :NSCalendarsFullAccessUsageDescription' ios/App/App/Info.plist
@@ -68,6 +119,7 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' ios/App/App/App.entitlements)" = 'group.jp.yos.onlysystem'
           grep -q 'CODE_SIGN_ENTITLEMENTS = App/App.entitlements;' ios/App/App.xcodeproj/project.pbxproj
       - name: Build iOS simulator candidate
+        if: runner.os == 'macOS'
         run: >-
           xcodebuild
           -project ios/App/App.xcodeproj
