@@ -146,7 +146,100 @@ async function entry(input,runsInApp,WebView){
  }
  return viewer;
 }
+
+// Opt-in transport for the existing shortcut. No network, clipboard or cloud storage.
+function createAionHandoff(fm,now=()=>Date.now(),random=()=>UUID.string(),scope="live"){
+ const held=reason=>({status:"held",action:"standard",reason});
+ const valid=id=>typeof id==="string"&&/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id);
+ if(!["live","probe"].includes(scope))throw Error("invalid_scope");
+ const dir=fm.joinPath(fm.documentsDirectory(),scope==="probe"?"YOS AION Handoff Probe":"YOS AION Handoff");
+ const ttl=600000,marker="yos-aion-handoff-v1";
+ const p=(id,suffix="")=>fm.joinPath(dir,id.toLowerCase()+suffix+".json");
+ const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+ function normalize(v){
+  if(v?.status==="ok"&&v.action==="follow_up"&&typeof v.followUp==="string"&&v.followUp.trim()&&v.followUp.length<=4000&&["choice","text"].includes(v.inputKind))return {status:"ok",action:"follow_up",followUp:v.followUp.trim(),inputKind:v.inputKind};
+  if(v?.status==="ok"&&v.action==="finish")return {status:"ok",action:"finish"};
+  return held("native_fallback");
+ }
+ function parse(raw,id){
+  if(typeof raw!=="string"||raw.length>32000)return null;
+  let x;try{x=JSON.parse(raw)}catch(_){return null}
+  if(x?.marker!==marker||x.session!==id.toLowerCase()||!Number.isFinite(x.created)||!same(x.result,normalize(x.result)))return null;
+  return x;
+ }
+ function clean(){
+  if(!fm.fileExists(dir)||!fm.isDirectory(dir))return;
+  for(const name of fm.listContents(dir).slice(0,128)){
+   const m=/^([0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})(?:\.claim|\.stage\.[0-9a-f-]{36})?\.json$/i.exec(name);
+   if(!m)continue;
+   try{const fp=fm.joinPath(dir,name);if(fm.isDirectory(fp))continue;const x=parse(fm.readString(fp),m[1]);if(x&&now()-x.created>ttl)fm.remove(fp)}catch(_){}
+  }
+ }
+ function write(id,viewer){
+  if(!valid(id))return held("invalid_session");
+  try{
+   clean();if(!fm.fileExists(dir))fm.createDirectory(dir,true);if(!fm.isDirectory(dir))return held("directory_invalid");
+   const final=p(id),claim=p(id,".claim");if(fm.fileExists(final)||fm.fileExists(claim))return held("session_exists");
+   const nonce=random();if(!valid(nonce))return held("invalid_nonce");
+   const stage=p(id,".stage."+nonce.toLowerCase());if(fm.fileExists(stage))return held("stage_exists");
+   const raw=JSON.stringify({marker,session:id.toLowerCase(),created:now(),result:normalize(viewer)});
+   fm.writeString(stage,raw);if(fm.readString(stage)!==raw)return held("write_unverified");
+   fm.copy(stage,final);if(fm.readString(final)!==raw)return held("publish_unverified");fm.remove(stage);
+   return {status:"ok",action:"handoff_ready",session:id.toLowerCase()};
+  }catch(_){return held("write_failed")}
+ }
+ function read(id){
+  if(!valid(id))return held("invalid_session");
+  try{
+   const final=p(id),claim=p(id,".claim");
+   if(fm.fileExists(claim))return held("already_claimed");
+   if(!fm.fileExists(final))return held("result_missing");
+   const raw=fm.readString(final),x=parse(raw,id);
+   if(!x)return held("invalid_result");
+   if(now()<x.created||now()-x.created>ttl){clean();return held("expired_result")}
+   fm.copy(final,claim);if(fm.readString(claim)!==raw)return held("claim_unverified");
+   fm.remove(final);if(fm.fileExists(final))return held("consume_unverified");
+   // Keep a content-free tombstone until expiry to reject a replay of the same session.
+   fm.writeString(claim,JSON.stringify({...x,result:{status:"ok",action:"finish"}}));
+   if(!parse(fm.readString(claim),id))return held("claim_unverified");
+   return x.result;
+  }catch(_){return held("read_failed")}
+ }
+ return {write,read};
+}
+async function handoffEntry(input,runsInApp,WebView,fm,clock,nonce){
+ // Opt-in is a Shortcut dictionary, not a JSON string returned by a model.
+ if(!input||typeof input!=="object"||Array.isArray(input)||!["aion_handoff_write_v1","aion_handoff_read_v1"].includes(input.mode))return entry(input,runsInApp,WebView);
+ const held=reason=>({status:"held",action:"standard",reason});
+ if(typeof input.session!=="string"||!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(input.session))return held("invalid_session");
+ if(input.mode==="aion_handoff_read_v1"){if(runsInApp)return held("read_requires_background");return createAionHandoff(fm(),clock,nonce).read(input.session)}
+ if(!runsInApp)return held("display_requires_app");
+ const packet={answer:input.answer,choices:input.choices,canSave:false,presentation:input.presentation};
+ if(!parseOutput(packet).ok)return held("invalid_input");
+ const result=await entry(packet,true,WebView);
+ return createAionHandoff(fm(),clock,nonce).write(input.session,result);
+}
+
+
+// Fixed synthetic probe; does not render, call a model, or read user data.
+async function diagnosticEntry(input,runsInApp,WebView,fm,clock,nonce){
+ if(input&&typeof input==="object"&&!Array.isArray(input)&&["aion_probe_write_v1","aion_probe_read_v1"].includes(input.mode)){
+  const held=reason=>({status:"held",action:"standard",reason});
+  if(typeof input.session!=="string"||!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(input.session))return held("invalid_session");
+  const probe=createAionHandoff(fm(),clock,nonce,"probe");
+  if(input.mode==="aion_probe_write_v1"){
+   if(!runsInApp)return held("probe_requires_app");
+   return probe.write(input.session,{status:"ok",action:"follow_up",followUp:"AION_PROBE_V1",inputKind:"text"});
+  }
+  if(runsInApp)return held("probe_requires_background");
+  const result=probe.read(input.session);
+  if(result.status==="ok"&&result.action==="follow_up"&&result.followUp==="AION_PROBE_V1")return {status:"ok",action:"probe_pass"};
+  return held(result.status==="held"?result.reason:"probe_payload_mismatch");
+ }
+ return handoffEntry(input,runsInApp,WebView,fm,clock,nonce);
+}
+
 let result;
-try{result=await entry(args.shortcutParameter,typeof config!=="undefined"&&config.runsInApp===true,WebView)}catch(_){result={status:"held",action:"standard",reason:"runtime_failed"}}
+try{result=await diagnosticEntry(args.shortcutParameter,typeof config!=="undefined"&&config.runsInApp===true,WebView,()=>FileManager.local())}catch(_){result={status:"held",action:"standard",reason:"runtime_failed"}}
 Script.setShortcutOutput(JSON.stringify(result));
 Script.complete();
