@@ -291,7 +291,7 @@ body{padding:0 8px}
   <p class="config-help">画質項目を一覧化。実際に変更できるものはテレビから取得した値と範囲を使用します。非対応項目はテレビ本体で設定してください。</p>
   <div id="pictureGroups"></div>
   <p id="pictureStatus" class="pic-status" aria-live="polite">未接続。画質の確認中です。</p>
-  <button class="tool" onclick="probePictureScene(event)">現在の設定を再取得</button><button class="tool" onclick="nativeAction(&quot;picture&quot;,&quot;discover&quot;,&quot;追加項目の調査&quot;)">追加画質項目を調査</button>
+  <button class="tool" onclick="probePictureScene(event)">現在の設定を再取得</button><button class="tool" id="discoverPictureButton" onclick="startPictureDiscovery(event)">追加画質項目を調査</button><p id="discoverPictureStatus" class="pic-status" role="status" aria-live="polite" hidden></p>
   <button class="tool" onclick="sendTVShortcut(event,'quick','クイック設定')">テレビのクイック設定</button>
 </div></div>
 <div id="brightLayer" class="config-layer" role="dialog" aria-modal="true" aria-label="BRAVIA明るさバー"><div class="config-card">
@@ -592,6 +592,22 @@ function closeBrightnessBar(e){if(e){e.preventDefault();e.stopPropagation()}docu
 function openShortcuts(e){if(e){e.preventDefault();e.stopPropagation()}document.getElementById("shortcutsLayer").classList.add("open");renderPicturePresets();probePictureScene()}
 function closeShortcuts(e){if(e){e.preventDefault();e.stopPropagation()}document.getElementById("shortcutsLayer").classList.remove("open")}
 function probePictureScene(e){if(e){e.preventDefault();e.stopPropagation()}for(const id of ["pictureStatus","shortcutsStatus"]){const el=document.getElementById(id);if(el)el.textContent="テレビから設定を読み取り中…"}nativeAction("picture","probe","画質対応確認")}
+let discoveryPending=false,discoveryTimer=null;
+function finishPictureDiscovery(message){
+ discoveryPending=false;if(discoveryTimer!==null)clearTimeout(discoveryTimer);discoveryTimer=null;
+ const button=document.getElementById("discoverPictureButton"),status=document.getElementById("discoverPictureStatus");
+ if(button){button.disabled=false;button.textContent="追加画質項目を調査"}
+ if(status){status.hidden=false;status.textContent=message}
+}
+function startPictureDiscovery(e){
+ if(e){e.preventDefault();e.stopPropagation()}if(discoveryPending)return;
+ discoveryPending=true;
+ const button=document.getElementById("discoverPictureButton"),status=document.getElementById("discoverPictureStatus");
+ if(button){button.disabled=true;button.textContent="調査中…"}
+ if(status){status.hidden=false;status.textContent="テレビへ問い合わせ中。設定は変更しません。"}
+ discoveryTimer=setTimeout(()=>finishPictureDiscovery("応答未確認。テレビとの通信状況を確認してください。"),25000);
+ nativeAction("picture","discover","追加項目の調査");
+}
 function pictureEntry(target){return pictureMap[target]||null}
 function pictureModeLabel(target,value){
  if(target!=="pictureMode")return String(value)
@@ -710,6 +726,8 @@ function loadPicturePreset(e,key){
  nativeAction("picture","load","呼出",key)
 }
 function showPictureStatus(result){
+ if(result?.picture?.discovery===true){finishPictureDiscovery(result.picture.message);return}
+ if(result?.discoveryError){finishPictureDiscovery("調査失敗："+result.message);return}
  const status=document.getElementById("pictureStatus"),shortStatus=document.getElementById("shortcutsStatus")
  if(result&&result.picture){
   pictureConnected=true
@@ -797,7 +815,7 @@ function nativeResult(result){
   if(result&&Object.prototype.hasOwnProperty.call(result,"ac"))setACState(result.ac)
   if(result&&Object.prototype.hasOwnProperty.call(result,"floor"))setFloorState(result.floor)
 }
-function requestMode(){nativeAction("system","refreshMode","")}function requestAC(){nativeAction("system","refreshAC","")}
+function requestMode(){if(!discoveryPending)nativeAction("system","refreshMode","")}function requestAC(){if(!discoveryPending)nativeAction("system","refreshAC","")}
 function sendMenu(e){e.preventDefault();e.stopPropagation();nativeAction("tv","menu","MENU")}
 function sendTVShortcut(e,action,label){e.preventDefault();e.stopPropagation();nativeAction("tv",action,label)}
 function sendOther(e,device,action,label){e.preventDefault();e.stopPropagation();nativeAction(device,action,label)}
@@ -851,8 +869,8 @@ async function sonyJSON(service,method){const r=new Request("http://"+sonyHost()
 const PICTURE_TARGETS=["pictureMode","autoPictureMode","lightSensor","brightness","contrast","autoLocalDimming","xtendedDynamicRange","color","colorTemperature","colorSpace","sharpness","hdrMode"]
 const PICTURE_PRESET_KEYS=["day","night","movie","extra1","extra2","extra3","extra4","extra5"]
 const PICTURE_PRESET_PREFIX="yos.bravia.scriptable.picture-user-preset.v2."
-async function sonyVideoJSON(method,params,version="1.0"){
- const r=new Request("http://"+sonyHost()+"/sony/video");r.method="POST";r.timeoutInterval=8
+async function sonyVideoJSON(method,params,version="1.0",timeout=8){
+ const r=new Request("http://"+sonyHost()+"/sony/video");r.method="POST";r.timeoutInterval=timeout
  r.headers={"Content-Type":"application/json","X-Auth-PSK":sonyPSK()}
  r.body=JSON.stringify({method,params,id:1,version})
  const data=JSON.parse(await r.loadString())
@@ -985,13 +1003,13 @@ async function discoverExtraPictureTargets(){
  const output=[];
  for(const version of ["1.0","1.1"]){
   try{
-   const data=await sonyVideoJSON("getPictureQualitySettings",[{target:""}],version);
-   const raw=flattenPicture(data.result);
+   const data=await sonyVideoJSON("getPictureQualitySettings",version==="1.1"?[{}]:[{target:""}],version,5);
+   const raw=flattenPicture(data.result),known=new Set(raw.filter(e=>PICTURE_TARGETS.includes(e.target)).map(e=>e.target));
    const extras=[...new Set(raw.filter(e=>e.isAvailable!==false&&typeof e.target==="string"&&!PICTURE_TARGETS.includes(e.target)).map(e=>e.target))].slice(0,30);
-   output.push("v"+version+"："+(extras.length?extras.join("、"):"追加対象なし"));
-  }catch(_){output.push("v"+version+"：取得不可（非対応または通信失敗）")}
+   output.push("v"+version+"：応答あり・既存"+known.size+"項目 / "+(extras.length?"追加候補 "+extras.join("、"):"追加対象なし"));
+  }catch(error){const code=String(error?.message||"").match(/API拒否：(\d+)/);output.push("v"+version+"："+(code?"API拒否（"+code[1]+"）":"通信失敗または応答形式不明"))}
  }
- return{...await pictureProbe(),message:"読み取り専用調査｜"+output.join(" / ")+"。追加対象の変更可否は未検証。"};
+ return{discovery:true,message:"読み取り専用調査｜"+output.join(" / ")+"。追加対象の変更可否は未検証。"};
 }
 async function pictureAction(action,slot){
  if(action==="probe")return pictureProbe()
@@ -1295,6 +1313,6 @@ async function controlFloor(action,value){
   return{ok:true,floor:await readFloor()}
 }
 const queue=[];let running=false,web=null
-async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvApps"){result=await yosTVMediaAction(item.action,item.slot)}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error)}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
+async function processQueue(){if(running)return;running=true;while(queue.length){const item=queue.shift();let result;try{if(item.device==="system"&&item.action==="refreshMode")result={ok:true,mode:await inferMode()};else if(item.device==="system"&&item.action==="refreshAC")result={ok:true,ac:await readACSummary()};else if(item.device==="picture"){result={ok:true,picture:await pictureAction(item.action,item.slot)}}else if(item.device==="quick"){result={ok:true,quick:await quickAction(item.action,item.slot)}}else if(item.device==="tvApps"){result=await yosTVMediaAction(item.action,item.slot)}else if(item.device==="tvCursor"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tvAdaptive"){const currentMode=await inferMode();let action=item.action;if(currentMode==="navigation"&&CROSS_NAV[item.slot])action=CROSS_NAV[item.slot];else if(currentMode==="hybrid"&&HYBRID_CURSOR_ROLES.has(item.slot))action=CROSS_NAV[item.slot];await sonyAction(action);result={ok:true,label:item.label,action,mode:await inferMode()}}else if(item.device==="tvOriginal"){await sonyAction(item.action,false);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="tv"){await sonyAction(item.action);result={ok:true,label:item.label,action:item.action,mode:await inferMode()}}else if(item.device==="light"){await runExisting(CONFIG.light.actionScript,item.action);result={ok:true,label:item.label}}else if(item.device==="ac"){await runExisting(CONFIG.ac.actionScript,item.action);result={ok:true,label:item.label,ac:await readACSummary()}}else if(item.device==="floor")result=await controlFloor(item.action,item.label);else throw new Error("不明なデバイスです")}catch(error){result={ok:false,message:error&&error.message?error.message:String(error),discoveryError:item.device==="picture"&&item.action==="discover"}}try{await web.evaluateJavaScript("nativeResult("+JSON.stringify(result)+")")}catch(_){}}running=false}
 web=new WebView();web.shouldAllowRequest=request=>{const url=String(request.url||"");if(!url.startsWith("https://yos-remote.local/__action?"))return true;const query=parseQuery(url);if(query.device==="tvHoldStart"){startTVHold(query.action);return false}if(query.device==="tvHoldHeartbeat"){renewTVHold(query.action);return false}if(query.device==="tvHoldStop"){stopTVHold();return false}if(query.device==="lightHoldStart"){startLightHold(query.action);return false}if(query.device==="lightHoldHeartbeat"){renewLightHold(query.action);return false}if(query.device==="lightHoldStop"){stopLightHold();return false}queue.push({device:query.device,action:query.action,label:query.label,slot:query.slot});processQueue();return false}
 await web.loadHTML(html,"https://yos-remote.local/");try{await web.evaluateJavaScript("setTimeout(()=>probePictureScene(),250)") }catch(_){}try{await web.evaluateJavaScript("setMode("+JSON.stringify(await inferMode())+")")}catch(_){}try{await web.evaluateJavaScript("setACState("+JSON.stringify(await readACSummary())+")")}catch(_){}await web.present(true);stopTVHold();stopLightHold();await Promise.allSettled([tvHoldPromise,lightHoldPromise]);Script.complete()
