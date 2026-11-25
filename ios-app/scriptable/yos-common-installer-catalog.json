@@ -234,6 +234,13 @@
       "path": "ios-app/scriptable/YOS AION OUTPUT.js",
       "commit": "c5bf94ee22d3a534b5231f9260021e95efb35000",
       "sha256": "3369d8450453632cd6d84765d65a43b78633086052ab152f2b7d8cada7026094"
+    },
+    {
+      "id": "discovery-preflight-test",
+      "name": "YOS DISCOVERY 実行検証 TEST",
+      "path": "ios-app/scriptable/YOS DISCOVERY 実行検証 TEST.js",
+      "commit": "f3cfd9f6a98450f0ac5a82f89380533f613cffd1",
+      "sha256": "4c62bab714fa4e52e6e587bba91e9c1e445fed793a3620b4cdbcff8362623a7d"
     }
   ]
 }
