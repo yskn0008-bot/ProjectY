@@ -234,6 +234,13 @@
       "path": "ios-app/scriptable/YOS AION OUTPUT.js",
       "commit": "54a4716dd2b82104f813b9b4f86087a08d7229c3",
       "sha256": "e893eefdc367e539690bf74fd6fe8e06af4bf4964cf0fb8cbb35ce6b36ddecf8"
+    },
+    {
+      "id": "notification-bridge",
+      "name": "Notification Bridge",
+      "path": "ios-app/scriptable/Notification Bridge.js",
+      "commit": "827f4969d387fafc2668fb8c89cb14793853a32a",
+      "sha256": "3969a1a20f7f2eec5e98fba34ec451fdbdf18a4aeac7c9ea939eeb295422521e"
     }
   ]
 }
