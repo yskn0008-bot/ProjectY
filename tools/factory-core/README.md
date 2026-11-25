@@ -36,24 +36,38 @@ python3 tools/factory-core/factory_store.py --store /path/to/OneEnterFactory res
 
 Secrets (`.env`, signing keys, certificates, provisioning profiles) and build caches are excluded from snapshots by default.
 
-## Provider fallback
+## Provider fallback and development stages
+
+The default `development` stage selects only local providers. External mirrors,
+GitHub QA and public hosts (including Vercel) are deferred instead of becoming
+automatic fallbacks. Use the existing local workspace and verified snapshots
+during implementation, verification and repair.
 
 ```bash
 python3 tools/factory-core/provider_router.py select source_store
 python3 tools/factory-core/provider_router.py select qa_runner
-python3 tools/factory-core/provider_router.py fail public_host github_pages "rate limit"
-python3 tools/factory-core/provider_router.py wait api_host vercel "rate limit"
-
-`wait` is the One Enter PARTIAL/external-wait path. It does **not** create `WAIT_USER`.
-If another enabled provider can satisfy the same role, the router returns
-`status=alternative_routed` and `action=execute_alternative` immediately.
-Only when no eligible alternative remains does it return `status=external_wait`
-so the current route can be parked and rechecked later. Human-only gates remain
-separate from provider waiting.
-
+python3 tools/factory-core/provider_router.py --stage release fail public_host github_pages "rate limit"
+python3 tools/factory-core/provider_router.py --stage release wait api_host vercel "rate limit"
+python3 tools/factory-core/provider_router.py --stage exception --exception-provider vercel --exception-reason "required live test" select api_host
 ```
 
-A provider failure returns the next eligible route instead of `stop` when another route exists.
+`release` is for the completed candidate's necessary integration, checks and
+distribution. A development exception needs a named provider and nonempty
+reason, and cannot select another external fallback or enable a disabled provider.
+These options select a route; they do not authorize public release or any other
+side effect. Keep existing approval, test, parity and distribution requirements.
+
+For development deferral, the router returns `status=deferred_until_release`,
+`ok=false` and CLI exit 3. Callers must preserve their candidate, continue
+independent work and revisit the deferred operation at release. This is not
+verification success, a provider outage or a human gate. Other non-success
+routes still return exit 2. An explicitly required check cannot be skipped.
+
+During release or an authorized exception, `wait` selects an eligible
+alternative or returns `external_wait` for the existing Issue #232 recovery
+path. It does not create `WAIT_USER`. Direct commands that do not use this
+router still require the existing AGENTS.md and job safety rules; this routing
+policy is not a network sandbox.
 
 ## YOS Loop Engine
 

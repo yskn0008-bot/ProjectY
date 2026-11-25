@@ -61,13 +61,27 @@ def save_health(path: Path, health: dict[str, Any]) -> None:
     os.replace(tmp, path)
 
 
-def candidates(config: dict[str, Any], health: dict[str, Any], role: str, exclude: set[str] | None = None) -> list[dict[str, Any]]:
+def _validate_stage(stage: str, exception_provider: str | None, exception_reason: str | None) -> None:
+    if stage not in {"development", "release", "exception"}:
+        raise ProviderRouterError("invalid development stage")
+    if stage == "exception":
+        if not isinstance(exception_provider, str) or not exception_provider.strip() or not isinstance(exception_reason, str) or not exception_reason.strip():
+            raise ProviderRouterError("exception requires a named provider and a reason")
+    elif exception_provider is not None or exception_reason is not None:
+        raise ProviderRouterError("exception arguments require exception stage")
+
+
+def candidates(config: dict[str, Any], health: dict[str, Any], role: str, exclude: set[str] | None = None, *, stage: str = "development", exception_provider: str | None = None, exception_reason: str | None = None) -> list[dict[str, Any]]:
+    _validate_stage(stage, exception_provider, exception_reason)
     exclude = exclude or set()
     health_map = health.get("providers", {})
     rows = []
     for provider in config["providers"]:
         if provider["id"] in exclude or not provider.get("enabled", True) or role not in provider["roles"]:
             continue
+        if provider.get("external", True) is not False:
+            if stage == "development" or (stage == "exception" and provider["id"] != exception_provider):
+                continue
         state = health_map.get(provider["id"], {}).get("state", "available")
         if state == "blocked":
             continue
@@ -79,9 +93,14 @@ def candidates(config: dict[str, Any], health: dict[str, Any], role: str, exclud
     return rows
 
 
-def select_provider(config: dict[str, Any], health: dict[str, Any], role: str, exclude: set[str] | None = None) -> dict[str, Any]:
-    rows = candidates(config, health, role, exclude)
+def select_provider(config: dict[str, Any], health: dict[str, Any], role: str, exclude: set[str] | None = None, *, stage: str = "development", exception_provider: str | None = None, exception_reason: str | None = None) -> dict[str, Any]:
+    rows = candidates(config, health, role, exclude, stage=stage, exception_provider=exception_provider, exception_reason=exception_reason)
     if not rows:
+        if stage == "development" and any(
+            p.get("enabled", True) and p.get("external", True) is not False and role in p["roles"]
+            for p in config["providers"]
+        ):
+            return {"ok": False, "role": role, "status": "deferred_until_release", "action": "continue_independent_work", "reason": "external provider deferred during development"}
         return {"ok": False, "role": role, "status": "needs_route", "reason": "no eligible provider"}
     selected = rows[0]
     return {
@@ -96,7 +115,8 @@ def select_provider(config: dict[str, Any], health: dict[str, Any], role: str, e
     }
 
 
-def record_failure(config: dict[str, Any], health: dict[str, Any], role: str, provider_id: str, reason: str) -> dict[str, Any]:
+def record_failure(config: dict[str, Any], health: dict[str, Any], role: str, provider_id: str, reason: str, *, stage: str = "development", exception_provider: str | None = None, exception_reason: str | None = None) -> dict[str, Any]:
+    _validate_stage(stage, exception_provider, exception_reason)
     known = {p["id"] for p in config["providers"]}
     if provider_id not in known:
         raise ProviderRouterError(f"unknown provider: {provider_id}")
@@ -106,7 +126,7 @@ def record_failure(config: dict[str, Any], health: dict[str, Any], role: str, pr
     row["state"] = "degraded" if row["failures"] < 2 else "blocked"
     row["last_failure_at"] = _now()
     row["last_reason"] = reason
-    fallback = select_provider(config, health, role, {provider_id})
+    fallback = select_provider(config, health, role, {provider_id}, stage=stage, exception_provider=exception_provider, exception_reason=exception_reason)
     return {
         "ok": fallback.get("ok", False),
         "failed_provider": provider_id,
@@ -116,13 +136,13 @@ def record_failure(config: dict[str, Any], health: dict[str, Any], role: str, pr
     }
 
 
-def route_wait(config: dict[str, Any], health: dict[str, Any], role: str, provider_id: str, reason: str) -> dict[str, Any]:
+def route_wait(config: dict[str, Any], health: dict[str, Any], role: str, provider_id: str, reason: str, *, stage: str = "development", exception_provider: str | None = None, exception_reason: str | None = None) -> dict[str, Any]:
     """Resolve an optional-provider wait without turning it into a user wait.
 
     A usable alternative is selected immediately. EXTERNAL_WAIT is returned only
     when no eligible alternative route remains.
     """
-    failed = record_failure(config, health, role, provider_id, reason)
+    failed = record_failure(config, health, role, provider_id, reason, stage=stage, exception_provider=exception_provider, exception_reason=exception_reason)
     fallback = failed.get("fallback", {})
     if fallback.get("ok"):
         return {
@@ -130,6 +150,14 @@ def route_wait(config: dict[str, Any], health: dict[str, Any], role: str, provid
             "status": "alternative_routed",
             "action": "execute_alternative",
             "selected_provider": fallback.get("provider"),
+            "external_wait": False,
+        }
+    if stage == "development":
+        return {
+            **failed,
+            "status": fallback.get("status", "needs_route"),
+            "action": "continue_independent_work",
+            "selected_provider": None,
             "external_wait": False,
         }
     return {
@@ -155,6 +183,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="One Enter provider fallback router")
     parser.add_argument("--config", default=str(Path(__file__).with_name("providers.json")))
     parser.add_argument("--health", default=".factory-state/provider-health.json")
+    parser.add_argument("--stage", choices=("development", "release", "exception"), default="development")
+    parser.add_argument("--exception-provider")
+    parser.add_argument("--exception-reason")
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("select")
     p.add_argument("role")
@@ -174,18 +205,22 @@ def main() -> int:
         config = load_config(Path(args.config))
         health_path = Path(args.health)
         health = load_health(health_path)
+        route_options = dict(stage=args.stage, exception_provider=args.exception_provider, exception_reason=args.exception_reason)
+        _validate_stage(**route_options)
         if args.command == "select":
-            out = select_provider(config, health, args.role)
+            out = select_provider(config, health, args.role, **route_options)
         elif args.command == "fail":
-            out = record_failure(config, health, args.role, args.provider, args.reason)
+            out = record_failure(config, health, args.role, args.provider, args.reason, **route_options)
             save_health(health_path, health)
         elif args.command == "wait":
-            out = route_wait(config, health, args.role, args.provider, args.reason)
+            out = route_wait(config, health, args.role, args.provider, args.reason, **route_options)
             save_health(health_path, health)
         else:
             out = record_success(config, health, args.provider)
             save_health(health_path, health)
         print(json.dumps(out, ensure_ascii=False, indent=2, sort_keys=True))
+        if out.get("status") == "deferred_until_release" or out.get("fallback", {}).get("status") == "deferred_until_release":
+            return 3  # planned deferral, not a successful check or external outage
         return 0 if out.get("ok") else 2
     except (ProviderRouterError, OSError, json.JSONDecodeError) as exc:
         print(json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False), file=os.sys.stderr)
