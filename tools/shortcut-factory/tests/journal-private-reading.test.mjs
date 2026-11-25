@@ -25,7 +25,7 @@ function mock({history=clone(old),stored=clone(pkt.blocks),loss=false,lossAfter=
  let writes=0,reads=0;const files=new Map();const fm={documentsDirectory:()=>'/local',joinPath:(a,b)=>a+'/'+b,fileExists:k=>files.has(k),writeString:(k,v)=>files.set(k,v),readString:k=>files.get(k)};
  class Req{constructor(url){this.url=url;}async loadJSON(){this.response={statusCode:200};assert.ok(this.url.startsWith('https://api.notion.com/'));assert.equal(this.headers.Authorization,'Bearer mock-token-123456');
  if(this.url.includes(inboxPage)){assert.equal(this.method,'GET');return {results:stored,has_more:false};}
- assert.ok(this.url.includes(readingPage));if(this.method==='PATCH'){writes++;if(loss)throw Error('lost');history.push(...JSON.parse(this.body).children);if(lossAfter)throw Error('lost after append');return{results:[],has_more:false};}reads++;if(change&&reads===2)return{results:[...history,B('paragraph','concurrent unrelated edit')],has_more:false};return{results:clone(history),has_more:false};}}
+ assert.ok(this.url.includes(readingPage));if(this.method==='PATCH'){writes++;if(loss)throw Error('lost');history.push(...JSON.parse(this.body).children);if(lossAfter)throw Error('lost after append');return{results:[],has_more:false};}reads++;if(change&&reads===2)return{results:[...history,B('paragraph','concurrent unrelated edit')],has_more:false};const start=Number(/start_cursor=(\d+)/.exec(this.url)?.[1]||0),end=start+100;return{results:clone(history.slice(start,end)),has_more:end<history.length,next_cursor:end<history.length?String(end):null};}}
  return {run:async(value=pkt.input)=>{let output;await runner(Req,{contains:()=>key,get:()=>'mock-token-123456'}, {local:()=>fm},{setShortcutOutput:x=>output=x,complete:()=>{}},{shortcutParameter:value});return output},writes:()=>writes,history};
 }
 test('exact Inbox and GPT pass append the new issue, disclose review scope, preserve old issue and recognize retry',async()=>{
@@ -46,4 +46,16 @@ test('same day different edition, previously published source, concurrent histor
 test('unknown append result never writes twice; successful-but-lost response reconciles',async()=>{
  const m=mock({loss:true});assert.match(await m.run(),/CHECK_FAILED/);assert.match(await m.run(),/PREVIOUS_APPEND_UNCONFIRMED/);assert.equal(m.writes(),1);
  const n=mock({lossAfter:true});assert.match(await n.run(),/CHECK_FAILED/);assert.equal(await n.run(),'YOS_JOURNAL_READING_VERIFIED:ALREADY_SAVED');assert.equal(n.writes(),1);
+});
+
+test('preserves more than 500 previous reading blocks when adding one issue',async()=>{
+ const history=[];
+ for(let n=0;n<25;n++){
+  const h=clone(old),date=new Date(Date.UTC(2025,0,n+1)).toISOString().slice(0,10);h[0].heading_2.rich_text[0].text.content='YOS JOURNAL｜'+date.replace(/-/g,'.');
+  for(const b of h)for(const t of b[b.type]?.rich_text||[])if(t.text?.link)t.text.link.url+='-'+n;
+  history.push(...h);
+ }
+ assert.ok(history.length>500);
+ const before=clone(history),m=mock({history});
+ assert.equal(await m.run(),'YOS_JOURNAL_READING_VERIFIED:SAVED_AND_READBACK');assert.deepEqual(m.history.slice(0,before.length),before);assert.equal(m.writes(),1);
 });

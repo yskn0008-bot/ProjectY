@@ -44,3 +44,18 @@ test('latest unique private edition is selected without deleting older data',()=
  assert.equal(parseReviewedEdition([...newest,...older]).issuedOn,'2026-11-24');
  assert.throws(()=>parseReviewedEdition([...newest,...newest]));
 });
+
+test('more than the previous 500 blocks remains readable through complete bounded pagination',async()=>{
+ const origin='https://yskn0008-bot.github.io',all=[];
+ for(let n=0;n<25;n++){
+  const h=fixture(),day=new Date(Date.UTC(2025,0,n+1)).toISOString().slice(0,10);h[0]=b('heading_2','YOS JOURNAL｜'+day.replace(/-/g,'.'));all.push(...h);
+ }
+ assert.ok(all.length>500);
+ let calls=0;
+ const handler=createJournalReader({authorize:async()=>true,notionToken:'mock',origins:[origin],fetcher:async u=>{
+  calls++;const start=Number(new URL(u).searchParams.get('start_cursor')||0),end=start+100;
+  return Response.json({results:all.slice(start,end),has_more:end<all.length,next_cursor:end<all.length?String(end):null});
+ }});
+ const res=await handler(new Request('https://example.test',{headers:{origin,authorization:'Bearer test-valid-token-1234'}}));
+ assert.equal(res.status,200);assert.ok(calls>5);assert.equal((await res.json()).edition.issuedOn,'2025-01-25');
+});

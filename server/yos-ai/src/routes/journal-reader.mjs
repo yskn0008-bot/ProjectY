@@ -1,4 +1,5 @@
 // Read only the existing private, editorial-reviewed JOURNAL reading page.
+export const MAX_REVIEW_BLOCKS=3000, MAX_REVIEW_PAGES=30;
 const PAGE='4215ca88-2895-816f-bdd3-c48c6cf700ae';
 const AUTO_REVIEW_MARK="本人用の非公開読書版。原著抜粋とGPTの執筆前・最終照合を実施。全文の独立審査は未実施。外部公開・配信は行っていない。";
 const HEAD=/^YOS JOURNAL｜(\d{4})\.(\d{2})\.(\d{2})(?:\s|$)/u;
@@ -7,7 +8,7 @@ const text=b=>(b?.[b.type]?.rich_text||[]).map(x=>x.plain_text??x.text?.content?
 const link=b=>{const a=(b?.[b.type]?.rich_text||[]).map(x=>x.href??x.text?.link?.url).filter(Boolean);return a.length===1?a[0]:''};
 const safeLink=s=>/^https:\/\/doi\.org\/10\.\d{4,9}\/[A-Za-z0-9._;()/:%-]{1,300}$/u.test(s)?s:'';
 export function parseReviewedEdition(blocks){
- if(!Array.isArray(blocks)||blocks.length>500)throw Error('invalid blocks');
+ if(!Array.isArray(blocks)||blocks.length>MAX_REVIEW_BLOCKS)throw Error('invalid blocks');
  const starts=blocks.map((b,i)=>b.type==='heading_2'&&HEAD.test(text(b))?i:-1).filter(i=>i>=0);
  if(!starts.length)throw Error('edition absent');
  const candidates=starts.map(i=>({i,date:HEAD.exec(text(blocks[i])).slice(1).join('-')}));
@@ -45,13 +46,14 @@ export function createJournalReader({authorize,notionToken,origins,fetcher=fetch
   try{if(await authorize(token)!==true)return reply({error:'Unauthorized'},401)}catch{return reply({error:'Unauthorized'},401)}
   if(!notionToken)return reply({error:'Unavailable'},503);
   try{
-   let cursor='',blocks=[];
-   for(let p=0;p<5;p++){
+   let cursor='',blocks=[],deadline=Date.now()+12000;
+   for(let p=0;p<MAX_REVIEW_PAGES;p++){
+    const remaining=deadline-Date.now();if(remaining<500)throw Error('read timeout');
     const u='https://api.notion.com/v1/blocks/'+PAGE+'/children?page_size=100'+(cursor?'&start_cursor='+encodeURIComponent(cursor):'');
-    const response=await fetcher(u,{headers:{Authorization:'Bearer '+notionToken,'Notion-Version':'2025-09-03'},redirect:'error',cache:'no-store'});
+    const response=await fetcher(u,{headers:{Authorization:'Bearer '+notionToken,'Notion-Version':'2025-09-03'},redirect:'error',cache:'no-store',signal:AbortSignal.timeout(Math.min(5000,remaining))});
     if(!response.ok)throw Error('read failed');
     const data=await response.json();if(!Array.isArray(data.results)||typeof data.has_more!=='boolean')throw Error('invalid reply');
-    blocks.push(...data.results);if(!data.has_more)return reply({source:'notion-reviewed-private',edition:parseReviewedEdition(blocks)},200);
+    blocks.push(...data.results);if(blocks.length>MAX_REVIEW_BLOCKS||Date.now()>deadline)throw Error('read capacity or timeout');if(!data.has_more)return reply({source:'notion-reviewed-private',edition:parseReviewedEdition(blocks)},200);
     if(typeof data.next_cursor!=='string'||!data.next_cursor||data.next_cursor===cursor)throw Error('invalid cursor');cursor=data.next_cursor;
    }
    throw Error('incomplete');

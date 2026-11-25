@@ -33,6 +33,7 @@ function historyFromBlocks(blocks){
   const b=blocks[i],m=b?.type==='heading_2'&&/^YOS JOURNAL｜(\d{4})\.(\d{2})\.(\d{2})(?:\s|$)/u.exec(textOf(b));
   if(!m)continue;
   const date=m.slice(1).join('-');
+  const dt=new Date(date+'T00:00:00Z');if(!Number.isFinite(+dt)||dt.toISOString().slice(0,10)!==date)throw Error('HISTORY_DATE_INVALID');
   if(dates.has(date)||!['本人用の非公開読書版。原著の主要箇所と照合済み。外部公開・配信は行っていない。',"本人用の非公開読書版。原著抜粋とGPTの執筆前・最終照合を実施。全文の独立審査は未実施。外部公開・配信は行っていない。"].includes(textOf(blocks[i+3])))throw Error('HISTORY_EDITION_INVALID');
   dates.add(date);let cursor=i+4;
   for(let n=1;n<=3;n++){
@@ -49,7 +50,7 @@ function historyFromBlocks(blocks){
   count++;i=cursor;
  }
  if(!count)throw Error('HISTORY_NO_REVIEWED_EDITION');
- return seen;
+ return {seen,dates,blockCount:blocks.length};
 }
 async function reviewedHistory(){
  if(typeof Keychain==='undefined'||!Keychain.contains('YOS_NOTION_INTEGRATION_TOKEN'))throw Error('HISTORY_KEY_MISSING');
@@ -125,7 +126,11 @@ async function main(){
  const index=day%TOPICS.length;
  let history;
  try{history=await reviewedHistory();}catch(_){Script.setShortcutOutput(HISTORY_HOLD);return;}
- const seen=new Set(history);
+ const today=new Date(day*86400000).toISOString().slice(0,10);
+ if(history.dates.has(today)){Script.setShortcutOutput('YOS_RESEARCH_HOLD_V1:TODAY_ALREADY_ISSUED');return;}
+ if(history.blockCount+26>3000){Script.setShortcutOutput('YOS_RESEARCH_HOLD_V1:READING_CAPACITY');return;}
+ if([...history.dates].some(d=>d>today)){Script.setShortcutOutput(HISTORY_HOLD);return;}
+ const seen=new Set(history.seen);
  const topics=[0,3,5].map(offset=>TOPICS[(index+offset)%TOPICS.length]);
  try{
   const groups=await Promise.all(topics.map(t=>fetchStudies(t).catch(()=>[])));
