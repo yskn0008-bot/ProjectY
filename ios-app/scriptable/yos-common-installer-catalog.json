@@ -188,8 +188,8 @@
       "id": "common-installer-repair",
       "name": "YOS Common Installer 修復",
       "path": "ios-app/scriptable/YOS Common Installer 修復.js",
-      "commit": "607484f37f28eba407c5493c2d90e085a40db1ad",
-      "sha256": "6e6e95fc164f54debc5d5243f3118905d4a7088bab17c70feb6d992267e0d18f"
+      "commit": "5de675a5efe55445f7b7728669370b17802f4863",
+      "sha256": "6f8402a88981aa50d278545381cc9e1ea42fea6bc99dd322b9afe1be61ba7fd8"
     },
     {
       "id": "bravia-picture-off-repair",
