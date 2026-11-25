@@ -208,7 +208,55 @@ async function main(){
    '\n\n消画：'+picture+
    '\n次は既存の共通インストーラーから必要なアプリ（消画・YOS TAXI等）を導入してください。',false);
 }
-try{await main();}
+
+ // Scoped recovery: only the missing TEST body corresponding to a verified receipt.
+const REMOTE_TEST_NAME='YOS Remote Hub Quick TEST';
+const REMOTE_TEST_ID='remote-hub-quick-test';
+const REMOTE_TEST_PATH="ios-app/scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js";
+const REMOTE_TEST_HISTORY=Object.freeze({"917563c8307a6c1690af56229c34089bce24c276":"63fd950fc1077f8e114e5c5746adfdde56af604bb9bba711395d004a14a6ba9f","37d7c7f27593d9db2c5e9d73bf47dfe526814b04":"284a383393280652e30c4abb64f4839863c3ad41cb9ad22baa5d0760c798091d","bd7d6011179a670309c464f2e558b1ec814089c5":"dbf8f7c6dd0cdb0f41d3ae1ed256f3ff580d12b8366c2c179887d63355c2c758","0d263b2295cc19e9a2607a9511edc4963da38b44":"0a8844f3d0092416fb5a0ecbafd9f9c7f45b47eae845ccfb370d72434f3b5b0f"});
+async function recoverRemoteTest(){
+ const locations=stores();
+ if(locations.length!==2)throw Error('iCloudと本体の両方を確認できません。変更しません');
+ const paths=locations.map(({fm,kind})=>{
+  const base=fm.joinPath(fm.documentsDirectory(),DATA_DIR);
+  return {fm,kind,target:fm.joinPath(fm.documentsDirectory(),REMOTE_TEST_NAME+'.js'),
+    receipt:fm.joinPath(base,encodeURIComponent(REMOTE_TEST_NAME)+'.receipt.json'),
+    pending:fm.joinPath(base,encodeURIComponent(REMOTE_TEST_NAME)+'.pending.json')};
+ });
+ const assertAbsent=()=>{
+  if(paths.some(x=>x.fm.fileExists(x.target)||x.fm.fileExists(x.pending)))throw Error('本体または中断記録が存在します。変更せず停止');
+ };
+ assertAbsent();
+ const found=paths.filter(x=>x.fm.fileExists(x.receipt));
+ if(found.length!==1)throw Error('管理記録が1件に確定できません。変更しません');
+ const item=found[0],fm=item.fm;
+ const raw=await readFile(fm,item.receipt);
+ let r;try{r=JSON.parse(raw)}catch(_){throw Error('管理記録が読めません。変更しません')}
+ if(!r||r.schema!==1||r.name!==REMOTE_TEST_NAME||r.id!==REMOTE_TEST_ID||r.path!==REMOTE_TEST_PATH||r.storage!==item.kind||
+    !Object.prototype.hasOwnProperty.call(REMOTE_TEST_HISTORY,r.commit)||REMOTE_TEST_HISTORY[r.commit]!==r.sha256)
+   throw Error('旧正式版と管理記録の一致を確認できません。変更しません');
+ const req=new Request('https://raw.githubusercontent.com/yskn0008-bot/ProjectY/'+r.commit+'/'+REMOTE_TEST_PATH.split('/').map(encodeURIComponent).join('/'));
+ req.timeoutInterval=30;
+ const source=await req.loadString();
+ if(req.response?.statusCode!==200||typeof source!=='string'||source.length>1200000||digest(source)!==r.sha256)
+    throw Error('旧版の固定コードを検証できません。変更しません');
+ const confirm=new Alert();confirm.title='リモコン本体の安全復元';confirm.message='対象：'+REMOTE_TEST_NAME+'\n保存先：'+item.kind+'\n管理記録に一致した正式版の本体だけを復元します。管理記録・家電設定は変更しません。その後通常のインストーラーで最新版へ更新します。';
+ confirm.addAction('本体だけ復元');confirm.addCancelAction('中止');
+ if(await confirm.presentAlert()!==0)return;
+ assertAbsent();
+ if(paths.filter(x=>x.fm.fileExists(x.receipt)).length!==1||!fm.fileExists(item.receipt)||await readFile(fm,item.receipt)!==raw)
+   throw Error('管理記録が変わりました。変更しません');
+ assertAbsent();
+ if(paths.filter(x=>x.fm.fileExists(x.receipt)).length!==1||!fm.fileExists(item.receipt))throw Error('管理記録が変わりました。変更しません');
+ fm.writeString(item.target,source);
+ if(await readFile(fm,item.target)!==source||await readFile(fm,item.receipt)!==raw)
+   throw Error('復元の読戻しが一致しません。管理記録は変更していません。既存ファイルを保護してください');
+ const next=new Alert();next.title='リモコン本体の復元完了';next.message='正式版の本体と元の管理記録が一致しました。続けて共通インストーラーで最新版へ更新してください。';
+ next.addAction('最新版に更新');next.addCancelAction('閉じる');
+ if(await next.presentAlert()===0)Safari.open('https://open.scriptable.app/run/YOS%20Common%20Installer?script=remote-hub-quick-test');
+}
+
+try{if(typeof args!=='undefined'&&args.queryParameters?.repair===REMOTE_TEST_ID)await recoverRemoteTest();else await main();}
 catch(error){await alert('共通インストーラー修復は未完了',
  String(error?.message||error).slice(0,350)+'\n既存コードやバックアップを削除しないでください。',false);}
 finally{Script.complete();}
