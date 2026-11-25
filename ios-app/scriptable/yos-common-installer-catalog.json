@@ -202,8 +202,8 @@
       "id": "remote-hub-quick-test",
       "name": "YOS Remote Hub Quick TEST",
       "path": "ios-app/scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js",
-      "commit": "0d263b2295cc19e9a2607a9511edc4963da38b44",
-      "sha256": "0a8844f3d0092416fb5a0ecbafd9f9c7f45b47eae845ccfb370d72434f3b5b0f"
+      "commit": "aa4881e0a31f5bc641e8bef3aaec78ee60fafcea",
+      "sha256": "db6639ddf62305c1852030b0eae044d270013af8ab7d7f8521c8776b3c79fca1"
     },
     {
       "id": "self",
