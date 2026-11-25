@@ -66,7 +66,7 @@ def validate(path):
         raise AssertionError('wrong review input')
     if 'YOS-JOURNAL-GPT-FINALCHECK-' not in repr(final) or final['WFInput']['Value'].get('OutputName')!='finalReviewText':
         raise AssertionError('final check backup missing')
-    if 'YOS_FINAL_REVIEW_PASS_V1' not in repr(actions[ask[2]:inline[2]]) or 'YOS_FINAL_REVIEW_HOLD_V1' not in repr(actions[ask[2]:inline[2]]):
+    if 'YOS_FINAL_REVIEW_PASS_V1' not in repr(actions[ask[2]:inline[2]]) or 'YOS_FINAL_REVIEW_HOLD_V1' not in repr(actions[saves[3]:ask[2]+1]):
         raise AssertionError('independent final review gate missing')
     bound=actions[inline[2]-1]
     bp=bound['WFWorkflowActionParameters']
