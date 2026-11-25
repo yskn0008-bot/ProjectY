@@ -220,6 +220,13 @@
       "path": "ios-app/scriptable/YOS TAXI.js",
       "commit": "34a459e80b230cc509752ec64b38e2b7c08f9f87",
       "sha256": "66d457b1e78c651aa5e65633d660ae90a3f096f9960e671735ac0fae7eaad295"
+    },
+    {
+      "id": "aion-memory-read",
+      "name": "YOS CORE Memory Read",
+      "path": "ios-app/scriptable/YOS CORE Memory Read.js",
+      "commit": "05ed6a1525ef85ea4ba7994db60236fc4154fb90",
+      "sha256": "776686d8edd81b9924985ed585bf9c69c7238d1568d9ea9198c22ab9e5e8468a"
     }
   ]
 }
