@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "updated_at": "2026-11-25T12:51:25+09:00",
+  "updated_at": "2026-11-25T12:53:56+09:00",
   "updated_by": "GitHub Actions",
   "source_of_truth": {
     "repository": "yskn0008-bot/ProjectY",
@@ -23,14 +23,14 @@
       "updated_at": "2026-11-24T18:25:55Z"
     },
     {
-      "id": "github-pr-925",
-      "title": "PR #925 feat(bravia): 既存4台リモコンに2本画質バー・横スクロールアプリ・キーボード・VPN入口",
+      "id": "github-pr-960",
+      "title": "PR #960 AION OUTPUT: explicit confirmation, compact spacing and cream theme",
       "type": "GitHub PR",
-      "status": "draft",
-      "priority": 2,
-      "next_action": "未確認条件を満たすまでDraftのまま維持する",
-      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/925",
-      "updated_at": "2026-11-23T21:07:43Z"
+      "status": "review",
+      "priority": 1,
+      "next_action": "差分とテスト結果を確認し、マージ可否を判断する",
+      "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/960",
+      "updated_at": "2026-11-25T03:53:17Z"
     },
     {
       "id": "github-pr-930",
@@ -110,7 +110,7 @@
       "priority": 2,
       "next_action": "未確認条件を満たすまでDraftのまま維持する",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/pull/959",
-      "updated_at": "2026-11-25T03:50:43Z"
+      "updated_at": "2026-11-25T03:51:25Z"
     },
     {
       "id": "github-issue-10",
@@ -130,7 +130,7 @@
       "priority": 3,
       "next_action": "完成条件を確認し、次の安全な実装を1件進める",
       "source_url": "https://github.com/yskn0008-bot/ProjectY/issues/232",
-      "updated_at": "2026-11-25T03:40:46Z"
+      "updated_at": "2026-11-25T03:51:05Z"
     },
     {
       "id": "github-issue-234",
@@ -274,7 +274,7 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS",
-      "next_action": "PR #950をレビューして公開判断する",
+      "next_action": "PR #960をレビューして公開判断する",
       "blocker": null,
       "dependencies": [],
       "source_links": [
@@ -284,7 +284,7 @@
         "https://github.com/yskn0008-bot/ProjectY/pull/5",
         "https://github.com/yskn0008-bot/ProjectY/pull/6"
       ],
-      "last_update": "2026-11-25T12:51:25+09:00",
+      "last_update": "2026-11-25T12:53:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -359,13 +359,13 @@
       "priority": 1,
       "progress_percent": 90,
       "owner": "YOS / Codex",
-      "next_action": "Open Issue 10件・Open PR 77件を自動同期中",
+      "next_action": "Open Issue 10件・Open PR 78件を自動同期中",
       "blocker": null,
       "dependencies": [],
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY"
       ],
-      "last_update": "2026-11-25T12:51:25+09:00",
+      "last_update": "2026-11-25T12:53:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -379,7 +379,7 @@
       "priority": 2,
       "progress_percent": 85,
       "owner": "Codex",
-      "next_action": "PR #950をレビューして公開判断する",
+      "next_action": "PR #960をレビューして公開判断する",
       "blocker": null,
       "dependencies": [
         "github",
@@ -388,7 +388,7 @@
       "source_links": [
         "https://github.com/yskn0008-bot/ProjectY/pulls"
       ],
-      "last_update": "2026-11-25T12:51:25+09:00",
+      "last_update": "2026-11-25T12:53:56+09:00",
       "updated_by": "GitHub Actions"
     },
     {
@@ -470,5 +470,5 @@
       "updated_by": "YOS"
     }
   ],
-  "github_snapshot_hash": "159b148ae556a8936eeb5a7d52c044b3c7beb07fed52cedc25d48d16163ea453"
+  "github_snapshot_hash": "ca8fbd5d5b8c0786d3798494a1cd3a6a77c794de3028941c79abb43509a51468"
 }
