@@ -315,6 +315,42 @@ class YosLoopEngineTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 1)
         self.assertEqual(result["status"], "FAILED_SAFE")
         self.assertEqual(result["failure_class"], "configuration_or_state_error")
+    def test_explicit_risk_policy_omits_audit_without_claiming_pass(self):
+        root = self.make_repo()
+        job = self.base_job()
+        job["implementation_command"] = [sys.executable, str(self.write_script(
+            "impl.py", "from pathlib import Path\nPath('allowed/state.txt').write_text('good')\n"))]
+        job["audit_commands"] = []
+        job["audit_policy"] = {"mode": "not_required", "risk": "low", "reason": "display only",
+                               "approval_reference": "approved risk policy", "verification_evidence": "focused tests"}
+        proc, result, _ = self.run_engine(root, job)
+        self.assertEqual(proc.returncode, 0)
+        self.assertEqual(result["status"], "COMPLETE")
+        self.assertFalse(result["audit_verified"])
+        self.assertEqual(result["audit_disposition"]["status"], "NOT_REQUIRED")
+        self.assertEqual(result["audit_results"], [])
+        self.assertNotIn("audit", {row["role"] for row in result["runtime_evidence"]})
+
+    def test_omission_without_explicit_valid_policy_fails_closed(self):
+        for policy in [None, {"mode": "not_required", "risk": "high"},
+                       {"mode": "not_required", "risk": "low", "reason": "x"}]:
+            root = self.make_repo()
+            job = self.base_job()
+            job["audit_commands"] = []
+            if policy is not None:
+                job["audit_policy"] = policy
+            proc, result, _ = self.run_engine(root, job)
+            self.assertEqual(proc.returncode, 1)
+            self.assertEqual(result["failure_class"], "configuration_or_state_error")
+
+    def test_omission_does_not_remove_configured_audit(self):
+        root = self.make_repo()
+        job = self.base_job()
+        job["audit_policy"] = {"mode": "not_required", "risk": "low", "reason": "x",
+                               "approval_reference": "approved", "verification_evidence": "tests"}
+        proc, result, _ = self.run_engine(root, job)
+        self.assertEqual(proc.returncode, 1)
+        self.assertEqual(result["failure_class"], "configuration_or_state_error")
 
 
 if __name__ == "__main__":
