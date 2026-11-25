@@ -90,3 +90,49 @@ test('real Git remote: two competing publishers, stale lease rejected, replan re
   assert.equal(run(remote,'rev-parse','refs/heads/integration/release'),second.commit);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
+
+test('actual workflow scope shell: exact AION candidate only; all unknown inputs use full builds',()=>{
+ const os=require('node:os'),{execFileSync}=require('node:child_process');
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'yos-native-scope-'));
+ const repoRoot=path.resolve(__dirname,'../..');
+ const workflows=['yos-bravia-safety.yml','yos-capture-safety.yml'].map(n=>fs.readFileSync(path.join(repoRoot,'.github/workflows',n),'utf8'));
+ const primary=fs.readFileSync(path.join(repoRoot,'.github/workflows/yos-ios-app-safety.yml'),'utf8');
+ const extract=y=>y.split('      - name: Classify reviewed base and exact candidate tree\n')[1].split('        run: |\n')[1].split('\n\n  ')[0].split('\n').map(l=>l.slice(10)).join('\n');
+ const shell=extract(workflows[0]);assert.equal(shell,extract(workflows[1]));
+ for(const y of workflows){
+  assert.match(y,/needs\.native-scope\.result == 'success' && needs\.native-scope\.outputs\.mode == 'scriptable-only-candidate'/);
+  assert.match(y,/test "\$SCOPE_RESULT" = success/);assert.match(y,/test "\$SCOPE_MODE" = scriptable-only-candidate/);
+  assert.match(y,/NOT_RUN/);assert.match(y,/npm test/);assert.match(y,/xcodebuild/);
+ }
+ for(const s of ['runs-on: macos-latest','NSLocalNetworkUsageDescription','NSAllowsLocalNetworking','NSCalendarsFullAccessUsageDescription','NSRemindersFullAccessUsageDescription','com.apple.security.application-groups','CODE_SIGN_ENTITLEMENTS','Build without signing'])assert.ok(primary.includes(s),s);
+ const g=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
+ const put=(p,s)=>{const f=path.join(root,p);fs.mkdirSync(path.dirname(f),{recursive:true});fs.writeFileSync(f,s);};
+ const commit=m=>{g('add','.');g('commit','-m',m);return g('rev-parse','HEAD');};
+ const classify=(eligible,base,head)=>{
+  const output=path.join(root,'../'+path.basename(root)+'-output'),summary=output+'-summary';
+  try{
+   fs.writeFileSync(output,'');fs.writeFileSync(summary,'');
+   execFileSync('bash',['-euo','pipefail','-c',shell],{cwd:root,env:{...process.env,ELIGIBLE:eligible,BASE_SHA:base,HEAD_SHA:head,RUNNER_TEMP:os.tmpdir(),GITHUB_OUTPUT:output,GITHUB_STEP_SUMMARY:summary},stdio:['ignore','pipe','pipe']});
+   return fs.readFileSync(output,'utf8').trim();
+  }finally{fs.rmSync(output,{force:true});fs.rmSync(summary,{force:true});}
+ };
+ try{
+  g('init');g('config','user.name','Test');g('config','user.email','test@example.invalid');
+  put(source,'old');put(testFile,'old test');put(cat,JSON.stringify(original));
+  put('tools/factory-core/catalog-scope.cjs',fs.readFileSync(path.join(__dirname,'catalog-scope.cjs'),'utf8'));
+  const base=commit('trusted base');
+  put(source,'new');put(testFile,'new test');put(cat,JSON.stringify(next));const narrow=commit('narrow');
+  assert.equal(classify('true',base,narrow),'mode=scriptable-only-candidate');
+  assert.equal(classify('false',base,narrow),'mode=full');
+  assert.equal(classify('true','invalid',narrow),'mode=full');
+  put('ios-app/shell/capture.js','changed');const broad=commit('broader');
+  assert.equal(classify('true',base,broad),'mode=full');
+  assert.equal(classify('true',base,narrow),'mode=full'); // checked-out tree differs
+  g('checkout','--detach',narrow);
+  put('tools/factory-core/catalog-scope.cjs','console.log("scriptable-only-candidate")');const tampered=commit('candidate classifier tampering');
+  assert.equal(classify('true',base,tampered),'mode=full');
+  g('checkout','--detach',base);put(source,'parallel');const diverged=commit('diverged');
+  g('checkout','--detach',narrow);
+  assert.equal(classify('true',diverged,narrow),'mode=full');
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
