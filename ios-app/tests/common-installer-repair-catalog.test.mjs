@@ -181,7 +181,7 @@ test('one-time repair is packaged for existing Scriptable installer and never ru
  assert.ok(entry);
  assert.equal(entry.name,'YOS Common Installer 修復');
  assert.equal(entry.path,'ios-app/scriptable/YOS Common Installer 修復.js');
- assert.equal(entry.commit,'607484f37f28eba407c5493c2d90e085a40db1ad');
+ assert.equal(entry.commit,'5de675a5efe55445f7b7728669370b17802f4863');
  assert.equal(sha(runtime),entry.sha256);
  assert.equal(sha(official),'1fd8e27aab18c267569312689d206899ba9713eb654e7dbdd41dd2cf7b77b8d4');
 });
@@ -211,7 +211,7 @@ test('actual historical Common Installer accepts new pinned helper through the e
   async loadString(){
    requests.push(this.url);
    if(this.url.endsWith('yos-common-installer-catalog.json'))return catalog;
-   if(this.url.includes('607484f37f28eba407c5493c2d90e085a40db1ad')&&this.url.includes('Common%20Installer%20'))return runtime;
+   if(this.url.includes('5de675a5efe55445f7b7728669370b17802f4863')&&this.url.includes('Common%20Installer%20'))return runtime;
    this.response.statusCode=404;
    return 'unapproved resource';
   }
@@ -344,4 +344,30 @@ test('installer installs pinned AION OUTPUT without modifying memory reader or C
  assert.equal(cloud.files.get('/cloud/YOS Common Installer.js'),official);
  assert.equal(local.writes.length,0);assert.equal(requests.length,2);
  assert.match(alerts.at(-1),/登録完了/);
+});
+
+test('remote TEST recovery restores only a verified missing body and preserves its receipt',async()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../scriptable/yos-common-installer-catalog.json',import.meta.url),'utf8'));
+ const pin=catalog.targets.find(x=>x.id==='remote-hub-quick-test');
+ const source=fs.readFileSync(new URL('../scriptable/remote-widgets/quick-media/YOS Remote Hub Quick TEST.js',import.meta.url),'utf8');
+ assert.equal(sha(source),pin.sha256);
+ const target=pin.name+'.js',receipt='YOS Common Installer Data/'+encodeURIComponent(pin.name)+'.receipt.json';
+ const raw=JSON.stringify({schema:1,name:pin.name,id:pin.id,path:pin.path,storage:'iCloud',commit:pin.commit,sha256:pin.sha256});
+ async function run({bad=false,duplicate=false,cancel=false,race=false,pending=false,network=false}={}){
+  const cloud=store('/cloud',{[receipt]:bad?raw.replace(pin.sha256,'0'.repeat(64)):raw,'unrelated.js':'protected'}),local=store('/local');
+  if(duplicate)local.files.set('/local/'+target,'protected');
+  if(pending)cloud.files.set('/cloud/'+receipt.replace('.receipt.json','.pending.json'),'protected');
+  const saved=cloud.files.get('/cloud/'+receipt),opened=[],alerts=[];
+  class Request{constructor(url){this.url=url;this.response={statusCode:network?503:200};}async loadString(){assert.ok(this.url.includes(pin.commit));return source;}}
+  class Alert{addAction(a){this.action=a;}addCancelAction(){}async presentAlert(){alerts.push(this.title);if(this.action==='本体だけ復元'){if(race)local.files.set('/local/'+target,'race');return cancel?-1:0;}return 0;}}
+  await new vm.Script('(async()=>{\n'+runtime+'\n})()').runInNewContext({FileManager:{iCloud:()=>cloud,local:()=>local},Request,Alert,Script:{complete:()=>{}},Safari:{open:x=>opened.push(x)},args:{queryParameters:{repair:pin.id}}},{timeout:6000});
+  assert.equal(cloud.files.get('/cloud/'+receipt),saved);
+  assert.equal(cloud.files.get('/cloud/unrelated.js'),'protected');
+  assert.equal(local.writes.length,0);
+  return {cloud,opened};
+ }
+ const pass=await run();assert.equal(pass.cloud.files.get('/cloud/'+target),source);assert.equal(pass.cloud.writes.length,1);assert.equal(pass.opened.length,1);
+ for(const opts of [{bad:true},{duplicate:true},{cancel:true},{race:true},{pending:true},{network:true}]){
+  const blocked=await run(opts);assert.equal(blocked.cloud.writes.length,0);assert.equal(blocked.opened.length,0);
+ }
 });
