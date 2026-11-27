@@ -232,8 +232,8 @@
       "id": "aion-output",
       "name": "YOS AION OUTPUT",
       "path": "ios-app/scriptable/YOS AION OUTPUT.js",
-      "commit": "c5bf94ee22d3a534b5231f9260021e95efb35000",
-      "sha256": "3369d8450453632cd6d84765d65a43b78633086052ab152f2b7d8cada7026094"
+      "commit": "eaae4c9baa8e50141fb442f0e9091f0a1ddb2532",
+      "sha256": "1082ceefbbe65ccbff64563a0ff5a285b1322c5ac2e448b21eff83134ecb900b"
     },
     {
       "id": "discovery-preflight-test",
