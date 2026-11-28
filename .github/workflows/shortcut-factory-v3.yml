@@ -525,3 +525,88 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  build-discovery-preflight:
+    # Existing Factory lane only; no production deployment or installed shortcut change.
+    if: github.event_name == 'pull_request' && github.head_ref == 'yos-discovery-shortcut-core' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install existing pinned Cherri compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --connect-timeout 15 --max-time 120 'https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip' -o /tmp/cherri.zip
+          printf '%s  %s\n' '7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9' /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+      - name: Test and compile isolated public-only diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash tools/shortcut-factory/discovery/build_preflight.sh "$RUNNER_TEMP/discovery-output"
+      - name: Verify no private payload or write actions before signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, plistlib
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"discovery-output/YOS-DISCOVERY-PREFLIGHT-unsigned.shortcut"
+          w=plistlib.loads(p.read_bytes())
+          a=w["WFWorkflowActions"]
+          ids=[x["WFWorkflowActionIdentifier"] for x in a]
+          assert all("runworkflow" not in x and "notification" not in x and "documentpicker.save" not in x for x in ids)
+          inline=[x["WFWorkflowActionParameters"] for x in a if x["WFWorkflowActionIdentifier"]=="dk.simonbs.Scriptable.RunScriptInlineIntent"]
+          assert len(inline)==2
+          assert all(x["runInApp"] is False and x["ShowWhenRun"] is False for x in inline)
+          for x in inline:
+              s=x["script"]["Value"]["string"]
+              assert all(y not in s for y in ("api.notion.com","api.github.com","Keychain.get(","Authorization","setClipboard","Notification("))
+          assert inline[0].get("parameter") in ("",None)
+          assert sum(x.endswith("askllm") for x in ids)==1
+          print("DISCOVERY public diagnostic boundary PASS")
+          PY
+      - name: Sign public-only diagnostic with existing HubSign recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/discovery-output"
+          # Shortcuty refused the same public-only request (HTTP 403 on run 45435063596).
+          # Reuse the already-authorized existing Factory signer; no retry of the denial.
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input "$dir/YOS-DISCOVERY-PREFLIGHT-unsigned.shortcut" \
+            --output "$dir/signed.tmp" \
+            --name 'YOS DISCOVERY 実行検証 TEST'
+          python3 -m pip install --disable-pip-version-check --quiet lzfse
+          python3 - <<'PY'
+          import os, plistlib, lzfse
+          from pathlib import Path
+          d=Path(os.environ["RUNNER_TEMP"])/"discovery-output"
+          b=(d/"signed.tmp").read_bytes()
+          assert b.startswith(b"AEA1") and len(b)>1024
+          cert_len=int.from_bytes(b[8:12],"little")
+          i=b.find(b"bvx",12+cert_len)
+          assert i>=0, "signed workflow payload unavailable"
+          raw=lzfse.decompress(b[i:])
+          j=raw.find(b"bplist00")
+          assert j>=0, "signed workflow plist unavailable"
+          signed=plistlib.loads(raw[j:])
+          original=plistlib.loads((d/"YOS-DISCOVERY-PREFLIGHT-unsigned.shortcut").read_bytes())
+          assert signed["WFWorkflowActions"]==original["WFWorkflowActions"], "signed actions differ"
+          (d/"signed.tmp").rename(d/"YOS-DISCOVERY-PREFLIGHT-signed.shortcut")
+          print("HubSign signed envelope and exact workflow actions PASS")
+          PY
+      - name: Retain diagnostic artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yos-discovery-preflight-candidate
+          path: |
+            ${{ runner.temp }}/discovery-output/YOS-DISCOVERY-PREFLIGHT-unsigned.shortcut
+            ${{ runner.temp }}/discovery-output/YOS-DISCOVERY-PREFLIGHT-signed.shortcut
+          if-no-files-found: warn
+          retention-days: 14
