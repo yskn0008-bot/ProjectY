@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "targets": [
+    {
+      "id": "stash",
+      "name": "STASH",
+      "source": "tools/shortcut-factory/shortcuts/STASH.cherri",
+      "source_git_blob_sha1": "ff23a830c8a554922cb2122374340ea538ec4623",
+      "allowed_hosts": []
+    },
+    {
+      "id": "stash-add",
+      "name": "STASH Add",
+      "source": "tools/shortcut-factory/shortcuts/STASH Add.cherri",
+      "source_git_blob_sha1": "3e84a1ad93bf19c9d9c5af614506f47265a5123d",
+      "allowed_hosts": []
+    }
+  ]
+}
