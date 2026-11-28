@@ -1,3 +1,5 @@
+// Variables used by Scriptable.
+// icon-color: blue; icon-glyph: microscope;
 // YOS_SCRIPT_NAME: YOS DISCOVERY 実行検証 TEST
 function publicQueryURL(topic){const queries={sleep:"(sleep AND (shift work OR circadian)) AND OPEN_ACCESS:Y",activity:"(physical activity AND sedentary) AND OPEN_ACCESS:Y",habit:"(habit formation AND behavior change) AND OPEN_ACCESS:Y"};if(!Object.prototype.hasOwnProperty.call(queries,topic))throw Error("UNAPPROVED_QUERY");const q=queries[topic];return "https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&resultType=core&pageSize=8&query="+encodeURIComponent(q)}
 function parseEuropePmcSearch(data){const results=data?.resultList?.result;if(!Array.isArray(results))throw Error("EUROPE_PMC_INVALID");const seen=new Set();return results.filter(r=>r&&/^PMC[0-9]+$/.test(r.pmcid)&&typeof r.title==="string"&&r.title.trim()&&!seen.has(r.pmcid)&&seen.add(r.pmcid)).slice(0,4).map(r=>({id:r.pmcid,title:r.title,doi:typeof r.doi==="string"?r.doi:null,pubYear:typeof r.pubYear==="string"?r.pubYear:null,sourceURL:"https://europepmc.org/articles/"+r.pmcid,fulltextURL:"https://www.ebi.ac.uk/europepmc/webservices/rest/"+r.pmcid+"/fullTextXML"}))}
