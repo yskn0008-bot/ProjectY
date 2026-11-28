@@ -1,0 +1,27 @@
+name: YOS Alerts tests
+
+on:
+  pull_request:
+    paths:
+      - 'yos/alerts/**'
+      - '.github/workflows/yos-alerts-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'yos/alerts/**'
+      - '.github/workflows/yos-alerts-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run YOS Alerts unit tests
+        run: node --test yos/alerts/*.test.mjs
