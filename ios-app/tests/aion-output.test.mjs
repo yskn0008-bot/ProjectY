@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 async function exercise(source){
  const passed=[];function check(v,n){if(!v)throw Error(n);passed.push(n)}
- const cut=source.indexOf("\nlet result;\ntry{result=await entry");
+ const cut=source.indexOf("\nlet result;");
  const {parseOutput,decideOutput,nextTurn,pageHTML,routeOutput,main,entry}=new Function(source.slice(0,cut)+";return {parseOutput,decideOutput,nextTurn,pageHTML,routeOutput,main,entry}")();
  const packet=parseOutput({answer:"回答\n# 見出し\n</script><img src=x onerror=alert(1)>",choices:[" 比較 ","保留"],canSave:true});
  check(parseOutput("plain").ok,"plain text");check(!parseOutput(null).ok,"invalid");check(!parseOutput("x".repeat(120001)).ok,"oversize");check(parseOutput("長".repeat(120000)).answer.length===120000,"long text");check(parseOutput({answer:"a",choices:[" x ","x"]}).choices.length===1,"dedup");check(parseOutput({answer:"a",choices:[{action:"execute"}]}).choices.length===0,"invalid choices");
@@ -27,7 +27,7 @@ async function exercise(source){
  class Bad extends WV{async evaluateJavaScript(){return undefined}}
  result=await main(p,Bad);check(result.status==="held","missing bridge result");
  const AF=Object.getPrototypeOf(async function(){}).constructor;let out,done=0;await new AF("args","config","WebView","Script",source)({shortcutParameter:p},{runsInApp:true},WV,{setShortcutOutput:s=>out=JSON.parse(s),complete:()=>done++});check(out.route.route==="model"&&done===1,"whole script");
- check(!/\b(?:Request|Keychain|FileManager|fetch|XMLHttpRequest|localStorage)\b/.test(source),"no network/storage APIs");check(!/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|(?:sk-|ntn_|secret_)[A-Za-z0-9_-]{15,}|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/i.test(source),"no private identifiers or tokens");
+ check(!/\b(?:Request|Keychain|fetch|XMLHttpRequest|localStorage)\b/.test(source)&&!/\bFileManager\b/.test(source.slice(0,source.indexOf("function createAionHandoff"))),"no network or legacy storage APIs");check(!/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|(?:sk-|ntn_|secret_)[A-Za-z0-9_-]{15,}|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/i.test(source),"no private identifiers or tokens");
 
  const metaPacket={answer:"本文全体\n**重要**\n末尾",currentUser:"質問",history:[],choices:["詳細"],canSave:false,presentation:{mode:"decide",title:"判断する内容",summary:"短い要約",sources:["<img src=x onerror=alert(1)>"],canSave:true,action:"delete"}};
  const getMeta=new Function(source.slice(0,cut)+";return {displayMeta,demoPacket}")();
@@ -54,3 +54,45 @@ async function exercise(source){
  return passed;
 }
 test('AION OUTPUT local display, choices, context and safety',async()=>{const source=await readFile(new URL('../scriptable/YOS AION OUTPUT.js',import.meta.url),'utf8');const passed=await exercise(source);console.log(passed.length+' checks: '+passed.join(', '));});
+
+async function handoffExercise(source){
+ const passed=[];function check(v,n){if(!v)throw Error(n);passed.push(n)}
+ const files=new Map(),dirs=new Set(["/local"]);let now=1000,seq=1000,fail="";
+ const uid=i=>"00000000-0000-4000-8000-"+String(i).padStart(12,"0");
+ const fm={documentsDirectory:()=>"/local",joinPath:(a,b)=>a+"/"+b,fileExists:p=>files.has(p)||dirs.has(p),isDirectory:p=>dirs.has(p),listContents:p=>[...files.keys()].filter(k=>k.startsWith(p+"/")).map(k=>k.slice(p.length+1)),createDirectory:p=>dirs.add(p),writeString:(p,v)=>{if(fail==="write")throw Error("disk");files.set(p,v)},readString:p=>{if(fail==="read")throw Error("read");return files.get(p)},copy:(a,b)=>{if(fail==="copy"||files.has(b)||!files.has(a))throw Error("copy");files.set(b,files.get(a))},remove:p=>{if(fail==="remove")throw Error("remove");files.delete(p)}};
+ const {createAionHandoff}=new Function(source.slice(0,source.indexOf("\nlet result;"))+";return {createAionHandoff}")();
+ const h=createAionHandoff(fm,()=>now,()=>uid(seq++));const w=(i,v)=>h.write(uid(i),v),r=i=>h.read(uid(i));
+ const v={status:"ok",action:"follow_up",followUp:"架空質問",inputKind:"text",answer:"原回答"};
+ check(r(1).reason==="result_missing","missing");check(h.write("../x",v).reason==="invalid_session","invalid ID");
+ check(w(1,v).action==="handoff_ready","write");check(![...files.values()].some(x=>x.includes("原回答")),"answer not stored");
+ check(w(1,v).reason==="session_exists","duplicate");check(r(2).reason==="result_missing","session isolation");
+ check(r(1).followUp==="架空質問","read");check(r(1).reason==="already_claimed","replay");
+ check(![...files.values()].some(x=>x.includes("架空質問")),"consumed question gone");
+ check(w(2,{status:"ok",action:"save_request"}).status==="ok"&&r(2).status==="held","save denied");
+ check(w(3,{status:"ok",action:"finish"}).status==="ok"&&r(3).action==="finish","finish");
+ w(4,v);now+=600001;check(r(4).reason==="expired_result","expiry");check(![...files.keys()].some(x=>x.includes(uid(4))),"expiry cleanup");
+ const foreign="/local/YOS AION Handoff/foreign.json";files.set(foreign,"foreign");w(5,v);check(files.get(foreign)==="foreign","foreign protected");
+ fail="copy";check(w(6,v).status==="held","copy failure");fail="remove";check(r(5).status==="held","consume failure");fail="";check(r(5).reason==="already_claimed","failed consume replay");
+ fail="write";check(w(7,v).status==="held","write failure");fail="read";check(r(6).status==="held","read failure");fail="";
+ const AF=Object.getPrototypeOf(async function(){}).constructor;let views=0,event={confirmed:true,action:"text",text:"追加質問"};
+ class WV{async loadHTML(){}async present(){views++}async evaluateJavaScript(){return JSON.stringify(event)}}
+ async function run(input,app){let out,done=0;await new AF("args","config","WebView","Script","FileManager","UUID",source)({shortcutParameter:input},{runsInApp:app},WV,{setShortcutOutput:s=>out=JSON.parse(s),complete:()=>done++},{local:()=>fm},{string:()=>uid(seq++)});if(done!==1)throw Error("completion");return out}
+ const wr={mode:"aion_handoff_write_v1",session:uid(8),answer:"架空回答",canSave:true},rd={mode:"aion_handoff_read_v1",session:uid(8)};
+ check((await run(wr,true)).action==="handoff_ready"&&views===1,"full screen write");
+ const pw={mode:"aion_probe_write_v1",session:uid(8)},pr={mode:"aion_probe_read_v1",session:uid(8)};
+ check((await run(pr,false)).reason==="result_missing","probe cannot consume live data");
+ check((await run(pw,true)).action==="handoff_ready"&&views===1,"probe writer no UI");
+ check((await run(pr,false)).action==="probe_pass"&&views===1,"probe read no UI");
+ check((await run(pr,false)).reason==="already_claimed","probe replay");
+ check((await run(rd,false)).followUp==="追加質問"&&views===1,"live read separate");
+ check((await run(wr,false)).reason==="display_requires_app","write wrong mode");
+ check((await run(rd,true)).reason==="read_requires_background","read wrong mode");
+ check((await run(pw,false)).reason==="probe_requires_app","probe writer wrong mode");
+ check((await run(pr,true)).reason==="probe_requires_background","probe reader wrong mode");
+ event={confirmed:true,action:"save"};await run({...wr,session:uid(9)},true);check((await run({...rd,session:uid(9)},false)).status==="held","viewer save denied");
+ event=null;await run({...wr,session:uid(10)},true);check((await run({...rd,session:uid(10)},false)).action==="finish","close cancels");
+ check((await run("従来回答",true)).answer==="従来回答","legacy text");
+ check((await run(JSON.stringify(wr),true)).answer==="架空回答","model string cannot start transport");
+ return passed;
+}
+test('AION local handoff and synthetic probe, isolated sessions and legacy compatibility',async()=>{const source=await readFile(new URL('../scriptable/YOS AION OUTPUT.js',import.meta.url),'utf8');const passed=await handoffExercise(source);console.log(passed.length+' handoff checks: '+passed.join(', '));});
