@@ -104,3 +104,43 @@ test('research button requests a new acquisition; sync details show error and ne
  assert.match(get('sheetBody').innerHTML,/鮮度確認済 0\/1/);
  click({act:'syncInfo'});assert.match(get('sheetBody').innerHTML,/404/);
 });
+
+
+test('TAXI source is private, exact identity match and read-only discovery',async()=>{
+ assert.doesNotMatch(src,/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+ const a=src.indexOf('function digest('),b=src.indexOf('const UI=',a);
+ assert.ok(a>=0&&b>a);
+ const code=src.slice(a,b);
+ const id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',other='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+ const fp=crypto.createHash('sha256').update(id.replace(/-/g,'')).digest('hex');
+ const fixture=code.replace(/const SOURCE_FINGERPRINT='[a-f0-9]{64}';/,"const SOURCE_FINGERPRINT='"+fp+"';");
+ assert.notEqual(fixture,code);
+ const row=id=>({object:'data_source',id,properties:{'営業日':{type:'date'},'種別':{type:'select'},'売上':{type:'number'}}});
+ async function run(pages){
+  const calls=[];let i=0;
+  class Request{constructor(url){assert.equal(url,'https://api.notion.com/v1/search')}async loadJSON(){assert.equal(this.method,'POST');assert.equal(this.headers['Notion-Version'],'2025-09-03');calls.push(JSON.parse(this.body));const p=pages[i++];this.response={statusCode:p?.status||200};return p?.body}}
+  const fn=vm.runInNewContext(fixture+';resolveSource',{Request});
+  try{return {id:await fn('mock-only'),calls}}catch(e){return {error:e.message,calls}}
+ }
+ const result=await run([{body:{results:[row(other)],has_more:true,next_cursor:'page2'}},{body:{results:[row(id)],has_more:false}}]);
+ assert.equal(result.id,id);assert.equal(result.calls[1].start_cursor,'page2');
+ assert.match((await run([{body:{results:[row(other)],has_more:false}}])).error,/404/);
+ assert.match((await run([{body:{results:[{...row(id),properties:{}}],has_more:false}}])).error,/形式/);
+ assert.match((await run([{status:403}])).error,/403/);
+ assert.match((await run([{status:401}])).error,/401/);
+ assert.match((await run([{status:429}])).error,/429/);
+ assert.match((await run([{body:{results:[],has_more:true,next_cursor:null}}])).error,/途中/);
+});
+test('consultation preview requires an explicit current confirmation, with bounded long text',()=>{
+ const html=JSON.parse(src.match(/^const UI=(.*);$/m)[1]).replace('__PAYLOAD__',JSON.stringify({month:'2026-11',today:'2026-11-25',at:'未取得',status:'未同期',rows:[],field:null,native:true})).replace('__CORE__',()=>JSON.parse(src.match(/^const CORE=(.*);$/m)[1]));
+ const {window,get,click}=htmlUI(html);
+ click({act:'researchConsult'});assert.equal(window.yosTake().actions.length,0);
+ get('taxiQuestion').value='';click({act:'taxiPrepare'});assert.match(get('sheetTitle').textContent,/相談内容を確認/);
+ click({act:'researchConsult'});get('taxiQuestion').value='あ'.repeat(4000);click({act:'taxiPrepare'});
+ assert.equal(window.yosTake().actions.length,0);
+ assert.ok(window.taxiDraft.rawText.includes('あ'.repeat(4000)));
+ click({act:'taxiCopy'});const pack=window.yosTake().actions;assert.equal(pack.length,1);assert.equal(pack[0].type,'taxiCopy');assert.ok(pack[0].value.length<=10000);
+ click({act:'taxiCopy'});assert.equal(window.yosTake().actions.length,0);
+ click({act:'researchConsult'});get('taxiQuestion').value='質問';click({act:'taxiPrepare'});get('sheet').close();click({act:'taxiCopy'});assert.equal(window.yosTake().actions.length,0);
+ click({act:'researchConsult'});get('taxiQuestion').value='質問';click({act:'taxiPrepare'});click({act:'syncInfo'});click({act:'taxiCopy'});assert.equal(window.yosTake().actions.length,0);
+});

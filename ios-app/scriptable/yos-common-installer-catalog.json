@@ -218,8 +218,8 @@
       "id": "yos-taxi",
       "name": "YOS TAXI",
       "path": "ios-app/scriptable/YOS TAXI.js",
-      "commit": "5d086dcef12e95d24d5f02897f86264a07cdac7c",
-      "sha256": "67d50ff0f7dddb7b4f19096e5a8fbea40544541d4a4d1a9b56824ce634aa355c"
+      "commit": "3cbf467f5256e8c09cfeaf6303c8142fd1d7d18f",
+      "sha256": "1759bea3150768475f234f9310251573c8f5e94bea8ce510a14acb24b7c1fcc0"
     },
     {
       "id": "aion-memory-read",
