@@ -1,0 +1,3 @@
+#define name "今日のヒント"
+// Native local notification only. No data access, network, or personal content.
+showNotification("新しい内容があります。", "今日のヒント", false)
