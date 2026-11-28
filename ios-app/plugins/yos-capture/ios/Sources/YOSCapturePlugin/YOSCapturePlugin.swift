@@ -8,11 +8,14 @@ public final class YOSCapturePlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "capture", returnType: CAPPluginReturnPromise)!,
         CAPPluginMethod(name: "list", returnType: CAPPluginReturnPromise)!,
+        CAPPluginMethod(name: "recordEvent", returnType: CAPPluginReturnPromise)!,
+        CAPPluginMethod(name: "listEvents", returnType: CAPPluginReturnPromise)!,
         CAPPluginMethod(name: "applyCalendar", returnType: CAPPluginReturnPromise)!,
         CAPPluginMethod(name: "applyReminder", returnType: CAPPluginReturnPromise)!
     ]
 
     private lazy var repositoryResult = Result { try YOSCaptureRepository() }
+    private lazy var eventLedgerResult = Result { try YOSEventLedger() }
 
     @objc public func capture(_ call: CAPPluginCall) {
         guard let rawText = call.getString("rawText"),
@@ -24,7 +27,8 @@ public final class YOSCapturePlugin: CAPPlugin, CAPBridgedPlugin {
         Task {
             do {
                 let repository = try repositoryResult.get()
-                let service = YOSCaptureService(repository: repository)
+                let eventLedger = try? eventLedgerResult.get()
+                let service = YOSCaptureService(repository: repository, eventLedger: eventLedger)
                 let record = try await service.capture(rawText: rawText, inputMode: inputMode)
                 call.resolve(["record": try dictionary(record)])
             } catch {
@@ -41,6 +45,52 @@ public final class YOSCapturePlugin: CAPPlugin, CAPBridgedPlugin {
                 call.resolve([
                     "records": try records.map { try dictionary($0) },
                     "storageScope": await repository.storageScope
+                ])
+            } catch {
+                call.reject(error.localizedDescription)
+            }
+        }
+    }
+
+    @objc public func recordEvent(_ call: CAPPluginCall) {
+        guard let source = call.getString("source"),
+              let type = call.getString("type") else {
+            call.reject("イベントの取得元と種別が必要です。")
+            return
+        }
+
+        Task {
+            do {
+                let facts = try YOSEventFacts.decode(call.getString("factsJSON") ?? "{}")
+                let privacy = YOSEventPrivacy(rawValue: call.getString("privacy") ?? "S0") ?? .s0
+                let occurredAt = try eventDate(call.getString("occurredAtISO"))
+                let ledger = try eventLedgerResult.get()
+                let service = YOSEventService(ledger: ledger)
+                let event = try await service.record(
+                    source: source,
+                    type: type,
+                    facts: facts,
+                    occurredAt: occurredAt,
+                    confidence: call.getDouble("confidence") ?? 1,
+                    privacy: privacy,
+                    evidenceRefs: call.getString("evidenceRef").map { [$0] } ?? [],
+                    sourceEventID: call.getString("sourceEventID")
+                )
+                call.resolve(["event": try dictionary(event)])
+            } catch {
+                call.reject(error.localizedDescription)
+            }
+        }
+    }
+
+    @objc public func listEvents(_ call: CAPPluginCall) {
+        Task {
+            do {
+                let ledger = try eventLedgerResult.get()
+                let events = try await ledger.recent(limit: call.getInt("limit") ?? 100)
+                call.resolve([
+                    "events": try events.map { try dictionary($0) },
+                    "storageScope": await ledger.storageScope
                 ])
             } catch {
                 call.reject(error.localizedDescription)
@@ -81,6 +131,15 @@ public final class YOSCapturePlugin: CAPPlugin, CAPBridgedPlugin {
                 call.reject(error.localizedDescription)
             }
         }
+    }
+
+    private func eventDate(_ value: String?) throws -> Date {
+        guard let value, !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return Date() }
+        let standard = ISO8601DateFormatter()
+        if let date = standard.date(from: value) { return date }
+        standard.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = standard.date(from: value) { return date }
+        throw YOSEventError.invalidOccurredAt
     }
 
     private func dictionary<T: Encodable>(_ value: T) throws -> JSObject {
