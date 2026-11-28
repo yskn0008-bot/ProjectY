@@ -249,13 +249,41 @@ test('same financial identity is counted once; ambiguous cross-source amounts re
  const r=api.merge([{...e,id:'local:abc',sourceId:'',source:'Money'}],[e]);assert.equal(r.length,2);assert.equal(r.every(x=>x.reconciliationPending),true);
 });
 
-test('calendar auth preserves the reviewed identity/origin/token implementation outside its new habit action',()=>{
- const original=readFileSync(new URL('../../yos/daystream/yos-tasks-auth.js',import.meta.url),'utf8');
- const calendar=readFileSync(new URL('./calendar-task-auth.js',import.meta.url),'utf8');
- const a=calendar.indexOf(' async function completeHabit('),b=calendar.indexOf(' function setup(',a);
- const unchanged=(calendar.slice(0,a)+calendar.slice(b)).replace('{setup,refresh,complete,completeHabit};','{setup,refresh,complete};');
- assert.equal(unchanged.split('\n').slice(1).join('\n'),original.split('\n').slice(1).join('\n'));
- assert.match(calendar,/action:'complete-habit'/);assert.match(calendar,/expectedEditedAt:item.lastEditedAt/);assert.match(calendar,/e\.taskId!==item\.id\.slice\(7\)/);
+test('calendar is login-free and imports a high-entropy private device link safely',()=>{
+ const auth=readFileSync(new URL('./calendar-task-auth.js',import.meta.url),'utf8');
+ const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+ assert.doesNotMatch(auth,/accounts\.google|googleId\.initialize|PublicKeyCredential/);
+ assert.match(auth,/const STORAGE='yos_calendar_device_key_v1'/);
+ assert.match(auth,/\^#yos-device=/);
+ assert.match(auth,/history\.replaceState/);
+ assert.match(auth,/hasDeviceKey:\(\)=>Boolean\(readToken\(\)\)/);
+ assert.match(auth,/source=notion/);
+ assert.match(auth,/action:'complete-habit'/);
+ assert.match(auth,/expectedEditedAt:item\.lastEditedAt/);
+ assert.match(auth,/e\.taskId!==item\.id\.slice\(7\)/);
+ assert.match(html,/YOS_DAYSTREAM_TASK_AUTH\?\.hasDeviceKey/);
+ assert.match(html,/snapshot\.origin!=='notion'/);
+ assert.match(html,/snapshot\.complete!==true/);
+});
+test('private setup link is consumed locally and its fragment removed before storage',()=>{
+ const script=readFileSync(new URL('./calendar-task-auth.js',import.meta.url),'utf8');
+ const token='yos_cd_'+'a'.repeat(64),events=[],values=new Map();
+ const location={hash:'#yos-device='+token,pathname:'/ProjectY/life/calendar/',search:'',origin:'https://yskn0008-bot.github.io'};
+ const browser={
+  location,
+  history:{replaceState(){events.push('erase');location.hash=''}},
+  localStorage:{
+   getItem:k=>values.get(k)||null,
+   setItem(k,v){events.push('store');values.set(k,v)},
+   removeItem:k=>values.delete(k)
+  },
+  document:{addEventListener(){}},addEventListener(){},setInterval(){}
+ };
+ vm.runInNewContext(script,{window:browser,document:browser.document},{timeout:1000});
+ assert.deepEqual(events,['erase','store']);
+ assert.equal(location.hash,'');
+ assert.equal(values.get('yos_calendar_device_key_v1'),token);
+ assert.equal(browser.YOS_DAYSTREAM_TASK_AUTH.hasDeviceKey(),true);
 });
 test('calendar PWA cache includes every new runtime module without caching fictional test fixtures',()=>{
  const sw=readFileSync(new URL('../../service-worker.js',import.meta.url),'utf8');
