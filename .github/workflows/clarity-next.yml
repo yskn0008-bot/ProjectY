@@ -140,10 +140,15 @@ jobs:
               ids=[a.get('WFWorkflowActionIdentifier','') for a in root.get('WFWorkflowActions',[])]
               blob=repr(root)
               assert not any(i=='is.workflow.actions.askllm' for i in ids), ids
-              assert 'Clarity Next' in blob
               assert any(i.endswith('runworkflow') for i in ids), ids
+          text_ids=[a.get('WFWorkflowActionIdentifier','') for a in text_root.get('WFWorkflowActions',[])]
+          text_blob=repr(text_root)
+          assert 'Clarity Voice Pilot v3' in text_blob
+          assert 'Clarity Next' not in text_blob
+          assert not any('dictatetext' in i or 'askforinput' in i for i in text_ids)
           share_ids=[a.get('WFWorkflowActionIdentifier','') for a in share_root.get('WFWorkflowActions',[])]
           share_blob=repr(share_root)
+          assert 'Clarity Next' in share_blob
           assert 'ActionExtension' in set(share_root.get('WFWorkflowTypes') or [])
           assert share_root.get('WFWorkflowHasShortcutInputVariables') is True
           assert any('extracttextfromimage' in i for i in share_ids), share_ids
