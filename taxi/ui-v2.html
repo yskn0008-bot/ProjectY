@@ -1112,7 +1112,7 @@ html,body,.app{background:#141516;color:#f1efeb}
  function renderMonthAnalysis(key,summary){
    $('analysis-month-title').textContent=key.replace('-','年')+'月';
    const holder=$('weekday-bars'),trend=$('monthly-trend');holder.replaceChildren();trend.replaceChildren();
-   if(summary.status!=='partial'){$('weekday-note').textContent='同一税区分の確認済み日報が揃うまで集計しません。';trend.textContent='未集計';return}
+   if(summary.status!=='partial'&&!Number.isSafeInteger(summary.recordedTotalYen)){$('weekday-note').textContent='同一税区分の確認済み日報が揃うまで集計しません。';trend.textContent='未集計';return}
    const api=window.YosTaxiConfirmedRevenueV1,groups=Array.from({length:7},()=>[]),days=[];
    const count=new Date(Number(key.slice(0,4)),Number(key.slice(5,7)),0).getDate();
    for(let d=1;d<=count;d++){const day=key+'-'+String(d).padStart(2,'0'),r=api.latest(day);if(!r)continue;groups[new Date(day+'T12:00:00Z').getUTCDay()].push(r.amountYen);days.push([d,r.amountYen])}
@@ -1121,7 +1121,7 @@ html,body,.app{background:#141516;color:#f1efeb}
      const column=document.createElement('div'),bar=document.createElement('i'),name=document.createElement('span'),value=document.createElement('small');
      bar.style.height=(averages[idx]===null?0:Math.max(3,averages[idx]/max*70))+'px';name.textContent='日月火水木金土'[idx];value.textContent=averages[idx]===null?'—':money(averages[idx]);column.append(bar,name,value);holder.append(column)
    }
-   $('weekday-note').textContent='確認済み日報 '+summary.dayCount+'日・各曜日の平均（未確定）';
+   $('weekday-note').textContent=(Number.isSafeInteger(summary.recordedTotalYen)?'Notion記録額 ':'確認済み日報 ')+summary.dayCount+'日・各曜日の平均（未確定）';
    let total=0;for(const [d,v] of days){total+=v;const row=document.createElement('div');row.className='trend-row';const label=document.createElement('span'),track=document.createElement('i'),amount=document.createElement('b');label.textContent=d+'日';track.style.width=Math.min(100,total/1000000*100)+'%';amount.textContent=money(total);row.append(label,track,amount);trend.append(row)}
  }
  function renderCockpitWait(){const v=waitView(),btn=$('cockpit-wait-toggle'),clock=$('cockpit-wait-time');if(!btn||!clock)return;
@@ -1150,6 +1150,7 @@ html,body,.app{background:#141516;color:#f1efeb}
      const val=document.createElement('small');
      const record=monthly.status!=='corrupt-preserved'&&api?.latest(monthKey+'-'+String(d).padStart(2,'0'));
      val.textContent=record?'¥'+record.amountYen.toLocaleString('ja-JP'):'—';
+     if(record?.source==='notion-recorded-total')val.title='Notion記録額・税区分未確認';
      const target=positive(plan?.target);
      if(record&&target&&record.amountYen<target&&(key<dateKey()||state.businessDate===key&&isEnded()))val.classList.add('below-target');
      val.hidden=!$('cal-show-sales').checked;
@@ -1160,7 +1161,7 @@ html,body,.app{background:#141516;color:#f1efeb}
      const events=calendarEvents(key,plan);
      if($('cal-show-events').checked&&events.length){const mark=document.createElement('span');mark.className='cal-event';mark.textContent=events[0].slice(0,9)+(events.length>1?'…':'');el.append(mark)}
      el.addEventListener('click',()=>openSheet(key,[
-       '写真確認額：'+(record?money(record.amountYen)+'（'+record.taxBasis+'）':'未登録'),
+       '記録額：'+(record?money(record.amountYen)+'（'+(record.source==='notion-recorded-total'?'Notion記録・税区分未確認':record.taxBasis)+'）':'未登録'),
        '日次目標：'+(target?money(target)+'（税区分一致未確認）':'未設定'),
        '勤務予定：'+(planLabel||'未登録'),
        '実勤務：'+(positive(plan?.actualHours)?plan.actualHours+'時間':'未登録'),
@@ -1173,7 +1174,12 @@ html,body,.app{background:#141516;color:#f1efeb}
    // This ratio is informational only; the goal tax basis is not yet configured.
    progress.textContent=monthly.status==='partial'&&Number.isSafeInteger(monthly.totalYen)
      ?(monthly.totalYen/1000000*100).toFixed(1)+'%（参考）':'—';
-   if(monthly.status==='partial'){
+   if(monthly.status==='basis-unconfirmed'&&Number.isSafeInteger(monthly.recordedTotalYen)){
+     $('monthly-sum-label').textContent='Notion記録額 '+monthly.dayCount+'日';
+     value.textContent=money(monthly.recordedTotalYen);
+     progress.textContent=(monthly.recordedTotalYen/1000000*100).toFixed(1)+'%（参考）';
+     notice.textContent='取り込んだNotion運行記録の参考合計。税区分・会社確定額は未確認。未登録日はゼロとしません。自動同期ではありません。';
+   }else if(monthly.status==='partial'){
      value.textContent=money(monthly.totalYen);
      notice.textContent=(monthly.taxBasis==='tax-included'?'税込':'税抜')+'で確認した各営業日の最新累積額だけを参考合計。100万円との比率は税区分の一致が未確認の参考値であり、目標達成の判定ではありません。勤務終了後の確定月商ではありません。Notion未同期。';
    }else if(monthly.status==='mixed-basis'){
@@ -1210,9 +1216,10 @@ html,body,.app{background:#141516;color:#f1efeb}
    }
    const confirmed=api?.latest(dateKey());
    analysis.textContent=confirmed?money(confirmed.amountYen):'未登録';
-   note.textContent=confirmed?'営業日 '+confirmed.businessDate+' の写真を本人が確認した累積額（'+(confirmed.taxBasis==='tax-included'?'税込':confirmed.taxBasis==='tax-excluded'?'税抜':'税区分未確認')+'）。未確定・Notion未同期。':'写真で確認した日報はまだありません。Notion未同期。';
+   note.textContent=confirmed?.source==='notion-recorded-total'?'Notion記録額・税区分と会社確定額は未確認。':confirmed?'営業日 '+confirmed.businessDate+' の写真を本人が確認した累積額（'+(confirmed.taxBasis==='tax-included'?'税込':confirmed.taxBasis==='tax-excluded'?'税抜':'税区分未確認')+'）。未確定・Notion未同期。':'写真で確認した日報はまだありません。Notion未同期。';
    if(!confirmed)return;
    $('sales-value').textContent=money(confirmed.amountYen);
+   if(confirmed.source==='notion-recorded-total'){$('report-clock').textContent='Notion記録額・税区分未確認';$('last-reflected').textContent='営業日 '+confirmed.businessDate+' のNotion取込額';return;}
    $('report-clock').textContent='総収入を端末で確認・'+(confirmed.taxBasis==='unconfirmed'?'税込／税抜未確認':confirmed.taxBasis==='tax-included'?'税込':'税抜');
    $('last-reflected').textContent='営業日 '+confirmed.businessDate+' の写真確認額・Notion未同期';
  }
@@ -1270,7 +1277,7 @@ html,body,.app{background:#141516;color:#f1efeb}
      const input={businessDate:snapshot.businessDate,amountYen:snapshot.amountYen,
        reportClock:snapshot.reportClock,taxBasis:snapshot.taxBasis,
        photoSha256:hash,photoKind:'paper-total'};
-     if(snapshot.correction&&previous)input.correctionOf=previous.id;
+     if(snapshot.correction&&previous?.source==='photo-manually-verified')input.correctionOf=previous.id;
      const result=api.confirm(input);
      const reasons={
        'invalid':'営業日・総収入・区分の形式を確認してください。',
@@ -1374,6 +1381,26 @@ html,body,.app{background:#141516;color:#f1efeb}
  $('wait-toggle').addEventListener('click',()=>{if(confirmedWait())finishWait();else startWait()});
  // Shortcut widget deep-link: the action runs ONLY in the storage container that opens this URL.
  // iOS standalone PWA storage is separate from Safari; never create a new shift silently.
+ function handlePrivateSalesImport(){
+   const url=new URL(location.href),prefix='#yos_sales_import=';
+   if(!url.hash.startsWith(prefix))return;
+   const raw=url.hash.slice(prefix.length);
+   history.replaceState(history.state,'',url.pathname+url.search);
+   navigate('monthly');
+   if(raw.length>16000){toast('売上取込データが長すぎます。保存していません。');return}
+   let rows;
+   try{rows=JSON.parse(decodeURIComponent(raw));if(!Array.isArray(rows)||!rows.length||rows.length>62||rows.some(r=>!r||!/^\d{4}-\d{2}-\d{2}$/.test(r.businessDate)||!Number.isSafeInteger(r.amountYen)||r.amountYen<0||r.amountYen>99999999||!/^([0-9a-f]{32})$/.test(r.sourceId)))throw Error('invalid')}
+   catch{toast('売上取込データが不正です。保存していません。');return}
+   const dates=rows.map(r=>r.businessDate).sort();
+   openSheet('Notionの売上を取り込む',dates[0]+'〜'+dates.at(-1)+'｜'+rows.length+'日分\n'+rows.map(r=>r.businessDate+'　'+money(r.amountYen)).join('\n')+'\n税区分・会社確定額は未確認。既存の同日記録は上書きしません。端末内にのみ保存。',[
+     {text:'売上を取り込む',primary:true,run:()=>{
+       const result=window.YosTaxiConfirmedRevenueV1?.importNotion(rows);
+       if(result?.status!=='saved'){toast('取り込めませんでした。既存記録は保護しています。');return}
+       closeSheet();selectedMonth=dates.at(-1).slice(0,7);render();navigate('monthly');
+       toast('取込 '+result.added+'日／重複 '+result.skipped+'日／要照合 '+result.conflicts+'日');
+     }}
+   ]);
+ }
  function handleShortcutLink(){
    const url=new URL(location.href),action=url.searchParams.get('yos_action');
    if(!action)return;
@@ -1416,7 +1443,7 @@ html,body,.app{background:#141516;color:#f1efeb}
  $('strategy-advice-load').addEventListener('click',loadStrategyAdvice);
  $('revenue-paste-ocr').addEventListener('click',pasteRevenueOcr);
  $('status-btn').addEventListener('click',changeShift);$('photo-btn').addEventListener('click',()=>$('photo-input').click());$('photo-input').addEventListener('change',e=>{handleFile(e.target.files?.[0]);e.target.value=''});$('decision-btn').addEventListener('click',()=>navigate('strategy'));document.querySelectorAll('[data-band]').forEach(x=>x.addEventListener('click',()=>{const band=Number(x.dataset.band);navigate('strategy');const target=document.querySelectorAll('[data-strat]')[[1,3,4][band]];target?.focus()}));document.querySelectorAll('[data-page]').forEach(x=>x.addEventListener('click',()=>navigate(x.dataset.page)));document.querySelectorAll('[data-strat]').forEach(x=>x.addEventListener('click',()=>{const labels=['退勤・宿泊需要を検証。GO・無線中心','飲食・観光の回転を検証','22時以降、待機過多を避ける','帰宅需要の重点候補。供給過多に注意','降車地での再乗車と帰庫動線を比較'];openSheet('時間帯別の営業方針',labels[Number(x.dataset.strat)]+'。これらは初期仮説であり、現地の需要や安全な待機可否は未確認です。')}));$('close-modal').addEventListener('click',closeSheet);$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeSheet()});$('history-info-btn').addEventListener('click',()=>{location.href='./index.html?legacy=1'});$('export-btn').addEventListener('click',exportJson);
- renderMonthly();render();handleShortcutLink();setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait();renderDailyPace();renderYosSend();if(strategyResearchFeed)renderStrategyResearch()},15000);setInterval(()=>{if($('sales-view').classList.contains('active'))renderCockpitWait()},1000);
+ renderMonthly();render();handleShortcutLink();handlePrivateSalesImport();addEventListener('hashchange',handlePrivateSalesImport);setInterval(()=>{const now=new Date();$('current-clock').textContent=time(now);updatePlan();renderWait();renderDailyPace();renderYosSend();if(strategyResearchFeed)renderStrategyResearch()},15000);setInterval(()=>{if($('sales-view').classList.contains('active'))renderCockpitWait()},1000);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderWait();renderYosSend()}});
  addEventListener('pageshow',()=>{renderWait();renderYosSend()});
  window.YOSTaxiPreview={debugState:()=>structuredClone(state),recordDropoff:stampDropoff,navigate,activeBand,waitClock:{get:()=>waitView(),start:startWait,stop:finishWait,refresh:renderWait},fieldReport:{list:()=>structuredClone(currentFields()),record:reportField,undo:undoField,refresh:renderField,prepareYosRequest:prepareYosFieldRequest,sendToYos:sendFieldToYos}};
