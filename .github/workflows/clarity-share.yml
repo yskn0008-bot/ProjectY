@@ -62,6 +62,7 @@ jobs:
           cherri "$generated" --skip-sign --debug
           entry='./Clarity Share v4_unsigned.shortcut'
           test -f "$entry"
+          python3 patch_voice_notion_inline.py "$entry"
 
           BUILD_ID='${{ github.event.pull_request.head.sha || github.sha }}'
           python3 patch_build_identity.py "$entry" "$BUILD_ID"
