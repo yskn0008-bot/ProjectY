@@ -1,0 +1,78 @@
+#define name Clarity 入力
+#define color purple
+#define version 18
+
+#include 'actions/text'
+#include 'actions/documents'
+#include 'actions/photos'
+#include 'actions/media'
+#include 'actions/shortcuts'
+
+// Optional folder is omitted; missing history must not stop first-run use.
+action 'documentpicker.open' getClarityHistory(text path: 'WFGetFilePath', bool notFoundError: 'WFFileErrorIfNotFound')
+
+/*
+ * YOS Clarity native input only.
+ * Standalone new shortcut. Never changes existing Clarity Text/Share/Next.
+ * Photo itself is NOT sent: only text OCR and a user-editable description.
+ * Local history is saved in iCloud Drive/Shortcuts/Clarity Input History.txt.
+ */
+@rawInput = ""
+@historyMode = false
+
+menu "Clarity｜入力方法" {
+    item "文字を入力":
+        const typed = prompt("Clarityに入力", "Text", "")
+        @rawInput = "{typed}"
+    item "履歴から選択":
+        @historyMode = true
+        const existing = getClarityHistory("Clarity Input History.txt", false)
+        if !existing {
+            alert("まだ履歴がありません。最初に文字入力をしてください。", "Clarity 入力")
+            stop()
+        }
+        const pastText = getText(existing)
+        const pastLines = splitText(pastText, "\n")
+        const chosen = chooseFromList(pastLines, "過去の入力を検索・選択")
+        @rawInput = "{chosen}"
+    item "写真ライブラリ":
+        const photo = selectPhotos()
+        const ocr = getTextFromImage(photo)
+        alert("写真から読み取れた文字を次の画面で確認してください。画像そのものはClarity Nextに送信されません。", "Clarity 入力")
+        const caption = prompt("写真の内容・依頼を入力", "Text", "{ocr}")
+        @rawInput = "{caption}"
+    item "カメラで撮影":
+        const captured = takePhoto()
+        savePhoto(captured)
+        const ocrCamera = getTextFromImage(captured)
+        alert("撮影画像は写真ライブラリへ保存します。Clarity Nextには画像ではなく、次に入力する文字だけを渡します。", "Clarity 入力")
+        const captionCamera = prompt("写真の内容・依頼を入力", "Text", "{ocrCamera}")
+        @rawInput = "{captionCamera}"
+    item "音声で入力":
+        const voice = listen("After Pause", "jp-JP")
+        @rawInput = "{voice}"
+}
+
+const content = trimWhitespace(@rawInput)
+if !content {
+    stop()
+}
+
+// Line-based search history; never writes to existing Clarity Inbox or ledger.
+// Collapse newlines to keep one capture per history row.
+const row = replaceText("\n", " ", content)
+const storedFile = getClarityHistory("Clarity Input History.txt", false)
+@oldText = ""
+if storedFile {
+    const old = getText(storedFile)
+    @oldText = "{old}"
+}
+const combined = text("{row}\n{@oldText}")
+const entries = splitText(combined, "\n")
+const firstEntries = getListItems(entries, 1, 80)
+const historyOut = joinText(firstEntries, "\n")
+saveFile("Clarity Input History.txt", historyOut, true)
+
+// Delegate routing/operation strictly to the existing Clarity Next.
+const transport = text("__YOS_CLARITY_TEXT_V1__\n{content}")
+run("Clarity Next", transport)

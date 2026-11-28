@@ -1,0 +1,121 @@
+name: Clarity native input shortcut (isolated)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/clarity-next/Clarity 入力.cherri'
+      - '.github/workflows/clarity-native-input.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-verify-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate isolated input contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/clarity-next/Clarity 入力.cherri')
+          s=p.read_text()
+          for required in ('#define name Clarity 入力','Clarity Input History.txt','getTextFromImage(','selectPhotos(','takePhoto(','savePhoto(','run("Clarity Next", transport)','__YOS_CLARITY_TEXT_V1__'):
+              assert required in s,required
+          for forbidden in ('api.notion.com','notion integration token','openURL(','deleteFiles(','YOS_NOTION_INTEGRATION_TOKEN','https://'):
+              assert forbidden not in s,forbidden
+          assert s.count('run("Clarity Next", transport)') == 1
+          print('Clarity native-only input contract PASS')
+          PY
+
+      - name: Install pinned Cherri v2.3.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip'
+          expected='7ab2c384b7b26e7c72a30a8dfa56f89dae12c4068b7951bc1e3193f3698edbe9'
+          curl -fsSL "$url" -o /tmp/cherri.zip
+          printf '%s  %s\n' "$expected" /tmp/cherri.zip | sha256sum -c -
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          binary="$(find /tmp/cherri -type f -name cherri -print -quit)"
+          test -n "$binary"
+          sudo install -m 0755 "$binary" /usr/local/bin/cherri
+          cherri --version
+
+      - name: Compile and validate native workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tools/clarity-next
+          cherri 'Clarity 入力.cherri' --skip-sign --debug
+          test -f 'Clarity 入力_unsigned.shortcut'
+          mkdir -p ../../downloads/clarity-input
+          cp 'Clarity 入力_unsigned.shortcut' ../../downloads/clarity-input/Clarity_Input_unsigned.plist
+          cd ../..
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          p=Path('downloads/clarity-input/Clarity_Input_unsigned.plist')
+          d=plistlib.loads(p.read_bytes())
+          actions=d.get('WFWorkflowActions',[])
+          identifiers=[a.get('WFWorkflowActionIdentifier','') for a in actions]
+          assert len(actions)>=12,len(actions)
+          assert any('menu' in x for x in identifiers),identifiers
+          assert any('choosefromlist' in x for x in identifiers),identifiers
+          assert any('gettextfromimage' in x or 'extracttext' in x for x in identifiers),identifiers
+          assert any('runworkflow' in x or 'run' in x and 'workflow' in x for x in identifiers),identifiers
+          print('Clarity shortcut static structure PASS',len(actions))
+          PY
+
+      - name: Sign with existing ProjectY HubSign adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/clarity-factory/sign_with_hubsign.py \
+            --input downloads/clarity-input/Clarity_Input_unsigned.plist \
+            --output downloads/clarity-input/Clarity_Input.shortcut \
+            --name 'Clarity 入力'
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('downloads/clarity-input/Clarity_Input.shortcut')
+          assert p.read_bytes().startswith(b'AEA1') and p.stat().st_size>500
+          print('Signed importable-format Clarity Input PASS',p.stat().st_size)
+          PY
+
+      - name: Upload install file
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarity-input-native-shortcut
+          path: downloads/clarity-input/Clarity_Input.shortcut
+          if-no-files-found: error
+          retention-days: 21
+
+      - name: Stage signed binary only on isolated review branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'feat/clarity-native-input-20261123'
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
+          TARGET_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          set -euo pipefail
+          test "$TARGET_REPO" = "$GITHUB_REPOSITORY"
+          cp downloads/clarity-input/Clarity_Input.shortcut /tmp/Clarity_Input.shortcut
+          git fetch origin "$TARGET_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
+          mkdir -p downloads/clarity-input
+          cp /tmp/Clarity_Input.shortcut downloads/clarity-input/Clarity_Input.shortcut
+          git add downloads/clarity-input/Clarity_Input.shortcut
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'build(clarity): attach signed input shortcut [skip ci]'
+            git push origin HEAD:"$TARGET_BRANCH"
+          fi
