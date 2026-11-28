@@ -201,7 +201,7 @@ test('Standard overview fits sparse days and expands only for dense days without
   const dense=Array.from({length:45},(_,i)=>({s:360+Math.floor(i/3)*2,d:5,t:i%3===0?'長いタスク名称も表示する':'タスク',kind:'task'}));
   const overflow=axisFor(dense,550,backdrops(dense),width);
   assert.ok(overflow.coordinate(1440)>550);
-  let previous=-Infinity,last=-1,offset=0;
-  for(const item of dense){if(item.s!==last){offset=0;last=item.s}const y=overflow.coordinate(item.s)+offset;assert.ok(y>=previous-1e-7);previous=y+cardFor(item,width).height;offset+=cardFor(item,width).height+gap;}
+  const rectangles=dense.map(item=>{const p=overflow.parallel.get(item),top=overflow.coordinate(item.s)+p.offset;return {top,bottom:top+p.height,left:p.col/p.count,right:(p.col+1)/p.count}});
+  for(let i=0;i<rectangles.length;i++)for(let j=i+1;j<rectangles.length;j++){const a=rectangles[i],b=rectangles[j];assert.ok(a.bottom<=b.top+1e-7||b.bottom<=a.top+1e-7||a.right<=b.left||b.right<=a.left);}
  }
 });

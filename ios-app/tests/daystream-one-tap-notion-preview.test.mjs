@@ -92,7 +92,7 @@ test('notion credentials and local user preferences remain outside the preview p
 });
 
 test('Scriptable uses published DAYSTREAM HTML and a stable HTTPS storage origin',()=>{
- assert.match(script,/const UI_REF='3325bccd5a864c141ae559fbee8c9a44553e1ace'/);
+ assert.match(script,/const UI_REF='57fab4cc6296d55c0d8a0001c0e7dafaf6a1cc62'/);
  assert.match(script,/const UI_BASE_URL='https:\/\/yskn0008-bot\.github\.io\/ProjectY\/yos\/daystream\/'/);
  assert.match(script,/WebView\.loadHTML\(output,UI_BASE_URL,null,true\)/);
  assert.match(script,/getElementById\('yosTimelineSync'\)/);
