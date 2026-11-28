@@ -1,0 +1,86 @@
+// YOS Notification v0.5 | one-time update + safe decision-filter installation + Notion read-only diagnostic
+// Changes only existing Notification Context and adds a separately named decision-filter Scriptable file.
+// Never modifies a Shortcut, Notification Bridge, Money, settings, or original app alerts.
+const BASE='https://raw.githubusercontent.com/yskn0008-bot/ProjectY/891fadea7aa2e60239ce56c717dfd9a504b680c4/tools/yos-notification/';
+const NAME=['Notification Context.js','YOS Notification Context.js'];
+const PREV='28db70dd', NEXT='12587c15', FILTER_HASH='cffeba75';
+const FILTER_NAME='Notification Decision Filter.js';
+const TK='YOS_NOTION_INTEGRATION_TOKEN';
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')}
+async function output(s){const a=new Alert();a.title='YOS通知｜更新・接続診断';a.message=s;a.addAction('OK');await a.present()}
+const places=[FileManager.local()];try{places.push(FileManager.iCloud())}catch(_){}
+try{
+ let hits=[];
+ for(const fm of places)for(const n of NAME){const path=fm.joinPath(fm.documentsDirectory(),n);if(fm.fileExists(path))hits.push({fm,path})}
+ if(hits.length!==1)throw Error('Context保存先が'+hits.length+'件。安全のため未更新');
+ // Refuse to replace a user-customized filter, even if the Context itself is known.
+ const installedFilter=[];
+ for(const fm of places){const path=fm.joinPath(fm.documentsDirectory(),FILTER_NAME);if(fm.fileExists(path))installedFilter.push({fm,path})}
+ if(installedFilter.length>1)throw Error('Filterが複数。安全のため未更新');
+ if(installedFilter.length===1){
+   const known=installedFilter[0];
+   if(known.fm.isFileStoredIniCloud?.(known.path))await known.fm.downloadFileFromiCloud(known.path);
+   if(hash(known.fm.readString(known.path))!==FILTER_HASH)throw Error('別のFilterが存在。上書きせず未更新');
+ }
+ const item=hits[0];if(item.fm.isFileStoredIniCloud?.(item.path))await item.fm.downloadFileFromiCloud(item.path);
+ const original=item.fm.readString(item.path);
+ if(!original.includes('YOS Notification Context'))throw Error('既存Contextの識別に失敗。未更新');
+ const current=hash(original);
+ if(current!==PREV&&current!==NEXT)throw Error('既存Contextが別の版です。未更新（識別値'+current+'）');
+ // Preflight and verify both immutable downloads BEFORE changing existing files.
+ let contextCode=null,filterCode=null,updated=false,filterInstalled=false;
+ if(current===PREV){
+   const req=new Request(BASE+'Notification-Context-v0.4.js');req.timeoutInterval=15;
+   contextCode=await req.loadString();
+   if(req.response?.statusCode!==200||hash(contextCode)!==NEXT||
+      !contextCode.includes('YOS Notification Context v0.4'))throw Error('Context配布コードの検証失敗。未更新');
+ }
+ if(!installedFilter.length){
+   const req=new Request(BASE+'Notification-Decision-Filter-v0.5.js');req.timeoutInterval=15;
+   filterCode=await req.loadString();
+   if(req.response?.statusCode!==200||hash(filterCode)!==FILTER_HASH||
+      !filterCode.includes('YOS Notification Decision Filter v0.5'))throw Error('Filter配布コードの検証失敗。未作成');
+ }
+ if(contextCode!==null){
+   const backup=item.path+'.YOS-v03-'+Date.now()+'.backup';
+   item.fm.writeString(backup,original);
+   if(item.fm.readString(backup)!==original)throw Error('バックアップ失敗。未更新');
+   try{item.fm.writeString(item.path,contextCode);if(item.fm.readString(item.path)!==contextCode)throw Error('書込み後の照合失敗');updated=true}
+   catch(e){try{item.fm.writeString(item.path,original)}catch(_){}throw Error('更新失敗・復旧試行済：'+String(e.message||e))}
+ }
+ // Inert staging only: no Shortcut wiring or notification changes on installation.
+ if(filterCode!==null){
+   const path=item.fm.joinPath(item.fm.documentsDirectory(),FILTER_NAME);
+   if(item.fm.fileExists(path))throw Error('Filter保存先に別ファイルあり。未作成');
+   try{
+     item.fm.writeString(path,filterCode);
+     if(item.fm.readString(path)!==filterCode)throw Error('Filter書込み後の照合失敗');
+     filterInstalled=true;
+   }catch(e){
+     try{if(item.fm.fileExists(path))item.fm.remove(path)}catch(_){}
+     if(updated)try{item.fm.writeString(item.path,original)}catch(_){}
+     throw Error('Filter導入失敗。既存Contextの復旧試行済：'+String(e.message||e));
+   }
+ }
+ // Probe Notion credentials without reading or displaying account data.
+ const base='https://api.notion.com/v1/';
+ async function probe(path,body,validate){
+   if(!Keychain.contains(TK))return '認証なし';
+   try{
+     const r=new Request(base+path);r.method=body?'POST':'GET';r.timeoutInterval=8;
+     r.headers={'Authorization':'Bearer '+Keychain.get(TK),'Notion-Version':'2025-09-03','Content-Type':'application/json'};
+     if(body)r.body=JSON.stringify(body);
+     const data=await r.loadJSON(),code=r.response?.statusCode;
+     if(code!==200)return 'HTTP '+(code||'不明');
+     return validate(data)?'取得OK':'内容未確認';
+   }catch(e){return '通信失敗'}
+ }
+ const [rules,tasks,money,balance]=await Promise.all([
+   probe('blocks/3fc5ca88289581a9955cf33b6aeea87d/children?page_size=100',null,x=>(x.results??[]).some(b=>JSON.stringify(b).includes('YOSの最上位判断方針'))),
+   probe('data_sources/965c608632c1463d93b487a9cb69b3ad/query',{page_size:1},x=>Array.isArray(x.results)),
+   probe('data_sources/95b30d16753040c6a320dab99acad55d/query',{page_size:1},x=>Array.isArray(x.results)),
+   probe('data_sources/94fc7e9ffd204073bbcf02efe8e95c5c/query',{page_size:1},x=>Array.isArray(x.results))
+ ]);
+ await output((updated?'Context v0.4 更新成功':'Context v0.4 更新済み')+'\nFilter v0.5：'+(filterInstalled?'追加済み':'検証済み')+'（通知接続は未変更）'+'\n運用ルール：'+rules+'\nYOS Tasks：'+tasks+'\n家計予定：'+money+'\n残高DB：'+balance+'\n\n機密の本文・金額・認証情報は表示しません。\n重要アラートの実通知は別途未確認。');
+}catch(e){await output('更新未完了：'+String(e.message||e).slice(0,180)+'\n既存の通知設定は維持してください。')}
+Script.complete();
