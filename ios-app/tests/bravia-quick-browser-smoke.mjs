@@ -35,6 +35,15 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   await page.locator('[data-home-kind="device"][data-home-id="tv"]').click();
   assert.equal(await page.evaluate(()=>window.sent.filter(x=>x.device==='home'&&x.action==='layoutLoad').length),1);
   await page.evaluate(()=>nativeResult({ok:true,home:true,kind:'layoutLoad',record:{raw:null,value:null}}));
+  assert.equal(await page.locator('#tvAppScroll button:visible').count(),0);
+  await page.locator('#homeLauncherHandle').click();
+  assert.equal(await page.locator('#tvAppScroll button:visible').count(),0);
+  await page.locator('#homeLauncherHandle').click();
+  await page.locator('#homeLayoutOpen').click();
+  assert.equal(await page.locator('#homeUnifiedEditor').isVisible(),true);
+  assert.equal(await page.locator('#tvAppScroll button:visible').count(),8);
+  await page.locator('#homeUnifiedEditor').getByText('取消',{exact:true}).click();
+  assert.equal(await page.locator('#tvAppScroll button:visible').count(),0);
   await page.evaluate(()=>{
    window.sent=[];
    nativeResult({ok:true,picture:{entries:[
@@ -67,12 +76,13 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
   assert.equal(commands.length,1);
   assert.equal(JSON.parse(commands[0].slot).target,'brightness');
   assert.equal(JSON.parse(commands[0].slot).value,preview);
+  assert.equal(await page.locator('#tvAppScroll button:visible').count(),0);
+  await page.locator('#homeLauncherHandle').click();
+  assert.equal(await page.locator('#tvAppScroll button:visible').count(),27);
   await page.locator('#tvAppScroll').scrollIntoViewIfNeeded();
   const appMetrics=await page.locator('#tvAppScroll').evaluate(e=>({width:e.clientWidth,scroll:e.scrollWidth,height:e.querySelector('button').getBoundingClientRect().height}));
   assert.ok(appMetrics.scroll<=appMetrics.width+1&&appMetrics.height>=44);
-  assert.equal(await page.locator('#tvAppScroll button:visible').count(),8);
-  await page.locator('#homeLauncherHandle').click();assert.equal(await page.locator('#tvAppScroll button:visible').count(),27);
-  await page.locator('#homeLauncherHandle').click();assert.equal(await page.locator('#tvAppScroll button:visible').count(),8);
+  await page.locator('#homeLauncherHandle').click();assert.equal(await page.locator('#tvAppScroll button:visible').count(),0);
   await page.evaluate(()=>openPictureEditor());
   assert.ok((await page.locator('#pictureGroups').textContent()).includes('テレビで設定'));
   await page.evaluate(()=>window.sent.length=0);
