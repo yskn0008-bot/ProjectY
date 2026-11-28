@@ -5,6 +5,13 @@
   "github": {
     "autoJobCancelation": false
   },
+  "git": {
+    "deploymentEnabled": {
+      "**": false,
+      "main": true,
+      "release/**": true
+    }
+  },
   "functions": {
     "api/yos/chat.mjs": {
       "maxDuration": 60,

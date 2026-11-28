@@ -13,3 +13,8 @@ test('Vercel does not cancel an active YOS AI build when a later data-sync commi
   const config=JSON.parse(await readFile(new URL('../vercel.json',import.meta.url),'utf8'));
   assert.equal(config.github?.autoJobCancelation,false);
 });
+
+test('Git auto-deploy is restricted to main and completed release branches', async () => {
+  const config=JSON.parse(await readFile(new URL('../vercel.json',import.meta.url),'utf8'));
+  assert.deepEqual(config.git?.deploymentEnabled,{'**':false,main:true,'release/**':true});
+});
